@@ -367,8 +367,8 @@ let excelmodel = {
                     }
                 }       
 
-                console.log(' excel文件中的所有表需要处理的数据persons')
-                console.log(persons)
+                // console.log(' excel文件中的所有表需要处理的数据persons')
+                // console.log(persons)
 
                 //最终处理的数据
                 _this.Table(persons,data=>{
@@ -441,8 +441,8 @@ let excelmodel = {
             }
             
         }
-        console.log('已经生成的空数据')
-        console.log(arr)
+        // console.log('已经生成的空数据')
+        // console.log(arr)
         callback(arr)
     },
 
@@ -468,8 +468,8 @@ let excelmodel = {
                         }
                     }
                 }
-                console.log('已注入数据')
-                console.log(data)
+                // console.log('已注入数据')
+                // console.log(data)
 
 
                 //调用表格去除多余无值的行列
@@ -482,10 +482,8 @@ let excelmodel = {
                 //把数据添加到即将要回调的数组中
                 oktable.sheet.push(data)
 
-                //把表头信息提交到回调函数中
-                this.Header(data,resul=>{
-                    oktable.hd.push(resul)
-                },true)
+                //把表头所有列信息提交到回调函数中
+                oktable.hd.push(Object.getOwnPropertyNames(data[0]))
 
             })         
         }
@@ -500,9 +498,13 @@ let excelmodel = {
             // console.log(arr)
             for (let i = 0; i<arr.length;i++){
 
-                //开始位置的列
+                //开始位置的列key A1
                 let start_c = index[parseInt(arr[i].s.c)]
-                //开始位置的行
+
+                //开始位置的列下标
+                let st_c = parseInt(arr[i].s.c);
+
+                //开始位置的行下标
                 let start_r = parseInt(arr[i].s.r)
                 // console.log('开始的位置: ',start_c+`${start_r}`)
  
@@ -511,23 +513,25 @@ let excelmodel = {
                 //结束的行 - 开始的行 + 1 = 合并了多少行
                 let row = parseInt(arr[i].e.r) - parseInt(arr[i].s.r) + 1;
                 // console.log('合并了多少列 : ',cos,' cos.length','  合并了多少行 : ',row)
+            
 
                 //储存单元格合并,进行合并处理，添加合并数量
-                if (data[start_r]['hd'+parseInt(arr[i].s.c)].key==(start_c+`${start_r+1}`)) {
-                    data[start_r]['hd'+parseInt(arr[i].s.c)].cos = cos;
-                    data[start_r]['hd'+parseInt(arr[i].s.c)].row = row;
+                let hdobj = Object.keys(data[start_r])  //储存第几行对象的所有属性名  返回的是个数组
+                if (data[start_r][hdobj[st_c]].key==(start_c+`${start_r+1}`)) {
+                    data[start_r][hdobj[st_c]].cos = cos;
+                    data[start_r][hdobj[st_c]].row = row;
                 }
 
-                    // 标记需要删除的合并的单元格
+                    // 标记需要清除数据的合并的单元格
                 for (let a = 0; a< row; a++) {   //dele是单元格合并后需要标记删除的元素，0为无需删除，1为需要删除。
                         if (a==0) {
                             for(let b =1 ; b < cos; b++){
                                 // data[start_r-1].splice(parseInt(arr[i].s.c)+1,cos-1);
-                                data[start_r]['hd'+(parseInt(arr[i].s.c)+b)].dele=1;
+                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].value=null;
                             }
                         }else{  //因为只保留最初始位置左上角的值，所以其他值都得删除掉
                             for(let b =0 ; b < cos; b++){
-                                data[start_r+a]['hd'+(parseInt(arr[i].s.c)+b)].dele=1;
+                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].value=null;
                             }
                         } 
                 }             
@@ -537,10 +541,11 @@ let excelmodel = {
 
             // //  对已经标记了合并需要删除的数组元素进行删除
             // for (let b = data.length-1; b >= 0; b--) {
-            //     for (let c = Object.keys(data[b]).length-1; c >= 0; c--) {
-            //             if (data[b]['hd'+c].dele==1) {
+            //     let hdobj = Object.keys(data[b]);
+            //     for (let c =hdobj.length-1; c >= 0; c--) {
+            //             if (data[b][hdobj[c]].dele==1) {
             //                 // data[b].splice(c,1);
-            //                 delete data[b]['hd'+c];
+            //                 delete data[b][hdobj[c]];
             //             }
             //     }
             // }         
@@ -561,7 +566,7 @@ let excelmodel = {
                         Rnum++;
                     }
                 }else{
-                    console.log('检测到非空即停止') 
+                    // console.log('检测到非空即停止') 
                     return data.length=data.length -Rnum;
                 } 
             }  
@@ -573,9 +578,10 @@ let excelmodel = {
         let Cnum =0;
         for (let index = data.length-1; index >= 0; index--) {
             let num =0;
-            for (let r = (Object.keys(data[index]).length-1); r >= 0; r--) {
+            let hdobj = Object.keys(data[index]);
+            for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index]['hd'+r].value ==null && data[index]['hd'+r].formula == null && data[index]['hd'+r].row == 1 && data[index]['hd'+r].cos == 1) {
+                if (data[index][hdobj[r]].value ==null && data[index][hdobj[r]].formula == null && data[index][hdobj[r]].row == 1 && data[index][hdobj[r]].cos == 1) {
                     num++;
                 }else{
                     if (index==data.length-1) {
@@ -588,28 +594,12 @@ let excelmodel = {
             }  
         }
         for (let index = 0; index < data.length; index++) {
-            // Object.keys(data[index]).length = Object.keys(data[index]).length -Cnum;
-            // console.log('length   '+Object.keys(data[index]).length)
+            let hdobj = Object.keys(data[index]);
             for (let c = 0; c < Cnum; c++) {
-                delete data[index]['hd'+(Object.keys(data[index]).length-1)];
-                
+                // delete data[index]['hd'+(Object.keys(data[index]).length-1)];
+                delete data[index][hdobj[(Object.keys(data[index]).length-1)]]
             }
         }
-    },
-    Header(data,callback,popr){
-        if (popr) {
-            let i =0;
-            for(let index= 0; index < data.length;index++){
-                if ((Object.keys(data[index]).length) > i) i = index;
-            }
-            let arr = Object.getOwnPropertyNames(data[i])
-            console.log('ssssssssssssssssssssssssssssssssssss')
-            console.log(arr[0])
-            callback(arr)
-        }else{
-
-        }
-
     }
 
 }

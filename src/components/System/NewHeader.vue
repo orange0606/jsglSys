@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <el-row>
-        <el-col :span="14" :offset="1">
+        <el-col :span="6" :xs="24" style="min-width:300px;">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
 
                 <el-form-item label="表头标段" prop="region">
@@ -35,7 +35,7 @@
     </el-row>
   
    <el-row style="text-anlign">
-        <el-col :span="1" :offset="1" :xs="3">
+        <el-col :span="1" :xs="3">
             <el-button plain size="small" @click="impt" >导入表头</el-button>
             <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
         </el-col>
@@ -60,31 +60,47 @@
         <el-col :span="1" :offset="1" :xs="3">
             <el-button plain size="small"  >删除</el-button>
        </el-col>
+        <el-col :span="1" :offset="1" :xs="3">
+            <el-button plain size="small" @click="add" >内容</el-button>
+       </el-col>
        <el-col :span="1" :offset="1" :xs="3">
             <el-button plain size="small" @click="expor" >导出表头</el-button>
        </el-col>
     </el-row>
+
     <el-row>
-      <el-col :span="12">
-          <el-button plain size="small" @click="add" >内容</el-button>
+      <el-col :span="14" :xs="24" :sm="20" :md="18" :lg="16">
+          <el-alert title="表格数据导入后系统给予默认宽高与单元格内文字居中显示，与原表格格式有些偏差，请进行手动调整。" type="info"></el-alert>
+          <br>
       </el-col>
+
     </el-row>
 
 
-    <el-table ref="multipleTable" :data="table.sheet[0]" :span-method="arraySpanMethod"
-       tooltip-effect="dark" border style="width: 100%"  @selection-change="handleSelectionChange">
-      <el-table-column
-        type="selection"
-        >
+
+
+    <el-table ref="multipleTable" :data="table.sheet[0]" max-height="500" :span-method="arraySpanMethod"
+       tooltip-effect="dark" border style="width: 100%"  @selection-change="handleSelectionChange" 
+       @cell-dblclick="tableDbEdit" >
+      <el-table-column type="selection" >
       </el-table-column>
-      <el-table-column :label="'标题'+(index+1)" show-overflow-tooltip v-for="(val,index) in table.hd[0]" :key="index"  :prop="'hd'+index+'.value'">
+      <el-table-column  resizable :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in table.hd[0]" :key="i" 
+      :prop="'hd'+i+'.value'">
         <!-- <template slot-scope="scope">{{ scope.row['hd0'].key }}</template> -->
+        <el-input
+        v-show="true"
+         slot-scope="scope" 
+         v-model="scope.row[val].value"
+         @focus="vmodel"
+         :disabled="showipt"
+        >
+      </el-input>
       </el-table-column>
 
     </el-table>
 
 
-    <div class="tbbox">
+    <!-- <div class="tbbox">
 
         <table id="table" ref="table">
           <tr v-for="(val,index) in table.sheet[0]" :key="index" >
@@ -92,7 +108,7 @@
           </tr>
         </table>
 
-    </div>
+    </div> -->
 
      
 
@@ -116,8 +132,10 @@
           number: '',   //表头编号
           type: '',   //表头类型
           range:'', //显示范围
+          hd_obj:[], //用来存储  处理饿了么单元格合并该行中的所有列
 
         },
+        showipt:false,
 
        
         multipleSelection: [],
@@ -153,20 +171,20 @@
         },
 
         arraySpanMethod({ row, column, rowIndex, columnIndex }) { //饿了么表格样式  单元格合并处理
+            // if (columnIndex <= this.hd_obj.length) {   // 不带选择框的情况
+            //     return [row[this.hd_obj[columnIndex]].row, row[this.hd_obj[columnIndex]].cos]
+            // }
+            // return [1, 1]
 
-            // if (row.) {
-              
-            // }
-            // if (row.hd1.key=="A1") {
-            //   return [2, 1];
-            // }else{
-            //   // return [0, 0];
-            // }
-            console.log('  row  :',row,'    column   :',column,'   rowIndex      :  ',rowIndex,'   columnIndex  :  ',columnIndex)
-            return [1, 1]
+            if (columnIndex !=0) {  //带选择框的情况
+                if (columnIndex <= this.hd_obj.length) {
+                    return [row[this.hd_obj[columnIndex-1]].row, row[this.hd_obj[columnIndex-1]].cos]
+                }
+            }
+                return [1, 1]
+
 
       },
-
 
         toggleSelection(rows) {
           if (rows) {
@@ -181,22 +199,48 @@
           this.multipleSelection = val;
         },
 
-
-
-
-
-
+        tableDbEdit(row, column, cell, event) {//编辑单元格数据
+        //当鼠标双击单元格里面具体单元格的时候，即可对数据进行编辑操作，其实就是添加了一个输入框，最终将输入框中的数据保存下来就行了。
+        console.log('ssssssssssssssssss')
+          //  event.target.innerHTML = ;
+          this.showipt=true;
+          console.log(this.table.sheet[0][0])
+          //  let cellInput = document.createElement("input");
+          //  cellInput.value = "";
+          //  cellInput.setAttribute("type", "text");
+          //  cellInput.style.width = "60%";
+          //  cell.appendChild(cellInput);
+          //  cellInput.onblur = function() {
+          //  cell.removeChild(cellInput);
+          //  event.target.innerHTML = cellInput.value;
+          //  };
+        },
+        vmodel(event,a){
+            console.log(event,a)
+        },
 
         importfxx() { //表头导入函数
-              
+              this.$notify.info({
+                  title: '提示',
+                  duration: 800,
+                  message: '正在努力导入表格噢，请稍等片刻。'
+              });
               this.table = {sheet:[null],hd:[null]}; //归为初始化状态
               let _this = this;
+
               excelmodel.Imports(data=>{
                   console.log('最终处理完成的数据')
                   console.log(data)
-                  _this.table=data;
+                  _this.table = data;   // 存储表格数据
 
+                  _this.hd_obj = data.hd[0];  //用来存储表格的所有列（对象的key值）
 
+                  _this.$notify({
+                    title: '提示',
+                    duration: 3000,
+                    message: '表格成功导入啦hhh',
+                    type: 'success'
+                  });
 
               })
         },

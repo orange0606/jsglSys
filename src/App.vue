@@ -3,17 +3,17 @@
     
     <!-- 头部 -->
     <header class="top">
-        <el-row :gutter="5">
-            <el-col :span="3">
+        <el-row >
+            <el-col :span="3" :xs="6" :sm="6" :md="6" :lg="3">
                 <div class="top-left">
                     <span>主页</span>
                     <i class="el-icon-sunny"></i>
                 </div>
             </el-col>
-            <el-col :span="18">
+            <el-col :span="18" :xs="12" :sm="12" :md="12" :lg="18">
                 <div class="top-main">公路建设管理系统</div>
             </el-col>
-            <el-col :span="3">
+            <el-col :span="3" :xs="6" :sm="6" :md="6" :lg="3">
                 <div class="top-right">
                     <i class="el-icon-chat-line-round"></i>
                     <span>张三</span>
@@ -109,8 +109,9 @@ html,body,#app{
     height: 100%;
 }
 .main .box {
-    width: 87.5%;
+    width: 77.5%;
     height: 100%;
+    padding: 10px 5% 10px 5% ;
     overflow: auto;
 }
 .el-menu-item, .el-submenu__title{
