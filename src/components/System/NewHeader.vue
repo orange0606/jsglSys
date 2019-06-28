@@ -6,15 +6,17 @@
 
                 <el-form-item label="表头标段" prop="region">
                     <el-select v-model="ruleForm.region" clearable placeholder="请选择表头标段" style=" width:100%;">
-                        <el-option label="JD1" value="1"></el-option>
-                        <el-option label="JD2" value="2"></el-option>
-                        <el-option label="JD3" value="3"></el-option>
+                        <el-option label="路线（Lx）" value="1"></el-option>
+                        <el-option label="路基（LJ）" value="2"></el-option>
+                        <el-option label="路面（LM）" value="3"></el-option>
+                        <el-option label="机电（JD）" value="4"></el-option>
+
 
                     </el-select>
                 </el-form-item>
                 <el-form-item label="表头类型" prop="type">
                     <el-select v-model="ruleForm.type" placeholder="请选择表头类型" clearable size="small" style=" width:100%;">
-                        <el-option label="清单" value="1"></el-option>
+                        <el-option label="原清单" value="1"></el-option>
                         <el-option label="变更清单" value="2"></el-option>
                         <el-option label="变更后的（新清单）" value="3"></el-option>
                         <el-option label="计量清单" value="4"></el-option>
@@ -50,7 +52,7 @@
 
                     </el-select>
                 </el-form-item>
-               
+
             </el-form>
         </el-col>
 
@@ -85,14 +87,15 @@
       <el-table-column type="selection" >
       </el-table-column>
       <el-table-column  resizable :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in table.hd[0]" :key="i" 
-      :prop="'hd'+i+'.value'">
-        <!-- <template slot-scope="scope">{{ scope.row['hd0'].key }}</template> -->
+      >
+        <!-- <template slot-scope="{row}">{{ row[val].value }}</template> -->
+        <!-- :prop="val+'.value'" -->
         <el-input
-        v-show="true"
-         slot-scope="scope" 
-         v-model="scope.row[val].value"
-         @focus="vmodel"
-         :disabled="showipt"
+            v-show="true"
+            slot-scope="scope" 
+            v-model="scope.row[val].value"
+            @focus="vmodel"
+            :disabled="showipt"
         >
       </el-input>
       </el-table-column>
@@ -186,7 +189,7 @@
 
       },
 
-        toggleSelection(rows) {
+        toggleSelection(rows) {   //table选择框反选和全选
           if (rows) {
             rows.forEach(row => {
               this.$refs.multipleTable.toggleRowSelection(row);
@@ -203,8 +206,11 @@
         //当鼠标双击单元格里面具体单元格的时候，即可对数据进行编辑操作，其实就是添加了一个输入框，最终将输入框中的数据保存下来就行了。
         console.log('ssssssssssssssssss')
           //  event.target.innerHTML = ;
-          this.showipt=true;
-          console.log(this.table.sheet[0][0])
+          // this.showipt=true;
+          // console.log(this.table.sheet[0][0])
+          console.log('row, column, cell, event',row, column, cell, event)
+          column.colSpan=5;
+          console.log(column.colSpan)
           //  let cellInput = document.createElement("input");
           //  cellInput.value = "";
           //  cellInput.setAttribute("type", "text");
