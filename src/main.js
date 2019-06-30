@@ -2,11 +2,14 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
-  DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,Table,TableColumn,Notification, Alert} from 'element-ui';
+  DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification, Table,TableColumn,Alert,Pagination,Loading} from 'element-ui';
 import App from './App'
 import router from './router'
-
+// Table,TableColumn,
 Vue.config.productionTip = false
+// Vue.use(Loading);
+Vue.use(Pagination);
+
 Vue.use(Button);
 Vue.use(Select);
 Vue.use(Row);
@@ -28,10 +31,26 @@ Vue.use(OptionGroup);
 Vue.use(Table);
 Vue.use(TableColumn);
 Vue.use(Alert);
+Vue.use(Loading.directive);
+
+import {
+
+  Editable,
+  EditableColumn
+} from 'vue-element-extends'
+import 'vue-element-extends/lib/index.css'
+
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Editable)
+Vue.use(EditableColumn)
+
+
 
 Vue.prototype.$message = Message;
 Vue.prototype.$notify = Notification;
-
+Vue.prototype.$loading = Loading.service;
+Vue.prototype.$msgbox = MessageBox;
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

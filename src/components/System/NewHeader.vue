@@ -78,31 +78,6 @@
 
     </el-row>
 
-
-
-
-    <el-table ref="multipleTable" :data="table.sheet[0]" max-height="500" :span-method="arraySpanMethod"
-       tooltip-effect="dark" border style="width: 100%"  @selection-change="handleSelectionChange" 
-       @cell-dblclick="tableDbEdit" >
-      <el-table-column type="selection" >
-      </el-table-column>
-      <el-table-column  resizable :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in table.hd[0]" :key="i" 
-      >
-        <!-- <template slot-scope="{row}">{{ row[val].value }}</template> -->
-        <!-- :prop="val+'.value'" -->
-        <el-input
-            v-show="true"
-            slot-scope="scope" 
-            v-model="scope.row[val].value"
-            @focus="vmodel"
-            :disabled="showipt"
-        >
-      </el-input>
-      </el-table-column>
-
-    </el-table>
-
-
     <!-- <div class="tbbox">
 
         <table id="table" ref="table">
@@ -112,7 +87,72 @@
         </table>
 
     </div> -->
+  <div v-loading="loading">
+    <p style="color: red;font-size: 12px;">合并行或列</p>
 
+    <div class="click-table8-oper">
+      <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
+      <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
+      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+    </div>
+
+    <!-- <p style="color: red;font-size: 12px;">name字段（校验必填，校验最少3个字符）</p>
+    <p style="color: red;font-size: 12px;">多级属性：由于 v-model 必须明确指定双向绑定的路径，所以需要配合自定义渲染使用</p>
+    <p style="color: red;font-size: 12px;">上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值</p> -->
+
+    <p>
+      <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
+      <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button>
+      <el-button type="success" size="mini" @click="insertEvent(-1)">在最后新增一行</el-button>
+      <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable.clearFilter()">清空筛选条件</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable.clearSort()">清空排序条件</el-button>
+      <el-button type="success" size="mini" @click="$refs.elxEditable.toggleRowSelection(list[1])">选中第2个</el-button>
+      <el-button type="warning" size="mini" @click="submitEvent">校验&保存</el-button>
+      <el-button type="primary" size="mini" @click="getInsertEvent">获取新增数据</el-button>
+      <el-button type="primary" size="mini" @click="getUpdateEvent">获取已修改数据</el-button>
+      <el-button type="primary" size="mini" @click="getRemoveEvent">获取已删除数据</el-button>
+      <el-button type="primary" size="mini" @click="getSelectedEvent">获取已选中数据</el-button>
+      <el-button type="primary" size="mini" @click="getAllEvent">获取所有数据</el-button>
+    </p>
+
+
+
+    <elx-editable
+      ref="elxEditable"
+      class="click-table8"
+      border
+      height="466"
+      size="mini"
+      :data.sync="table.sheet[0]"
+      :span-method="arraySpanMethod"
+      :row-class-name="tableRowClassName"
+      :edit-rules="validRules"
+      :edit-config="{trigger: 'click', mode: 'cell'}"
+      style="width: 100%">
+      <elx-editable-column type="selection" width="55"></elx-editable-column>
+
+      <elx-editable-column :prop="val+'.value'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in table.hd[0]" :key="i" :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+      <!-- <elx-editable-column prop="name" label="内容" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="language" label="语言" width="160" :edit-render="{name: 'ElSelect', options: languageList}"></elx-editable-column>
+      <elx-editable-column prop="updateTime" label="更新时间" width="160" :formatter="formatterDate"></elx-editable-column>
+      <elx-editable-column prop="createTime" label="创建时间" width="160" :formatter="formatterDate"></elx-editable-column> -->
+    </elx-editable>
+
+    <el-pagination
+      class="click-table8-pagination"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pageVO.currentPage"
+      :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
+      :page-size="pageVO.pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="pageVO.totalResult">
+    </el-pagination>
+  </div>
      
 
 
@@ -121,6 +161,10 @@
 </template>
 
 <script>
+  import XEUtils from 'xe-utils'
+  import XEAjax from 'xe-ajax'
+
+
   import excelmodel from '../../excel/proces';
 
   export default {
@@ -158,12 +202,43 @@
           type: [
             { required: true, message: '请选择表头类型', trigger: 'change' }
           ]
-        }
- 
+        },
+
+
+
+
+        loading: false, //2
+        languageList: [],
+        list: [],
+        formData: {
+          key: null,
+          name: null,
+          language: null
+        },
+        pageVO: {
+          currentPage: 1,
+          pageSize: 10,
+          totalResult: 0
+        },
+        validRules: {
+          key: [
+            { required: true, message: '请输入键值', trigger: 'change' }
+          ],
+          language: [
+            { required: true, message: '请选择语言', trigger: 'change' }
+          ]
+        },
+        pendingRemoveList: []
+  
 
         
       }
     },
+     created () { //2
+    // this.findLanguageList()
+    // this.findList()
+    },
+
     methods: {
         add(){
           console.log('表头名字 ： '+this.ruleForm.name+'  表头标段 ： '+this.ruleForm.region+'   表头编号 ： '+this.ruleForm.number+'   表头类型  ：  '+this.ruleForm.type+'   显示范围 ： '+this.ruleForm.range)
@@ -185,8 +260,6 @@
                 }
             }
                 return [1, 1]
-
-
       },
 
         toggleSelection(rows) {   //table选择框反选和全选
@@ -202,30 +275,10 @@
           this.multipleSelection = val;
         },
 
-        tableDbEdit(row, column, cell, event) {//编辑单元格数据
-        //当鼠标双击单元格里面具体单元格的时候，即可对数据进行编辑操作，其实就是添加了一个输入框，最终将输入框中的数据保存下来就行了。
-        console.log('ssssssssssssssssss')
-          //  event.target.innerHTML = ;
-          // this.showipt=true;
-          // console.log(this.table.sheet[0][0])
-          console.log('row, column, cell, event',row, column, cell, event)
-          column.colSpan=5;
-          console.log(column.colSpan)
-          //  let cellInput = document.createElement("input");
-          //  cellInput.value = "";
-          //  cellInput.setAttribute("type", "text");
-          //  cellInput.style.width = "60%";
-          //  cell.appendChild(cellInput);
-          //  cellInput.onblur = function() {
-          //  cell.removeChild(cellInput);
-          //  event.target.innerHTML = cellInput.value;
-          //  };
-        },
-        vmodel(event,a){
-            console.log(event,a)
-        },
+        
 
         importfxx() { //表头导入函数
+              this.loading = true
               this.$notify.info({
                   title: '提示',
                   duration: 800,
@@ -240,7 +293,7 @@
                   _this.table = data;   // 存储表格数据
 
                   _this.hd_obj = data.hd[0];  //用来存储表格的所有列（对象的key值）
-
+                  _this.loading = false
                   _this.$notify({
                     title: '提示',
                     duration: 3000,
@@ -269,10 +322,194 @@
               // 饿了么弹窗提示文件导出失败
           }
 
-        }
+        },
 
-    }
+
+      
+        handleSizeChange (pageSize) { //2
+          this.pageVO.pageSize = pageSize
+          this.findList()
+        },
+        handleCurrentChange (currentPage) {
+          this.pageVO.currentPage = currentPage
+          this.findList()
+        },
+        formatterDate (row, column, cellValue, index) {
+          return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+        },
+        tableRowClassName ({ row, rowIndex }) {
+          if (this.pendingRemoveList.some(item => item === row)) {
+            return 'delete-row'
+          }
+          return ''
+        },
+       
+        insertEvent () {
+          this.$refs.elxEditable.insert().then(({ row }) => {
+            this.$refs.elxEditable.setActiveCell(row, 'key')
+          })
+        },
+        pendingRemoveEvent () {
+          let selection = this.$refs.elxEditable.getSelecteds()
+          if (selection.length) {
+            let plus = []
+            let minus = []
+            selection.forEach(data => {
+              if (this.pendingRemoveList.some(item => data === item)) {
+                minus.push(data)
+              } else {
+                plus.push(data)
+              }
+            })
+            if (minus.length) {
+              this.pendingRemoveList = this.pendingRemoveList.filter(item => minus.some(data => data !== item)).concat(plus)
+            } else if (plus) {
+              this.pendingRemoveList = this.pendingRemoveList.concat(plus)
+            }
+            this.$refs.elxEditable.clearSelection()
+          } else {
+            this.$message({
+              type: 'info',
+              message: '请至少选择一条数据！'
+            })
+          }
+        },
+        submitEvent () {
+          this.$refs.elxEditable.validate(valid => {
+            if (valid) {
+              let removeRecords = this.pendingRemoveList
+              let { insertRecords, updateRecords } = this.$refs.elxEditable.getAllRecords()
+              if (insertRecords.length || updateRecords.length || removeRecords.length) {
+                insertRecords.forEach(item => {
+                  if (XEUtils.isDate(item.date)) {
+                    item.date = item.date.getTime()
+                  }
+                })
+                updateRecords.forEach(item => {
+                  if (XEUtils.isDate(item.date)) {
+                    item.date = item.date.getTime()
+                  }
+                })
+                this.loading = true
+                XEAjax.doPost('/api/i18n/save', { insertRecords, updateRecords, removeRecords }).then(({ data }) => {
+                  this.$message({
+                    type: 'success',
+                    message: '保存成功!'
+                  })
+                  this.findList()
+                }).catch(e => {
+                  this.loading = false
+                })
+              } else {
+                this.$message({
+                  type: 'info',
+                  message: '数据未改动！'
+                })
+              }
+            }
+          })
+        },
+        exportCsvEvent () {
+          this.$refs.elxEditable.exportCsv()
+        },
+
+
+
+
+        getSelectLabel (value, valueProp, labelProp, list) {  //3
+          let item = XEUtils.find(list, item => item[valueProp] === value)
+          return item ? item[labelProp] : null
+        },
+        insertEvent (index) {
+          this.$refs.elxEditable.insertAt({
+            name: '默认名字2',
+            userInfo: {
+              base: {
+                age: 26
+              }
+            },
+            slider: 20
+          }, index).then(({ row }) => {
+            this.$refs.elxEditable.setActiveCell(row, 'name')
+          })
+        },
+        removeEvent (scope) {
+          this.$msgbox.confirm('确定删除该数据?', '温馨提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$refs.elxEditable.remove(scope.row)
+          }).catch(e => e)
+        },
+        revertEvent (row) {
+          this.$msgbox.confirm('确定还原该行数据?', '温馨提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$refs.elxEditable.revert(row)
+            this.$message({ message: '数据还原成功！', type: 'success' })
+          }).catch(e => e)
+        },
+        selectEvent (selection, row) {
+          console.log(selection)
+        },
+        currentChangeEvent (currentRow, oldCurrentRow) {
+          console.log(currentRow)
+        },
+        deleteSelectedEvent () {
+          let selection = this.$refs.elxEditable.getSelecteds()
+          if (selection.length) {
+            this.$refs.elxEditable.removeSelecteds()
+            this.$message({ message: '删除成功', type: 'success' })
+          } else {
+            this.$message({
+              type: 'info',
+              message: '请至少选择一条数据！'
+            })
+          }
+        },
+        submitEvent () {
+          this.$refs.elxEditable.validate(valid => {
+            if (valid) {
+              alert('成功')
+            } else {
+              this.$message({ message: '校验不通过', type: 'error' })
+            }
+          })
+        },
+        getInsertEvent () {
+          let rest = this.$refs.elxEditable.getInsertRecords()
+          this.$msgbox({ message: JSON.stringify(rest), title: `获取新增数据(${rest.length}条)` }).catch(e => e)
+        },
+        getUpdateEvent () {
+          let rest = this.$refs.elxEditable.getUpdateRecords()
+          this.$msgbox({ message: JSON.stringify(rest), title: `获取已修改数据(${rest.length}条)` }).catch(e => e)
+        },
+        getRemoveEvent () {
+          let rest = this.$refs.elxEditable.getRemoveRecords()
+          this.$msgbox({ message: JSON.stringify(rest), title: `获取已删除数据(${rest.length}条)` }).catch(e => e)
+        },
+        getSelectedEvent () {
+          let rest = this.$refs.elxEditable.getSelecteds()
+          this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
+        },
+        getAllEvent () {
+          let rest = this.$refs.elxEditable.getRecords()
+          this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
+        },
+        postJSON (data) {
+          // 提交请求
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve('保存成功')
+            }, 300)
+          })
+        }
   }
+}
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -315,4 +552,25 @@ table {
     border: 1px solid orange;
 }
 
+
+
+.click-table8-oper {
+  margin-bottom: 18px;
+}
+.click-table8 .delete-row {
+  color: #f56c6c;
+  text-decoration: line-through;
+}
+.click-table8-pagination {
+  margin-top: 18px;
+  text-align: right;
+}
+.click-table8.elx-editable .elx-editable-row.new-insert,
+.click-table8.elx-editable .elx-editable-row.new-insert:hover>td {
+  background-color: #f0f9eb;
+}
+
+.click-table12 .el-table__body .el-table__row>td.elx_checked {
+  box-shadow: inset 0 0 6px #409EFF;
+}
 </style>
