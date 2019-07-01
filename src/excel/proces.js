@@ -528,10 +528,14 @@ let excelmodel = {
                             for(let b =1 ; b < cos; b++){
                                 // data[start_r-1].splice(parseInt(arr[i].s.c)+1,cos-1);
                                 data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].value=null;
+                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].row=0;   //在饿了么单元格合并，被合并了的单元格需要设置为rowspan: 0, colspan: 0,  
+                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].cos=0;
                             }
                         }else{  //因为只保留最初始位置左上角的值，所以其他值都得删除掉
                             for(let b =0 ; b < cos; b++){
                                 data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].value=null;
+                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].row=0;
+                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].cos=0;
                             }
                         } 
                 }             

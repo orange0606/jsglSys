@@ -62,9 +62,7 @@
         <el-col :span="1" :offset="1" :xs="3">
             <el-button plain size="small"  >删除</el-button>
        </el-col>
-        <el-col :span="1" :offset="1" :xs="3">
-            <el-button plain size="small" @click="add" >内容</el-button>
-       </el-col>
+
        <el-col :span="1" :offset="1" :xs="3">
             <el-button plain size="small" @click="expor" >导出表头</el-button>
        </el-col>
@@ -87,91 +85,34 @@
         </table>
 
     </div> -->
-  <div v-loading="loading">
-    <p style="color: red;font-size: 12px;">合并行或列</p>
-
-    <div class="click-table8-oper">
-      <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
-      <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
-      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-    </div>
-
-    <!-- <p style="color: red;font-size: 12px;">name字段（校验必填，校验最少3个字符）</p>
-    <p style="color: red;font-size: 12px;">多级属性：由于 v-model 必须明确指定双向绑定的路径，所以需要配合自定义渲染使用</p>
-    <p style="color: red;font-size: 12px;">上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值</p> -->
-
-    <p>
-      <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
-      <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button>
-      <el-button type="success" size="mini" @click="insertEvent(-1)">在最后新增一行</el-button>
-      <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.clearFilter()">清空筛选条件</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.clearSort()">清空排序条件</el-button>
-      <el-button type="success" size="mini" @click="$refs.elxEditable.toggleRowSelection(list[1])">选中第2个</el-button>
-      <el-button type="warning" size="mini" @click="submitEvent">校验&保存</el-button>
-      <el-button type="primary" size="mini" @click="getInsertEvent">获取新增数据</el-button>
-      <el-button type="primary" size="mini" @click="getUpdateEvent">获取已修改数据</el-button>
-      <el-button type="primary" size="mini" @click="getRemoveEvent">获取已删除数据</el-button>
-      <el-button type="primary" size="mini" @click="getSelectedEvent">获取已选中数据</el-button>
-      <el-button type="primary" size="mini" @click="getAllEvent">获取所有数据</el-button>
-    </p>
 
 
+  <!-- 表格编辑弹窗显示====== -->
+  <el-dialog
+    title="请进行修改确认"
+    :visible.sync="dialogVisible"
+    width="80%"
+    :before-close="handleClose">
 
-    <elx-editable
-      ref="elxEditable"
-      class="click-table8"
-      border
-      height="466"
-      size="mini"
-      :data.sync="table.sheet[0]"
-      :span-method="arraySpanMethod"
-      :row-class-name="tableRowClassName"
-      :edit-rules="validRules"
-      :edit-config="{trigger: 'click', mode: 'cell'}"
-      style="width: 100%">
-      <elx-editable-column type="selection" width="55"></elx-editable-column>
-
-      <elx-editable-column :prop="val+'.value'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in table.hd[0]" :key="i" :edit-render="{name: 'ElInput'}" ></elx-editable-column>
-      <!-- <elx-editable-column prop="name" label="内容" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="language" label="语言" width="160" :edit-render="{name: 'ElSelect', options: languageList}"></elx-editable-column>
-      <elx-editable-column prop="updateTime" label="更新时间" width="160" :formatter="formatterDate"></elx-editable-column>
-      <elx-editable-column prop="createTime" label="创建时间" width="160" :formatter="formatterDate"></elx-editable-column> -->
-    </elx-editable>
-
-    <el-pagination
-      class="click-table8-pagination"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="pageVO.currentPage"
-      :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
-      :page-size="pageVO.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="pageVO.totalResult">
-    </el-pagination>
-  </div>
-     
-
-
+    <!-- 引入表格编辑组件 -->
+    <edits :tableList="table"></edits>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button type="primary" @click="dialogVisible = false">下一步</el-button>
+    </span>
+  </el-dialog>
 
   </div>
 </template>
 
 <script>
-  import XEUtils from 'xe-utils'
-  import XEAjax from 'xe-ajax'
-
-
-  import excelmodel from '../../excel/proces';
-
+  import edits from '@/components/assembly/edit'
+   import excelmodel from '../../excel/proces';
   export default {
     name: 'newheader',
+    components: { edits },
     data () {
       return {
-        msg: 'hello 请导入表格',
         table:{sheet:[null],hd:[null]},
         ruleForm: {
           name: '',    //表头名字
@@ -179,12 +120,9 @@
           number: '',   //表头编号
           type: '',   //表头类型
           range:'', //显示范围
-          hd_obj:[], //用来存储  处理饿了么单元格合并该行中的所有列
 
         },
-        showipt:false,
 
-       
         multipleSelection: [],
 
         rules: {  //input 反馈错误
@@ -203,34 +141,7 @@
             { required: true, message: '请选择表头类型', trigger: 'change' }
           ]
         },
-
-
-
-
-        loading: false, //2
-        languageList: [],
-        list: [],
-        formData: {
-          key: null,
-          name: null,
-          language: null
-        },
-        pageVO: {
-          currentPage: 1,
-          pageSize: 10,
-          totalResult: 0
-        },
-        validRules: {
-          key: [
-            { required: true, message: '请输入键值', trigger: 'change' }
-          ],
-          language: [
-            { required: true, message: '请选择语言', trigger: 'change' }
-          ]
-        },
-        pendingRemoveList: []
-  
-
+        dialogVisible: false,  //弹窗显示表格编辑
         
       }
     },
@@ -240,42 +151,11 @@
     },
 
     methods: {
-        add(){
-          console.log('表头名字 ： '+this.ruleForm.name+'  表头标段 ： '+this.ruleForm.region+'   表头编号 ： '+this.ruleForm.number+'   表头类型  ：  '+this.ruleForm.type+'   显示范围 ： '+this.ruleForm.range)
-        },
+      
 
         impt(){ //button 按钮调用input文件选择事件
             this.$refs.input.click()
         },
-
-        arraySpanMethod({ row, column, rowIndex, columnIndex }) { //饿了么表格样式  单元格合并处理
-            // if (columnIndex <= this.hd_obj.length) {   // 不带选择框的情况
-            //     return [row[this.hd_obj[columnIndex]].row, row[this.hd_obj[columnIndex]].cos]
-            // }
-            // return [1, 1]
-
-            if (columnIndex !=0) {  //带选择框的情况
-                if (columnIndex <= this.hd_obj.length) {
-                    return [row[this.hd_obj[columnIndex-1]].row, row[this.hd_obj[columnIndex-1]].cos]
-                }
-            }
-                return [1, 1]
-      },
-
-        toggleSelection(rows) {   //table选择框反选和全选
-          if (rows) {
-            rows.forEach(row => {
-              this.$refs.multipleTable.toggleRowSelection(row);
-            });
-          } else {
-            this.$refs.multipleTable.clearSelection();
-          }
-        },
-        handleSelectionChange(val) {
-          this.multipleSelection = val;
-        },
-
-        
 
         importfxx() { //表头导入函数
               this.loading = true
@@ -290,9 +170,10 @@
               excelmodel.Imports(data=>{
                   console.log('最终处理完成的数据')
                   console.log(data)
-                  _this.table = data;   // 存储表格数据
 
-                  _this.hd_obj = data.hd[0];  //用来存储表格的所有列（对象的key值）
+                  _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
+
+                  _this.table = data;   // 存储表格数据
                   _this.loading = false
                   _this.$notify({
                     title: '提示',
@@ -323,190 +204,14 @@
           }
 
         },
-
-
-      
-        handleSizeChange (pageSize) { //2
-          this.pageVO.pageSize = pageSize
-          this.findList()
-        },
-        handleCurrentChange (currentPage) {
-          this.pageVO.currentPage = currentPage
-          this.findList()
-        },
-        formatterDate (row, column, cellValue, index) {
-          return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
-        },
-        tableRowClassName ({ row, rowIndex }) {
-          if (this.pendingRemoveList.some(item => item === row)) {
-            return 'delete-row'
-          }
-          return ''
-        },
-       
-        insertEvent () {
-          this.$refs.elxEditable.insert().then(({ row }) => {
-            this.$refs.elxEditable.setActiveCell(row, 'key')
-          })
-        },
-        pendingRemoveEvent () {
-          let selection = this.$refs.elxEditable.getSelecteds()
-          if (selection.length) {
-            let plus = []
-            let minus = []
-            selection.forEach(data => {
-              if (this.pendingRemoveList.some(item => data === item)) {
-                minus.push(data)
-              } else {
-                plus.push(data)
-              }
+        handleClose(done) {   //弹窗关闭确认
+          this.$confirm('确认关闭？ 直接关闭将不保存任何数据噢。')
+            .then(_ => {
+              done();
             })
-            if (minus.length) {
-              this.pendingRemoveList = this.pendingRemoveList.filter(item => minus.some(data => data !== item)).concat(plus)
-            } else if (plus) {
-              this.pendingRemoveList = this.pendingRemoveList.concat(plus)
-            }
-            this.$refs.elxEditable.clearSelection()
-          } else {
-            this.$message({
-              type: 'info',
-              message: '请至少选择一条数据！'
-            })
-          }
-        },
-        submitEvent () {
-          this.$refs.elxEditable.validate(valid => {
-            if (valid) {
-              let removeRecords = this.pendingRemoveList
-              let { insertRecords, updateRecords } = this.$refs.elxEditable.getAllRecords()
-              if (insertRecords.length || updateRecords.length || removeRecords.length) {
-                insertRecords.forEach(item => {
-                  if (XEUtils.isDate(item.date)) {
-                    item.date = item.date.getTime()
-                  }
-                })
-                updateRecords.forEach(item => {
-                  if (XEUtils.isDate(item.date)) {
-                    item.date = item.date.getTime()
-                  }
-                })
-                this.loading = true
-                XEAjax.doPost('/api/i18n/save', { insertRecords, updateRecords, removeRecords }).then(({ data }) => {
-                  this.$message({
-                    type: 'success',
-                    message: '保存成功!'
-                  })
-                  this.findList()
-                }).catch(e => {
-                  this.loading = false
-                })
-              } else {
-                this.$message({
-                  type: 'info',
-                  message: '数据未改动！'
-                })
-              }
-            }
-          })
-        },
-        exportCsvEvent () {
-          this.$refs.elxEditable.exportCsv()
-        },
-
-
-
-
-        getSelectLabel (value, valueProp, labelProp, list) {  //3
-          let item = XEUtils.find(list, item => item[valueProp] === value)
-          return item ? item[labelProp] : null
-        },
-        insertEvent (index) {
-          this.$refs.elxEditable.insertAt({
-            name: '默认名字2',
-            userInfo: {
-              base: {
-                age: 26
-              }
-            },
-            slider: 20
-          }, index).then(({ row }) => {
-            this.$refs.elxEditable.setActiveCell(row, 'name')
-          })
-        },
-        removeEvent (scope) {
-          this.$msgbox.confirm('确定删除该数据?', '温馨提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.$refs.elxEditable.remove(scope.row)
-          }).catch(e => e)
-        },
-        revertEvent (row) {
-          this.$msgbox.confirm('确定还原该行数据?', '温馨提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.$refs.elxEditable.revert(row)
-            this.$message({ message: '数据还原成功！', type: 'success' })
-          }).catch(e => e)
-        },
-        selectEvent (selection, row) {
-          console.log(selection)
-        },
-        currentChangeEvent (currentRow, oldCurrentRow) {
-          console.log(currentRow)
-        },
-        deleteSelectedEvent () {
-          let selection = this.$refs.elxEditable.getSelecteds()
-          if (selection.length) {
-            this.$refs.elxEditable.removeSelecteds()
-            this.$message({ message: '删除成功', type: 'success' })
-          } else {
-            this.$message({
-              type: 'info',
-              message: '请至少选择一条数据！'
-            })
-          }
-        },
-        submitEvent () {
-          this.$refs.elxEditable.validate(valid => {
-            if (valid) {
-              alert('成功')
-            } else {
-              this.$message({ message: '校验不通过', type: 'error' })
-            }
-          })
-        },
-        getInsertEvent () {
-          let rest = this.$refs.elxEditable.getInsertRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取新增数据(${rest.length}条)` }).catch(e => e)
-        },
-        getUpdateEvent () {
-          let rest = this.$refs.elxEditable.getUpdateRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取已修改数据(${rest.length}条)` }).catch(e => e)
-        },
-        getRemoveEvent () {
-          let rest = this.$refs.elxEditable.getRemoveRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取已删除数据(${rest.length}条)` }).catch(e => e)
-        },
-        getSelectedEvent () {
-          let rest = this.$refs.elxEditable.getSelecteds()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
-        },
-        getAllEvent () {
-          let rest = this.$refs.elxEditable.getRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
-        },
-        postJSON (data) {
-          // 提交请求
-          return new Promise(resolve => {
-            setTimeout(() => {
-              resolve('保存成功')
-            }, 300)
-          })
+            .catch(_ => {});
         }
+        
   }
 }
 
