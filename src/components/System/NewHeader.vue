@@ -102,15 +102,35 @@
     </span>
   </el-dialog>
 
+<!-- 表格编辑弹窗显示====== -->
+  <el-dialog
+    title="请进行设置表头每个单元格属性"
+    :visible.sync="dialogVisible2"
+    width="80%"
+    :before-close="handleClose">
+
+    <!-- 引入表格编辑组件 -->
+    <headeratt :tableList="table"></headeratt>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible2 = false">取 消</el-button>
+      <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
+    </span>
+  </el-dialog>
+
   </div>
 </template>
 
 <script>
+  // 引入单元格列编辑组件
   import edits from '@/components/assembly/edit'
-   import excelmodel from '../../excel/proces';
+  // 引入表头属性设置组件
+  import headeratt from '@/components/assembly/header-att'
+
+  // 引入excel 表格导入js处理函数模块
+  import excelmodel from '../../excel/proces';
   export default {
     name: 'newheader',
-    components: { edits },
+    components: { edits, headeratt},
     data () {
       return {
         table:{sheet:[null],hd:[null]},
@@ -142,7 +162,7 @@
           ]
         },
         dialogVisible: false,  //弹窗显示表格编辑
-        
+        dialogVisible2: false,  //弹窗显示表头属性设置
       }
     },
      created () { //2
@@ -172,6 +192,7 @@
                   console.log(data)
 
                   _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
+                  // _this.dialogVisible2 = true;  //调用显示表头属性设置确认弹窗
 
                   _this.table = data;   // 存储表格数据
                   _this.loading = false
@@ -219,63 +240,5 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  color: orange;
-  /* font-weight: normal; */
-  }
-table,table tr th, table tr td { border:1px solid #000000; }
-td {
-  min-width: 20px;
-  text-align: center;
-  font-size:0.8rem; 
-  padding: 5px 5px;
 
-  
-}
-
-table {
-  width: 100%;
-  height: 100%;
-  font-size: 0.9rem;
-  /* border:1px solid red; */
-}
-
-.tbbox{
-  max-width: 100%;
-  max-height: 100%;
-}
-.btn-import{
-    width: 100%;
-    display: inline-flex;
-     -webkit-box-pack:justify;
-    -webkit-justify-content:space-between;
-    -ms-flex-pack:justify;
-    justify-content:space-between;
-    justify-content: center;
-
-    /* align-items: center; */
-    border: 1px solid orange;
-}
-
-
-
-.click-table8-oper {
-  margin-bottom: 18px;
-}
-.click-table8 .delete-row {
-  color: #f56c6c;
-  text-decoration: line-through;
-}
-.click-table8-pagination {
-  margin-top: 18px;
-  text-align: right;
-}
-.click-table8.elx-editable .elx-editable-row.new-insert,
-.click-table8.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-
-.click-table12 .el-table__body .el-table__row>td.elx_checked {
-  box-shadow: inset 0 0 6px #409EFF;
-}
 </style>

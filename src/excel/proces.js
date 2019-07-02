@@ -353,8 +353,8 @@ let excelmodel = {
                         perobj.sheets = wb.Sheets[sheet] //添加工作表的数据
 
                         perobj.ref= wb.Sheets[sheet]['!ref']  //添加表的单元格范围
-                        console.log('perobj.ref')
-                        console.log(perobj.ref)
+                        // console.log('perobj.ref')
+                        // console.log(perobj.ref)
 
                         if(wb.Sheets[sheet]['!merges']){    //检测该工作表有无单元格合并
                         perobj.merges = wb.Sheets[sheet]['!merges']   //添加单元格合并情况，是个数组
@@ -430,13 +430,13 @@ let excelmodel = {
         // console.log('即将要生成多少列:  ',cos,'   即将要生成多少行:  ',row)
 
         //生成空数据数组
-        //key 为单元格所在位置例如A1，value 是单元格的值， formula为单元格公式，cos row 为单元格合并的列数与行数
+        //key 为单元格所在位置例如A1，td 是单元格的值， formula为单元格公式，td_rowspan td_colspan 为单元格合并的列数与行数
         //dele是单元格合并后需要标记删除的元素，0为无需删除，1为需要删除。
         let arr = [];
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
-                arr[i]['hd'+j]={key:index[j]+`${i+1}`,value:null,cos:1,row:1,formula:null,dele:0}
+                arr[i]['hd'+j]={key:index[j]+`${i+1}`,tr_num:i+1, col_num:index[j], td:null, td_colspan:1, td_rowspan:1, formula:null,dele:0}
   
             }
             
@@ -459,7 +459,7 @@ let excelmodel = {
                     if (key!='!ref' && key!='!merges' && key!='!margins') {
                         let cos = index.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
                         let row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
-                        data[row]['hd'+cos].value = arr[i].sheets[key].w;   //给空数据加入真实的数据
+                        data[row]['hd'+cos].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
                         // data[row][cos].value = arr[i].sheets[key].w;    
 
                         //若单元格有公式的话，对公式进行保存
@@ -518,8 +518,8 @@ let excelmodel = {
                 //储存单元格合并,进行合并处理，添加合并数量
                 let hdobj = Object.keys(data[start_r])  //储存第几行对象的所有属性名  返回的是个数组
                 if (data[start_r][hdobj[st_c]].key==(start_c+`${start_r+1}`)) {
-                    data[start_r][hdobj[st_c]].cos = cos;
-                    data[start_r][hdobj[st_c]].row = row;
+                    data[start_r][hdobj[st_c]].td_colspan = cos;
+                    data[start_r][hdobj[st_c]].td_rowspan = row;
                 }
 
                     // 标记需要清除数据的合并的单元格
@@ -527,15 +527,15 @@ let excelmodel = {
                         if (a==0) {
                             for(let b =1 ; b < cos; b++){
                                 // data[start_r-1].splice(parseInt(arr[i].s.c)+1,cos-1);
-                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].value=null;
-                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].row=0;   //在饿了么单元格合并，被合并了的单元格需要设置为rowspan: 0, colspan: 0,  
-                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].cos=0;
+                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].td =null;
+                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].td_rowspan =0;   //在饿了么单元格合并，被合并了的单元格需要设置为rowspan: 0, colspan: 0,  
+                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].td_colspan =0;
                             }
                         }else{  //因为只保留最初始位置左上角的值，所以其他值都得删除掉
                             for(let b =0 ; b < cos; b++){
-                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].value=null;
-                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].row=0;
-                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].cos=0;
+                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].td =null;
+                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].td_rowspan =0;
+                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].td_colspan =0;
                             }
                         } 
                 }             
@@ -565,7 +565,7 @@ let excelmodel = {
         for (let index = data.length-1; index >= 0; index--) {
             for (let r = 0; r < Object.keys(data[index]).length; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
-                if (data[index]['hd'+r].value ==null && data[index]['hd'+r].formula == null && data[index]['hd'+r].row == 1 && data[index]['hd'+r].cos == 1) {
+                if (data[index]['hd'+r].td ==null && data[index]['hd'+r].formula == null && data[index]['hd'+r].td_rowspan == 1 && data[index]['hd'+r].td_colspan == 1) {
                     if (r==Object.keys(data[index]).length-1) {
                         Rnum++;
                     }
@@ -585,7 +585,7 @@ let excelmodel = {
             let hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index][hdobj[r]].value ==null && data[index][hdobj[r]].formula == null && data[index][hdobj[r]].row == 1 && data[index][hdobj[r]].cos == 1) {
+                if (data[index][hdobj[r]].td ==null && data[index][hdobj[r]].formula == null && data[index][hdobj[r]].td_rowspan == 1 && data[index][hdobj[r]].td_colspan == 1) {
                     num++;
                 }else{
                     if (index==data.length-1) {

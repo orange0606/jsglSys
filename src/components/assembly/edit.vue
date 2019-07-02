@@ -42,19 +42,27 @@
 
     <elx-editable
       ref="elxEditable"
-      class="click-table8"
+      class="click-table12"
+      stripe
       border
-      height="466"
-      size="mini"
+      height="480"
+      highlight-current-row
       :data.sync="list.sheet[0]"
       :span-method="arraySpanMethod"
-      :row-class-name="tableRowClassName"
+      @select="selectEvent"
+      @current-change="currentChangeEvent"
       :edit-rules="validRules"
-      :edit-config="{trigger: 'click', mode: 'cell'}"
+      :edit-config="{trigger: 'click', mode: 'cell', showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
       style="width: 100%">
       <elx-editable-column type="selection" width="55"></elx-editable-column>
 
-      <elx-editable-column :prop="val+'.value'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in list.hd[0]" :key="i" :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+      <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in list.hd[0]" :key="i"  >
+          <el-input
+            slot-scope="scope" 
+            v-model="scope.row[val].td"
+            >
+      </el-input>
+      </elx-editable-column>
       <!-- <elx-editable-column prop="name" label="内容" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
       <elx-editable-column prop="language" label="语言" width="160" :edit-render="{name: 'ElSelect', options: languageList}"></elx-editable-column>
       <elx-editable-column prop="updateTime" label="更新时间" width="160" :formatter="formatterDate"></elx-editable-column>
@@ -66,8 +74,9 @@
 </template>
 
 <script>
-  import XEUtils from 'xe-utils'
-  // import XEAjax from 'xe-ajax'
+import XEUtils from 'xe-utils'
+import XEAjax from 'xe-ajax'
+import { MessageBox, Message } from 'element-ui'
 
 
   export default {
@@ -123,150 +132,173 @@
 
 
     methods: {
-       
-        formatterDate (row, column, cellValue, index) {
-          return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+        getSelectLabel (value, valueProp, labelProp, list) {
+          let item = XEUtils.find(list, item => item[valueProp] === value)
+          return item ? item[labelProp] : null
         },
-        tableRowClassName ({ row, rowIndex }) {
-          if (this.pendingRemoveList.some(item => item === row)) {
-            return 'delete-row'
-          }
-          return ''
-        },
+        removeEvent (scope) {
+            MessageBox.confirm('确定删除该数据?', '温馨提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              this.$refs.elxEditable.remove(scope.row)
+            }).catch(e => e)
+          },
+          revertEvent (row) {
+            MessageBox.confirm('确定还原该行数据?', '温馨提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              this.$refs.elxEditable.revert(row)
+              Message({ message: '数据还原成功！', type: 'success' })
+            }).catch(e => e)
+          },
+          selectEvent (selection, row) {
+            console.log(selection)
+          },
+          currentChangeEvent (currentRow, oldCurrentRow) {
+            console.log(currentRow)
+          },
+          deleteSelectedEvent () {
+            let selection = this.$refs.elxEditable.getSelecteds()
+            if (selection.length) {
+              this.$refs.elxEditable.removeSelecteds()
+              Message({ message: '删除成功', type: 'success' })
+            } else {
+              Message({
+                type: 'info',
+                message: '请至少选择一条数据！'
+              })
+            }
+          },          
 
-       
+          pendingRemoveEvent () { //标记/取消
+            let selection = this.$refs.elxEditable.getSelecteds()
+            if (selection.length) {
+              let plus = []
+              let minus = []
+              selection.forEach(data => {
+                if (this.pendingRemoveList.some(item => data === item)) {
+                  minus.push(data)
+                } else {
+                  plus.push(data)
+                }
+              })
+              if (minus.length) {
+                this.pendingRemoveList = this.pendingRemoveList.filter(item => minus.some(data => data !== item)).concat(plus)
+              } else if (plus) {
+                this.pendingRemoveList = this.pendingRemoveList.concat(plus)
+              }
+              this.$refs.elxEditable.clearSelection()
+            } else {
+              this.$message({
+                type: 'info',
+                message: '请至少选择一条数据！'
+              })
+            }
+          },
+          arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+              // if (columnIndex <= this.hd_obj.length) {   // 不带选择框的情况
+              //     return [row[this.hd_obj[columnIndex]].td_rowspan, row[this.hd_obj[columnIndex]].td_colspan]
+              // }
+              // return [1, 1]
 
-        pendingRemoveEvent () { //标记/取消
-          let selection = this.$refs.elxEditable.getSelecteds()
-          if (selection.length) {
-            let plus = []
-            let minus = []
-            selection.forEach(data => {
-              if (this.pendingRemoveList.some(item => data === item)) {
-                minus.push(data)
+              if (columnIndex >0) {  //带选择框的情况
+                  if(row[this.hd_obj[columnIndex-1]].dele !=1){
+                  if (columnIndex <= this.hd_obj.length) {
+                      return [row[this.hd_obj[columnIndex-1]].td_rowspan, row[this.hd_obj[columnIndex-1]].td_colspan]
+                  }
+                  }
+              }
+                  return [1, 1]
+
+          },       
+          exportCsvEvent () { //导出表格
+            this.$refs.elxEditable.exportCsv()
+          },
+
+          insertEvent (index) { //新增一行
+
+            this.$refs.elxEditable.insertAt({
+              
+              hd0: {
+                value:789,
+                row:1,
+                cos:1
+              },
+
+            }, index)
+
+            // .then(({ row }) => {
+            //   // this.$refs.elxEditable.setActiveCell(row, 'name')
+            // })
+
+          },
+          
+          deleteSelectedEvent () {    //删除选中
+            let selection = this.$refs.elxEditable.getSelecteds()
+            if (selection.length) {
+              this.$refs.elxEditable.removeSelecteds()
+              this.$message({ message: '删除成功', type: 'success' })
+            } else {
+              this.$message({
+                type: 'info',
+                message: '请至少选择一条数据！'
+              })
+            }
+          },
+          submitEvent () {  //校验保存  即可提交数据
+            this.$refs.elxEditable.validate(valid => {
+              if (valid) {
+                  console.log(this.list.sheet[0])
+                  console.log('tbtbtb')
+                  this.$message({ message: '保存成功', type: 'success' })
+                // alert('成功1')
               } else {
-                plus.push(data)
+                this.$message({ message: '校验不通过', type: 'error' })
               }
             })
-            if (minus.length) {
-              this.pendingRemoveList = this.pendingRemoveList.filter(item => minus.some(data => data !== item)).concat(plus)
-            } else if (plus) {
-              this.pendingRemoveList = this.pendingRemoveList.concat(plus)
-            }
-            this.$refs.elxEditable.clearSelection()
-          } else {
-            this.$message({
-              type: 'info',
-              message: '请至少选择一条数据！'
-            })
-          }
-        },
-        arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-            // if (columnIndex <= this.hd_obj.length) {   // 不带选择框的情况
-            //     return [row[this.hd_obj[columnIndex]].row, row[this.hd_obj[columnIndex]].cos]
-            // }
-            // return [1, 1]
-
-            if (columnIndex >0) {  //带选择框的情况
-                if(row[this.hd_obj[columnIndex-1]].dele !=1){
-                if (columnIndex <= this.hd_obj.length) {
-                    return [row[this.hd_obj[columnIndex-1]].row, row[this.hd_obj[columnIndex-1]].cos]
-                }
-                }
-            }
-                return [1, 1]
-
-        },       
-        exportCsvEvent () { //导出表格
-          this.$refs.elxEditable.exportCsv()
-        },
-
-        insertEvent (index) { //新增一行
-
-          this.$refs.elxEditable.insertAt({
-            
-            hd0: {
-              value:789,
-              row:1,
-              cos:1
-            },
-
-          }, index)
-
-          // .then(({ row }) => {
-          //   // this.$refs.elxEditable.setActiveCell(row, 'name')
-          // })
-
-        },
-        
-        deleteSelectedEvent () {    //删除选中
-          let selection = this.$refs.elxEditable.getSelecteds()
-          if (selection.length) {
-            this.$refs.elxEditable.removeSelecteds()
-            this.$message({ message: '删除成功', type: 'success' })
-          } else {
-            this.$message({
-              type: 'info',
-              message: '请至少选择一条数据！'
-            })
-          }
-        },
-        submitEvent () {  //校验保存  即可提交数据
-          this.$refs.elxEditable.validate(valid => {
-            if (valid) {
-                console.log(this.list.sheet[0])
-                console.log('tbtbtb')
-                this.$message({ message: '保存成功', type: 'success' })
-              // alert('成功1')
-            } else {
-              this.$message({ message: '校验不通过', type: 'error' })
-            }
+          },
+          getInsertEvent () { //获取新增数据
+            let rest = this.$refs.elxEditable.getInsertRecords()
+            this.$msgbox({ message: JSON.stringify(rest), title: `获取新增数据(${rest.length}条)` }).catch(e => e)
+            console.log(rest)
+          },
+          getUpdateEvent () { //获取已修改数据
+            let rest = this.$refs.elxEditable.getUpdateRecords()
+            this.$msgbox({ message: JSON.stringify(rest), title: `获取已修改数据(${rest.length}条)` }).catch(e => e)
+          },
+          getRemoveEvent () { //获取已删除数据
+            let rest = this.$refs.elxEditable.getRemoveRecords()
+            this.$msgbox({ message: JSON.stringify(rest), title: `获取已删除数据(${rest.length}条)` }).catch(e => e)
+          },
+          getSelectedEvent () { //获取已选中数据
+            let rest = this.$refs.elxEditable.getSelecteds()
+            this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
+          },
+          getAllEvent () {   //获取所有数据
+            let rest = this.$refs.elxEditable.getRecords()
+            this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
+          },
+          postJSON (data) {
+          // 提交请求
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve('保存成功')
+            }, 300)
           })
-        },
-        getInsertEvent () { //获取新增数据
-          let rest = this.$refs.elxEditable.getInsertRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取新增数据(${rest.length}条)` }).catch(e => e)
-          console.log(rest)
-        },
-        getUpdateEvent () { //获取已修改数据
-          let rest = this.$refs.elxEditable.getUpdateRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取已修改数据(${rest.length}条)` }).catch(e => e)
-        },
-        getRemoveEvent () { //获取已删除数据
-          let rest = this.$refs.elxEditable.getRemoveRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取已删除数据(${rest.length}条)` }).catch(e => e)
-        },
-        getSelectedEvent () { //获取已选中数据
-          let rest = this.$refs.elxEditable.getSelecteds()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
-        },
-        getAllEvent () {   //获取所有数据
-          let rest = this.$refs.elxEditable.getRecords()
-          this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
         }
-        
-  }
-}
+              
+      }
+    }
 
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.click-table8-oper {
-  margin-bottom: 18px;
-}
-.click-table8 .delete-row {
-  color: #f56c6c;
-  text-decoration: line-through;
-}
-.click-table8-pagination {
-  margin-top: 18px;
-  text-align: right;
-}
-.click-table8.elx-editable .elx-editable-row.new-insert,
-.click-table8.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
+
 
 .click-table12 .el-table__body .el-table__row>td.elx_checked {
   box-shadow: inset 0 0 6px #409EFF;
