@@ -127,7 +127,7 @@
   import headeratt from '@/components/assembly/header-att'
 
   // 引入excel 表格导入js处理函数模块
-  import excelmodel from '../../excel/proces';
+  import excelmodel from '../../modules/proces';
   export default {
     name: 'newheader',
     components: { edits, headeratt},
@@ -191,8 +191,8 @@
                   console.log('最终处理完成的数据')
                   console.log(data)
 
-                  _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
-                  // _this.dialogVisible2 = true;  //调用显示表头属性设置确认弹窗
+                  // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
+                  _this.dialogVisible2 = true;  //调用显示表头属性设置确认弹窗
 
                   _this.table = data;   // 存储表格数据
                   _this.loading = false

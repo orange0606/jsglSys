@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
   DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification,
-  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading} from 'element-ui';
+  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag} from 'element-ui';
 import App from './App'
 import router from './router'
 // Table,TableColumn,
@@ -34,6 +34,8 @@ Vue.use(OptionGroup);
 Vue.use(Alert);
 Vue.use(Loading.directive);
 Vue.use(Popover);
+Vue.use(Tag);
+
 
 import {
 
