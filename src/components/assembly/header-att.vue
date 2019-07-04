@@ -14,8 +14,8 @@
   <div v-loading="loading">
 
     <!-- <p style="color: red;font-size: 12px;">name字段（校验必填，校验最少3个字符）</p>
-    <p style="color: red;font-size: 12px;">多级属性：由于 v-model 必须明确指定双向绑定的路径，所以需要配合自定义渲染使用</p>
-    <p style="color: red;font-size: 12px;">上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值</p> -->
+    <p style="color: red;font-size: 12px;">多级属性：由于 v-model 必须明确指定双向绑定的路径，所以需要配合自定义渲染使用</p>-->
+    <p style="color: red;font-size: 12px;">上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值</p> 
 
     <p>
       <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
@@ -47,7 +47,7 @@
       border
       height="480"
       :highlight-current-row="false"
-      :data.sync="list.sheet[0]"
+      :data.sync="list"
       :span-method="arraySpanMethod"
       @select="selectEvent"
       @current-change="currentChangeEvent"
@@ -56,7 +56,7 @@
       style="width: 100%">
       <elx-editable-column type="selection" width="55"></elx-editable-column>
 
-      <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in list.hd[0]" :key="i"  >
+      <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
         
        <template  slot-scope="scope">
           <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
@@ -98,12 +98,12 @@ import XEUtils from 'xe-utils'
         btn: {  //按钮的名称,与存储信息事件
             next:'下一步',
             cancel: '取 消',
-            edit: true,
+            edit: true,    //true开启单元格编辑，false开启属性设置，默认true。
         },
-          //开启单元格编辑，false开启属性设置，默认true。
-        hd_obj:[], //用来存储  处理饿了么单元格合并该行中的所有列
         loading: true, //  div  加载中的样式
-        list: {sheet:[null],hd:[null]}, //用来存储数据
+        list:[], //用来存储导入的数据
+        hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
+
 
         formData: {
           key: null,
@@ -128,7 +128,11 @@ import XEUtils from 'xe-utils'
      created () { //2
         this.list = this.tableList;
         this.loading =false;
-        this.hd_obj = this.list.hd[0]
+        console.log('tanle')
+        console.log(this.tableList[0])
+        if (this.list[0]) {
+          this.hd = Object.keys(this.list[0]); //用来所需要的所有列（属性）名
+        } 
     },
     watch: {
         tableList: function(newVal,oldVal){
@@ -140,7 +144,10 @@ import XEUtils from 'xe-utils'
             // }
             this.loading =false;
             this.list = newVal;  //newVal即是tablelist
-            this.hd_obj = newVal.hd[0] //用来保存单元格合并处理函数所需要的所有列（属性）名
+            if (this.list[0]) {
+              this.hd = Object.keys(this.list[0]); //用来所需要的所有列（属性）名
+            }
+
         }
     },
 
@@ -217,16 +224,16 @@ import XEUtils from 'xe-utils'
             }
           },
           arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-              // if (columnIndex <= this.hd_obj.length) {   // 不带选择框的情况
-              //     return [row[this.hd_obj[columnIndex]].td_rowspan, row[this.hd_obj[columnIndex]].td_colspan]
+              // if (columnIndex <= this.hd.length) {   // 不带选择框的情况
+              //     return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
               // }
               // return [1, 1]
 
               if (columnIndex >0) {  //带选择框的情况
-                  if(row[this.hd_obj[columnIndex-1]].dele !=1){
-                  if (columnIndex <= this.hd_obj.length) {
-                      return [row[this.hd_obj[columnIndex-1]].td_rowspan, row[this.hd_obj[columnIndex-1]].td_colspan]
-                  }
+                  if(row[this.hd[columnIndex-1]].dele !=1){
+                    if (columnIndex <= this.hd.length) {
+                        return [row[this.hd[columnIndex-1]].td_rowspan, row[this.hd[columnIndex-1]].td_colspan]
+                    }
                   }
               }
                   return [1, 1]

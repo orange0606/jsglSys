@@ -117,6 +117,12 @@
     </span>
   </el-dialog>
 
+
+
+  <div style="width:100px;height:30px;border:1px solid orange;">
+
+  </div>
+
   </div>
 </template>
 
@@ -128,12 +134,14 @@
 
   // 引入excel 表格导入js处理函数模块
   import excelmodel from '../../modules/proces';
+
+  import inven from '../../modules/inventory';
   export default {
     name: 'newheader',
     components: { edits, headeratt},
     data () {
       return {
-        table:{sheet:[null],hd:[null]},
+        table:[],
         ruleForm: {
           name: '',    //表头名字
           region: '',   //表头标段
@@ -168,6 +176,12 @@
      created () { //2
     // this.findLanguageList()
     // this.findList()
+
+    let a = [1,2,3,4]
+    let b = a;
+    a[0]='shabi';
+    console.log('sssssssswwwwwwwwwwwwwwwwwwwwwwwwwssssssssssssss')
+    console.log(b)
     },
 
     methods: {
@@ -184,7 +198,7 @@
                   duration: 800,
                   message: '正在努力导入表格噢，请稍等片刻。'
               });
-              this.table = {sheet:[null],hd:[null]}; //归为初始化状态
+              this.table = []; //归为初始化状态
               let _this = this;
 
               excelmodel.Imports(data=>{
@@ -196,6 +210,13 @@
 
                   _this.table = data;   // 存储表格数据
                   _this.loading = false
+       
+                  let Assem = inven.Assemble(data.slice(0)) //此处调用
+                  console.log('AAAAAAAAAAAAAAAAAAAA')
+
+                  console.log(Assem)
+
+                  
                   _this.$notify({
                     title: '提示',
                     duration: 3000,

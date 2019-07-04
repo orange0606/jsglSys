@@ -60,7 +60,7 @@ let excelmodel = {
                         }
                         persons.push(perobj)
 
-                        //  break; //只需要单张工作表数据时才跳出循环
+                         break; //只需要单张工作表数据时才跳出循环
                     }
                 }       
 
@@ -144,7 +144,7 @@ let excelmodel = {
     },
 
     Table(arr,callback){    //表格完整数据生成函数
-        let oktable ={sheet:[],hd:[]} //储存处理好的数据（二维数组）
+        let sheet=[] //储存处理好的数据（二维数组）
         // console.log('arr')
         for (let i = 0; i < arr.length; i++) {
 
@@ -170,23 +170,23 @@ let excelmodel = {
 
 
                 //调用表格去除多余无值的行列
-                this.Delete_R(data)
-                this.Delete_C(data)
+                this.Delete_R(data);
+                this.Delete_C(data);
 
                 //调用单元格合并信息函数
                 this.Merge(arr[i].merges,data);
 
                 //把数据添加到即将要回调的数组中
-                oktable.sheet.push(data)
+                sheet = data;
 
-                //把表头所有列信息提交到回调函数中
-                oktable.hd.push(Object.getOwnPropertyNames(data[0]))
+                // //把表头所有列信息提交到回调函数中
+                // oktable.hd.push(Object.getOwnPropertyNames(data[0]))
 
             })         
         }
         // console.log('oktable')
         //最终生成好的数据
-        callback(oktable)
+        callback(sheet)
     },
     Merge(arr,data){  //arr是合并信息 数组，data 是生成的数据
         // console.log('这里开始设置合并单元格啦')
