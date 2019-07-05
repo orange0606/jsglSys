@@ -1,5 +1,9 @@
 
 const data = {
+    /*
+        原清单、变更清单，变更后的（新）清单、计量清单、累计计量清单、支付清单，累计支付清单
+    */
+    all_headname:['t_orginal', 't_change', 't_update', 't_meterage', 't_totalmeteragge', 't_pay', 't_totalpay'],  
     all_head:{  //所有清单表头字段
         tender_id : null, //标段id
         sys_order : null, //系统序号，用于排序
@@ -20,17 +24,17 @@ const data = {
         'attribute_value' //属性值
     ],
     all_attribute: {   //所有清单表头共有的属性
-        sys_order: {att_name: 'sys_order',zh:'系统序号列“sys_order”（用于系统的排序，导入导出时无需匹配）',value:null},
-        sys_num: {att_name: 'sys_num',zh:'系统编号列“sys_num”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null},
-        formula: {att_name: 'formula',zh:'“formula”公式',value:'=H3-G2'},
-        sum_text: {att_name: 'sum_text',zh:'系统默认的合计行-普通文本',value:'合计'},
-        sum_null: {att_name: 'sum_null',zh:'系统默认的合计行-空文本',value:null},
-        sum_formula: {att_name: 'sum_formula',zh:'系统默认的合计行-合计公式',value:'=SUM()'}
+        sys_order: {att_name: 'sys_order',zh:'系统序号列“sys_order”（用于系统的排序，导入导出时无需匹配）',value:null,if:false},
+        sys_num: {att_name: 'sys_num',zh:'系统编号列“sys_num”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false},
+        formula: {att_name: 'formula',zh:'“formula”公式',value:'=H3-G2',if:true,if:false},
+        sum_text: {att_name: 'sum_text',zh:'系统默认的合计行-普通文本',value:'合计',if:true},
+        sum_null: {att_name: 'sum_null',zh:'系统默认的合计行-空文本',value:null,if:false},
+        sum_formula: {att_name: 'sum_formula',zh:'系统默认的合计行-合计公式',value:'=SUM()',if:true}
     },
     all_limit:[ //所有清单表头行限制限制属性的值
-        {att_name: 'max',zh:'max最大值', value:null},
-        {att_name: 'increasemax',zh:'increasemax增加的最大值', value:null},
-        {att_name: 'decreasemax',zh:'decreasemax减少的最大值', value:'"CA14"'}
+        {att_name: 'max',zh:'max最大值', value:null,if:false},
+        {att_name: 'increasemax',zh:'increasemax增加的最大值', value:null,if:false},
+        {att_name: 'decreasemax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
     ],
     t_orginal: {  // 原清单
         head_row:[  
@@ -48,9 +52,9 @@ const data = {
             'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
         ],
         attribute:{ //属性及属性值
-            orginal: {att_name: 'orginal',zh:'“orginal”原清单',value:'CA14'},
-            orginalnull: {att_name: 'orginalnull',zh:'“orginalnull”新清单（无对应）',value:null},
-            change: {att_name: 'change',zh:'“change”变更清单',value:null},
+            orginal: {att_name: 'orginal',zh:'“orginal”原清单',value:'CA14',if:true,if:false},
+            orginalnull: {att_name: 'orginalnull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
+            change: {att_name: 'change',zh:'“change”变更清单',value:null,if:false},
         }
 
     },
@@ -72,9 +76,9 @@ const data = {
             'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
         ],
         attribute:{ //属性及属性值
-            update: {att_name: 'update',zh:'“update”新清单',value:'CA14'},
-            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null},
-            meterage: {att_name: 'meterage',zh:'“meterage”变更清单',value:null},
+            update: {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
+            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
+            meterage: {att_name: 'meterage',zh:'“meterage”变更清单',value:null,if:false},
         }
         
     },
@@ -87,10 +91,10 @@ const data = {
             'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
         ],
         attribute:{ //属性及属性值
-            update: {att_name: 'update',zh:'“update”新清单',value:'CA14'},
-            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null},
-            meterage: {att_name: 'meterage',zh:'“meterage”变更清单',value:null},
-            fluctuate: {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12'},
+            update: {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
+            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
+            meterage: {att_name: 'meterage',zh:'“meterage”变更清单',value:null,if:false},
+            fluctuate: {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         }        
     },   
     t_pay:{    //支付清单
@@ -102,10 +106,10 @@ const data = {
             'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
         ],
         attribute:{ //属性及属性值
-            update: {att_name: 'update',zh:'“update”新清单',value:'CA14'},
-            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null},
-            pay: {att_name: 'meterage',zh:'“pay”支付清单',value:null},
-            fluctuate: {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12'},
+            update: {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
+            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null, if:false},
+            pay: {att_name: 'meterage',zh:'“pay”支付清单',value:null, if:false},
+            fluctuate: {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         }        
     },  
     t_totalpay:{    //累计支付清单
@@ -118,38 +122,61 @@ const data = {
             'update_time' //最新更新的时间
         ],
         attribute:{ //属性及属性值
-            update: {att_name: 'update',zh:'“update”新清单',value:'CA14'},
-            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null},
-            totalpay: {att_name: 'totalpay',zh:'“totalpay"累计支付清单',value:null},
-            fluctuate: {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12'},
+            update: {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
+            updatenull: {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
+            totalpay: {att_name: 'totalpay',zh:'“totalpay"累计支付清单',value:null,if:false},
+            fluctuate: {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12', if:true},
         }        
     }
 }
 
 /*
+ 深拷贝多层数组对象
+param source: Array or Object
+return : 深拷贝后的数组对象
+ */
+var objDeepCopy = function (source) {
+    var sourceCopy = source instanceof Array ? [] : {};
+    for (var item in source) {
+        sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item];
+    }
+    return sourceCopy;
+}
+
+
+/*
  组装各种清单数据
-param arr: 表头基本数据
-param type: 需要组装哪种类型的清单表头数据
+param arr: 表头基本数据(array)
+param type: 需要组装哪种类型的清单表头数据(string)
 return : 完整清单表头数据
  */
 export default {
     Assemble (arr, type){ //组装数据函数
+        let Arr = { sheet:null, attribute: null,limit: null};        
+        type =data.all_headname[3];
+        // var arr = objDeepCopy(Arrays);
         //先组装公有清单类型数据
-        let hd = Object.keys(arr[0])
+        let hd = Object.keys(arr[0]);   //获取所有的列
+        let attr = data.all_head_row.concat(data[type].head_row); //合并共有属性和私有属性数组
 
-        for (let index = 0; index < arr.length; index++) {
-                
-            for (let i = 0; i < hd.length; i++) {
-                for (let e = 0; e < data.all_head_row.length; e++) {
-                    arr[index][hd[i]][data.all_head_row[e]] =null;
+        for (let index = 0; index < arr.length; index++) { 
+            for (let i = 0; i < hd.length; i++) {  
+                for (let e = 0; e < attr.length; e++) {    
+                    arr[index][hd[i]][attr[e]] =null;   //把合并的属性一起注入数据
+                } 
 
-                }
-                
-                
             }
-
         }
-        return arr;
+        if (data[type].attribute.length !=0) {
+            Arr.attribute = Object.assign(data[type].attribute,data.all_attribute);  //合并共有特殊属性以及私有特殊属性对象一起注入数据
+        }
+        if (data[type].head_row.indexOf("limit") !=-1) {    //先判断这个类型清单表头有无限制属性，无则不添加
+            Arr.limit = data.all_limit;
+        }
+        Arr.sheet = arr;
+        console.log('重新组装好的数据')
+        console.log(Arr)
+        return Arr;
         //组装私有清单类型数据
     }
 

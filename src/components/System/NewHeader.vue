@@ -141,7 +141,7 @@
     components: { edits, headeratt},
     data () {
       return {
-        table:[],
+        table:null,
         ruleForm: {
           name: '',    //表头名字
           region: '',   //表头标段
@@ -177,11 +177,6 @@
     // this.findLanguageList()
     // this.findList()
 
-    let a = [1,2,3,4]
-    let b = a;
-    a[0]='shabi';
-    console.log('sssssssswwwwwwwwwwwwwwwwwwwwwwwwwssssssssssssss')
-    console.log(b)
     },
 
     methods: {
@@ -198,7 +193,7 @@
                   duration: 800,
                   message: '正在努力导入表格噢，请稍等片刻。'
               });
-              this.table = []; //归为初始化状态
+              this.table = null; //归为初始化状态
               let _this = this;
 
               excelmodel.Imports(data=>{
@@ -208,15 +203,10 @@
                   // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
                   _this.dialogVisible2 = true;  //调用显示表头属性设置确认弹窗
 
-                  _this.table = data;   // 存储表格数据
+                    //inven.Assemble(data)数据添加属性组装函数
+                  _this.table = inven.Assemble(data);   // 存储表格数据
+                //   _this.table = data  // 存储表格数据
                   _this.loading = false
-       
-                  let Assem = inven.Assemble(data.slice(0)) //此处调用
-                  console.log('AAAAAAAAAAAAAAAAAAAA')
-
-                  console.log(Assem)
-
-                  
                   _this.$notify({
                     title: '提示',
                     duration: 3000,

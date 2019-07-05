@@ -59,9 +59,49 @@
       <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
         
        <template  slot-scope="scope">
+              <!-- 
+                单元格编辑
+                -->
           <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
 
-          <el-popover v-else-if="btn.edit ==false" trigger="hover" placement="top">
+          <el-popover v-else-if="btn.edit ==false" trigger="click" placement="top">
+               <!-- 
+                  弹窗属性选择设置
+                -->
+          <!--
+          <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
+
+                <el-form-item label="表头标段" prop="region">
+                    <el-select v-model="ruleForm.region" clearable placeholder="请选择表头标段" style=" width:100%;">
+                        <el-option label="路线（Lx）" value="1"></el-option>
+                        <el-option label="路基（LJ）" value="2"></el-option>
+                        <el-option label="路面（LM）" value="3"></el-option>
+                        <el-option label="机电（JD）" value="4"></el-option>
+
+          
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="表头类型" prop="type">
+                    <el-select v-model="ruleForm.type" placeholder="请选择表头类型" clearable size="small" style=" width:100%;">
+                        <el-option label="原清单" value="1"></el-option>
+                        <el-option label="变更清单" value="2"></el-option>
+                        <el-option label="变更后的（新清单）" value="3"></el-option>
+                        <el-option label="计量清单" value="4"></el-option>
+                        <el-option label="累计计量清单" value="5"></el-option>
+                        <el-option label="支付清单" value="6"></el-option>
+                        <el-option label="累计支付清单" value="7"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="表头编号" prop="number">
+                    <el-input v-model="ruleForm.number"></el-input>
+                </el-form-item>
+                <el-form-item label="表头名称" prop="name">
+                    <el-input v-model="ruleForm.name"></el-input>
+                </el-form-item>
+            </el-form>                 
+    -->
+
+
             <p>属性设置: 叫什么{{scope.row[val].td }}</p>
             <p>属性2: 在哪里{{ scope.row[val].td }}</p>
             <div slot="reference" class="name-wrapper">
@@ -126,26 +166,22 @@ import XEUtils from 'xe-utils'
       }
     },
      created () { //2
-        this.list = this.tableList;
-        this.loading =false;
-        console.log('tanle')
-        console.log(this.tableList[0])
-        if (this.list[0]) {
-          this.hd = Object.keys(this.list[0]); //用来所需要的所有列（属性）名
-        } 
+        console.log('this.tableList')
+        console.log(this.tableList)
+        if(this.tableList != null){
+            this.list = this.tableList.sheet;
+            this.loading =false;
+            this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列（属性）名
+        }
     },
     watch: {
         tableList: function(newVal,oldVal){
-            console.log('sssssssssssssssssss')
-            // if (newVal.sheet[0]==null) {    //当没有数据的时候div 为加载中状态
-            //     this.loading = true;
-            // }else{
-            //     this.loading = false;
-            // }
-            this.loading =false;
-            this.list = newVal;  //newVal即是tablelist
-            if (this.list[0]) {
-              this.hd = Object.keys(this.list[0]); //用来所需要的所有列（属性）名
+            if (newVal == null ) {    //当没有数据的时候div 为加载中状态
+                this.loading = true;
+            }else{
+                this.list = newVal.sheet
+                this.hd = Object.keys(newVal.sheet[0])
+                this.loading = false;
             }
 
         }
@@ -153,6 +189,7 @@ import XEUtils from 'xe-utils'
 
 
     methods: {
+
           next(){  //编辑完成点击下一步
               if (this.btn.edit) {
                   this.btn.edit = false;
