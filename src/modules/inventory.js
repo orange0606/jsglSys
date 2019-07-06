@@ -153,7 +153,7 @@ return : 完整清单表头数据
 export default {
     Assemble (arr, type){ //组装数据函数
         let Arr = { sheet:null, attribute: null,limit: null};        
-        type =data.all_headname[3];
+        type =data.all_headname[1];
         // var arr = objDeepCopy(Arrays);
         //先组装公有清单类型数据
         let hd = Object.keys(arr[0]);   //获取所有的列

@@ -112,8 +112,9 @@
     <!-- 引入表格编辑组件 -->
     <headeratt :tableList="table"></headeratt>
     <span slot="footer" class="dialog-footer">
-      <el-button @click="dialogVisible2 = false">取 消</el-button>
-      <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
+     <!--    <el-button @click="dialogVisible2 = false">取 消</el-button>
+         <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
+        -->
     </span>
   </el-dialog>
 

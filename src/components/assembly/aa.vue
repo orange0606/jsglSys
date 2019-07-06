@@ -51,7 +51,6 @@
       @select="selectEvent"
       @current-change="currentChangeEvent"
       :edit-rules="validRules"
-      @cell-click ="aa"
       :edit-config="{ showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
       style="width: 100%">
       <elx-editable-column type="selection" width="55"></elx-editable-column>
@@ -63,9 +62,6 @@
                 -->
           <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
 
-               <!-- 
-                  **************弹窗属性选择设置**************
-              -->
           <el-popover v-else-if="btn.edit ==false" trigger="click" placement="top" width="400">
                <!-- 
                   **************弹窗属性选择设置**************
@@ -108,7 +104,6 @@
               <el-tag size="medium">{{ scope.row[val].td }}</el-tag>
             </div>
           </el-popover>
-
       </template>
       </elx-editable-column>
       <!-- <elx-editable-column prop="name" label="内容" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
@@ -228,11 +223,7 @@ import XEUtils from 'xe-utils'
 
 
     methods: {
-          aa(row, column, cell, event){
-              // console.log('row, column, cell, event')
-              // console.log(row, column, cell, event)
-              
-          },
+
           next(){  //编辑完成点击下一步
               if (this.btn.edit) {
                   this.btn.edit = false;
@@ -261,19 +252,10 @@ import XEUtils from 'xe-utils'
           },
         
           selectEvent (selection, row) {
-            console.log('row rrrrrrrrrrrrrrr')
-            console.log(row)
-            console.log('selection')
-            
             console.log(selection)
           },
-          currentChangeEvent (currentRow, oldCurrentRow) {  //点击编辑
-            console.log('currentRow')            
+          currentChangeEvent (currentRow, oldCurrentRow) {
             console.log(currentRow)
-            console.log('oldCurrentRow')
-            console.log(oldCurrentRow)
-            
-            
           },
           deleteSelectedEvent () {  //删除选中数据
             let selection = this.$refs.elxEditable.getSelecteds()
