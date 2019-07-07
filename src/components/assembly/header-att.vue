@@ -1,16 +1,5 @@
 <template>
 
-
-
-    <!-- <div class="tbbox">
-
-        <table id="table" ref="table">
-          <tr v-for="(val,index) in table.sheet[0]" :key="index" >
-                <td v-for="(item, i) in val" :key="i" :colspan="item.cos" :rowspan="item.row">{{item.value}}</td>
-          </tr>
-        </table>
-
-    </div> -->
   <div v-loading="loading">
 
     <!-- <p style="color: red;font-size: 12px;">name字段（校验必填，校验最少3个字符）</p>
@@ -50,7 +39,6 @@
       :span-method="arraySpanMethod"
       @select="selectEvent"
       @current-change="currentChangeEvent"
-      :edit-rules="validRules"
       @cell-click ="aa"
       :edit-config="{ showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
       style="width: 100%">
@@ -66,63 +54,70 @@
                <!-- 
                   **************弹窗属性选择设置**************
               -->
-          <el-popover v-else-if="btn.edit ==false" trigger="click" placement="top" width="400">
-               <!-- 
-                  **************弹窗属性选择设置**************
-                -->
-          <el-form :model="scope.row[val]" :rules="rules" ref="scope.row[val]" label-width="120" size="small">
-              <el-form-item label="设置属性" prop="attribute">
-                  <el-select v-model="scope.row[val].attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
-                      <el-option label="原清单" value="1"></el-option>
-                  </el-select>
-              </el-form-item>
-              <el-form-item label="属性值" prop="attribute_value">
-                  <el-input v-model="scope.row[val].attribute_value"></el-input>
-              </el-form-item>
-              <el-form-item v-if="'attribute_value_id' in scope.row[val]" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
-                  <el-input v-model="scope.row[val].attribute_value_id"></el-input>
-              </el-form-item>
-              <el-form-item label="列宽" prop="col_width">
-                  <el-input v-model="scope.row[val].col_width"></el-input>
-              </el-form-item>
-              <el-form-item label="行高" prop="tr_high">
-                  <el-input v-model="scope.row[val].tr_high"></el-input>
-              </el-form-item>
-              <el-form-item v-if="'limit' in scope.row[val]" label="限制单元格大小值" prop="limit">
-                <el-select v-model="scope.row[val].limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
-                      <el-option label="原清单" value="1"></el-option>
-                  </el-select>
-              </el-form-item>
-              <el-form-item v-if="'limit_value' in scope.row[val]" label="限制值" prop="limit_value">
-                    <el-input v-model="scope.row[val].limit_value"></el-input>
-              </el-form-item>
-               <el-form-item v-if="'limit_id' in scope.row[val]" label="（限制id）对应原清单表头内容id" prop="limit_id">
-                    <el-input v-model="scope.row[val].limit_id"></el-input>
-              </el-form-item>
-               <el-form-item v-if="'update_time' in scope.row[val]" label="更新时间" prop="update_time">
-                    <el-input v-model="scope.row[val].update_time"></el-input>
-              </el-form-item>
-
-            </el-form>                 
-            <div slot="reference" class="name-wrapper">
-              <el-tag size="medium">{{ scope.row[val].td }}</el-tag>
-            </div>
-          </el-popover>
+          <el-button v-else type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
 
       </template>
       </elx-editable-column>
-      <!-- <elx-editable-column prop="name" label="内容" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="language" label="语言" width="160" :edit-render="{name: 'ElSelect', options: languageList}"></elx-editable-column>
-      <elx-editable-column prop="updateTime" label="更新时间" width="160" :formatter="formatterDate"></elx-editable-column>
-      <elx-editable-column prop="createTime" label="创建时间" width="160" :formatter="formatterDate"></elx-editable-column> -->
     </elx-editable>
     <br>
 
-    <!-- 取消和下一步按钮 -->
+    <!-- 导入之后单元格编辑 取消和下一步按钮 -->
     <span slot="footer" class="dialog-footer">
       <el-button @click="back">{{ btn.cancel }}</el-button>
       <el-button type="primary" @click="next">{{ btn.next }}</el-button>
     </span>
+
+    <!-- 
+        属性弹窗组件
+     -->
+    <el-dialog title="属性设置" 
+    :visible.sync="shwo_att" 
+    append-to-body 
+    :close-on-click-modal="false" 
+    width="30%" 
+    top="5vh">
+
+        <el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="300" size="small">
+            <el-form-item label="设置属性" prop="attribute">
+                <el-select v-model="row_att.attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
+                    <el-option v-for="(val,i) in attribute" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="属性值" prop="attribute_value">
+                <el-input v-model="row_att.attribute_value"></el-input>
+            </el-form-item>
+            <el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
+                <el-input v-model="row_att.attribute_value_id"></el-input>
+            </el-form-item>
+            <el-form-item label="列宽" prop="col_width">
+                <el-input v-model="row_att.col_width"></el-input>
+            </el-form-item>
+            <el-form-item label="行高" prop="tr_high">
+                <el-input v-model="row_att.tr_high"></el-input>
+            </el-form-item>
+            <el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
+            <el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
+                    <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
+                <el-input v-model="row_att.limit_value"></el-input>
+            </el-form-item>
+            <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
+                <el-input v-model="row_att.limit_id"></el-input>
+            </el-form-item>
+            <el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
+                <el-input v-model="row_att.update_time"></el-input>
+            </el-form-item>
+
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="shwo_att = false">取 消</el-button>
+          <el-button type="primary" @click="submitAtt">确 定</el-button>
+        </div>       
+    </el-dialog>  
+
+
 
   </div>
      
@@ -146,8 +141,9 @@ import XEUtils from 'xe-utils'
         hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
         attribute:{}, //用来存储特殊属性的所有类
         limits:[],  //用来存储限制单元格大小的所有类
-
-        rules: {  //input 反馈错误
+        row_att:{},  //存储属性弹窗选择所需要的每个单元格的数据
+        shwo_att:false, //属性弹窗默认不显示     
+        rules: {  //属性 反馈错误
           attribute_value: [
             { required: true, message: '请输入内容', trigger: 'blur' },
             { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
@@ -183,33 +179,18 @@ import XEUtils from 'xe-utils'
             { required: true, message: '请选择限制类型', trigger: 'change' }
           ]
         },
-
-        formData: {
-          key: null,
-          name: null,
-          language: null
-        },
-
-        validRules: {
-          key: [
-            { required: true, message: '请输入键值', trigger: 'change' }
-          ],
-          language: [
-            { required: true, message: '请选择语言', trigger: 'change' }
-          ]
-        },
+      
         pendingRemoveList: [] //存储已标记的行数
-  
-
-        
       }
     },
-     created () { //2
+    created () { //2
         console.log('this.tableList')
         console.log(this.tableList)
         if(this.tableList != null){
             this.list = this.tableList.sheet;
             this.loading =false;
+            this.attribute = this.tableList.attribute;
+            this.limits = this.tableList.limit;
             this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列（属性）名
         }
     },
@@ -218,20 +199,47 @@ import XEUtils from 'xe-utils'
             if (newVal == null ) {    //当没有数据的时候div 为加载中状态
                 this.loading = true;
             }else{
-                this.list = newVal.sheet
-                this.hd = Object.keys(newVal.sheet[0])
+                this.list = newVal.sheet;
+                this.attribute = newVal.attribute;
+                this.limits = newVal.limit;
+                this.hd = Object.keys(newVal.sheet[0]);
                 this.loading = false;
             }
 
         }
     },
 
-
     methods: {
           aa(row, column, cell, event){
-              // console.log('row, column, cell, event')
-              // console.log(row, column, cell, event)
+              console.log('row, column, cell, event')
+              console.log(row, column, cell, event)
               
+          },
+          submitAtt(){  //校验属性的值是否成功
+            this.$refs.row_att.validate(valid => {
+              if (valid) {
+                  console.log('这里保存数据')
+                
+                  console.log(this.list)
+                  this.$message({ message: '保存成功', type: 'success' })
+                  this.shwo_att = false;
+                // alert('成功1')
+              } else {
+                this.$message({ message: '校验不通过', type: 'error' })
+              }
+            })
+          },
+          /*
+            单元格属性设置
+            param row:  Object  
+            return : 无
+          */
+          att(row){
+            //把数据传入属性弹窗组件
+            this.row_att = row;
+            console.log(row)
+            //显示设置属性弹窗
+            this.shwo_att = true;
           },
           next(){  //编辑完成点击下一步
               if (this.btn.edit) {
@@ -272,8 +280,6 @@ import XEUtils from 'xe-utils'
             console.log(currentRow)
             console.log('oldCurrentRow')
             console.log(oldCurrentRow)
-            
-            
           },
           deleteSelectedEvent () {  //删除选中数据
             let selection = this.$refs.elxEditable.getSelecteds()
@@ -326,7 +332,6 @@ import XEUtils from 'xe-utils'
                   }
               }
                   return [1, 1]
-
           },       
           exportCsvEvent () { //导出表格
             this.$refs.elxEditable.exportCsv()
@@ -362,11 +367,12 @@ import XEUtils from 'xe-utils'
               })
             }
           },
-          submitEvent () {  //校验保存  即可提交数据
+          submitEvent () {  //校验(表格数据)保存  即可提交数据
             this.$refs.elxEditable.validate(valid => {
               if (valid) {
-                  console.log(this.list.sheet[0])
-                  console.log('tbtbtb')
+                  console.log('这里保存数据')
+                
+                  console.log(this.list)
                   this.$message({ message: '保存成功', type: 'success' })
                 // alert('成功1')
               } else {
@@ -395,14 +401,7 @@ import XEUtils from 'xe-utils'
             let rest = this.$refs.elxEditable.getRecords()
             this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
           },
-          postJSON (data) {
-          // 提交请求
-          return new Promise(resolve => {
-            setTimeout(() => {
-              resolve('保存成功')
-            }, 300)
-          })
-        }
+
               
       }
     }

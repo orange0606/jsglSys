@@ -151,7 +151,7 @@ let excelmodel = {
             //调用生成工作表 i 空数据函数
             this.Create(arr[i].ref,data=>{
 
-                for(let key  in arr[i].sheets){ //遍历sheet对象键与键值，进行数据存储
+                for(let key in arr[i].sheets){ //遍历sheet对象键与键值，进行数据存储
                     //做优化，直接用下标来设置值
                     if (key!='!ref' && key!='!merges' && key!='!margins') {
                         let cos = index.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标

@@ -107,6 +107,8 @@
     title="请进行设置表头每个单元格属性"
     :visible.sync="dialogVisible2"
     width="80%"
+    :append-to-body="false" 
+    top="10vh"
     :before-close="handleClose">
 
     <!-- 引入表格编辑组件 -->
