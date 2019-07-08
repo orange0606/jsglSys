@@ -3,7 +3,7 @@ const data = {
     /*
         原清单、变更清单，变更后的（新）清单、计量清单、累计计量清单、支付清单，累计支付清单
     */
-    all_headname:['t_orginal', 't_change', 't_update', 't_meterage', 't_totalmeteragge', 't_pay', 't_totalpay'],  
+    all_headname:['orginal', 'change', 'update', 'meterage', 'totalmeteragge', 'pay', 'totalpay'],  
     all_head:{  //所有清单表头字段
         tender_id : null, //标段id
         sys_order : null, //系统序号，用于排序
@@ -36,14 +36,14 @@ const data = {
         {att_name: 'increasemax',zh:'increasemax增加的最大值', value:null,if:false},
         {att_name: 'decreasemax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
     ],
-    t_orginal: {  // 原清单
+    orginal: {  // 原清单
         head_row:[  
             't_original_head_id', //原清单头id
         ],
         attribute:[ //属性及属性值
         ]
     },
-    t_change:{    //变更清单
+    change:{    //变更清单
         head_row:[
             't_change_head_id', //变更清单表头id
             'attribute_value_id', //对应原清单表头内容的id
@@ -58,7 +58,7 @@ const data = {
         ]
 
     },
-    t_update:{    //变更后（新）清单
+    update:{    //变更后（新）清单
         head_row:[
             't_update_head_id', //变更后（新）清单表头id
             't_original_head_row_id' //原清单表头内容id
@@ -67,7 +67,7 @@ const data = {
         ]
 
     },
-    t_meterage:{    //计量清单
+    meterage:{    //计量清单
         head_row:[
             't_meterage_head_id', //原清单头id
             'attribute_value_id', //对应原清单表头内容的id
@@ -82,7 +82,7 @@ const data = {
         ]
         
     },
-    t_totalmeteragge:{    //累计计量清单
+    totalmeteragge:{    //累计计量清单
         head_row:[
             't_meterage_head_id', //原清单头id
             'attribute_value_id', //对应原清单表头内容的id
@@ -97,7 +97,7 @@ const data = {
             {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         ]        
     },   
-    t_pay:{    //支付清单
+    pay:{    //支付清单
         head_row:[
             't_pay_head_id', //支付清单表头id
             'attribute_value_id', //对应新清单表头内容的id
@@ -112,7 +112,7 @@ const data = {
             {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         ]        
     },  
-    t_totalpay:{    //累计支付清单
+    totalpay:{    //累计支付清单
         head_row:[
             't_totalpay_head_id', //支付清单表头id
             'attribute_value_id', //对应新清单表头内容的id
@@ -130,18 +130,6 @@ const data = {
     }
 }
 
-/*
- 深拷贝多层数组对象
-param source: Array or Object
-return : 深拷贝后的数组对象
- */
-var objDeepCopy = function (source) {
-    var sourceCopy = source instanceof Array ? [] : {};
-    for (var item in source) {
-        sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item];
-    }
-    return sourceCopy;
-}
 
 
 /*
@@ -153,7 +141,7 @@ return : 完整清单表头数据
 export default {
     Assemble (arr, type){ //组装数据函数
         let Arr = { sheet:null, attribute: null,limit: null};        
-        type =data.all_headname[0];
+        // type =data.all_headname[4];
         // var arr = objDeepCopy(Arrays);
         //先组装公有清单类型数据
         let hd = Object.keys(arr[0]);   //获取所有的列
@@ -179,6 +167,23 @@ export default {
         console.log(Arr)
         return Arr;
         //组装私有清单类型数据
+    },
+
+        /*
+    深拷贝多层数组对象
+    param obj:  Object
+    return : 深拷贝后的数组对象
+    */
+    deepcopy(obj){
+        var newobj = {};
+        for(arr in obj){
+            if (typeof obj[arr]==='object' && obj[arr] !== null) {
+                newobj[arr] = deepcopy(obj[arr]); //递归，核心代码
+            } else {
+                newobj[arr] = obj[arr];
+            }
+        }
+        return newobj;
     }
 
 }

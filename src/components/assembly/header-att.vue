@@ -40,7 +40,8 @@
       @select="selectEvent"
       @current-change="currentChangeEvent"
       @cell-click ="aa"
-      :edit-config="{ showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
+	  :show-summary ="true"
+      :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
       style="width: 100%">
       <elx-editable-column type="selection" width="55"></elx-editable-column>
 
@@ -75,6 +76,7 @@
     append-to-body 
     :close-on-click-modal="false" 
     width="30%" 
+    custom-class="custom"
     top="5vh">
 
         <el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="300" size="small">
@@ -126,6 +128,7 @@
 <script>
 import XEUtils from 'xe-utils'
 
+  import inven from '../../modules/inventory';
   export default {
     name: 'edit',
     props:["tableList"],
@@ -211,8 +214,8 @@ import XEUtils from 'xe-utils'
 
     methods: {
           aa(row, column, cell, event){
-              console.log('row, column, cell, event')
-              console.log(row, column, cell, event)
+              // console.log('row, column, cell, event')
+              // console.log(row, column, cell, event)
               
           },
           submitAtt(){  //校验属性的值是否成功
@@ -235,7 +238,8 @@ import XEUtils from 'xe-utils'
             return : 无
           */
           att(row){
-            //把数据传入属性弹窗组件
+			//把数据传入属性弹窗组件
+			console.log(this.list)
             this.row_att = row;
             console.log(row)
             //显示设置属性弹窗
@@ -245,22 +249,51 @@ import XEUtils from 'xe-utils'
               if (this.btn.edit) {
                   this.btn.edit = false;
                   this.btn.next ='完  成';
-                  this.btn.cancel ='上一步';
+				  this.btn.cancel ='上一步';
+				  
+				  //此处检测是否生成合计尾行
+				  console.log('这里开始')
+				  this.tableList.sheet.push(inven.deepcopy(this.tableList.sheet[this.tableList.sheet.length-1])) 
+				  let hd = Object.keys(this.tableList.sheet[0])
+				  for (let i = 0; i < hd.length; i++) {
+					  let tb = this.tableList.sheet[this.tableList.sheet.length-1][hd[i]];
+					  tb.td = '合计'+i;
+					  if (tb.td_rowspan >1 || tb.td_rowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
+						  tb.td_rowspan = 1;
+					  }
+					  tb.td_colspan ==0?tb.td_colspan =1:tb.td_colspan;
+						  
+					  
+					  
+				  }
+				  this.list =this.tableList.sheet;
+				  console.log(this.tableList.sheet)
+
+				//   let rest = this.$refs.elxEditable.getRecords();
+				//   this.list =rest.push(rest[rest.length-1])
+				//   this.list.push(this.list[this.list.length-1]);
 
               }else{
                   alert('直接完成')
                   //此处调用提交数据到父组件
               }
           },
-          back(){
+          back(){ //编辑完成点击上一步
             if (this.btn.edit) {
                 alert('直接取消')
-                //此处取消弹窗显示
+				//此处取消弹窗显示
+
     
               }else{
                   this.btn.edit = true
                   this.btn.next ='下一步';
-                  this.btn.cancel ='取  消';
+				  this.btn.cancel ='取  消';
+				  
+				  //此处删除合计尾行
+				  this.tableList.sheet.pop();
+				  this.list =this.tableList.sheet;
+				  console.log(this.list)
+
               }
           },
           getSelectLabel (value, valueProp, labelProp, list) {
@@ -269,17 +302,17 @@ import XEUtils from 'xe-utils'
           },
         
           selectEvent (selection, row) {
-            console.log('row rrrrrrrrrrrrrrr')
+            console.log('选中行')
             console.log(row)
             console.log('selection')
             
             console.log(selection)
           },
           currentChangeEvent (currentRow, oldCurrentRow) {  //点击编辑
-            console.log('currentRow')            
-            console.log(currentRow)
-            console.log('oldCurrentRow')
-            console.log(oldCurrentRow)
+            // console.log('currentRow')            
+            // console.log(currentRow)
+            // console.log('oldCurrentRow')
+            // console.log(oldCurrentRow)
           },
           deleteSelectedEvent () {  //删除选中数据
             let selection = this.$refs.elxEditable.getSelecteds()
@@ -398,7 +431,10 @@ import XEUtils from 'xe-utils'
             this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
           },
           getAllEvent () {   //获取所有数据
-            let rest = this.$refs.elxEditable.getRecords()
+			let rest = this.$refs.elxEditable.getRecords()
+			console.log('点击获取所有数据')
+			console.log(rest)
+			console.log(this.list)
             this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
           },
 
@@ -414,5 +450,7 @@ import XEUtils from 'xe-utils'
 
 .click-table12 .el-table__body .el-table__row>td.elx_checked {
   box-shadow: inset 0 0 6px #409EFF;
+  
 }
+
 </style>

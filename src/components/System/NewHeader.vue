@@ -6,23 +6,31 @@
 
                 <el-form-item label="表头标段" prop="region">
                     <el-select v-model="ruleForm.region" clearable placeholder="请选择表头标段" style=" width:100%;">
-                        <el-option label="路线（Lx）" value="1"></el-option>
-                        <el-option label="路基（LJ）" value="2"></el-option>
-                        <el-option label="路面（LM）" value="3"></el-option>
-                        <el-option label="机电（JD）" value="4"></el-option>
-
-
+                        <el-option label="路线（LX）" value="LX"></el-option>
+                        <el-option label="路基（LJ）" value="LJ"></el-option>
+                        <el-option label="路面（LM）" value="LM"></el-option>
+                        <el-option label="机电（JD）" value="JD"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="表头类型" prop="type">
                     <el-select v-model="ruleForm.type" placeholder="请选择表头类型" clearable size="small" style=" width:100%;">
-                        <el-option label="原清单" value="1"></el-option>
-                        <el-option label="变更清单" value="2"></el-option>
-                        <el-option label="变更后的（新清单）" value="3"></el-option>
-                        <el-option label="计量清单" value="4"></el-option>
-                        <el-option label="累计计量清单" value="5"></el-option>
-                        <el-option label="支付清单" value="6"></el-option>
-                        <el-option label="累计支付清单" value="7"></el-option>
+                        <el-option label="原清单" value="orginal"></el-option>
+                        <el-option label="变更清单" value="change"></el-option>
+                        <el-option label="变更后的（新清单）" value="update"></el-option>
+                        <el-option label="计量清单" value="meterage"></el-option>
+                        <el-option label="累计计量清单" value="totalmeteragge"></el-option>
+                        <el-option label="支付清单" value="pay"></el-option>
+                        <el-option label="累计支付清单" value="totalpay"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='totalmeteragge' || ruleForm.type=='totalpay' " label="选择表头" prop="type">
+                    <el-select v-model="ruleForm.value" placeholder="请选择清单表头" clearable size="small" style=" width:100%;">
+                        <el-option label="公路清单" value="公路清单"></el-option>
+                        <el-option label="2号公路清单" value="2号公路清单"></el-option>
+                        <el-option label="2号公路清单" value="2号公路清单"></el-option>
+                        <el-option label="路面清单" value="路面清单"></el-option>
+                        <el-option label="2号路面清单" value="2号路面清单"></el-option>
+                        <el-option label="3号清单" value="3号清单"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="表头编号" prop="number">
@@ -31,43 +39,15 @@
                 <el-form-item label="表头名称" prop="name">
                     <el-input v-model="ruleForm.name"></el-input>
                 </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="submitHeader">立即创建</el-button>
+                    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                    <el-button>取消</el-button>
+                </el-form-item>
             </el-form>
         </el-col>
         
     </el-row>
-  
-   <el-row style="text-anlign">
-        <el-col :span="1" :xs="3">
-            <el-button plain size="small" @click="impt" >导入表头</el-button>
-            <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-        </el-col>
-        <el-col :span="4" :offset="1" :xs="7" >
-            <el-form  label-width="90px" size="small" class="demo-ruleForm">
-
-                <el-form-item label="显示范围" prop="region">
-                    <el-select v-model="ruleForm.range"  placeholder="请选择显示范围" style=" width:100%;">
-                        <el-option label="1-1" value="1"></el-option>
-                        <el-option label="1-2" value="2"></el-option>
-                        <el-option label="1-3" value="3"></el-option>
-
-                    </el-select>
-                </el-form-item>
-
-            </el-form>
-        </el-col>
-
-        <el-col :span="1" :offset="1" :xs="3">
-            <el-button plain size="small" >合并/拆开</el-button>
-       </el-col>
-        <el-col :span="1" :offset="1" :xs="3">
-            <el-button plain size="small"  >删除</el-button>
-       </el-col>
-
-       <el-col :span="1" :offset="1" :xs="3">
-            <el-button plain size="small" @click="expor" >导出表头</el-button>
-       </el-col>
-    </el-row>
-
     <el-row>
       <el-col :span="14" :xs="24" :sm="20" :md="18" :lg="16">
           <el-alert title="表格数据导入后系统给予默认宽高与单元格内文字居中显示，与原表格格式有些偏差，请进行手动调整。" type="info"></el-alert>
@@ -75,17 +55,6 @@
       </el-col>
 
     </el-row>
-
-    <!-- <div class="tbbox">
-
-        <table id="table" ref="table">
-          <tr v-for="(val,index) in table.sheet[0]" :key="index" >
-                <td v-for="(item, i) in val" :key="i" :colspan="item.cos" :rowspan="item.row">{{item.value}}</td>
-          </tr>
-        </table>
-
-    </div> -->
-
 
   <!-- 表格编辑弹窗显示====== -->
   <el-dialog
@@ -108,7 +77,7 @@
     :visible.sync="dialogVisible2"
     width="80%"
     :append-to-body="false" 
-    top="10vh"
+    top="15vh"
     :before-close="handleClose">
 
     <!-- 引入表格编辑组件 -->
@@ -119,12 +88,6 @@
         -->
     </span>
   </el-dialog>
-
-
-
-  <div style="width:100px;height:30px;border:1px solid orange;">
-
-  </div>
 
   </div>
 </template>
@@ -149,8 +112,9 @@
           name: '',    //表头名字
           region: '',   //表头标段
           number: '',   //表头编号
-          type: '',   //表头类型
-          range:'', //显示范围
+          type: '',  //表头类型
+          value: null, //可引入的表头清单
+
 
         },
 
@@ -174,16 +138,31 @@
         },
         dialogVisible: false,  //弹窗显示表格编辑
         dialogVisible2: false,  //弹窗显示表头属性设置
+        
       }
     },
      created () { //2
     // this.findLanguageList()
     // this.findList()
-
     },
-
     methods: {
-      
+        submitHeader () {  //校验表头选择表单  
+            this.$refs.ruleForm.validate(valid => {
+              if (valid) {
+                    if(this.ruleForm.type!='change' || this.ruleForm.type!='totalmeteragge' || this.ruleForm.type!='totalpay'){
+                        console.log('这里保存表头类型标段数据')
+                        console.log(this.ruleForm)
+                        this.$message({ message: '输入正确哦', type: 'success' })
+                        //button 按钮调用input文件选择事件
+                        this.$refs.input.click()
+                    }else if(this.ruleForm.value!= null){ //按用户选择清单导入数据 
+
+                    }
+              } else {
+                this.$message({ message: '校验不通过', type: 'error' })
+              }
+            })
+          },
 
         impt(){ //button 按钮调用input文件选择事件
             this.$refs.input.click()
@@ -207,7 +186,7 @@
                   _this.dialogVisible2 = true;  //调用显示表头属性设置确认弹窗
 
                     //inven.Assemble(data)数据添加属性组装函数
-                  _this.table = inven.Assemble(data);   // 存储表格数据
+                  _this.table = inven.Assemble(data,_this.ruleForm.type);   // 存储表格数据
                 //   _this.table = data  // 存储表格数据
                   _this.loading = false
                   _this.$notify({

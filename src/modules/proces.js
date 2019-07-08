@@ -133,7 +133,7 @@ let excelmodel = {
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
-                arr[i]['hd'+j]={key:index[j]+`${i+1}`,tr_num:i+1, col_num:index[j], td:null, td_colspan:1, td_rowspan:1, formula:null}
+                arr[i]['hd'+j]={tr_num:i+1, col_num:index[j], td:null, td_colspan:1, td_rowspan:1}
   
             }
             
@@ -159,15 +159,16 @@ let excelmodel = {
                         data[row]['hd'+cos].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
                         // data[row][cos].value = arr[i].sheets[key].w;    
 
-                        //若单元格有公式的话，对公式进行保存
-                        if (arr[i].sheets[key].f) {
-                            data[row]['hd'+cos].formula = arr[i].sheets[key].f;
-                        }
+                        // //若单元格有公式的话，对公式进行保存
+                        // if (arr[i].sheets[key].f) {
+                        //     data[row]['hd'+cos].formula = arr[i].sheets[key].f;
+                        // }
                     }
                 }
                 // console.log('已注入数据')
                 // console.log(data)
 
+                
 
                 //调用表格去除多余无值的行列
                 this.Delete_R(data);
@@ -214,10 +215,10 @@ let excelmodel = {
 
                 //储存单元格合并,进行合并处理，添加合并数量
                 let hdobj = Object.keys(data[start_r])  //储存第几行对象的所有属性名  返回的是个数组
-                if (data[start_r][hdobj[st_c]].key==(start_c+`${start_r+1}`)) {
+                // if (data[start_r][hdobj[st_c]].key==(start_c+`${start_r+1}`)) {
                     data[start_r][hdobj[st_c]].td_colspan = cos;
                     data[start_r][hdobj[st_c]].td_rowspan = row;
-                }
+                // }
 
                     // 标记需要清除数据的合并的单元格
                 for (let a = 0; a< row; a++) {   //dele是单元格合并后需要标记删除的元素，0为无需删除，1为需要删除。
@@ -262,7 +263,7 @@ let excelmodel = {
         for (let index = data.length-1; index >= 0; index--) {
             for (let r = 0; r < Object.keys(data[index]).length; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
-                if (data[index]['hd'+r].td ==null && data[index]['hd'+r].formula == null && data[index]['hd'+r].td_rowspan == 1 && data[index]['hd'+r].td_colspan == 1) {
+                if (data[index]['hd'+r].td ==null && data[index]['hd'+r].td_rowspan == 1 && data[index]['hd'+r].td_colspan == 1) {
                     if (r==Object.keys(data[index]).length-1) {
                         Rnum++;
                     }
@@ -282,7 +283,7 @@ let excelmodel = {
             let hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index][hdobj[r]].td ==null && data[index][hdobj[r]].formula == null && data[index][hdobj[r]].td_rowspan == 1 && data[index][hdobj[r]].td_colspan == 1) {
+                if (data[index][hdobj[r]].td ==null  && data[index][hdobj[r]].td_rowspan == 1 && data[index][hdobj[r]].td_colspan == 1) {
                     num++;
                 }else{
                     if (index==data.length-1) {
