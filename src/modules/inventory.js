@@ -150,7 +150,16 @@ export default {
         for (let index = 0; index < arr.length; index++) { 
             for (let i = 0; i < hd.length; i++) {  
                 for (let e = 0; e < attr.length; e++) {    
-                    arr[index][hd[i]][attr[e]] =null;   //把合并的属性一起注入数据
+                    if (attr[e] =='col_width') {        //设置单元格默认宽高
+                        arr[index][hd[i]][attr[e]] =80;
+                    }else if(attr[e] =='tr_high'){
+                        arr[index][hd[i]][attr[e]] =25;
+                    }else{
+                        arr[index][hd[i]][attr[e]] =null;   //把合并的属性一起注入数据
+                    }
+                    
+                    
+                    
                 } 
 
             }

@@ -40,7 +40,6 @@
       @select="selectEvent"
       @current-change="currentChangeEvent"
       @cell-click ="aa"
-	  :show-summary ="true"
       :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
       style="width: 100%">
       <elx-editable-column type="selection" width="55"></elx-editable-column>
@@ -61,7 +60,7 @@
       </elx-editable-column>
     </elx-editable>
     <br>
-
+    <div style="width:20px;height:10px;border:1px solid orange;"></div>
     <!-- 导入之后单元格编辑 取消和下一步按钮 -->
     <span slot="footer" class="dialog-footer">
       <el-button @click="back">{{ btn.cancel }}</el-button>
@@ -71,56 +70,67 @@
     <!-- 
         属性弹窗组件
      -->
+<transition name="el-fade-in-linear">
+	<div class="dialogm_att">
     <el-dialog title="属性设置" 
     :visible.sync="shwo_att" 
-    append-to-body 
+	custom-class="dialog_att"
     :close-on-click-modal="false" 
-    width="30%" 
-    custom-class="custom"
+    width="100%" 
+	:modal="false"
     top="5vh">
+	<el-row :gutter="20">
+		<!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
+		<el-col :span="6" :offset="18">
+			<div class="grid-content bg-purple">
+				<el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="800" size="small">
+					<el-form-item label="设置属性" prop="attribute">
+						<el-select v-model="row_att.attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
+							<el-option v-for="(val,i) in attribute" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item label="属性值" prop="attribute_value">
+						<el-input v-model="row_att.attribute_value"></el-input>
+					</el-form-item>
+					<el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
+						<el-input v-model="row_att.attribute_value_id"></el-input>
+					</el-form-item>
+					<el-form-item label="列宽 ( 默认为80px 请根据内容适当调整 )" >
+						<br>
+						<el-slider v-model="row_att.col_width" :max="500" :min="0" :step="5"> </el-slider>
+					</el-form-item>
+					<el-form-item label="行高 ( 默认为25px 请根据内容适当调整 )" >
+						<br>
+						<el-slider v-model="row_att.tr_high" :max="300" :min="0" :step="5"> </el-slider>
+						<div :style="{width:row_att.col_width+'px',height:row_att.tr_high+'px','line-height':row_att.tr_high+'px' }" class="wh">{{row_att.td}}</div>
+					</el-form-item>
+					<el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
+					<el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
+							<el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
+						<el-input v-model="row_att.limit_value"></el-input>
+					</el-form-item>
+					<el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
+						<el-input v-model="row_att.limit_id"></el-input>
+					</el-form-item>
+					<el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
+						<el-input v-model="row_att.update_time"></el-input>
+					</el-form-item>
+				</el-form>
 
-        <el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="300" size="small">
-            <el-form-item label="设置属性" prop="attribute">
-                <el-select v-model="row_att.attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
-                    <el-option v-for="(val,i) in attribute" :key="i" :label="val.zh" :value="val.att_name"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="属性值" prop="attribute_value">
-                <el-input v-model="row_att.attribute_value"></el-input>
-            </el-form-item>
-            <el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
-                <el-input v-model="row_att.attribute_value_id"></el-input>
-            </el-form-item>
-            <el-form-item label="列宽" prop="col_width">
-                <el-input v-model="row_att.col_width"></el-input>
-            </el-form-item>
-            <el-form-item label="行高" prop="tr_high">
-                <el-input v-model="row_att.tr_high"></el-input>
-            </el-form-item>
-            <el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
-            <el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
-                    <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
-                <el-input v-model="row_att.limit_value"></el-input>
-            </el-form-item>
-            <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
-                <el-input v-model="row_att.limit_id"></el-input>
-            </el-form-item>
-            <el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
-                <el-input v-model="row_att.update_time"></el-input>
-            </el-form-item>
-
-        </el-form>
+			</div>
+		</el-col>
+	</el-row>
+        
         <div slot="footer" class="dialog-footer">
           <el-button @click="shwo_att = false">取 消</el-button>
           <el-button type="primary" @click="submitAtt">确 定</el-button>
         </div>       
-    </el-dialog>  
-
-
-
+    </el-dialog> 
+	</div> 
+    </transition>
   </div>
      
 </template>
@@ -160,14 +170,6 @@ import XEUtils from 'xe-utils'
             { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
           ],
           limit_id: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          col_width: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          tr_high: [
             { required: true, message: '请输入内容', trigger: 'blur' },
             { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
           ],
@@ -249,29 +251,23 @@ import XEUtils from 'xe-utils'
               if (this.btn.edit) {
                   this.btn.edit = false;
                   this.btn.next ='完  成';
-				  this.btn.cancel ='上一步';
-				  
-				  //此处检测是否生成合计尾行
-				  console.log('这里开始')
-				  this.tableList.sheet.push(inven.deepcopy(this.tableList.sheet[this.tableList.sheet.length-1])) 
-				  let hd = Object.keys(this.tableList.sheet[0])
-				  for (let i = 0; i < hd.length; i++) {
-					  let tb = this.tableList.sheet[this.tableList.sheet.length-1][hd[i]];
-					  tb.td = '合计'+i;
-					  if (tb.td_rowspan >1 || tb.td_rowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
-						  tb.td_rowspan = 1;
-					  }
-					  tb.td_colspan ==0?tb.td_colspan =1:tb.td_colspan;
-						  
-					  
-					  
-				  }
-				  this.list =this.tableList.sheet;
-				  console.log(this.tableList.sheet)
-
-				//   let rest = this.$refs.elxEditable.getRecords();
-				//   this.list =rest.push(rest[rest.length-1])
-				//   this.list.push(this.list[this.list.length-1]);
+                  this.btn.cancel ='上一步';
+                  
+                  //此处生成合计尾行
+              
+                  let tr = XEUtils.clone(this.tableList.sheet[this.tableList.sheet.length-1], true)
+                  this.tableList.sheet.push(tr) 
+                  let hd = Object.keys(this.tableList.sheet[0])
+                  for (let i = 0; i < hd.length; i++) {
+                    let tb = this.tableList.sheet[this.tableList.sheet.length-1][hd[i]];
+                    tb.td = '合计'+i;
+                    if (tb.td_rowspan >1 || tb.td_rowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
+                      tb.td_rowspan = 1;
+                    }
+                    tb.td_colspan ==0?tb.td_colspan =1:tb.td_colspan;
+                        
+                  }
+                  this.list =this.tableList.sheet;
 
               }else{
                   alert('直接完成')
@@ -281,18 +277,17 @@ import XEUtils from 'xe-utils'
           back(){ //编辑完成点击上一步
             if (this.btn.edit) {
                 alert('直接取消')
-				//此处取消弹窗显示
+				        //此处取消弹窗显示
 
     
               }else{
                   this.btn.edit = true
                   this.btn.next ='下一步';
-				  this.btn.cancel ='取  消';
-				  
-				  //此处删除合计尾行
-				  this.tableList.sheet.pop();
-				  this.list =this.tableList.sheet;
-				  console.log(this.list)
+				          this.btn.cancel ='取  消';
+                  //此处删除合计尾行
+                  this.tableList.sheet.pop();
+                  this.list =this.tableList.sheet;
+                  console.log(this.list)
 
               }
           },
@@ -436,7 +431,9 @@ import XEUtils from 'xe-utils'
 			console.log(rest)
 			console.log(this.list)
             this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
-          },
+		 
+		 },
+		  
 
               
       }
@@ -452,5 +449,55 @@ import XEUtils from 'xe-utils'
   box-shadow: inset 0 0 6px #409EFF;
   
 }
+.transition-box {
+    margin-bottom: 10px;
+    width: 200px;
+    height: 100px;
+    border-radius: 4px;
+    background-color: #409EFF;
+    text-align: center;
+    color: #fff;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    margin-right: 20px;
+  }
+/* .el-row {
+margin-bottom: 20px;
 
+}
+.el-row:last-child {
+margin-bottom: 0;
+}
+.el-col {
+border-radius: 4px;
+}
+.bg-purple-dark {
+background: #99a9bf;
+}
+.bg-purple {
+background: #d3dce6;
+}
+.bg-purple-light {
+background: #e5e9f2;
+}
+.grid-content {
+border-radius: 4px;
+min-height: 36px;
+}
+.row-bg {
+padding: 10px 0;
+background-color: #f9fafc;
+} */
+.wh{
+	width: 100px;
+	border: 1px solid #909399;
+	display: block;
+	border-radius: 2px;
+	text-align: center;
+	overflow: hidden;
+	
+}
+.dialogm_att .el-dialog{
+	background: orange;
+}
 </style>

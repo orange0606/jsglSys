@@ -3,7 +3,8 @@
 import Vue from 'vue'
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
   DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification,
-  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag} from 'element-ui';
+  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider} from 'element-ui';
+import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
 import App from './App'
 import router from './router'
 // Table,TableColumn,
@@ -35,7 +36,9 @@ Vue.use(Alert);
 Vue.use(Loading.directive);
 Vue.use(Popover);
 Vue.use(Tag);
+Vue.use(Slider);
 
+Vue.component(CollapseTransition.name, CollapseTransition)
 
 import {
 
