@@ -1,136 +1,196 @@
 <template>
 
-  <div v-loading="loading">
+  <div>
+      <el-row :gutter="20">
+        
+        <!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
+        <el-col :span="19" :offset="0" :xs="24" :sm="12" :md="16" :lg="17" :xl="20">
+            <el-collapse-transition>
+            <div class="Form_editing" v-if="show_lead">
+                <p>
+                  <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
+                  <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+                  <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
+                  <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button>
+                  <el-button type="success" size="mini" @click="insertEvent(-1)">在最后新增一行</el-button>
+                  <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+                  <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
+                  <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
+                  <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearFilter()">清空筛选条件</el-button> -->
+                  <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearSort()">清空排序条件</el-button> -->
+                  <!-- <el-button type="success" size="mini" @click="$refs.elxEditable.toggleRowSelection(table.sheet[0][2])">选中第2个</el-button> -->
+                  <el-button type="warning" size="mini" @click="submitEvent">保存&提交</el-button>
+                  <!-- <el-button type="primary" size="mini" @click="getInsertEvent">获取新增数据</el-button>
+                  <el-button type="primary" size="mini" @click="getUpdateEvent">获取已修改数据</el-button>
+                  <el-button type="primary" size="mini" @click="getRemoveEvent">获取已删除数据</el-button>
+                  <el-button type="primary" size="mini" @click="getSelectedEvent">获取已选中数据</el-button>
+                  <el-button type="primary" size="mini" @click="getAllEvent">获取所有数据</el-button> -->
+                </p>
+                <br>
+                <br>
+                <elx-editable
+                  v-loading="loading" 
+                  ref="elxEditable"
+                  class="click-table12"
+                  border
+                  height="450"
+                  :highlight-current-row="false"
+                  :data.sync="list"
+                  :span-method="arraySpanMethod1"
+                  @select="selectEvent"
+                  @current-change="currentChangeEvent"
+                  @cell-click ="aa"
+                  :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
+                  style="width: 100%">
+                  <elx-editable-column type="selection" width="55"></elx-editable-column>
 
-    <!-- <p style="color: red;font-size: 12px;">name字段（校验必填，校验最少3个字符）</p>
-    <p style="color: red;font-size: 12px;">多级属性：由于 v-model 必须明确指定双向绑定的路径，所以需要配合自定义渲染使用</p>-->
-    <p style="color: red;font-size: 12px;">上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值</p> 
+                  <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
+                  <template  slot-scope="scope">
+                          <!-- 
+                              **************单元格编辑**************
+                            -->
+                      <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
 
-    <p>
-      <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
-      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+                          <!-- 
+                              **************点击 cell 进行属性选择设置**************
+                          -->
+                      <el-button v-else type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
 
-      <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
-      <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button>
-      <el-button type="success" size="mini" @click="insertEvent(-1)">在最后新增一行</el-button>
-      <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
-      <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
-      <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearFilter()">清空筛选条件</el-button> -->
-      <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearSort()">清空排序条件</el-button> -->
-      <!-- <el-button type="success" size="mini" @click="$refs.elxEditable.toggleRowSelection(table.sheet[0][2])">选中第2个</el-button> -->
-      <el-button type="warning" size="mini" @click="submitEvent">保存&提交</el-button>
-      <el-button type="primary" size="mini" @click="getInsertEvent">获取新增数据</el-button>
-      <el-button type="primary" size="mini" @click="getUpdateEvent">获取已修改数据</el-button>
-      <el-button type="primary" size="mini" @click="getRemoveEvent">获取已删除数据</el-button>
-      <el-button type="primary" size="mini" @click="getSelectedEvent">获取已选中数据</el-button>
-      <el-button type="primary" size="mini" @click="getAllEvent">获取所有数据</el-button>
-    </p>
+                  </template>
+                  </elx-editable-column>
+                </elx-editable>
+            </div>
+            </el-collapse-transition>
+
+                
+                <!-- ********点击 attribute之后的选择清单类型，然后显示引入的只读表格****** -->
+             <transition name="el-fade-in-linear">
+            <div class="read-only_form" v-if="show_lead">
+               
+                    <p v-text="lead.name">123131312</p>
+                    <p>123131312</p>
+
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+
+                   <elx-editable
+                      v-loading="lead.loading" 
+                      ref="elxEditable1"
+                      class="click-table12"
+                      border
+                      height="450"
+                      :highlight-current-row="true"
+                      :data.sync="lead.list"
+                      :span-method="arraySpanMethod2"
+                      @select="selectEvent"
+                      @current-change="currentChangeEvent"
+                      @cell-click ="aa"
+                      :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
+                      style="width: 100%">
+
+                          <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
+                          <template  slot-scope="scope">
+                                
+
+                                  <!-- 
+                                      **************点击 cell 进行属性选择设置**************
+                                  -->
+                              <el-button type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
+
+                          </template>
+                          </elx-editable-column>
+                    </elx-editable>
+                
+            </div>
+            </transition>
+      </el-col>
+      <el-col :span="5" :offset="0" :xs="24" :sm="12" :md="8" :lg="7" :xl="4">
+            <el-collapse-transition>
+            <div class="tips" v-show="!shwo_att">
+                <br><br>
+                <template>
+                  <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                      <span>注意事项</span>
+                      <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+                    </div>
+                    <div class="text item" style="color: red;font-size: 12px;">
+                      第一步
+                    </div>
+                    <div class="text item" style="font-size: 8px;">
+                      上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值、点击单元格进行编辑修改
+                    </div> 
+                    <div class="text item" style="color: red;font-size: 12px;">
+                      第二步
+                    </div>                    
+                    <div class="text item" style="font-size: 12px;">
+                      点击每个单元格蓝色文字进行相关属性属性设置哦、表格样式与实际导出表格的可能不同噢，请根据实际情况进行调整
+                    </div>                    
+                    <div class="text item" style="font-size: 12px;">
+                      可引入相关的清单进行关联
+                    </div>
+                  </el-card>
+                </template>
+            </div>
+            </el-collapse-transition>
+
+            <!-- **************单元格属性*********** -->
+            <el-collapse-transition>
+            <div class="cell_att" v-show="shwo_att">
+                <br><br><br>
+                
+                <el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="800" size="small">
+                    <el-form-item label="设置属性" prop="attribute">
+                      <el-select v-model="row_att.attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
+                        <el-option v-for="(val,i) in attribute" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="属性值" prop="attribute_value">
+                      <el-input v-model="row_att.attribute_value"></el-input>
+                    </el-form-item>
+                    <!-- <el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
+                      <el-input v-model="row_att.attribute_value_id"></el-input>
+                    </el-form-item> -->
+                    <el-form-item label="列宽 ( 默认为80px 请根据内容适当调整 )" >
+                      <br>
+                      <el-slider v-model="row_att.col_width" :max="500" :min="0" :step="5"> </el-slider>
+                    </el-form-item>
+                    <el-form-item label="行高 ( 默认为25px 请根据内容适当调整 )" >
+                      <br>
+                      <el-slider v-model="row_att.tr_high" :max="300" :min="0" :step="5"> </el-slider>
+                      <div :style="{width:row_att.col_width+'px',height:row_att.tr_high+'px','line-height':row_att.tr_high+'px' }" class="wh">{{row_att.td}}</div>
+                    </el-form-item>
+                    <el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
+                    <el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
+                        <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
+                      <el-input v-model="row_att.limit_value"></el-input>
+                    </el-form-item>
+                    <!-- <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
+                      <el-input v-model="row_att.limit_id"></el-input>
+                    </el-form-item> -->
+                    <!-- <el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
+                      <el-input v-model="row_att.update_time"></el-input>
+                    </el-form-item> -->
+                      <el-button @click="shwo_att = false">取 消</el-button>
+                      <el-button type="primary" @click="submitAtt">确 定</el-button>
+                </el-form>
+            </div>
+            </el-collapse-transition>
+
+      </el-col>
+    </el-row>
     <br>
-
-
-    <elx-editable
-      ref="elxEditable"
-      class="click-table12"
-      border
-      height="450"
-      :highlight-current-row="false"
-      :data.sync="list"
-      :span-method="arraySpanMethod"
-      @select="selectEvent"
-      @current-change="currentChangeEvent"
-      @cell-click ="aa"
-      :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
-      style="width: 100%">
-      <elx-editable-column type="selection" width="55"></elx-editable-column>
-
-      <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
-       <template  slot-scope="scope">
-               <!-- 
-                  **************单元格编辑**************
-                -->
-          <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
-
-               <!-- 
-                  **************弹窗属性选择设置**************
-              -->
-          <el-button v-else type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
-
-      </template>
-      </elx-editable-column>
-    </elx-editable>
-    <br>
-    <div style="width:20px;height:10px;border:1px solid orange;"></div>
-    <!-- 导入之后单元格编辑 取消和下一步按钮 -->
+    <!-- *************导入之后单元格编辑 取消和下一步按钮************* -->
     <span slot="footer" class="dialog-footer">
       <el-button @click="back">{{ btn.cancel }}</el-button>
       <el-button type="primary" @click="next">{{ btn.next }}</el-button>
     </span>
 
-    <!-- 
-        属性弹窗组件
-     -->
-<transition name="el-fade-in-linear">
-	<div class="dialogm_att">
-    <el-dialog title="属性设置" 
-    :visible.sync="shwo_att" 
-	custom-class="dialog_att"
-    :close-on-click-modal="false" 
-    width="100%" 
-	:modal="false"
-    top="5vh">
-	<el-row :gutter="20">
-		<!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
-		<el-col :span="6" :offset="18">
-			<div class="grid-content bg-purple">
-				<el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="800" size="small">
-					<el-form-item label="设置属性" prop="attribute">
-						<el-select v-model="row_att.attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
-							<el-option v-for="(val,i) in attribute" :key="i" :label="val.zh" :value="val.att_name"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item label="属性值" prop="attribute_value">
-						<el-input v-model="row_att.attribute_value"></el-input>
-					</el-form-item>
-					<el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
-						<el-input v-model="row_att.attribute_value_id"></el-input>
-					</el-form-item>
-					<el-form-item label="列宽 ( 默认为80px 请根据内容适当调整 )" >
-						<br>
-						<el-slider v-model="row_att.col_width" :max="500" :min="0" :step="5"> </el-slider>
-					</el-form-item>
-					<el-form-item label="行高 ( 默认为25px 请根据内容适当调整 )" >
-						<br>
-						<el-slider v-model="row_att.tr_high" :max="300" :min="0" :step="5"> </el-slider>
-						<div :style="{width:row_att.col_width+'px',height:row_att.tr_high+'px','line-height':row_att.tr_high+'px' }" class="wh">{{row_att.td}}</div>
-					</el-form-item>
-					<el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
-					<el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
-							<el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
-						<el-input v-model="row_att.limit_value"></el-input>
-					</el-form-item>
-					<el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
-						<el-input v-model="row_att.limit_id"></el-input>
-					</el-form-item>
-					<el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
-						<el-input v-model="row_att.update_time"></el-input>
-					</el-form-item>
-				</el-form>
-
-			</div>
-		</el-col>
-	</el-row>
-        
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="shwo_att = false">取 消</el-button>
-          <el-button type="primary" @click="submitAtt">确 定</el-button>
-        </div>       
-    </el-dialog> 
-	</div> 
-    </transition>
   </div>
      
 </template>
@@ -155,7 +215,16 @@ import XEUtils from 'xe-utils'
         attribute:{}, //用来存储特殊属性的所有类
         limits:[],  //用来存储限制单元格大小的所有类
         row_att:{},  //存储属性弹窗选择所需要的每个单元格的数据
-        shwo_att:false, //属性弹窗默认不显示     
+        shwo_att:false, //属性弹窗默认不显示 
+        show_lead:true, //显示引入的清单类型表格
+        lead:{ //存储引入清单数据
+            list:[],   //引入的清单表格数据
+            select:[],  //可选择的清单列表名字
+            loding:true, //加载中
+            hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
+            name:'高速公路1-1清单', //引入的清单名字
+        },
+         //存储引入进来的表格数据    
         rules: {  //属性 反馈错误
           attribute_value: [
             { required: true, message: '请输入内容', trigger: 'blur' },
@@ -240,8 +309,8 @@ import XEUtils from 'xe-utils'
             return : 无
           */
           att(row){
-			//把数据传入属性弹窗组件
-			console.log(this.list)
+            //把数据传入属性弹窗组件
+            console.log(this.list)
             this.row_att = row;
             console.log(row)
             //显示设置属性弹窗
@@ -283,7 +352,9 @@ import XEUtils from 'xe-utils'
               }else{
                   this.btn.edit = true
                   this.btn.next ='下一步';
-				          this.btn.cancel ='取  消';
+                  this.btn.cancel ='取  消';
+                  this.shwo_att = false;  //隐藏属性设置栏
+
                   //此处删除合计尾行
                   this.tableList.sheet.pop();
                   this.list =this.tableList.sheet;
@@ -346,21 +417,25 @@ import XEUtils from 'xe-utils'
               })
             }
           },
-          arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-              // if (columnIndex <= this.hd.length) {   // 不带选择框的情况
-              //     return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
-              // }
-              // return [1, 1]
+          arraySpanMethod1({ row, column, rowIndex, columnIndex }) {   //单元格合并处理//带选择框的情况
 
-              if (columnIndex >0) {  //带选择框的情况
-                  if(row[this.hd[columnIndex-1]].dele !=1){
+              if (columnIndex >0) {  
+                  // if(row[this.hd[columnIndex-1]].dele !=1){
                     if (columnIndex <= this.hd.length) {
                         return [row[this.hd[columnIndex-1]].td_rowspan, row[this.hd[columnIndex-1]].td_colspan]
                     }
-                  }
+                  // }
               }
                   return [1, 1]
-          },       
+          }, 
+          arraySpanMethod2({ row, column, rowIndex, columnIndex }) {   //单元格合并处理2不带选择框的情况
+
+              if (columnIndex <= this.hd.length) {   
+                  return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
+              }
+              return [1, 1]
+
+          },             
           exportCsvEvent () { //导出表格
             this.$refs.elxEditable.exportCsv()
           },
@@ -497,7 +572,27 @@ background-color: #f9fafc;
 	overflow: hidden;
 	
 }
-.dialogm_att .el-dialog{
-	background: orange;
+.dialogm_att .el-dialog__wrapper{
+	background: none;
+  /* right: 0; */
+}
+.dialogm_att .dialog_att {
+  right: 0;
+}
+
+
+.text {
+  font-size: 14px;
+}
+
+.item {
+  padding: 18px 0;
+}
+
+.box-card {
+  width: 100%;
+  text-align: left;
+  margin-top: 40px;
+  /* top: 15vh; */
 }
 </style>

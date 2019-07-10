@@ -75,9 +75,9 @@
   <el-dialog
     title="请进行设置表头每个单元格属性"
     :visible.sync="dialogVisible2"
-    width="80%"
+    width="90%"
     :append-to-body="false" 
-    top="15vh"
+    top="8vh"
     :before-close="handleClose">
 
     <!-- 引入表格编辑组件 -->
@@ -233,5 +233,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.el-dialog {
+  background: orange;
+}
 </style>
