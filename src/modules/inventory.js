@@ -21,7 +21,8 @@ const data = {
         'col_width', //列宽（注意上行与下行的列宽要相等）
         'tr_high', // 行高
         'attribute', //属性
-        'attribute_value' //属性值
+        'attribute_value', //属性值
+        'id'
     ],
     all_attribute: [   //所有清单表头共有的属性
         {att_name: 'sys_order',zh:'系统序号列“sys_order”（用于系统的排序，导入导出时无需匹配）',value:null,if:false},

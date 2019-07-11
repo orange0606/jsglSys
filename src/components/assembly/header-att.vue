@@ -39,7 +39,8 @@
                   :span-method="arraySpanMethod1"
                   @select="selectEvent"
                   @current-change="currentChangeEvent"
-                  @cell-click ="aa"
+                  @cell-click ="cell_click"
+                  :cell-style ="cell_select"
                   :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
                   style="width: 100%">
                   <elx-editable-column type="selection" width="55"></elx-editable-column>
@@ -54,7 +55,7 @@
                           <!-- 
                               **************点击 cell 进行属性选择设置**************
                           -->
-                      <el-button v-else type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
+                      <el-button style="width:100%;height:100%;" v-else type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
 
                   </template>
                   </elx-editable-column>
@@ -66,40 +67,36 @@
                 <!-- ********点击 attribute之后的选择清单类型，然后显示引入的只读表格****** -->
              <transition name="el-fade-in-linear">
             <div class="read-only_form" v-if="show_lead">
-               
-                    <p v-text="lead.name">123131312</p>
-                    <p>123131312</p>
-
+                  <template>
+                      <el-alert
+                        title="单元格属性设置"
+                        type="success" 
+                        :center="true"
+                        description="请点击单元格">
+                      </el-alert>
+                  </template>
+                    <h5 v-text="lead.name"></h5>
                     <br>
-                    <br>
-                    <br>
-                    <br>
-
                    <elx-editable
                       v-loading="lead.loading" 
                       ref="elxEditable1"
                       class="click-table12"
                       border
-                      height="450"
-                      :highlight-current-row="true"
+                      height="450" 
                       :data.sync="lead.list"
                       :span-method="arraySpanMethod2"
-                      @select="selectEvent"
-                      @current-change="currentChangeEvent"
-                      @cell-click ="aa"
-                      :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
+                      @cell-click ="cell_click"
+                      :cell-style ="cell_select"
+                      :edit-config="{ render: 'scroll'}"
                       style="width: 100%">
-
-                          <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
-                          <template  slot-scope="scope">
-                                
-
+                          <elx-editable-column  :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in lead.hd" :key="i"  >
+                          <!-- <template  slot-scope="scope"> -->
                                   <!-- 
                                       **************点击 cell 进行属性选择设置**************
                                   -->
-                              <el-button type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
+                              <!-- <el-button type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button> -->
 
-                          </template>
+                          <!-- </template> -->
                           </elx-editable-column>
                     </elx-editable>
                 
@@ -223,6 +220,9 @@ import XEUtils from 'xe-utils'
             loding:true, //加载中
             hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
             name:'高速公路1-1清单', //引入的清单名字
+            att_id:null,
+            att_key:null,
+
         },
          //存储引入进来的表格数据    
         rules: {  //属性 反馈错误
@@ -266,6 +266,9 @@ import XEUtils from 'xe-utils'
             this.attribute = this.tableList.attribute;
             this.limits = this.tableList.limit;
             this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列（属性）名
+
+            this.lead.list= this.list;
+            this.lead.hd = this.hd;
         }
     },
     watch: {
@@ -278,6 +281,9 @@ import XEUtils from 'xe-utils'
                 this.limits = newVal.limit;
                 this.hd = Object.keys(newVal.sheet[0]);
                 this.loading = false;
+
+                this.lead.list= this.list;
+                this.lead.hd = this.hd;
             }
 
         }
@@ -309,7 +315,7 @@ import XEUtils from 'xe-utils'
             return : 无
           */
           att(row){
-            //把数据传入属性弹窗组件
+            //把数据传入属性组件
             console.log(this.list)
             this.row_att = row;
             console.log(row)
@@ -330,6 +336,7 @@ import XEUtils from 'xe-utils'
                   for (let i = 0; i < hd.length; i++) {
                     let tb = this.tableList.sheet[this.tableList.sheet.length-1][hd[i]];
                     tb.td = '合计'+i;
+                    tb.tr_num +=1;
                     if (tb.td_rowspan >1 || tb.td_rowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
                       tb.td_rowspan = 1;
                     }
@@ -348,7 +355,6 @@ import XEUtils from 'xe-utils'
                 alert('直接取消')
 				        //此处取消弹窗显示
 
-    
               }else{
                   this.btn.edit = true
                   this.btn.next ='下一步';
@@ -362,6 +368,7 @@ import XEUtils from 'xe-utils'
 
               }
           },
+          
           getSelectLabel (value, valueProp, labelProp, list) {
             let item = XEUtils.find(list, item => item[valueProp] === value)
             return item ? item[labelProp] : null
@@ -428,14 +435,7 @@ import XEUtils from 'xe-utils'
               }
                   return [1, 1]
           }, 
-          arraySpanMethod2({ row, column, rowIndex, columnIndex }) {   //单元格合并处理2不带选择框的情况
-
-              if (columnIndex <= this.hd.length) {   
-                  return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
-              }
-              return [1, 1]
-
-          },             
+           
           exportCsvEvent () { //导出表格
             this.$refs.elxEditable.exportCsv()
           },
@@ -443,13 +443,11 @@ import XEUtils from 'xe-utils'
           insertEvent (index) { //新增一行
 
             this.$refs.elxEditable.insertAt({
-              
               hd0: {
                 value:789,
                 row:1,
                 cos:1
               },
-
             }, index)
 
             // .then(({ row }) => {
@@ -501,18 +499,50 @@ import XEUtils from 'xe-utils'
             this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
           },
           getAllEvent () {   //获取所有数据
-			let rest = this.$refs.elxEditable.getRecords()
-			console.log('点击获取所有数据')
-			console.log(rest)
-			console.log(this.list)
+            let rest = this.$refs.elxEditable.getRecords()
+            console.log('点击获取所有数据')
+            console.log(rest)
+            console.log(this.list)
             this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
-		 
-		 },
-		  
+          },
 
+          //****************引入清单的表格函数**********
+          arraySpanMethod2({ row, column, rowIndex, columnIndex }) {   //单元格合并处理2不带选择框的情况
+
+              if (columnIndex <= this.hd.length) {   
+                  return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
+              }
+              return [1, 1]
+
+          },  
+          cell_click(row, column, cell, event){ //单元格点击事件
+              // console.log('row, column, cell, event')
+              // console.log(row, column, cell, event)
+              let colum =column.property;
+              colum = colum.substr(0,colum.indexOf('.'));
+              this.lead.cell_row = row[colum].tr_num;
+              this.lead.cell_col = column.id;
+
+              //点击单元格获取id 和key（位置）
+              this.lead.att_id = row[colum].id;
+              this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
+              console.log('this.lead.att_id,this.lead.att_key')
+              console.log(this.lead.att_id,this.lead.att_key)
+              //手动刷新表格
+              this.$refs.elxEditable1.refresh()
+          },
+          cell_select ({row, column, rowIndex, columnIndex}){
+              if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
+                  return {'border':'1px solid #409EFF','text-align': 'center'}
+                  // return 'cell-select'
+              }else{
+                // return 'center'
+                return 'text-align: center'
+              }  
+          },
               
-      }
     }
+  }
 
 </script>
 
@@ -594,5 +624,15 @@ background-color: #f9fafc;
   text-align: left;
   margin-top: 40px;
   /* top: 15vh; */
+}
+
+
+
+.cell-select{
+  border: 1px solid  orange;
+  background: #409EFF;
+}
+.center {
+  text-align: center;
 }
 </style>

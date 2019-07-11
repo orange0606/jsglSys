@@ -233,7 +233,5 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.el-dialog {
-  background: orange;
-}
+
 </style>
