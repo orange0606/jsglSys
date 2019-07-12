@@ -22,6 +22,7 @@ const data = {
         'tr_high', // 行高
         'attribute', //属性
         'attribute_value', //属性值
+        'text_align', //文本对齐对齐方式
         'id'
     ],
     all_attribute: [   //所有清单表头共有的属性
@@ -154,13 +155,14 @@ export default {
                     if (attr[e] =='col_width') {        //设置单元格默认宽高
                         arr[index][hd[i]][attr[e]] =80;
                     }else if(attr[e] =='tr_high'){
-                        arr[index][hd[i]][attr[e]] =25;
+                        arr[index][hd[i]][attr[e]] =30;        
+                    }else if(attr[e] == 'text_align'){  //默认居中文字
+                        arr[index][hd[i]][attr[e]] ='center';
+                    }else if(attr[e] == 'id'){  //默认id
+                        arr[index][hd[i]][attr[e]] = i;
                     }else{
                         arr[index][hd[i]][attr[e]] =null;   //把合并的属性一起注入数据
-                    }
-                    
-                    
-                    
+                    }  
                 } 
 
             }

@@ -4,9 +4,9 @@
       <el-row :gutter="20">
         
         <!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
-        <el-col :span="19" :offset="0" :xs="24" :sm="12" :md="16" :lg="17" :xl="20">
+        <el-col :span="16" :offset="1" :xs="23" :sm="19" :md="13" :lg="14" :xl="16">
             <el-collapse-transition>
-            <div class="Form_editing" v-if="show_lead">
+            <div class="form_editing" v-if="show_lead">
                 <p>
                   <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
                   <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
@@ -14,7 +14,7 @@
                   <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button>
                   <el-button type="success" size="mini" @click="insertEvent(-1)">在最后新增一行</el-button>
                   <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-                  <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
+                  <el-button type="info" size="mini" @click="$refs.elxEditable.revert(4)">放弃更改</el-button>
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearFilter()">清空筛选条件</el-button> -->
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearSort()">清空排序条件</el-button> -->
@@ -33,29 +33,25 @@
                   ref="elxEditable"
                   class="click-table12"
                   border
-                  height="450"
+                  height="400"
                   :highlight-current-row="false"
                   :data.sync="list"
                   :span-method="arraySpanMethod1"
                   @select="selectEvent"
                   @current-change="currentChangeEvent"
-                  @cell-click ="cell_click"
-                  :cell-style ="cell_select"
+                  @cell-click ="cell_click1"
+                  :cell-style ="cell_select1"
                   :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
-                  style="width: 100%">
+                  >
                   <elx-editable-column type="selection" width="55"></elx-editable-column>
 
-                  <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
+                  <elx-editable-column :prop="val+'.td'" :width="`${col_width}`" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
                   <template  slot-scope="scope">
                           <!-- 
                               **************单元格编辑**************
                             -->
                       <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
 
-                          <!-- 
-                              **************点击 cell 进行属性选择设置**************
-                          -->
-                      <el-button style="width:100%;height:100%;" v-else type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button>
 
                   </template>
                   </elx-editable-column>
@@ -76,34 +72,28 @@
                       </el-alert>
                   </template>
                     <h5 v-text="lead.name"></h5>
-                    <br>
+ 
                    <elx-editable
                       v-loading="lead.loading" 
                       ref="elxEditable1"
                       class="click-table12"
                       border
-                      height="450" 
+                      height="400" 
                       :data.sync="lead.list"
                       :span-method="arraySpanMethod2"
-                      @cell-click ="cell_click"
-                      :cell-style ="cell_select"
+                      @cell-click ="cell_click2"
+                      :cell-style ="cell_select2"
                       :edit-config="{ render: 'scroll'}"
-                      style="width: 100%">
-                          <elx-editable-column  :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in lead.hd" :key="i"  >
-                          <!-- <template  slot-scope="scope"> -->
-                                  <!-- 
-                                      **************点击 cell 进行属性选择设置**************
-                                  -->
-                              <!-- <el-button type="text" @click="att(scope.row[val])">{{ scope.row[val].td }}</el-button> -->
+                      >
+                          <elx-editable-column  :prop="val+'.td'" :width="`${col_width}`" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in lead.hd" :key="i"  >
 
-                          <!-- </template> -->
                           </elx-editable-column>
                     </elx-editable>
                 
             </div>
             </transition>
       </el-col>
-      <el-col :span="5" :offset="0" :xs="24" :sm="12" :md="8" :lg="7" :xl="4">
+      <el-col :span="5" :offset="1" :xs="23" :sm="12" :md="8" :lg="7" :xl="5">
             <el-collapse-transition>
             <div class="tips" v-show="!shwo_att">
                 <br><br>
@@ -152,20 +142,29 @@
                     </el-form-item> -->
                     <el-form-item label="列宽 ( 默认为80px 请根据内容适当调整 )" >
                       <br>
-                      <el-slider v-model="row_att.col_width" :max="500" :min="0" :step="5"> </el-slider>
+                      <!-- <el-slider v-model="row_att.col_width" :max="500" :min="0" :step="5"> </el-slider> -->
+                      <el-slider v-model="col_width" :max="500" :min="0" :step="5"> </el-slider>
+
                     </el-form-item>
                     <el-form-item label="行高 ( 默认为25px 请根据内容适当调整 )" >
                       <br>
                       <el-slider v-model="row_att.tr_high" :max="300" :min="0" :step="5"> </el-slider>
-                      <div :style="{width:row_att.col_width+'px',height:row_att.tr_high+'px','line-height':row_att.tr_high+'px' }" class="wh">{{row_att.td}}</div>
+                      <div :style="{width:row_att.col_width+'px',height:row_att.tr_high+'px','text-align':row_att.text_align,'line-height':row_att.tr_high+'px' }" class="wh">{{row_att.td}}</div>
+                    </el-form-item>
+                     <el-form-item label="单元格文字对齐" >
+                        <el-select v-model="row_att.text_align" placeholder="请选择对齐方式" clearable size="small" style=" width:100%;">
+                            <el-option  label="居中" value="center"></el-option>
+                            <el-option  label="靠左" value="left"></el-option>
+                            <el-option  label="靠右" value="right"></el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
-                    <el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
-                        <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
-                      </el-select>
+                        <el-select v-model="row_att.limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
+                            <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
-                      <el-input v-model="row_att.limit_value"></el-input>
+                        <el-input v-model="row_att.limit_value"></el-input>
                     </el-form-item>
                     <!-- <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
                       <el-input v-model="row_att.limit_id"></el-input>
@@ -214,6 +213,7 @@ import XEUtils from 'xe-utils'
         row_att:{},  //存储属性弹窗选择所需要的每个单元格的数据
         shwo_att:false, //属性弹窗默认不显示 
         show_lead:true, //显示引入的清单类型表格
+        col_width:130, //调整单元格的列宽
         lead:{ //存储引入清单数据
             list:[],   //引入的清单表格数据
             select:[],  //可选择的清单列表名字
@@ -250,7 +250,7 @@ import XEUtils from 'xe-utils'
             { required: true, message: '请选择属性', trigger: 'change' }
           ],
           limit: [
-            { required: true, message: '请选择限制类型', trigger: 'change' }
+            { required: true, message: '请选择类型', trigger: 'change' }
           ]
         },
       
@@ -270,6 +270,25 @@ import XEUtils from 'xe-utils'
             this.lead.list= this.list;
             this.lead.hd = this.hd;
         }
+    },
+    mounted() {
+      this.screenWidth = document.body.clientWidth;
+      // this.screenHeight = document.body.clientHeight;
+      console.log(this.screenWidth,this.screenHeight)
+      if (this.screenWidth > 1920) {
+          this.hd.length >=9 ? this.col_width =130 : this.col_width = 140
+        
+      }else{
+          this.hd.length >=9 ? this.col_width =115 : this.col_width = 130
+      }
+
+      // window.onresize = () => {
+      //   return (() => {
+      //     this.screenWidth = document.body.clientWidth;
+      //     this.screenHeight = document.body.clientHeight;
+      //     console.log(this.screenWidth,this.screenHeight)
+      //   })();
+      // };
     },
     watch: {
         tableList: function(newVal,oldVal){
@@ -361,6 +380,13 @@ import XEUtils from 'xe-utils'
                   this.btn.cancel ='取  消';
                   this.shwo_att = false;  //隐藏属性设置栏
 
+                  //此处清除单元格点击残留样式
+                  this.lead.cell_row = null;
+                  this.lead.cell_col = null;
+                  this.lead.cell_hd = null;
+                  //点击单元格获取id 和key（位置）
+                  this.lead.att_id = null;
+                  this.lead.att_key = null;
                   //此处删除合计尾行
                   this.tableList.sheet.pop();
                   this.list =this.tableList.sheet;
@@ -435,7 +461,37 @@ import XEUtils from 'xe-utils'
               }
                   return [1, 1]
           }, 
-           
+           cell_click1(row, column, cell, event){ //单元格点击事件
+
+              if (column.property && !this.btn.edit) {  //做容错处理，防止点击到选择框触发此事件
+                    let colum =column.property;
+                    colum = colum.substr(0,colum.indexOf('.'));
+                    //调用点击属性设置显示事件
+                    this.att(row[colum])
+
+                    this.lead.cell_row = row[colum].tr_num;
+                    this.lead.cell_col = column.id;
+                    this.lead.cell_hd = colum;
+                    //点击单元格获取id 和key（位置）
+                    this.lead.att_id = row[colum].id;
+                    this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
+                    // console.log('this.lead.att_id,this.lead.att_key')
+                    console.log(this.lead.att_id,this.lead.att_key)
+                    //手动刷新表格
+                    this.$refs.elxEditable.refresh()
+              }
+          },
+          cell_select1 ({row, column, rowIndex, columnIndex}){
+                  console.log('这个也进来呃')
+              if (columnIndex >0) {
+                  row = row[this.lead.hd[columnIndex-1]]
+                  if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
+                      return {'border':'1px solid #409EFF','text-align': row['text_align'],'height':row.tr_high+'px',background:'pink'}
+                  }else{
+                      return {'text-align': row['text_align'],'width':row['col_width'],'height':row['tr_high']}
+                  }
+              }  
+          },
           exportCsvEvent () { //导出表格
             this.$refs.elxEditable.exportCsv()
           },
@@ -515,14 +571,14 @@ import XEUtils from 'xe-utils'
               return [1, 1]
 
           },  
-          cell_click(row, column, cell, event){ //单元格点击事件
+          cell_click2(row, column, cell, event){ //单元格点击事件
               // console.log('row, column, cell, event')
               // console.log(row, column, cell, event)
               let colum =column.property;
               colum = colum.substr(0,colum.indexOf('.'));
               this.lead.cell_row = row[colum].tr_num;
               this.lead.cell_col = column.id;
-
+              this.lead.cell_hd = colum;
               //点击单元格获取id 和key（位置）
               this.lead.att_id = row[colum].id;
               this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
@@ -531,13 +587,14 @@ import XEUtils from 'xe-utils'
               //手动刷新表格
               this.$refs.elxEditable1.refresh()
           },
-          cell_select ({row, column, rowIndex, columnIndex}){
+          cell_select2 ({row, column, rowIndex, columnIndex}){
+              row = row[this.lead.hd[columnIndex]]
               if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-                  return {'border':'1px solid #409EFF','text-align': 'center'}
+                  return {'border':'1px solid #409EFF','text-align': row['text_align'],'height':row.tr_high+'px',background:'pink'}
                   // return 'cell-select'
               }else{
                 // return 'center'
-                return 'text-align: center'
+                return {'text-align': row['text_align'],'height':row.tr_high+'px'}
               }  
           },
               
@@ -566,33 +623,6 @@ import XEUtils from 'xe-utils'
     box-sizing: border-box;
     margin-right: 20px;
   }
-/* .el-row {
-margin-bottom: 20px;
-
-}
-.el-row:last-child {
-margin-bottom: 0;
-}
-.el-col {
-border-radius: 4px;
-}
-.bg-purple-dark {
-background: #99a9bf;
-}
-.bg-purple {
-background: #d3dce6;
-}
-.bg-purple-light {
-background: #e5e9f2;
-}
-.grid-content {
-border-radius: 4px;
-min-height: 36px;
-}
-.row-bg {
-padding: 10px 0;
-background-color: #f9fafc;
-} */
 .wh{
 	width: 100px;
 	border: 1px solid #909399;
@@ -613,6 +643,7 @@ background-color: #f9fafc;
 
 .text {
   font-size: 14px;
+  
 }
 
 .item {
@@ -628,11 +659,8 @@ background-color: #f9fafc;
 
 
 
-.cell-select{
-  border: 1px solid  orange;
-  background: #409EFF;
-}
-.center {
-  text-align: center;
+.form_editing, .read-only_form {
+    margin: 0 auto;
+    border: 1px solid pink;
 }
 </style>
