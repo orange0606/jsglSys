@@ -77,11 +77,11 @@
     :visible.sync="dialogVisible2"
     width="90%"
     :append-to-body="false" 
-    top="8vh"
+    top="11vh"
     :before-close="handleClose">
 
     <!-- 引入表格编辑组件 -->
-    <headeratt :tableList="table"></headeratt>
+    <headeratt :tableList.sync="table"></headeratt>
     <span slot="footer" class="dialog-footer">
      <!--    <el-button @click="dialogVisible2 = false">取 消</el-button>
          <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>

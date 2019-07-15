@@ -26,12 +26,12 @@ const data = {
         'id'
     ],
     all_attribute: [   //所有清单表头共有的属性
-        {att_name: 'sys_order',zh:'系统序号列“sys_order”（用于系统的排序，导入导出时无需匹配）',value:null,if:false},
-        {att_name: 'sys_num',zh:'系统编号列“sys_num”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false},
-        {att_name: 'formula',zh:'“formula”公式',value:'=H3-G2',if:true,if:false},
-        {att_name: 'sum_text',zh:'系统默认的合计行-普通文本',value:'合计',if:true},
-        {att_name: 'sum_null',zh:'系统默认的合计行-空文本',value:null,if:false},
-        {att_name: 'sum_formula',zh:'系统默认的合计行-合计公式',value:'=SUM()',if:true}
+        {att_name: 'sys_order',zh:'系统序号列“sys_order”（用于系统的排序，导入导出时无需匹配）',value:null,if:false,no:1},
+        {att_name: 'sys_num',zh:'系统编号列“sys_num”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false,no:1},
+        {att_name: 'formula',zh:'“formula”公式',value:'=H3-G2',if:true,no:1},
+        {att_name: 'sum_text',zh:'系统默认的合计行-普通文本',value:'合计',if:true,no:1},
+        {att_name: 'sum_null',zh:'系统默认的合计行-空文本',value:null,if:false,no:1},
+        {att_name: 'sum_formula',zh:'系统默认的合计行-合计公式',value:'=SUM()',if:true,no:1}
     ],
     all_limit:[ //所有清单表头行限制限制属性的值
         {att_name: 'max',zh:'max最大值', value:null,if:false},
@@ -54,7 +54,7 @@ const data = {
             'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
         ],
         attribute:[ //属性及属性值
-            {att_name: 'orginal',zh:'“orginal”原清单',value:'CA14',if:true,if:false},
+            {att_name: 'orginal',zh:'“orginal”原清单',value:'CA14',if:true},
             {att_name: 'orginalnull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
             {att_name: 'change',zh:'“change”变更清单',value:null,if:false},
         ]
@@ -155,7 +155,7 @@ export default {
                     if (attr[e] =='col_width') {        //设置单元格默认宽高
                         arr[index][hd[i]][attr[e]] =80;
                     }else if(attr[e] =='tr_high'){
-                        arr[index][hd[i]][attr[e]] =30;        
+                        arr[index][hd[i]][attr[e]] =35;        
                     }else if(attr[e] == 'text_align'){  //默认居中文字
                         arr[index][hd[i]][attr[e]] ='center';
                     }else if(attr[e] == 'id'){  //默认id
@@ -167,7 +167,6 @@ export default {
 
             }
         }
-        
         Arr.attribute = data[type].attribute.concat(data.all_attribute)
         // Arr.attribute = Object.assign(data[type].attribute,data.all_attribute);  //合并共有特殊属性以及私有特殊属性对象一起注入数据
 

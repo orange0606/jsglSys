@@ -49,112 +49,27 @@ export default {
 </script>
 
 <style>
-
-/*公共样式*/
-html, body, div, ul, li, h1, h2, h3, h4, h5, h6, p, dl, dt, dd, ol, form, input, textarea, th, td, select {
-    margin: 0;
-    padding: 0;
-}
-
-
-*{box-sizing: border-box;}
-html, body {
-    min-height: 100%;
-}
-
-body {
-    font-family: "Microsoft YaHei";
-    font-size:14px;
-    color:#333;
-}
-h1, h2, h3, h4, h5, h6{font-weight:normal;}
-ul,ol {
-    list-style: none;
-}
-
-img {
-    border: none;
-    vertical-align: middle;
-}
-
-a {
-    text-decoration: none;
-    color: #232323;
-}
-
-table {
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-input, textarea {
-    outline: none;
-    border: none;
-}
-
-textarea {
-    resize: none;
-    overflow: auto;
-}
-
-.clearfix {
-    zoom: 1;
-}
-
-.clearfix:after {
-    content: ".";
-    width: 0;
-    height: 0;
-    visibility: hidden;
-    display: block;
-    clear: both;
-    overflow:hidden;
-}
-
-.fl {
-    float: left
-}
-
-.fr {
-    float: right
-}
-
-.tl {
-    text-align: left;
-}
-
-.tc {
-    text-align: center
-}
-
-.tr {
-    text-align: right;
-}
-
-.ellipse {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.inline{
-    display: inline-block;
-    *display: inline;
-    *zoom: 1;
-}
-body{
-  /* width: 100%; */
-  height: 100%; 
-  overflow: hidden;
-}
-html,body,#app{
-
- height: 100%;
-
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, input, textarea, th, td { margin:0; padding:0; } 
+body, button, input, select, textarea { font:12px/1.5tahoma, arial, \5b8b\4f53; } 
+h1, h2, h3, h4, h5, h6{ font-size:100%; } 
+address, cite, dfn, em, var { font-style:normal; } 
+code, kbd, pre, samp { font-family:couriernew, courier, monospace; } 
+small{ font-size:12px; } 
+ul, ol { list-style:none; } 
+a { text-decoration:none; } 
+a:hover { text-decoration:underline; } 
+sup { vertical-align:text-top; } 
+sub{ vertical-align:text-bottom; } 
+legend { color:#000; } 
+fieldset, img { border:0; } 
+button, input, select, textarea { font-size:100%; } 
+table { border-collapse:collapse; border-spacing:0; }
+body, html, #app{
+    width: 100%;
+    height: 100%;
 }
 
 #app {
-    /* width: 100%;
-  height: 100%; */
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -181,9 +96,6 @@ html,body,#app{
   width: 100%;
   height: 87%;
   display: inline-flex;
-  /* align-items: center; */
-  /* background: pink; */
-  /* border: 1px solid red; */
 
 }
 .main .nav {
@@ -205,4 +117,9 @@ html,body,#app{
     position: relative;
     white-space: nowrap;
 }
+
+
+
+
+
 </style>

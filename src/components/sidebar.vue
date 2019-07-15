@@ -83,8 +83,8 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .el-menu{
-    /* min-height: 800px; */
     min-height: 100%;
+    /* height: 100%; */
 }
 .el-submenu .el-menu-item {
     height: 40px;
