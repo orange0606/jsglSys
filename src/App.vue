@@ -104,9 +104,9 @@ body, html, #app{
     height: 100%;
 }
 .main .box {
-    width: 77.5%;
+    width: 82.5%;
     height: 100%;
-    padding: 10px 5% 10px 5% ;
+    padding: 10px 2.5% 10px 2.5% ;
     overflow: auto;
 }
 .el-menu-item, .el-submenu__title{

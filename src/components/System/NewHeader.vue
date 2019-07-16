@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    <header >
     <el-row>
         <el-col :span="6" :xs="24" style="min-width:300px;">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
@@ -39,7 +40,7 @@
                 <el-form-item label="表头名称" prop="name">
                     <el-input v-model="ruleForm.name"></el-input>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item v-if="!dialogVisible">
                     <el-button type="primary" @click="submitHeader">立即创建</el-button>
                     <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
                     <el-button>取消</el-button>
@@ -55,39 +56,40 @@
       </el-col>
 
     </el-row>
+    </header>
 
   <!-- 表格编辑弹窗显示====== -->
-  <el-dialog
+  <!-- <el-dialog
     title="请进行修改确认"
     :visible.sync="dialogVisible"
     width="80%"
-    :before-close="handleClose">
+    :before-close="handleClose"> -->
 
     <!-- 引入表格编辑组件 -->
-    <edits :tableList="table"></edits>
+    <!-- <edits :tableList="table"></edits>
     <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="dialogVisible = false">下一步</el-button>
     </span>
-  </el-dialog>
+  </el-dialog> -->
 
 <!-- 表格编辑弹窗显示====== -->
-  <el-dialog
+  <!-- <el-dialog
     title="请进行设置表头每个单元格属性"
     :visible.sync="dialogVisible2"
     width="90%"
     :append-to-body="false" 
     top="11vh"
-    :before-close="handleClose">
+    :before-close="handleClose"> -->
 
     <!-- 引入表格编辑组件 -->
-    <headeratt :tableList.sync="table"></headeratt>
-    <span slot="footer" class="dialog-footer">
+    <headeratt :tableList.sync="table" :dialog.sync="dialogVisible" ></headeratt>
+    <!-- <span slot="footer" class="dialog-footer"> -->
      <!--    <el-button @click="dialogVisible2 = false">取 消</el-button>
          <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
         -->
-    </span>
-  </el-dialog>
+    <!-- </span>
+  </el-dialog> -->
 
   </div>
 </template>
@@ -136,8 +138,7 @@
             { required: true, message: '请选择表头类型', trigger: 'change' }
           ]
         },
-        dialogVisible: false,  //弹窗显示表格编辑
-        dialogVisible2: false,  //弹窗显示表头属性设置
+        dialogVisible: false,  //弹窗显示表头属性设置
         
       }
     },
@@ -183,7 +184,7 @@
                   console.log(data)
 
                   // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
-                  _this.dialogVisible2 = true;  //调用显示表头属性设置确认弹窗
+                  _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗
 
                     //inven.Assemble(data)数据添加属性组装函数
                   _this.table = inven.Assemble(data,_this.ruleForm.type);   // 存储表格数据
@@ -217,13 +218,6 @@
               // 饿了么弹窗提示文件导出失败
           }
 
-        },
-        handleClose(done) {   //弹窗关闭确认
-          this.$confirm('确认关闭？ 直接关闭将不保存任何数据噢。')
-            .then(_ => {
-              done();
-            })
-            .catch(_ => {});
         }
         
   }

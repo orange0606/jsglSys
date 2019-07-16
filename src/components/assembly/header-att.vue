@@ -1,12 +1,19 @@
 <template>
-
-  <div>
+    <div v-if="dialog">
+    <!-- <el-dialog
+    title="请进行设置表头每个单元格属性"
+    :visible.sync="dialog"
+    width="90%"
+    :append-to-body="false" 
+    top="11vh"
+    :before-close="handleClose"> -->
       <el-row :gutter="0">
         
         <!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
-        <el-col :span="16" :offset="1" :xs="23" :sm="19" :md="14" :lg="16" :xl="17">
+        <el-col :span="19"  :xs="24" :sm="21" :md="16" :lg="18" :xl="19">
             <el-collapse-transition>
-            <div class="form_editing" >
+            <div class="form_editing"  >
+                <!-- v-show="!show_lead" -->
               <!-- v-if="!show_lead" -->
                 <p v-if="btn.edit" style="margin:0 0 20px 0">
                   <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
@@ -17,9 +24,7 @@
                   <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                   <el-button type="info" size="mini" @click="$refs.elxEditable.revert(4)">放弃更改</el-button>
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
-                  <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearFilter()">清空筛选条件</el-button> -->
-                  <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clearSort()">清空排序条件</el-button> -->
-                  <!-- <el-button type="success" size="mini" @click="$refs.elxEditable.toggleRowSelection(table.sheet[0][2])">选中第2个</el-button> -->
+
                   <el-button type="warning" size="mini" @click="submitEvent">保存&提交</el-button>
                   <!-- <el-button type="primary" size="mini" @click="getInsertEvent">获取新增数据</el-button>
                   <el-button type="primary" size="mini" @click="getUpdateEvent">获取已修改数据</el-button>
@@ -34,7 +39,7 @@
                   ref="elxEditable"
                   class="click-table12"
                   border
-                  height="350"
+                  
                   width="100%"
                   :highlight-current-row="false"
                   :data.sync="list"
@@ -69,7 +74,7 @@
                       ref="elxEditable1"
                       class="click-table12"
                       border
-                      height="350" 
+                      height="400" 
                       :data="lead.list"
                       :span-method="arraySpanMethod"
                       @cell-click ="cell_click2"
@@ -83,7 +88,7 @@
             </div>
             </transition>
       </el-col>
-      <el-col :span="5" :offset="1" :xs="23" :sm="12" :md="7" :lg="5" :xl="4">
+      <el-col :span="4" :offset="1" :xs="23" :sm="12" :md="7" :lg="5" :xl="4">
             <el-collapse-transition>
             <div class="tips" v-show="!shwo_att" style="margin:-40px 0 0 0">
                 <!-- <br><br> -->
@@ -130,24 +135,24 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item v-for="(val,a) in attribute" :key="a+'a'" v-show="(val.att_name==row_att.attribute && val.if)?true:false" label="属性值(点击左边表格的单元格选择值)" prop="attribute_value">
-                              <el-input v-model="row_att.attribute_value" :autofocus="true" :placeholder="val.value">
-                                  <el-button slot="append" @click="input_att">确定</el-button>
+                              <el-input v-model="row_att.attribute_value" @change="AttrInputChang" :autofocus="true" :placeholder="val.value">
+                                  <el-button slot="append" @click="lead.att_click_type = null; show_lead=false">确定</el-button>
                               </el-input>
                         </el-form-item>
                     </div>
                     <!-- <el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
                       <el-input v-model="row_att.attribute_value_id"></el-input>
                     </el-form-item> -->
-                    <el-form-item :label="`列宽 ( 默认为${col_width}px 请根据内容适当调整 )`" >
+                    <el-form-item :label="`表格列宽 ( 系统已自动调整，请根据内容自行调整 )`" >
                       <br>
                       <!-- <el-slider v-model="row_att.col_width" :max="500" :min="0" :step="5"> </el-slider> -->
                       <el-slider v-model="col_width" :max="500" :min="50" :step="5"> </el-slider>
 
                     </el-form-item>
-                    <el-form-item label="行高 ( 默认为最低30px 请根据内容适当调整 )" >
+                    <el-form-item label="此行行高 ( 默认为最低30px 请根据内容适当调整 )" >
                       <br>
                       <el-slider v-model="row_att.tr_high" :max="300" :min="30" :step="5"> </el-slider>
-                      <div :style="{width:col_width+'px',height:row_att.tr_high+'px','text-align':row_att.text_align,'line-height':row_att.tr_high+'px' }" class="wh">{{row_att.td}}</div>
+                      <div :style="{width:col_width+'px',height:row_att.tr_high+'px','text-align':row_att.text_align,'line-height':row_att.tr_high+'px'}" class="wh">{{row_att.td}}</div>
                     </el-form-item>
                      <el-form-item label="单元格文字对齐" >
                         <el-select v-model="row_att.text_align" placeholder="请选择对齐方式" clearable size="small" style=" width:100%;">
@@ -161,9 +166,9 @@
                             <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item v-if="'limit_value' in row_att" label="限制值" prop="limit_value">
+                    <el-form-item v-if="row_att.limit!=null" label="限制值" prop="limit_value">
                         <el-input v-model="row_att.limit_value">
-                            <el-button slot="append" @click="input_att">确定</el-button>
+                            <el-button slot="append" @click="lead.att_click_type = null; show_lead=false">确定</el-button>
                         </el-input>
                     </el-form-item>
                     <!-- <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
@@ -187,6 +192,12 @@
       <el-button type="primary" @click="next">{{ btn.next }}</el-button>
     </span>
 
+  <!-- <span slot="footer" class="dialog-footer"> -->
+     <!--    <el-button @click="dialogVisible2 = false">取 消</el-button>
+         <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
+        -->
+    <!-- </span> -->
+  <!-- </el-dialog> -->
   </div>
      
 </template>
@@ -197,7 +208,7 @@ import XEUtils from 'xe-utils'
   import inven from '../../modules/inventory';
   export default {
     name: 'edit',
-    props:["tableList"],
+    props:['tableList','dialog'],
     data () {
       return {
         btn: {  //按钮的名称,与存储信息事件
@@ -229,6 +240,7 @@ import XEUtils from 'xe-utils'
             att_key:null,
             lim_click:false,  ////点击单元格设置限制属性值属性与id关闭
             key_click:false, //当前是否点击获取属性值状态  默认不开启false
+            att_click_type:null, //当前属性开启状态 null为未开启 formula为公式状态 attribute为属性状态 limit 为限制属性状态
             
 
         },
@@ -282,25 +294,21 @@ import XEUtils from 'xe-utils'
         }
     },
     mounted() {
-      this.screenWidth = document.body.clientWidth;
-      // this.screenHeight = document.body.clientHeight;
-      this.col_width = Math.floor(((this.screenWidth/24)*17)/(this.hd.length+1.5));
-      console.log(this.col_width)
-      this.hd.length <=20 ? this.col_width : this.col_width = 150
       window.onresize = () => {
         return (() => {
           this.screenWidth = document.body.clientWidth;
          console.log(this.screenWidth)
 
             if (this.screenWidth > 1900) {    //浏览器兼容自动调整列宽Math.ceil(5/2)
-                this.col_width = Math.floor(((this.screenWidth/24)*17)/(this.hd.length+1.5));
+                this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
+                console.log('1900this.col_width')
                 console.log(this.col_width)
                 this.hd.length <=20 ? this.col_width : this.col_width = 150
             }else if (this.screenWidth >= 1500) {
-                this.col_width = Math.floor(((this.screenWidth/24)*16)/(this.hd.length+1.5));
+                this.col_width = Math.floor(((this.screenWidth/24)*17)/(this.hd.length+3));
                 this.hd.length <=15 ? this.col_width : this.col_width = 140
             }else{
-               this.col_width = Math.floor(((this.screenWidth/24)*19)/(this.hd.length+1.5));
+               this.col_width = Math.floor(((this.screenWidth/24)*20)/(this.hd.length+3));
                 this.hd.length <=6 ? this.col_width : this.col_width = 80
             }
         })();
@@ -322,8 +330,17 @@ import XEUtils from 'xe-utils'
                 console.log('watch_tablelist打印一下this.lead.list')
                 console.log(this.lead.list)
                 this.lead.hd = this.hd;
+
+                this.screenWidth = document.body.clientWidth;
+                // this.screenHeight = document.body.clientHeight;
+                this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+1.5));
+                this.hd.length <=20 ? this.col_width : this.col_width = 150
             }
 
+        },
+        dialog:function(n,v){
+            console.log('子组件中监听dialog的值变化')
+            console.log(n)
         }
 
     },
@@ -333,6 +350,13 @@ import XEUtils from 'xe-utils'
               // console.log('row, column, cell, event')
               // console.log(row, column, cell, event)
               
+          },
+          handleClose(done) {   //弹窗关闭确认
+            this.$confirm('确认关闭？ 直接关闭将不保存任何数据噢。')
+              .then(_ => {
+                done();
+              })
+              .catch(_ => {});
           },
           submitAtt(){  //校验属性设置的值是否成功
             this.$refs.row_att.validate(valid => {
@@ -349,11 +373,11 @@ import XEUtils from 'xe-utils'
               }
             })
           },
-          cancelAtt(){
+          cancelAtt(){  //属性组件取消按钮
               this.shwo_att = false;  //隐藏设置属性组件页面
               this.show_lead = false; //隐藏引入的表格
-              this.lead.key_click = false;  //点击单元格设置属性值属性与id关闭
-              this.lead.lim_click = false;  //点击单元格设置限制属性值属性与id关闭
+              this.lead.click.type = null;  //所有单元格
+
           },
           /*
             单元格属性设置
@@ -395,13 +419,19 @@ import XEUtils from 'xe-utils'
                   
 
               }else{
-                  alert('直接完成')
+                  // alert('直接完成')
+                  // this.dialogVisible = false;
+                  // this.$emit('update:dialog',false)
+                  this.$emit("update:dialog", false)
                   //此处调用提交数据到父组件
               }
           },
           back(){ //编辑完成点击上一步
             if (this.btn.edit) {
-                alert('直接取消')
+                // this.dialogVisible = false;
+                  this.$emit("update:dialog", false)
+                
+                // alert('直接取消')
 				        //此处取消弹窗显示
 
               }else{
@@ -500,40 +530,41 @@ import XEUtils from 'xe-utils'
           }, 
           cell_click(row, column, cell, event){ //单元格点击事件
 
-              
               if (column.property && !this.btn.edit) {  //做容错处理，防止点击到选择框触发此事件
                     //判断引入表格是否显示
-                    this.show_lead?this.show_lead = false:this.show_lead;
+                    // this.show_lead?this.show_lead = false:this.show_lead;
 
                     let colum =column.property;
                     colum = colum.substr(0,colum.indexOf('.'));
-                    //调用点击属性设置显示事件
-                    this.att(row[colum])
-
                     this.lead.cell_row = row[colum].tr_num;
                     this.lead.cell_col = column.id;
                     // console.log(column)
                     this.lead.cell_hd = colum;
 
-                    if(this.lead.key_click){    //当属性设置开启后才开始设置属性
-                         //点击单元格获取id 和key（位置）
-                        this.lead.att_id = row[colum].id;
-                        this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
-                        console.log(this.lead.att_id,this.lead.att_key)
-                        console.log('this.row_att')
-                        console.log(this.row_att)
-                        if(!this.lead.lim_click){ //点击单元格设置属性值与id的
-                          this.row_att.attribute_value = this.lead.att_key;
+                    if(this.lead.att_click_type == 'formula'){    ////点击单元格设置公式属性值
+                            //点击单元格获取id 和key（位置）
+                          this.lead.att_id = row[colum].id;
+                          this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
+                          console.log(this.lead.att_id,this.lead.att_key)
+                          console.log('this.row_att')
+                          console.log('进来了公式设置')
+                          console.log(this.row_att)
+                          this.row_att.attribute_value==null? this.row_att.attribute_value="":this.row_att.attribute_value+="+";
+                          this.row_att.attribute_value = this.row_att.attribute_value+this.lead.att_key;
                           this.row_att.attribute_value_id = this.lead.att_id;
-                        }else{  //点击单元格设置限制属性值与id
-                          this.row_att.limit_value = this.lead.att_key;
-                          this.row_att.limit_id = this.lead.att_id;
+                        // }else{  //点击单元格设置限制属性值与id
+                        //   this.row_att.limit_value = this.lead.att_key;
+                        //   this.row_att.limit_id = this.lead.att_id;
                           
-                        }
+                          
 
+                    }else if(this.lead.att_click_type == null){
+                          //调用点击属性设置显示事件
+                          console.log('调用点击属性设置显示事件')
+                          this.att(row[colum])
                     }
                    
-                    // console.log('this.lead.att_id,this.lead.att_key')
+                    console.log('this.lead.att_id,this.lead.att_key')
                     
                     //手动刷新表格
                     this.$refs.elxEditable?this.$refs.elxEditable.refresh():this.$refs.elxEditable1.refresh()
@@ -631,27 +662,32 @@ import XEUtils from 'xe-utils'
               if (column.property && !this.btn.edit) {  //做容错处理，防止点击到选择框触发此事件
                     //判断引入表格是否显示
                     // this.show_lead?this.show_lead = false:this.show_lead;
+                          console.log('进来了表格2点击单元格1')
+                          console.log(this.lead.att_click_type)
 
-                    let colum =column.property;
-                    colum = colum.substr(0,colum.indexOf('.'));
-                    this.lead.cell_row = row[colum].tr_num;
-                    this.lead.cell_col = column.id;
-                    // console.log(column)
-                    this.lead.cell_hd = colum;
+                    if(this.lead.att_click_type !=null && this.lead.att_click_type !='formula'){    //设置属性开启后，才执行相关属性与限制值属性操作
+                        console.log('进来了表格2点击单元格2')
+                        let colum =column.property;
+                        colum = colum.substr(0,colum.indexOf('.'));
+                        this.lead.cell_row = row[colum].tr_num;
+                        this.lead.cell_col = column.id;
 
-                    if(this.lead.att_click_state){    //设置属性开启后，才执行相关属性与限制值属性操作
+                        // console.log(column)
+                        this.lead.cell_hd = colum;
                          //点击单元格获取id 和key（位置）
                         this.lead.att_id = row[colum].id;
                         this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
                         console.log(this.lead.att_id,this.lead.att_key)
-                        console.log('this.row_att')
+                        console.log('cell_click2打印一下this.row_att')
                         console.log(this.row_att)
-                        if(!this.lead.lim_click_state){ //this.lead.lim_click_state 限制值属性设置状态  true为限制值操作 false为普通属性操作
-                          this.row_att.attribute_value = this.lead.att_key;
-                          this.row_att.attribute_value_id = this.lead.att_id;
-                        }else{  //点击单元格设置限制属性值与id
-                          this.row_att.limit_value = this.lead.att_key;
-                          this.row_att.limit_id = this.lead.att_id;
+                        if(this.lead.att_click_type =='attribute'){ //  点击单元格设置属性值
+                            console.log('点击单元格设置属性值')
+                            this.row_att.attribute_value = this.lead.att_key;
+                            this.row_att.attribute_value_id = this.lead.att_id;
+                        }else if(this.lead.att_click_type =='limit'){  //点击单元格设置限制属性值与id
+                            console.log('点击单元格设置限制属性值与id')
+                            this.row_att.limit_value = this.lead.att_key;
+                            this.row_att.limit_id = this.lead.att_id;
                           
                         }
 
@@ -667,7 +703,7 @@ import XEUtils from 'xe-utils'
           remote1(req){   //监听设置属性选择框的值
               console.log('这里开始网络请求查找用户选择的清单类型的所有清单')
               console.log(req)
-              if (req!='sys_order' && req!= 'sys_num' && req!= 'formula' && req!= 'formula' && req!= 'sum_text' && req!= 'sum_null' && req!= 'sum_formula'){
+              if (req=='orginal' || req== 'update' || req== 'fluctuate'){
                   //网络请求
 
                   //数据返回后，开启清单选择
@@ -675,58 +711,57 @@ import XEUtils from 'xe-utils'
 
                   //显示引入的表格
                   this.show_lead = true;
-                  console.log('this.lead.list')
-                  console.log(this.lead.list)
-                  //手动刷新表格
-                  this.$refs.elxEditable1?this.$refs.elxEditable1.refresh():
-
-                   //开启属性选择
-                  this.lead.key_click =true;
-              }else if(req== 'formula' || req== 'formula' || req== 'sum_text' || req== 'sum_formula'){
+                  this.lead.att_click_type = 'attribute';  //开启属性输入状态为属性模式
+                  console.log('attribute开启属性输入状态为属性模式')
+ 
+              }else if(req== 'formula' || req== 'sum_text' || req== 'sum_formula'){  //设置公式
                   //关闭清单选择
                   this.lead.show_select_name =false;
-                  //开启属性选择
-                  this.lead.key_click =true;
+                                    
+                  this.show_lead = false;//隐藏引入的表格
+                  this.lead.att_click_type = 'formula';  //开启属性输入状态为公式模式
+                  console.log('formula开启属性输入状态为公式模式')
+
               }else{
                   //关闭清单选择
                   this.lead.show_select_name =false;
                   //隐藏引入的表格
                   this.show_lead = false;
 
+                  this.lead.att_click_type = null; //关闭属性输入状态模式
+                  console.log('null关闭属性输入状态模式')
+
               }
-              // 关闭限制值点击输入
-              this.lead.lim_click =false;
+              // // 关闭限制值点击输入
+              // this.lead.lim_click =false;
 
 
 
           },
-          remote2(req){
+          remote2(req){ //请求清单数据
               console.log('这里开始网络请求查找用户选择的清单类型的数据')
               console.log(req)
 
               //网络请求
 
           },
-          limiremote(req){  //限制值类型的选择
+          limiremote(req){  //限制值类型的选择改变后触发的函数（开启点击引入的单元格输入限制值）
+              //数据返回后，开启清单选择
+              this.lead.show_select_name =true;
               //显示引入的表格
               this.show_lead = true;
-              //手动刷新表格
-              this.$refs.elxEditable1?this.$refs.elxEditable1.refresh():
-              // 开启限制值输入
-              this.lead.lim_click =true;
-               //开启属性选择
-              this.lead.key_click =true;
-          },
-          input_att(){ //清单属性值或者公式属性值输入完成
-              //隐藏引入的表格
-              // this.show_lead = false;
-              //点击单元格设置属性与id关闭
-              this.lead.key_click = false;
-
-              //点击单元格设置限制属性值属性与id关闭
-              this.lead.lim_click = false;
+              //显示引入的表格
+              this.show_lead = true;
+              this.lead.att_click_type = 'limit';  //开启限制值属性输入
+              console.log('limit开启限制值属性输入状态模式')
 
           },
+          AttrInputChang(val){
+              console.log('输入框值改变之后触发')
+              console.log(val)
+
+          }
+
 
     }
   }
@@ -755,11 +790,12 @@ import XEUtils from 'xe-utils'
   }
 .wh{
 	width: 100px;
-	border: 1px solid #909399;
+	border: 1px solid #409EFF;
 	display: block;
 	border-radius: 2px;
 	text-align: center;
 	overflow: hidden;
+  color: #409EFF;
 	
 }
 .dialogm_att .el-dialog__wrapper{
@@ -791,7 +827,7 @@ import XEUtils from 'xe-utils'
 
 .form_editing, .read-only_form {
     /* padding: 5px; */
-    margin: 0 auto;
+    /* margin: 0 auto; */
     /* border: 1px solid pink; */
     border: 1px solid #ffffff;
 }
