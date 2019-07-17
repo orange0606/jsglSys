@@ -185,16 +185,35 @@ export default {
     param obj:  Object
     return : 深拷贝后的数组对象
     */
-    deepcopy(obj){
-        var newobj = {};
-        for(arr in obj){
-            if (typeof obj[arr]==='object' && obj[arr] !== null) {
-                newobj[arr] = deepcopy(obj[arr]); //递归，核心代码
-            } else {
-                newobj[arr] = obj[arr];
-            }
-        }
-        return newobj;
+    // deepcopy(obj){
+    //     var newobj = {};
+    //     for(arr in obj){
+    //         if (typeof obj[arr]==='object' && obj[arr] !== null) {
+    //             newobj[arr] = deepcopy(obj[arr]); //递归，核心代码
+    //         } else {
+    //             newobj[arr] = obj[arr];
+    //         }
+    //     }
+    //     return newobj;
+    // }
+    badge_name:{
+        sys_order:'序号',
+        sys_num:'编号',
+        formula:'公式',
+        sum_text:'合计（普通）',
+        sum_null:'合计（空）',
+        sum_formula:'合计（公式）',
+        orginal:'原清单',
+        orginalnull:'新清单（无）',
+        change:'变更清单',
+        update:'新清单',
+        updatenull:'新清单（无）',
+        meterage:'变更清单？',
+        fluctuate:'变更清单（变更清单增减）',
+        totalpay:'累计支付清单',
+        max:'MAX',
+        increasemax:'增加MAX',
+        decreasemax:'减少MAX'
     }
 
 }
