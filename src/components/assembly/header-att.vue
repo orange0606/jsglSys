@@ -62,7 +62,7 @@
                           <el-badge style="display:block;" v-else :hidden="!btn.edit && scope.row[val].attribute !=null" is-dot  class="item_red">{{scope.row[val].td}}</el-badge>
                           <!-- -if="!btn.edit && scope.row[val].attribute ==null" -->
                           <el-badge  v-if="!btn.edit && scope.row[val].attribute !=null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>
-                          <el-badge  v-if="!btn.edit && scope.row[val].limit !=null" type="success" :value="badge_name[scope.row[val].limit]" class="new"></el-badge>
+                          <el-badge  v-if="!btn.edit && scope.row[val].tLimit !=null" type="success" :value="badge_name[scope.row[val].tLimit]" class="new"></el-badge>
                           <!-- <el-badge v-if="!btn.edit" type="warning" value="变" class="new"></el-badge> -->
                       </template>
                   </elx-editable-column>
@@ -144,23 +144,23 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item v-for="(val,a) in attribute" :key="a+'a'" v-show="(val.att_name==row_att.attribute && val.if)?true:false" label="属性值(点击左边表格的单元格选择值)" >
-                              <el-input v-model="row_att.attribute_value" @change="AttrInputChang" :autofocus="true" :placeholder="val.value">
+                              <el-input v-model="row_att.attributeValue" :autofocus="true" :placeholder="val.value">
                                   <el-button slot="append" @click="att_input1(row_att)">确定</el-button>
                               </el-input>
                         </el-form-item>
                     </div>
-                    <el-form-item v-if="'limit' in row_att" label="限制单元格大小值" prop="limit">
-                        <el-select v-model="row_att.limit" placeholder="请选择限制类型" @change="limiremote" clearable size="small" style=" width:100%;">
-                            <el-option v-for="(val,i) in limits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                    <el-form-item v-if="'tLimit' in row_att" label="限制单元格大小值" prop="tLimit">
+                        <el-select v-model="row_att.tLimit" placeholder="请选择限制类型" @change="limiremote" clearable size="small" style=" width:100%;">
+                            <el-option v-for="(val,i) in tLimits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item v-if="row_att.limit!=null" label="限制值" >
-                        <el-input v-model="row_att.limit_value">
+                    <el-form-item v-if="row_att.tLimit!=null" label="限制值" >
+                        <el-input v-model="row_att.limitValue">
                             <el-button slot="append" @click="att_input2(row_att)">确定</el-button>
                         </el-input>
                     </el-form-item>
                     <!-- <el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
-                      <el-input v-model="row_att.attribute_value_id"></el-input>
+                      <el-input v-model="row_att.attributeValue_id"></el-input>
                     </el-form-item> -->
                     <el-form-item :label="`表格列宽 ( 系统已自动调整，请根据内容自行调整 )`" >
                       <br>
@@ -170,11 +170,11 @@
                     </el-form-item>
                     <el-form-item label="此行行高 ( 默认为最低30px 请根据内容适当调整 )" >
                       <br>
-                      <el-slider v-model="row_att.tr_high" :max="300" :min="30" :step="5"> </el-slider>
-                      <div :style="{width:col_width+'px',height:row_att.tr_high+'px','text-align':row_att.text_align,'line-height':row_att.tr_high+'px'}" class="wh">{{row_att.td}}</div>
+                      <el-slider v-model="row_att.trHigh" :max="300" :min="30" :step="5"> </el-slider>
+                      <div :style="{width:col_width+'px',height:row_att.trHigh+'px','text-align':row_att.textAlign,'line-height':row_att.trHigh+'px'}" class="wh">{{row_att.td}}</div>
                     </el-form-item>
                      <el-form-item label="单元格文字对齐" >
-                        <el-select v-model="row_att.text_align" placeholder="请选择对齐方式" clearable size="small" style=" width:100%;">
+                        <el-select v-model="row_att.textAlign" placeholder="请选择对齐方式" clearable size="small" style=" width:100%;">
                             <el-option  label="居中" value="center"></el-option>
                             <el-option  label="靠左" value="left"></el-option>
                             <el-option  label="靠右" value="right"></el-option>
@@ -182,7 +182,7 @@
                     </el-form-item>
                     
                     <!-- <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
-                      <el-input v-model="row_att.limit_id"></el-input>
+                      <el-input v-model="row_att.tLimit_id"></el-input>
                     </el-form-item> -->
                     <!-- <el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
                       <el-input v-model="row_att.update_time"></el-input>
@@ -208,11 +208,10 @@
 
 <script>
 import XEUtils from 'xe-utils'
-
 import inven from '../../modules/inventory';
   export default {
     name: 'edit',
-    props:['tableList','dialog'],
+    props:['tableList','dialog','NewList'],
     data () {
       return {
         btn: {  //按钮的名称,与存储信息事件
@@ -224,12 +223,13 @@ import inven from '../../modules/inventory';
         list:[], //用来存储导入的数据
         hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
         attribute:{}, //用来存储特殊属性的所有类
-        limits:[],  //用来存储限制单元格大小的所有类
+        tLimits:[],  //用来存储限制单元格大小的所有类
         row_att:{},  //存储属性弹窗选择所需要的每个单元格的数据
         shwo_att:false, //属性弹窗默认不显示 
         show_lead:false, //显示引入的清单类型表格
         col_width:130, //调整单元格的列宽
         badge_name:inven.badge_name, //属性标记名对象
+        row:null,
 
         lead:{ //存储引入清单数据
             list:[],//引入的清单数据
@@ -245,22 +245,22 @@ import inven from '../../modules/inventory';
             att_key:null,
             lim_click:false,  ////点击单元格设置限制属性值属性与id关闭
             key_click:false, //当前是否点击获取属性值状态  默认不开启false
-            att_click_type:null, //当前属性开启状态 null为未开启 formula为公式状态 attribute为属性状态 limit 为限制属性状态           
+            att_click_type:null, //当前属性开启状态 null为未开启 formula为公式状态 attribute为属性状态 limit 为限制属性状态        
         },
          //存储引入进来的表格数据    
         rules: {  //属性 反馈错误
-          attribute_value: [
+          attributeValue: [
             { required: true, message: '请点击单元格或者输入内容', trigger: 'blur' },
             { min: 0, max: 30, message: '长度在 1 到 20 个字符', trigger: 'change' },
           ],
-          limit_value: [
+          limitValue: [
             { required: true, message: '请点击单元格或者输入内容', trigger: 'blur' },
             { min: 0, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
           ],
           attribute: [
             { required: true, message: '请选择属性', trigger: 'change' }
           ],
-          limit: [
+          tLimit: [
             { required: true, message: '请选择类型', trigger: 'change' }
           ]
         },
@@ -275,7 +275,7 @@ import inven from '../../modules/inventory';
             this.list = this.tableList.sheet;
             this.loading =false;
             this.attribute = this.tableList.attribute;
-            this.limits = this.tableList.limit;
+            this.tLimits = this.tableList.limit;
             this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列（属性）名
 
             this.lead.list= XEUtils.clone(this.list, true);
@@ -312,7 +312,7 @@ import inven from '../../modules/inventory';
             }else{
                 this.list = newVal.sheet;
                 this.attribute = newVal.attribute;
-                this.limits = newVal.limit;
+                this.tLimits = newVal.limit;
                 this.hd = Object.keys(newVal.sheet[0]);
                 this.loading = false;
 
@@ -352,27 +352,26 @@ import inven from '../../modules/inventory';
               .catch(_ => {});
           },
           submitAtt(){  //校验属性设置的值是否成功
-            if (this.lead.att_click_type == 'okay') {
-              
-            
-                  this.$refs.row_att.validate(valid => {
-                    if(this.lead.att_click_type != null){
-                        this.$message({ message: '属性未设置完毕', type: 'error' })
-                        return false;
-                    }else if (valid) {   //校验通过与点击设置属性及设置限制属性值关闭后才能完成
-                        console.log('这里保存数据')
-                      
-                        console.log(this.list)
-                        this.$message({ message: '保存成功', type: 'success' })
-                        this.shwo_att = false;  //隐藏设置属性组件页面
-                        this.show_lead = false; //隐藏引入的表格
-                      // alert('成功1')
-                        return false;
-                    } else {
-                        this.$message({ message: '校验不通过', type: 'error' })
-                    }
-                  })
+            console.log('submitatt 状态')
+            console.log(this.lead.att_click_type)
+            if(this.lead.att_click_type == 'transit'){
+                return this.$message({ message: '属性未设置完毕', type: 'error' });
+            }else if(this.lead.att_click_type == 'limit' || this.lead.att_click_type == 'attribute' || this.lead.att_click_type == 'formula'){
+                return this.$message({ message: '设置完属性未点击相关确定按钮', type: 'error' })
             }
+            this.$refs.row_att.validate(valid => {
+             if (valid && this.lead.att_click_type == 'okay') {   //校验通过与点击设置属性及设置限制属性值关闭后才能完成
+                  this.$message({ message: '保存成功', type: 'success' })
+                  this.lead.att_click_type = null;
+                  this.shwo_att = false;  //隐藏设置属性组件页面
+                  this.show_lead = false; //隐藏引入的表格
+                // alert('成功1')
+                  return false;
+              } else {
+                  this.$message({ message: '校验不通过', type: 'error' })
+              }
+            })
+            
           },
           cancelAtt(){  //属性组件取消按钮
               this.shwo_att = false;  //隐藏设置属性组件页面
@@ -395,7 +394,7 @@ import inven from '../../modules/inventory';
             }
 
           },
-          next(){  //编辑完成点击下一步
+          next(){  //编辑完成点击下一步(完成提交新建表头按钮)
               if (this.btn.edit) {
                   this.btn.edit = false;
                   this.btn.next ='完  成';
@@ -409,28 +408,31 @@ import inven from '../../modules/inventory';
                   for (let i = 0; i < hd.length; i++) {
                     let tb = this.tableList.sheet[this.tableList.sheet.length-1][hd[i]];
                     tb.td = '合计'+i;
-                    tb.tr_num +=1;
-                    if (tb.td_rowspan >1 || tb.td_rowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
-                      tb.td_rowspan = 1;
+                    tb.trNum +=1;
+                    if (tb.tdRowspan >1 || tb.tdRowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
+                      tb.tdRowspan = 1;
                     }
-                    tb.td_colspan ==0?tb.td_colspan =1:tb.td_colspan;
+                    tb.tdColspan ==0?tb.tdColspan =1:tb.tdColspan;
                         
                   }
                   this.list =this.tableList.sheet;
                   
 
-              }else{
+              }else{  //提交新建表头数据到父组件
                   // alert('直接完成')
                   // this.dialogVisible = false;
                   // this.$emit('update:dialog',false)
-                  this.$emit("update:dialog", false)
+                  let succre = false;
+                  this.$emit("update:dialog", succre) //关闭表格显示窗口
                   //此处调用提交数据到父组件
+                  this.$emit("update:NewList", this.list) //关闭表格显示窗口
               }
           },
           back(){ //编辑完成点击上一步
             if (this.btn.edit) {
                 // this.dialogVisible = false;
-                  this.$emit("update:dialog", false)
+                  let succre = false;
+                  this.$emit("update:dialog", succre)
                 
                 // alert('直接取消')
 				        //此处取消弹窗显示
@@ -462,7 +464,6 @@ import inven from '../../modules/inventory';
             let item = XEUtils.find(list, item => item[valueProp] === value)
             return item ? item[labelProp] : null
           },
-        
           selectEvent (selection, row) {
             console.log('选中行')
             console.log(row)
@@ -517,12 +518,12 @@ import inven from '../../modules/inventory';
               if (this.btn.edit) {
                   if (columnIndex >0) {  //带选择框的情况
                       if (columnIndex <= this.hd.length) {
-                          return [row[this.hd[columnIndex-1]].td_rowspan, row[this.hd[columnIndex-1]].td_colspan]
+                          return [row[this.hd[columnIndex-1]].tdRowspan, row[this.hd[columnIndex-1]].tdColspan]
                       }
                   }
               }else{
                   if (columnIndex < this.hd.length) {   //不带选择框的情况
-                      return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
+                      return [row[this.hd[columnIndex]].tdRowspan, row[this.hd[columnIndex]].tdColspan]
                   }
               }
                   return [1, 1]
@@ -537,13 +538,13 @@ import inven from '../../modules/inventory';
 
                     let colum =column.property;
                     colum = colum.substr(0,colum.indexOf('.'));
-                    this.lead.cell_row = row[colum].tr_num;
+                    this.lead.cell_row = row[colum].trNum;
                     this.lead.cell_col = column.id;
                     // console.log(column)
                     this.lead.cell_hd = colum;
                     //点击单元格获取id 和key（位置）
                     this.lead.att_id = row[colum].id;
-                    this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
+                    this.lead.att_key = `${row[colum].colNum}${row[colum].trNum}`;
 
                     if(this.lead.att_click_type == 'formula'){    ////点击单元格设置公式属性值
                           
@@ -552,17 +553,17 @@ import inven from '../../modules/inventory';
                           console.log('this.row_att')
                           console.log('进来了公式设置')
                           console.log(this.row_att)
-                          this.row_att.attribute_value==null? this.row_att.attribute_value="":this.row_att.attribute_value+="+";
-                          this.row_att.attribute_value = this.row_att.attribute_value+this.lead.att_key;
-                          this.row_att.attribute_value_id = this.lead.att_id;
+                          this.row_att.attributeValue==null? this.row_att.attributeValue="":this.row_att.attributeValue+="+";
+                          this.row_att.attributeValue = this.row_att.attributeValue+this.lead.att_key;
+
                         // }else{  //点击单元格设置限制属性值与id
-                        //   this.row_att.limit_value = this.lead.att_key;
-                        //   this.row_att.limit_id = this.lead.att_id;
+                        //   this.row_att.tLimitValue = this.lead.att_key;
+                        //   this.row_att.tLimit_id = this.lead.att_id;
                           
                     }else if(this.lead.att_click_type =='limit'){  //点击单元格设置限制属性值与id
                             console.log('点击单元格设置限制属性值与id')
-                            this.row_att.limit_value = this.lead.att_key;
-                            this.row_att.limit_id = this.lead.att_id;
+                            this.row_att.limitValue = this.lead.att_key;
+
                           
                    }else if(this.lead.att_click_type == null){
                           //调用点击属性设置显示事件
@@ -582,21 +583,20 @@ import inven from '../../modules/inventory';
                   if (columnIndex >0) { //带选择框的情况
                       row = row[this.lead.hd[columnIndex-1]]
                       if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-                          return {'border':'1px solid #409EFF','text-align': row['text_align'],'height':row.tr_high+'px'}
+                          return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
                       }
                   }
               }else{  //不带选择框的情况
                   row = row[this.lead.hd[columnIndex]]
                   if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-                      return {'border':'1px solid #409EFF','text-align': row['text_align'],'height':row.tr_high+'px'}
+                      return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
                   }
               }
-              return {'text-align': row['text_align'],'height':row.tr_high+'px'}
+              return {'text-align': row['textAlign'],'height':row.trHigh+'px'}
           },
           exportCsvEvent () { //导出表格
             this.$refs.elxEditable.exportCsv()
           },
-
           insertEvent (index) { //新增一行
 
             this.$refs.elxEditable.insertAt({
@@ -612,7 +612,6 @@ import inven from '../../modules/inventory';
             // })
 
           },
-          
           deleteSelectedEvent () {    //删除选中
             let selection = this.$refs.elxEditable.getSelecteds()
             if (selection.length) {
@@ -662,7 +661,6 @@ import inven from '../../modules/inventory';
             console.log(this.list)
             this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
           },
-
           //****************引入清单的表格函数**********
           cell_click2(row, column, cell, event){ //单元格点击事件
               if (column.property && !this.btn.edit) {  //做容错处理，防止点击到选择框触发此事件
@@ -675,19 +673,19 @@ import inven from '../../modules/inventory';
                             console.log('进来了表格2点击单元格2')
                             let colum =column.property;
                             colum = colum.substr(0,colum.indexOf('.'));
-                            this.lead.cell_row = row[colum].tr_num;
+                            this.lead.cell_row = row[colum].trNum;
                             this.lead.cell_col = column.id;
                             // console.log(column)
                             this.lead.cell_hd = colum;
                             //点击单元格获取id 和key（位置）
                             this.lead.att_id = row[colum].id;
-                            this.lead.att_key = `${row[colum].col_num}${row[colum].tr_num}`;
+                            this.lead.att_key = `${row[colum].colNum}${row[colum].trNum}`;
                             console.log(this.lead.att_id,this.lead.att_key)
                             console.log('cell_click2打印一下this.row_att')
                             console.log(this.row_att)
                             console.log('点击单元格设置属性值')
-                            this.row_att.attribute_value = this.lead.att_key;
-                            this.row_att.attribute_value_id = this.lead.att_id;
+                            this.row_att.attributeValue = this.lead.att_key;
+                            //此处id。。。。。。。。。。。。。。。。。。
                         }
                     // console.log('this.lead.att_id,this.lead.att_key')
                     
@@ -699,6 +697,7 @@ import inven from '../../modules/inventory';
           remote1(req){   //监听设置属性选择框的值
               console.log('这里开始网络请求查找用户选择的清单类型的所有清单')
               console.log(req)
+              console.log(this.row)
               if (req=='orginal' || req== 'update' || req== 'fluctuate'){
                   //网络请求
 
@@ -710,7 +709,7 @@ import inven from '../../modules/inventory';
                   this.lead.att_click_type = 'attribute';  //开启属性输入状态为属性模式
                   console.log('attribute开启属性输入状态为属性模式')
  
-              }else if(req== 'formula' || req== 'sum_text' || req== 'sum_formula'){  //设置公式
+              }else if(req== 'formula' || req== 'sumText' || req== 'sumFormula'){  //设置公式
                   //关闭清单选择
                   this.lead.show_select_name =false;
                                     
@@ -722,9 +721,10 @@ import inven from '../../modules/inventory';
                   this.lead.show_select_name =false;
                   //隐藏引入的表格
                   this.show_lead = false;
-
-                  this.lead.att_click_type = null; //关闭属性输入状态模式
-                  console.log('null关闭属性输入状态模式')
+                  console.log('这里需要检测是否有限制属性')
+                  this.tLimits!=null?this.lead.att_click_type = 'transit':this.lead.att_click_type = 'okay';
+                  //这里需要检测是否有限制属性
+                  // this.InspectAtt(this.row,'limit') //调用状态检测设定函数
 
               }
 
@@ -736,7 +736,6 @@ import inven from '../../modules/inventory';
               //网络请求
 
           },
-
           limiremote(req){  //限制值类型的选择改变后触发的函数（开启点击引入的单元格输入限制值）
               //数据返回后，开启清单选择
               this.lead.show_select_name =true;
@@ -746,24 +745,42 @@ import inven from '../../modules/inventory';
               console.log('limit开启限制值属性输入状态模式')
 
           },
-          AttrInputChang(val){
-              console.log('输入框值改变之后触发')
-              console.log(val)
-
-          },
           att_input1(row){  //属性值输入完成确定按钮
-                if(this.lead.att_click_type == 'limit')return false; //当前是限制属性状态的话无法点击此按钮
-                if (row.attribute_value==null || row.attribute_value =='') {  //检测属性值是否输入完成
+                console.log('属性值输入完成确定按钮 状态')
+                console.log(this.lead.att_click_type)
+                console.log(row.attributeValue)
+                if(this.lead.att_click_type == 'limit')return this.$message({ message: '当前正在设置限制属性，请继续完成！', type: 'error' });; //当前是限制属性状态的话无法点击此按钮
+                if (row.attributeValue==null || row.attributeValue =='') {  //检测属性值是否输入完成
                     this.$message({ message: '属性值不能为空！', type: 'error' })
                     return false;
                 }else{
-                    if (this.limits!=null) {  //检测有无限制属性
-                          if (row.limit_value !=null && row.attribute_value !='') { //检测限制值是否已经设定
+                    this.InspectAtt(row,'limit') //调用限制值状态检测设定函数
+                }
+          },
+
+          att_input2(row){  //属性值输入完成确定按钮
+                if(this.lead.att_click_type == 'attribute' || this.lead.att_click_type == 'formula')return this.$message({ message: '当前正在设置公式或者属性，请继续完成！', type: 'error' }); //当前是公式OR属性状态的话无法点击此按钮
+                if (row.limitValue==null || row.limitValue=='') {
+                    this.$message({ message: '限制属性值不能为空！', type: 'error' })
+                    return false;
+                }else{
+                    this.InspectAtt(row,'att') //调用状态检测设定函数
+                }
+          },
+          InspectAtt(data,type){   //设定属性状态函数（检测各种属性值情况）   data该单元格数据   type属性类型（公式与属性值属于att   限制值属性属于limit）
+              console.log(data)
+              if (data!=null && type=='limit') {
+                    if (this.tLimits!=null) {  //检测有无限制属性
+                          if (data.limitValue !=null && data.attributeValue !='') { //检测限制值是否已经设定
+                               console.log('检测限制值已经设定 状态')
+                                console.log(this.lead.att_click_type)
                               this.show_lead=false;//隐藏引入的清单表格
                               // 设置为等待完成状态
                               return this.lead.att_click_type = 'okay';
                               
                           }else{
+                                console.log('检测限制值已经未设定 状态')
+                                console.log(this.lead.att_click_type)
                               // 设置为有未设置属性存在，过渡状态
                               this.show_lead=false;//隐藏引入的清单表格
                               return this.lead.att_click_type = 'transit';
@@ -771,21 +788,15 @@ import inven from '../../modules/inventory';
                       
                     }else{  //无限制属性直接完成属性设置
                           // 设置为等待完成状态
+                          console.log('无限制属性直接完成属性设置 状态')
+                          console.log(this.lead.att_click_type)
                           this.show_lead=false;//隐藏引入的清单表格
                           return this.lead.att_click_type = 'okay';
                     }
-                }
-          },
-
-          att_input2(row){  //属性值输入完成确定按钮
-                if(this.lead.att_click_type == 'limit' || this.lead.att_click_type == 'attribute' || this.lead.att_click_type == 'formula')return false; //当前是公式OR属性状态的话无法点击此按钮
-                if (row.limit_value==null || row.limit_value=='') {
-                    this.$message({ message: '限制属性值不能为空！', type: 'error' })
-                    return false;
-                }else{
-                    if (row.attribute !=null) {
-                        if (row.attribute=='orginal' || row.attribute== 'update' || row.attribute== 'fluctuate' || row.attribute== 'formula' || row.attribute== 'sum_text' || row.attribute== 'sum_formula') {
-                              if (row.attribute_value ==null || row.attribute_value =='') { //检测属性有无设置
+              }else if(data!=null && type=='att'){
+                  if (data.attribute !=null) {
+                        if (data.attribute=='orginal' || data.attribute== 'update' || data.attribute== 'fluctuate' || data.attribute== 'formula' || data.attribute== 'sumText' || data.attribute== 'sumFormula') {
+                              if (data.attributeValue ==null || data.attributeValue =='') { //检测属性有无设置
                                   // 设置为有未设置属性存在，过渡状态
                                   return this.lead.att_click_type = 'transit';
                               }else{
@@ -801,10 +812,9 @@ import inven from '../../modules/inventory';
                     }else{
                           // 设置为有未设置属性存在，过渡状态
                           return this.lead.att_click_type = 'transit';
-                    }
-                }
+                  }
+              }
           }
-
 
     }
   }

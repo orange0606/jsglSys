@@ -55,13 +55,18 @@ Vue.use(TableColumn)
 Vue.use(Editable)
 Vue.use(EditableColumn)
 
-
+import Axios from "axios"
+//将axios挂载到原型上
+Vue.prototype.$axios = Axios;
+Vue.prototype.HOST = '/api'
 
 Vue.prototype.$message = Message;
 Vue.prototype.$notify = Notification;
 Vue.prototype.$loading = Loading.service;
 Vue.prototype.$msgbox = MessageBox;
 Vue.prototype.$confirm = MessageBox.confirm;
+
+Vue.prototype.orginal = null;  //全局变量，用来存储原清单
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

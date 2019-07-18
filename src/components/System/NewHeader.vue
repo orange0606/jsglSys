@@ -4,7 +4,6 @@
     <el-row>
         <el-col :span="6" :xs="24" style="min-width:300px;">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
-
                 <el-form-item label="表头标段" prop="region">
                     <el-select v-model="ruleForm.region" clearable placeholder="请选择表头标段" style=" width:100%;">
                         <el-option label="路线（LX）" value="LX"></el-option>
@@ -83,7 +82,7 @@
     :before-close="handleClose"> -->
 
     <!-- 引入表格编辑组件 -->
-    <headeratt :tableList.sync="table" :dialog.sync="dialogVisible" ></headeratt>
+    <headeratt :NewList.sync="List" :tableList.sync="table" :dialog.sync="dialogVisible" ></headeratt>
     <!-- <span slot="footer" class="dialog-footer"> -->
      <!--    <el-button @click="dialogVisible2 = false">取 消</el-button>
          <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
@@ -110,6 +109,7 @@
     data () {
       return {
         table:null,
+        List:null,
         ruleForm: {
           name: '',    //表头名字
           region: '',   //表头标段
@@ -145,6 +145,26 @@
      created () { //2
     // this.findLanguageList()
     // this.findList()
+    },
+   watch: {
+        List: function(newVal,oldVal){
+            console.log('newVal,oldVal')
+            console.log('子组件最终传过来的数据')
+            console.log(newVal,oldVal)
+            let headRowList = [];
+            let hd = Object.keys(newVal[0]);   //获取所有的列
+            for (let index = 0; index < newVal.length; index++) {
+                for (let i = 0; i < hd.length; i++) {
+                      headRowList.push(newVal[index][hd[i]]);
+                }
+              
+            }
+            console.log('数据结构')
+            console.log(headRowList)
+            console.log(headRowList[0].length)
+        }
+
+
     },
     methods: {
         submitHeader () {  //校验表头选择表单  

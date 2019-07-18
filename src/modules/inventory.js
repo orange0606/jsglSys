@@ -5,33 +5,36 @@ const data = {
     */
     all_headname:['orginal', 'change', 'update', 'meterage', 'totalmeteragge', 'pay', 'totalpay'],  
     all_head:{  //所有清单表头字段
-        tender_id : null, //标段id
-        sys_order : null, //系统序号，用于排序
-        sys_num : null, // 系统编号，用于处理清单编号的去空格、转换中文符号为英文等。
+        tenderId : null, //标段id
+        sysOrder : null, //系统序号，用于排序
+        sysNum : null, // 系统编号，用于处理清单编号的去空格、转换中文符号为英文等。
         num : null, //表头编号
         name : null, //表头名称
         type : null, //清单类别
-        save_time : null, //保存时间
-        update_time : null, //更改时间
-        save_employee_id : null, // 保存人
-        update_employee_id : null //更改人
+        tOriginalHeadId:null,//原清单id 
     },
     all_head_row:[  //所有表头行共有的key值
         'name', //名称
-        'col_width', //列宽（注意上行与下行的列宽要相等）
-        'tr_high', // 行高
+        'colWidth', //列宽（注意上行与下行的列宽要相等）
+        'colWdthProportion',//列宽比例
+        'trHigh', // 行高
+        'trHighproportion',//行高比例
         'attribute', //属性
-        'attribute_value', //属性值
-        'text_align', //文本对齐对齐方式
+        'attributeValue', //属性值
+        'textAlign', //文本对齐对齐方式
+        'tOriginalHeadRowId',//原清单表头内容ID
+        'tUpdateHeadRowId',//原清单表头内容ID
+        'tLimit',    //限制值类型 int
+        'limitValue', //限制值
         'id'
     ],
     all_attribute: [   //所有清单表头共有的属性
-        {att_name: 'sys_order',zh:'系统序号列“sys_order”（用于系统的排序，导入导出时无需匹配）',value:null,if:false,no:1},
-        {att_name: 'sys_num',zh:'系统编号列“sys_num”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false,no:1},
+        {att_name: 'sysOrder',zh:'系统序号列“sysOrder”（用于系统的排序，导入导出时无需匹配）',value:null,if:false,no:1},
+        {att_name: 'sysNnum',zh:'系统编号列“sysNum”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false,no:1},
         {att_name: 'formula',zh:'“formula”公式',value:'=H3-G2',if:true,no:1},
-        {att_name: 'sum_text',zh:'系统默认的合计行-普通文本',value:'合计',if:true,no:1},
-        {att_name: 'sum_null',zh:'系统默认的合计行-空文本',value:null,if:false,no:1},
-        {att_name: 'sum_formula',zh:'系统默认的合计行-合计公式',value:'=SUM()',if:true,no:1}
+        {att_name: 'sumText',zh:'系统默认的合计行-普通文本',value:'合计',if:true,no:1},
+        {att_name: 'sumNull',zh:'系统默认的合计行-空文本',value:null,if:false,no:1},
+        {att_name: 'sumFormula',zh:'系统默认的合计行-合计公式',value:'=SUM()',if:true,no:1}
     ],
     all_limit:[ //所有清单表头行限制限制属性的值
         {att_name: 'max',zh:'max最大值', value:null,if:false},
@@ -39,94 +42,52 @@ const data = {
         {att_name: 'decreasemax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
     ],
     orginal: {  // 原清单
-        head_row:[  
-            't_original_head_id', //原清单头id
-        ],
         attribute:[ //属性及属性值
+            {att_name: 'orginalNull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
         ]
     },
     change:{    //变更清单
-        head_row:[
-            't_change_head_id', //变更清单表头id
-            'attribute_value_id', //对应原清单表头内容的id
-            'limit', //限制 1、max最大值 2、increasemax增加的最大值 3、decreasemax减少的最大值
-            'limit_value', // 3、“CA14”
-            'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
-        ],
         attribute:[ //属性及属性值
             {att_name: 'orginal',zh:'“orginal”原清单',value:'CA14',if:true},
-            {att_name: 'orginalnull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
+            {att_name: 'orginalNull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
             {att_name: 'change',zh:'“change”变更清单',value:null,if:false},
         ]
 
     },
     update:{    //变更后（新）清单
-        head_row:[
-            't_update_head_id', //变更后（新）清单表头id
-            't_original_head_row_id' //原清单表头内容id
-        ],
         attribute:[ //属性及属性值
         ]
 
     },
     meterage:{    //计量清单
-        head_row:[
-            't_meterage_head_id', //原清单头id
-            'attribute_value_id', //对应原清单表头内容的id
-            'limit', //限制 1、max最大值 2、increasemax增加的最大值 3、decreasemax减少的最大值
-            'limit_value', // 3、“CA14”
-            'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
-        ],
         attribute:[ //属性及属性值
             {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
-            {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
+            {att_name: 'updateNull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
             {att_name: 'meterage',zh:'“meterage”变更清单',value:null,if:false},
         ]
         
     },
     totalmeteragge:{    //累计计量清单
-        head_row:[
-            't_meterage_head_id', //原清单头id
-            'attribute_value_id', //对应原清单表头内容的id
-            'limit', //限制 1、max最大值 2、increasemax增加的最大值 3、decreasemax减少的最大值
-            'limit_value', // 3、“CA14”
-            'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
-        ],
         attribute:[ //属性及属性值
             {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
-            {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
+            {att_name: 'updateNull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
             {att_name: 'meterage',zh:'“meterage”变更清单',value:null,if:false},
             {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         ]        
     },   
     pay:{    //支付清单
-        head_row:[
-            't_pay_head_id', //支付清单表头id
-            'attribute_value_id', //对应新清单表头内容的id
-            'limit', //限制 1、max最大值 2、increasemax增加的最大值 3、decreasemax减少的最大值
-            'limit_value', // 3、“CA14”
-            'limit_id' //对应原清单表头内容的id1、3 2、5 3、2
-        ],
         attribute:[ //属性及属性值
             {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
-            {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null, if:false},
+            {att_name: 'updateNull',zh:'“updatenull”新清单（无对应）',value:null, if:false},
             {att_name: 'meterage',zh:'“pay”支付清单',value:null, if:false},
             {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         ]        
     },  
     totalpay:{    //累计支付清单
-        head_row:[
-            't_totalpay_head_id', //支付清单表头id
-            'attribute_value_id', //对应新清单表头内容的id
-            'limit', //限制 1、max最大值 2、increasemax增加的最大值 3、decreasemax减少的最大值
-            'limit_value', // 3、“CA14”
-            'limit_id', //对应原清单表头内容的id1、3 2、5 3、2
-            'update_time' //最新更新的时间
-        ],
         attribute:[ //属性及属性值
             {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
-            {att_name: 'updatenull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
-            {att_name: 'totalpay',zh:'“totalpay"累计支付清单',value:null,if:false},
+            {att_name: 'updateNull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
+            {att_name: 'totalPay',zh:'“totalpay"累计支付清单',value:null,if:false},
             {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12', if:true},
         ]        
     }
@@ -147,16 +108,16 @@ export default {
         // var arr = objDeepCopy(Arrays);
         //先组装公有清单类型数据
         let hd = Object.keys(arr[0]);   //获取所有的列
-        let attr = data.all_head_row.concat(data[type].head_row); //合并共有属性和私有属性数组
+        let attr = data.all_head_row; //合并共有属性和私有属性数组
 
         for (let index = 0; index < arr.length; index++) { 
             for (let i = 0; i < hd.length; i++) {  
                 for (let e = 0; e < attr.length; e++) {    
-                    if (attr[e] =='col_width') {        //设置单元格默认宽高
+                    if (attr[e] =='colWidth') {        //设置单元格默认宽高
                         arr[index][hd[i]][attr[e]] =80;
-                    }else if(attr[e] =='tr_high'){
+                    }else if(attr[e] =='trHigh'){
                         arr[index][hd[i]][attr[e]] =35;        
-                    }else if(attr[e] == 'text_align'){  //默认居中文字
+                    }else if(attr[e] == 'textAlign'){  //默认居中文字
                         arr[index][hd[i]][attr[e]] ='center';
                     }else if(attr[e] == 'id'){  //默认id
                         arr[index][hd[i]][attr[e]] = i;
@@ -170,9 +131,9 @@ export default {
         Arr.attribute = data[type].attribute.concat(data.all_attribute)
         // Arr.attribute = Object.assign(data[type].attribute,data.all_attribute);  //合并共有特殊属性以及私有特殊属性对象一起注入数据
 
-        if (data[type].head_row.indexOf("limit") !=-1) {    //先判断这个类型清单表头有无限制属性，无则不添加
+        // if (data[type].head_row.indexOf("limit") !=-1) {    //先判断这个类型清单表头有无限制属性，无则不添加
             Arr.limit = data.all_limit;
-        }
+        // }
         Arr.sheet = arr;
         console.log('重新组装好的数据')
         console.log(Arr)
@@ -197,23 +158,23 @@ export default {
     //     return newobj;
     // }
     badge_name:{
-        sys_order:'序号',
-        sys_num:'编号',
+        sysOrder:'序号',
+        sysNum:'编号',
         formula:'公式',
-        sum_text:'合计（普通）',
-        sum_null:'合计（空）',
-        sum_formula:'合计（公式）',
+        sumText:'合计（普通）',
+        sumNull:'合计（空）',
+        sumFormula:'合计（公式）',
         orginal:'原清单',
-        orginalnull:'新清单（无）',
+        orginalNull:'新清单（无）',
         change:'变更清单',
         update:'新清单',
-        updatenull:'新清单（无）',
+        updateNull:'新清单（无）',
         meterage:'变更清单？',
         fluctuate:'变更清单（变更清单增减）',
         totalpay:'累计支付清单',
-        max:'MAX',
-        increasemax:'增加MAX',
-        decreasemax:'减少MAX'
+        max:'max',
+        increaseMax:'增加MAX',
+        decreaseMax:'减少MAX'
     }
 
 }
