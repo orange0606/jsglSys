@@ -30,7 +30,7 @@ const data = {
     ],
     all_attribute: [   //所有清单表头共有的属性
         {att_name: 'sysOrder',zh:'系统序号列“sysOrder”（用于系统的排序，导入导出时无需匹配）',value:null,if:false,no:1},
-        {att_name: 'sysNnum',zh:'系统编号列“sysNum”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false,no:1},
+        {att_name: 'sysNum',zh:'系统编号列“sysNum”（系统用于对清单编号去空格和中文符号的处理，导入导出时无需匹配）',value:null,if:false,no:1},
         {att_name: 'formula',zh:'“formula”公式',value:'=H3-G2',if:true,no:1},
         {att_name: 'sumText',zh:'系统默认的合计行-普通文本',value:'合计',if:true,no:1},
         {att_name: 'sumNull',zh:'系统默认的合计行-空文本',value:null,if:false,no:1},
@@ -38,8 +38,8 @@ const data = {
     ],
     all_limit:[ //所有清单表头行限制限制属性的值
         {att_name: 'max',zh:'max最大值', value:null,if:false},
-        {att_name: 'increasemax',zh:'increasemax增加的最大值', value:null,if:false},
-        {att_name: 'decreasemax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
+        {att_name: 'increaseMax',zh:'increasemax增加的最大值', value:null,if:false},
+        {att_name: 'decreaseMax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
     ],
     orginal: {  // 原清单
         attribute:[ //属性及属性值

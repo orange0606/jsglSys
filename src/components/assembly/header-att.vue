@@ -149,7 +149,7 @@
                               </el-input>
                         </el-form-item>
                     </div>
-                    <el-form-item v-if="'tLimit' in row_att" label="限制单元格大小值" prop="tLimit">
+                    <el-form-item v-if="listType!='orginal' && listType!='update'" label="限制单元格大小值" prop="tLimit">
                         <el-select v-model="row_att.tLimit" placeholder="请选择限制类型" @change="limiremote" clearable size="small" style=" width:100%;">
                             <el-option v-for="(val,i) in tLimits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
                         </el-select>
@@ -181,12 +181,6 @@
                         </el-select>
                     </el-form-item>
                     
-                    <!-- <el-form-item v-if="'limit_id' in row_att" label="（限制id）对应原清单表头内容id" prop="limit_id">
-                      <el-input v-model="row_att.tLimit_id"></el-input>
-                    </el-form-item> -->
-                    <!-- <el-form-item v-if="'update_time' in row_att" label="更新时间" prop="update_time">
-                      <el-input v-model="row_att.update_time"></el-input>
-                    </el-form-item> -->
                     <el-button @click="cancelAtt">取 消</el-button>
                     <el-button type="primary" @click="submitAtt">确 定</el-button>
                 </el-form>
@@ -211,7 +205,7 @@ import XEUtils from 'xe-utils'
 import inven from '../../modules/inventory';
   export default {
     name: 'edit',
-    props:['tableList','dialog','NewList'],
+    props:['type','tableList','dialog','NewList'],
     data () {
       return {
         btn: {  //按钮的名称,与存储信息事件
@@ -229,8 +223,7 @@ import inven from '../../modules/inventory';
         show_lead:false, //显示引入的清单类型表格
         col_width:130, //调整单元格的列宽
         badge_name:inven.badge_name, //属性标记名对象
-        row:null,
-
+        listType:this.type,//清单类型
         lead:{ //存储引入清单数据
             list:[],//引入的清单数据
             show_select_name:false, //显示选择清单选择框
@@ -280,9 +273,13 @@ import inven from '../../modules/inventory';
 
             this.lead.list= XEUtils.clone(this.list, true);
             this.lead.hd = this.hd;
-            console.log('created打印一下this.lead.list')
-            console.log(this.lead.list)
+            // console.log('created打印一下this.lead.list')
+            // console.log(this.lead.list)
+
+            // console.log(this.type)
+
         }
+
     },
     mounted() {
       window.onresize = () => {
@@ -318,8 +315,8 @@ import inven from '../../modules/inventory';
 
                 this.lead.list= XEUtils.clone(this.list, true);
                 // this.lead.list= this.list;
-                console.log('watch_tablelist打印一下this.lead.list')
-                console.log(this.lead.list)
+                // console.log('watch_tablelist打印一下this.lead.list')
+                // console.log(this.lead.list)
                 this.lead.hd = this.hd;
 
                 this.screenWidth = document.body.clientWidth;
@@ -332,8 +329,12 @@ import inven from '../../modules/inventory';
         dialog:function(n,v){
             console.log('子组件中监听dialog的值变化')
             console.log(n)
-        }
-
+        },
+        type: function(newVal,oldVal){
+           if(newVal !=null){
+              this.listType = newVal;
+           }
+        },
     },
 
     methods: {
@@ -352,8 +353,8 @@ import inven from '../../modules/inventory';
               .catch(_ => {});
           },
           submitAtt(){  //校验属性设置的值是否成功
-            console.log('submitatt 状态')
-            console.log(this.lead.att_click_type)
+            // console.log('submitatt 状态')
+            // console.log(this.lead.att_click_type)
             if(this.lead.att_click_type == 'transit'){
                 return this.$message({ message: '属性未设置完毕', type: 'error' });
             }else if(this.lead.att_click_type == 'limit' || this.lead.att_click_type == 'attribute' || this.lead.att_click_type == 'formula'){
@@ -548,26 +549,20 @@ import inven from '../../modules/inventory';
 
                     if(this.lead.att_click_type == 'formula'){    ////点击单元格设置公式属性值
                           
-
-                          console.log(this.lead.att_id,this.lead.att_key)
-                          console.log('this.row_att')
-                          console.log('进来了公式设置')
-                          console.log(this.row_att)
+                          // console.log(this.lead.att_id,this.lead.att_key)
+                          // console.log('this.row_att')
+                          // console.log('进来了公式设置')
+                          // console.log(this.row_att)
                           this.row_att.attributeValue==null? this.row_att.attributeValue="":this.row_att.attributeValue+="+";
                           this.row_att.attributeValue = this.row_att.attributeValue+this.lead.att_key;
-
-                        // }else{  //点击单元格设置限制属性值与id
-                        //   this.row_att.tLimitValue = this.lead.att_key;
-                        //   this.row_att.tLimit_id = this.lead.att_id;
                           
                     }else if(this.lead.att_click_type =='limit'){  //点击单元格设置限制属性值与id
-                            console.log('点击单元格设置限制属性值与id')
+                            // console.log('点击单元格设置限制属性值与')
                             this.row_att.limitValue = this.lead.att_key;
-
-                          
+ 
                    }else if(this.lead.att_click_type == null){
                           //调用点击属性设置显示事件
-                          console.log('调用点击属性设置显示事件')
+                          // console.log('调用点击属性设置显示事件')
                           this.att(row[colum])
                     }
                    
@@ -666,11 +661,11 @@ import inven from '../../modules/inventory';
               if (column.property && !this.btn.edit) {  //做容错处理，防止点击到选择框触发此事件
                     //判断引入表格是否显示
                     // this.show_lead?this.show_lead = false:this.show_lead;
-                            console.log('进来了表格2点击单元格1')
-                            console.log(this.lead.att_click_type)
+                            // console.log('进来了表格2点击单元格1')
+                            // console.log(this.lead.att_click_type)
 
                         if(this.lead.att_click_type =='attribute'){ //设置属性开启后，才执行相关属性与限制值属性操作
-                            console.log('进来了表格2点击单元格2')
+                            // console.log('进来了表格2点击单元格2')
                             let colum =column.property;
                             colum = colum.substr(0,colum.indexOf('.'));
                             this.lead.cell_row = row[colum].trNum;
@@ -680,14 +675,19 @@ import inven from '../../modules/inventory';
                             //点击单元格获取id 和key（位置）
                             this.lead.att_id = row[colum].id;
                             this.lead.att_key = `${row[colum].colNum}${row[colum].trNum}`;
-                            console.log(this.lead.att_id,this.lead.att_key)
-                            console.log('cell_click2打印一下this.row_att')
-                            console.log(this.row_att)
-                            console.log('点击单元格设置属性值')
+                            // console.log(this.lead.att_id,this.lead.att_key)
+                            // console.log('cell_click2打印一下this.row_att')
+                            // console.log(this.row_att)
+                            // console.log('点击单元格设置属性值')
                             this.row_att.attributeValue = this.lead.att_key;
-                            //此处id。。。。。。。。。。。。。。。。。。
+                            let attribute = this.row_att.attribute;
+                            if (attribute =="orginal" || attribute =="updata") {  //原清单表头内容ID
+                                this.row_att.tOriginalHeadRowId =  this.lead.att_id;
+                            }else if(attribute =="change" || attribute =="meterage" || attribute =="fluctuate"){  //变更后清单表头内容ID
+                                this.row_att.tUpdateHeadRowId =  this.lead.att_id;
+                  
+                            }
                         }
-                    // console.log('this.lead.att_id,this.lead.att_key')
                     
                     //手动刷新表格
                     this.$refs.elxEditable?this.$refs.elxEditable.refresh():this.$refs.elxEditable1.refresh()
@@ -695,19 +695,17 @@ import inven from '../../modules/inventory';
               }
           },
           remote1(req){   //监听设置属性选择框的值
-              console.log('这里开始网络请求查找用户选择的清单类型的所有清单')
-              console.log(req)
-              console.log(this.row)
+              // console.log('这里开始网络请求查找用户选择的清单类型的所有清单')
+              // console.log(req)
               if (req=='orginal' || req== 'update' || req== 'fluctuate'){
                   //网络请求
-
                   //数据返回后，开启清单选择
                   this.lead.show_select_name =true;
 
                   //显示引入的表格
                   this.show_lead = true;
                   this.lead.att_click_type = 'attribute';  //开启属性输入状态为属性模式
-                  console.log('attribute开启属性输入状态为属性模式')
+                  // console.log('attribute开启属性输入状态为属性模式')
  
               }else if(req== 'formula' || req== 'sumText' || req== 'sumFormula'){  //设置公式
                   //关闭清单选择
@@ -715,14 +713,14 @@ import inven from '../../modules/inventory';
                                     
                   this.show_lead = false;//隐藏引入的表格
                   this.lead.att_click_type = 'formula';  //开启属性输入状态为公式模式
-                  console.log('formula开启属性输入状态为公式模式')
+                  // console.log('formula开启属性输入状态为公式模式')
               }else{
                   //关闭清单选择
                   this.lead.show_select_name =false;
                   //隐藏引入的表格
                   this.show_lead = false;
-                  console.log('这里需要检测是否有限制属性')
-                  this.tLimits!=null?this.lead.att_click_type = 'transit':this.lead.att_click_type = 'okay';
+                  // console.log('这里需要检测是否有限制属性')
+                  this.listType!='orginal' && this.listType!='update'?this.lead.att_click_type = 'transit':this.lead.att_click_type = 'okay';
                   //这里需要检测是否有限制属性
                   // this.InspectAtt(this.row,'limit') //调用状态检测设定函数
 
@@ -746,9 +744,9 @@ import inven from '../../modules/inventory';
 
           },
           att_input1(row){  //属性值输入完成确定按钮
-                console.log('属性值输入完成确定按钮 状态')
-                console.log(this.lead.att_click_type)
-                console.log(row.attributeValue)
+                // console.log('属性值输入完成确定按钮 状态')
+                // console.log(this.lead.att_click_type)
+                // console.log(row.attributeValue)
                 if(this.lead.att_click_type == 'limit')return this.$message({ message: '当前正在设置限制属性，请继续完成！', type: 'error' });; //当前是限制属性状态的话无法点击此按钮
                 if (row.attributeValue==null || row.attributeValue =='') {  //检测属性值是否输入完成
                     this.$message({ message: '属性值不能为空！', type: 'error' })
@@ -768,19 +766,19 @@ import inven from '../../modules/inventory';
                 }
           },
           InspectAtt(data,type){   //设定属性状态函数（检测各种属性值情况）   data该单元格数据   type属性类型（公式与属性值属于att   限制值属性属于limit）
-              console.log(data)
+              // console.log(data)
               if (data!=null && type=='limit') {
-                    if (this.tLimits!=null) {  //检测有无限制属性
+                    if (this.listType!='orginal' && this.listType!='update') {  //检测有无限制属性
                           if (data.limitValue !=null && data.attributeValue !='') { //检测限制值是否已经设定
-                               console.log('检测限制值已经设定 状态')
-                                console.log(this.lead.att_click_type)
+                              //  console.log('检测限制值已经设定 状态')
+                              //   console.log(this.lead.att_click_type)
                               this.show_lead=false;//隐藏引入的清单表格
                               // 设置为等待完成状态
                               return this.lead.att_click_type = 'okay';
                               
                           }else{
-                                console.log('检测限制值已经未设定 状态')
-                                console.log(this.lead.att_click_type)
+                                // console.log('检测限制值已经未设定 状态')
+                                // console.log(this.lead.att_click_type)
                               // 设置为有未设置属性存在，过渡状态
                               this.show_lead=false;//隐藏引入的清单表格
                               return this.lead.att_click_type = 'transit';
@@ -788,8 +786,8 @@ import inven from '../../modules/inventory';
                       
                     }else{  //无限制属性直接完成属性设置
                           // 设置为等待完成状态
-                          console.log('无限制属性直接完成属性设置 状态')
-                          console.log(this.lead.att_click_type)
+                          // console.log('无限制属性直接完成属性设置 状态')
+                          // console.log(this.lead.att_click_type)
                           this.show_lead=false;//隐藏引入的清单表格
                           return this.lead.att_click_type = 'okay';
                     }

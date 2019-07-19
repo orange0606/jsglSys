@@ -57,38 +57,9 @@
     </el-row>
     </header>
 
-  <!-- 表格编辑弹窗显示====== -->
-  <!-- <el-dialog
-    title="请进行修改确认"
-    :visible.sync="dialogVisible"
-    width="80%"
-    :before-close="handleClose"> -->
-
     <!-- 引入表格编辑组件 -->
-    <!-- <edits :tableList="table"></edits>
-    <span slot="footer" class="dialog-footer">
-      <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="dialogVisible = false">下一步</el-button>
-    </span>
-  </el-dialog> -->
+    <headeratt :type="ruleForm.type" :NewList.sync="List" :tableList="table" :dialog.sync="dialogVisible" ></headeratt>
 
-<!-- 表格编辑弹窗显示====== -->
-  <!-- <el-dialog
-    title="请进行设置表头每个单元格属性"
-    :visible.sync="dialogVisible2"
-    width="90%"
-    :append-to-body="false" 
-    top="11vh"
-    :before-close="handleClose"> -->
-
-    <!-- 引入表格编辑组件 -->
-    <headeratt :NewList.sync="List" :tableList.sync="table" :dialog.sync="dialogVisible" ></headeratt>
-    <!-- <span slot="footer" class="dialog-footer"> -->
-     <!--    <el-button @click="dialogVisible2 = false">取 消</el-button>
-         <el-button type="primary" @click="dialogVisible2 = false">下一步</el-button>
-        -->
-    <!-- </span>
-  </el-dialog> -->
 
   </div>
 </template>
@@ -116,8 +87,6 @@
           number: '',   //表头编号
           type: '',  //表头类型
           value: null, //可引入的表头清单
-
-
         },
 
         multipleSelection: [],
@@ -145,23 +114,56 @@
      created () { //2
     // this.findLanguageList()
     // this.findList()
+    console.log(this.HOST)
     },
    watch: {
         List: function(newVal,oldVal){
+
             console.log('newVal,oldVal')
             console.log('子组件最终传过来的数据')
             console.log(newVal,oldVal)
+            
+
             let headRowList = [];
             let hd = Object.keys(newVal[0]);   //获取所有的列
             for (let index = 0; index < newVal.length; index++) {
                 for (let i = 0; i < hd.length; i++) {
                       headRowList.push(newVal[index][hd[i]]);
                 }
-              
+             
+            }
+            let params = {
+                sysOrder: null,          //系统序号 预留，暂时不用
+                sysNum: null,           //系统编号 预留，暂时不用
+                tenderId: null,           //标段id 
+                num: this.ruleForm.number,    //表头编号
+                name: this.ruleForm.name,           //表名
+                type: this.ruleForm.type,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
+                tOriginalHeadId: null,    //原清单ID
+                headRowList,           //表头内容
             }
             console.log('数据结构')
-            console.log(headRowList)
-            console.log(headRowList[0].length)
+            // console.log(parame)
+            // console.log(headRowList[0].length)
+            // this.$axios.get(this.HOST+'/head/add',{
+            //     parame
+            // }).then(res => {
+            //     //获取你需要用到的数据
+            //     console.log('网路请求。。。。。。。。')
+            //     console.log(res)
+            // });
+            var data = params  //定义一个data储存需要带的参数
+            console.log(data)
+            this.$axios.post(this.HOST+'/head/add',this.$qs.stringify(data)
+            ).then(res =>{
+                 console.log('网路请求。。。。。。。。')
+                 
+                //获取你需要的数据
+                console.log(res)
+            }).catch(error =>{
+                console.log(error)
+            })
+
         }
 
 
@@ -200,8 +202,8 @@
               let _this = this;
 
               excelmodel.Imports(data=>{
-                  console.log('最终处理完成的数据')
-                  console.log(data)
+                  // console.log('最终处理完成的数据')
+                  // console.log(data)
 
                   // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
                   _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗

@@ -55,10 +55,15 @@ Vue.use(TableColumn)
 Vue.use(Editable)
 Vue.use(EditableColumn)
 
-import Axios from "axios"
-//将axios挂载到原型上
-Vue.prototype.$axios = Axios;
+import axios from "axios"
+
+// //将axios挂载到原型上
+Vue.prototype.$axios = axios;
+import qs from 'qs';
+
+// import qs from 'axios.config';
 Vue.prototype.HOST = '/api'
+Vue.prototype.$qs = qs;
 
 Vue.prototype.$message = Message;
 Vue.prototype.$notify = Notification;
