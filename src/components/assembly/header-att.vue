@@ -39,7 +39,6 @@
                   ref="elxEditable"
                   class="click-table12"
                   border
-                  
                   width="100%"
                   :highlight-current-row="false"
                   :data.sync="list"
@@ -149,9 +148,9 @@
                               </el-input>
                         </el-form-item>
                     </div>
-                    <el-form-item v-if="listType!='orginal' && listType!='update'" label="限制单元格大小值" prop="tLimit">
+                    <el-form-item v-if="listType!='original' && listType!='update'" label="限制单元格大小值" prop="tLimit">
                         <el-select v-model="row_att.tLimit" placeholder="请选择限制类型" @change="limiremote" clearable size="small" style=" width:100%;">
-                            <el-option v-for="(val,i) in tLimits" :key="i" :label="val.zh" :value="val.att_name"></el-option>
+                            <el-option v-for="(val,i) in tLimits" :key="i" :label="val.zh" :value="i+1"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item v-if="row_att.tLimit!=null" label="限制值" >
@@ -681,7 +680,7 @@ import inven from '../../modules/inventory';
                             // console.log('点击单元格设置属性值')
                             this.row_att.attributeValue = this.lead.att_key;
                             let attribute = this.row_att.attribute;
-                            if (attribute =="orginal" || attribute =="updata") {  //原清单表头内容ID
+                            if (attribute =="original" || attribute =="updata") {  //原清单表头内容ID
                                 this.row_att.tOriginalHeadRowId =  this.lead.att_id;
                             }else if(attribute =="change" || attribute =="meterage" || attribute =="fluctuate"){  //变更后清单表头内容ID
                                 this.row_att.tUpdateHeadRowId =  this.lead.att_id;
@@ -697,7 +696,7 @@ import inven from '../../modules/inventory';
           remote1(req){   //监听设置属性选择框的值
               // console.log('这里开始网络请求查找用户选择的清单类型的所有清单')
               // console.log(req)
-              if (req=='orginal' || req== 'update' || req== 'fluctuate'){
+              if (req=='original' || req== 'update' || req== 'fluctuate'){
                   //网络请求
                   //数据返回后，开启清单选择
                   this.lead.show_select_name =true;
@@ -720,7 +719,7 @@ import inven from '../../modules/inventory';
                   //隐藏引入的表格
                   this.show_lead = false;
                   // console.log('这里需要检测是否有限制属性')
-                  this.listType!='orginal' && this.listType!='update'?this.lead.att_click_type = 'transit':this.lead.att_click_type = 'okay';
+                  this.listType!='original' && this.listType!='update'?this.lead.att_click_type = 'transit':this.lead.att_click_type = 'okay';
                   //这里需要检测是否有限制属性
                   // this.InspectAtt(this.row,'limit') //调用状态检测设定函数
 
@@ -768,7 +767,7 @@ import inven from '../../modules/inventory';
           InspectAtt(data,type){   //设定属性状态函数（检测各种属性值情况）   data该单元格数据   type属性类型（公式与属性值属于att   限制值属性属于limit）
               // console.log(data)
               if (data!=null && type=='limit') {
-                    if (this.listType!='orginal' && this.listType!='update') {  //检测有无限制属性
+                    if (this.listType!='original' && this.listType!='update') {  //检测有无限制属性
                           if (data.limitValue !=null && data.attributeValue !='') { //检测限制值是否已经设定
                               //  console.log('检测限制值已经设定 状态')
                               //   console.log(this.lead.att_click_type)
@@ -793,7 +792,7 @@ import inven from '../../modules/inventory';
                     }
               }else if(data!=null && type=='att'){
                   if (data.attribute !=null) {
-                        if (data.attribute=='orginal' || data.attribute== 'update' || data.attribute== 'fluctuate' || data.attribute== 'formula' || data.attribute== 'sumText' || data.attribute== 'sumFormula') {
+                        if (data.attribute=='original' || data.attribute== 'update' || data.attribute== 'fluctuate' || data.attribute== 'formula' || data.attribute== 'sumText' || data.attribute== 'sumFormula') {
                               if (data.attributeValue ==null || data.attributeValue =='') { //检测属性有无设置
                                   // 设置为有未设置属性存在，过渡状态
                                   return this.lead.att_click_type = 'transit';

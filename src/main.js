@@ -55,15 +55,24 @@ Vue.use(TableColumn)
 Vue.use(Editable)
 Vue.use(EditableColumn)
 
-import axios from "axios"
+// import axios from "axios"
+// // //将axios挂载到原型上
+// Vue.prototype.$axios = axios;
 
-// //将axios挂载到原型上
-Vue.prototype.$axios = axios;
-import qs from 'qs';
 
-// import qs from 'axios.config';
+// 引入工具类-目录自定义
+// import fetch from '@/utils/request'
+// import axios from 'axios'
+import {post,fetch,patch,put} from '@/utils/request'
+//定义全局变量
+Vue.prototype.$post=post;
+Vue.prototype.$fetch=fetch;
+Vue.prototype.$patch=patch;
+Vue.prototype.$put=put;
+
+
+
 Vue.prototype.HOST = '/api'
-Vue.prototype.$qs = qs;
 
 Vue.prototype.$message = Message;
 Vue.prototype.$notify = Notification;

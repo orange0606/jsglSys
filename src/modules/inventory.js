@@ -3,7 +3,7 @@ const data = {
     /*
         原清单、变更清单，变更后的（新）清单、计量清单、累计计量清单、支付清单，累计支付清单
     */
-    all_headname:['orginal', 'change', 'update', 'meterage', 'totalmeteragge', 'pay', 'totalpay'],  
+    all_headname:['original', 'change', 'update', 'meterage', 'totalmeteragge', 'pay', 'totalpay'],  
     all_head:{  //所有清单表头字段
         tenderId : null, //标段id
         sysOrder : null, //系统序号，用于排序
@@ -26,7 +26,7 @@ const data = {
         'tUpdateHeadRowId',//原清单表头内容ID
         'tLimit',    //限制值类型 int
         'limitValue', //限制值
-        'id'
+
     ],
     all_attribute: [   //所有清单表头共有的属性
         {att_name: 'sysOrder',zh:'系统序号列“sysOrder”（用于系统的排序，导入导出时无需匹配）',value:null,if:false,no:1},
@@ -41,15 +41,15 @@ const data = {
         {att_name: 'increaseMax',zh:'increasemax增加的最大值', value:null,if:false},
         {att_name: 'decreaseMax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
     ],
-    orginal: {  // 原清单
+    original: {  // 原清单
         attribute:[ //属性及属性值
-            {att_name: 'orginalNull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
+            {att_name: 'originalNull',zh:'“originalnull”新清单（无对应）',value:null,if:false},
         ]
     },
     change:{    //变更清单
         attribute:[ //属性及属性值
-            {att_name: 'orginal',zh:'“orginal”原清单',value:'CA14',if:true},
-            {att_name: 'orginalNull',zh:'“orginalnull”新清单（无对应）',value:null,if:false},
+            {att_name: 'original',zh:'“original”原清单',value:'CA14',if:true},
+            {att_name: 'originalNull',zh:'“originalnull”新清单（无对应）',value:null,if:false},
             {att_name: 'change',zh:'“change”变更清单',value:null,if:false},
         ]
 
@@ -164,8 +164,8 @@ export default {
         sumText:'合计（普通）',
         sumNull:'合计（空）',
         sumFormula:'合计（公式）',
-        orginal:'原清单',
-        orginalNull:'新清单（无）',
+        original:'原清单',
+        originalNull:'新清单（无）',
         change:'变更清单',
         update:'新清单',
         updateNull:'新清单（无）',

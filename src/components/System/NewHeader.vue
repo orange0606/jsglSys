@@ -6,15 +6,12 @@
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
                 <el-form-item label="表头标段" prop="region">
                     <el-select v-model="ruleForm.region" clearable placeholder="请选择表头标段" style=" width:100%;">
-                        <el-option label="路线（LX）" value="LX"></el-option>
-                        <el-option label="路基（LJ）" value="LJ"></el-option>
-                        <el-option label="路面（LM）" value="LM"></el-option>
-                        <el-option label="机电（JD）" value="JD"></el-option>
+                        <el-option v-for="(val,i) in regionList" :key="i" :label="val.name" :value="val.id"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="表头类型" prop="type">
                     <el-select v-model="ruleForm.type" placeholder="请选择表头类型" clearable size="small" style=" width:100%;">
-                        <el-option label="原清单" value="orginal"></el-option>
+                        <el-option label="原清单" value="original"></el-option>
                         <el-option label="变更清单" value="change"></el-option>
                         <el-option label="变更后的（新清单）" value="update"></el-option>
                         <el-option label="计量清单" value="meterage"></el-option>
@@ -79,6 +76,7 @@
     components: { edits, headeratt},
     data () {
       return {
+        regionList:[],
         table:null,
         List:null,
         ruleForm: {
@@ -112,63 +110,52 @@
       }
     },
      created () { //2
-    // this.findLanguageList()
-    // this.findList()
-    console.log(this.HOST)
+      this.findList()
     },
    watch: {
         List: function(newVal,oldVal){
 
-            console.log('newVal,oldVal')
-            console.log('子组件最终传过来的数据')
-            console.log(newVal,oldVal)
-            
-
+            // console.log('newVal,oldVal')
+            // console.log('子组件最终传过来的数据')
+            // console.log(newVal,oldVal)
+        
             let headRowList = [];
             let hd = Object.keys(newVal[0]);   //获取所有的列
             for (let index = 0; index < newVal.length; index++) {
                 for (let i = 0; i < hd.length; i++) {
                       headRowList.push(newVal[index][hd[i]]);
                 }
-             
             }
             let params = {
                 sysOrder: null,          //系统序号 预留，暂时不用
                 sysNum: null,           //系统编号 预留，暂时不用
-                tenderId: null,           //标段id 
+                tenderId: 29,           //标段id 
                 num: this.ruleForm.number,    //表头编号
                 name: this.ruleForm.name,           //表名
                 type: this.ruleForm.type,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
                 tOriginalHeadId: null,    //原清单ID
                 headRowList,           //表头内容
             }
-            console.log('数据结构')
-            // console.log(parame)
-            // console.log(headRowList[0].length)
-            // this.$axios.get(this.HOST+'/head/add',{
-            //     parame
-            // }).then(res => {
-            //     //获取你需要用到的数据
-            //     console.log('网路请求。。。。。。。。')
-            //     console.log(res)
-            // });
-            var data = params  //定义一个data储存需要带的参数
-            console.log(data)
-            this.$axios.post(this.HOST+'/head/add',this.$qs.stringify(data)
-            ).then(res =>{
-                 console.log('网路请求。。。。。。。。')
-                 
-                //获取你需要的数据
-                console.log(res)
-            }).catch(error =>{
-                console.log(error)
+            // console.log('数据结构')
+            // console.log(params)
+            //进行网路请求保存
+            this.$post('/head/add',params)
+              .then((response) => {
+              this.$message({ message: '新建成功', type: 'success' })
             })
-
         }
 
 
     },
     methods: {
+        findList () {   //请求标段函数
+            //发起网络请求
+          this.$post('/tender/getall',{})
+            .then((response) => {
+            console.log(response)
+            this.regionList = response.data.tenderList;
+          })
+        },
         submitHeader () {  //校验表头选择表单  
             this.$refs.ruleForm.validate(valid => {
               if (valid) {

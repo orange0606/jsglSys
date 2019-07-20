@@ -15,21 +15,21 @@
         ref="elxEditable"
         class="manual-table2"
         border
-        height="466"
-        :default-sort="{prop: 'updateTime', order: 'descending'}"
+        height="550"
         :data.sync="list"
         :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', clearActiveMethod}"
         style="width: 100%">
         <elx-editable-column type="selection" width="55"></elx-editable-column>
-        <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column>
+        <elx-editable-column type="index" width="50"> </elx-editable-column>
+        <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
         <elx-editable-column prop="num" label="标段编号" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
         <elx-editable-column prop="name" label="标段名称" :edit-render="{name: 'ElInput'}"></elx-editable-column>
         
-        <elx-editable-column prop="updateTime" label="更新时间" sortable  :formatter="formatterDate"></elx-editable-column>
-        <elx-editable-column prop="createTime" label="创建时间"  :formatter="formatterDate"></elx-editable-column>
+        <!-- <elx-editable-column prop="updateTime" label="更新时间" sortable  :formatter="formatterDate"></elx-editable-column>
+        <elx-editable-column prop="createTime" label="创建时间"  :formatter="formatterDate"></elx-editable-column> -->
 
-        <elx-editable-column label="操作" width="150">
+        <elx-editable-column label="操作" width="200">
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>
@@ -57,10 +57,10 @@
     return {
       loading: false,
       list: [
-          {id:1,num:'aaa1',name:'标段名称'},
-          {id:2,num:'aaa2',name:'标段名称'},
-          {id:3,num:'aaa3',name:'标段名称'},
-          {id:4,num:'aaa4',name:'标段名称'},
+          // {id:1,num:'aaa1',name:'标段名称'},
+          // {id:2,num:'aaa2',name:'标段名称'},
+          // {id:3,num:'aaa3',name:'标段名称'},
+          // {id:4,num:'aaa4',name:'标段名称'},
 
       ],
       formData: {
@@ -77,18 +77,24 @@
     }
   },
   created () {
-    // this.findList()  //发起请求标段
+    this.findList()  //发起请求标段
   },
   methods: {
     findList () {   //请求标段函数
       this.loading = true
         //发起网络请求
-
+    
+      this.$post('/tender/getall',{})
+        .then((response) => {
+        console.log(response)
+        this.list = response.data.tenderList;
+        this.loading = false
+      })
         // 请求成功
-        this.list = result
+        // this.list = result
 
         // 请求不成功或者没数据
-        this.loading = false
+        // this.loading = false
 
     },
 
@@ -248,13 +254,21 @@
           type: 'warning'
         }).then(() => {
           this.loading = true
-        //   进行删除数据
-
-        //删除成功
-        this.loading = false
-        //删除失败
-        //  this.loading = false
-  
+          // 进行发起请求删除
+          let data ={}
+          data.tenderIdList=[];
+          data.tenderIdList.push(row.id)
+          this.$post('/tender/delarray',data)
+              .then((response) => {
+              // console.log(response)
+              //删除成功
+              this.loading = false
+              this.findList()
+              this.$message({
+                type: 'success',
+                message: '删除所选选项成功!'
+              })
+            })
         }).catch(action => action).then(() => {
           this.isClearActiveFlag = true
         })
@@ -276,15 +290,29 @@
         }).then(() => {
           this.loading = true
             // 进行发起请求删除
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
+            let data= {}
+            data.tenderIdList=[];
+            for (let index = 0; index < removeRecords.length; index++) {
+                console.log(typeof removeRecords[index].id)
+                data.tenderIdList.push(removeRecords[index].id)
+              
+            }
+            this.loading = true
+            // 进行发起请求删除
+            this.$post('/tender/delarray',data)
+              .then((response) => {
+              // console.log(response)
+              //删除成功
+              this.loading = false
+              this.findList()
+              this.$message({
+                type: 'success',
+                message: '删除所选选项成功!'
+              })
             })
-            // this.findList()
-            //删除成功
-
-            this.loading = false
+            // this.loading = false
             //删除不成功
+ 
             
           })
         
@@ -297,25 +325,30 @@
         })
       }
     },
-    saveRowEvent (row) {
+    saveRowEvent (row) {  //网络保存(分修改与新增)
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-          let url = '/api/user/add'
-          if (row.id) {
-            url = '/api/user/update'
-            console.log('这id是什么梗')
-            console.log(row)
-            console.log(row.id)
+          let url = '/tender/add'
+          if (row.id) { //已有id便是修改保存
+            url = '/tender/update';
+
           }
-          if (XEUtils.isDate(row.date)) {
-            row.date = row.date.getTime()
-          }
+
           this.loading = true
           this.$refs.elxEditable.clearActive()
           //进行网路请求保存
-            // this.findList()
-           this.$message({ message: '保存成功', type: 'success' })
+          console.log('row新建标段或者修改标段')
+          console.log(row,url)
+
+          this.$post(url,row)
+            .then((response) => {
+            // console.log(response)
             this.loading = false
+            this.findList()
+            this.$message({ message: '保存2成功', type: 'success' })
+
+          })
+            
             //保存不成功
         
            // this.loading = false
