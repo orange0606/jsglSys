@@ -56,7 +56,6 @@
                               <!-- 
                                   **************单元格编辑**************
                                 -->
-
                           <el-input v-if="btn.edit" v-model="scope.row[val].td" > </el-input>
                           <el-badge style="display:block;" v-else :hidden="!btn.edit && scope.row[val].attribute !=null" is-dot  class="item_red">{{scope.row[val].td}}</el-badge>
                           <!-- -if="!btn.edit && scope.row[val].attribute ==null" -->
@@ -106,10 +105,10 @@
                       <span>注意事项</span>
                       <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
                     </div>
-                    <div class="text item" style="color: red;font-size: 12px;">
+                    <div class="text item" style="color: red;font-size: 13px;">
                       第一步
                     </div>
-                    <div class="text item" style="font-size: 8px;">
+                    <div class="text item" style="font-size: 13px;">
                       上下左右方向键切换列、Tab 键切换列、选中后可直接输入值覆盖旧值、点击单元格进行编辑修改
                     </div> 
                     <div class="text item" style="color: red;font-size: 12px;">

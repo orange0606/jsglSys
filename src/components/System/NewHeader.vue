@@ -15,12 +15,12 @@
                         <el-option label="变更清单" value="change"></el-option>
                         <el-option label="变更后的（新清单）" value="update"></el-option>
                         <el-option label="计量清单" value="meterage"></el-option>
-                        <el-option label="累计计量清单" value="totalmeteragge"></el-option>
+                        <el-option label="累计计量清单" value="totalmeterage"></el-option>
                         <el-option label="支付清单" value="pay"></el-option>
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='totalmeteragge' || ruleForm.type=='totalpay' " label="选择表头" prop="type">
+                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='totalmeterage' || ruleForm.type=='totalpay' " label="选择表头" prop="type">
                     <el-select v-model="ruleForm.value" placeholder="请选择清单表头" clearable size="small" style=" width:100%;">
                         <el-option label="公路清单" value="公路清单"></el-option>
                         <el-option label="2号公路清单" value="2号公路清单"></el-option>
@@ -121,6 +121,8 @@
         
             let headRowList = [];
             let hd = Object.keys(newVal[0]);   //获取所有的列
+            let refCol = hd.length;
+            let refRow = newVal.length;
             for (let index = 0; index < newVal.length; index++) {
                 for (let i = 0; i < hd.length; i++) {
                       headRowList.push(newVal[index][hd[i]]);
@@ -134,10 +136,13 @@
                 name: this.ruleForm.name,           //表名
                 type: this.ruleForm.type,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
                 tOriginalHeadId: null,    //原清单ID
+                refCol,   //多少列
+                refRow,   //多少行
                 headRowList,           //表头内容
             }
-            // console.log('数据结构')
-            // console.log(params)
+
+            console.log('数据结构')
+            console.log(params)
             //进行网路请求保存
             this.$post('/head/add',params)
               .then((response) => {
@@ -159,7 +164,7 @@
         submitHeader () {  //校验表头选择表单  
             this.$refs.ruleForm.validate(valid => {
               if (valid) {
-                    if(this.ruleForm.type!='change' || this.ruleForm.type!='totalmeteragge' || this.ruleForm.type!='totalpay'){
+                    if(this.ruleForm.type!='change' || this.ruleForm.type!='totalmeterage' || this.ruleForm.type!='totalpay'){
                         console.log('这里保存表头类型标段数据')
                         console.log(this.ruleForm)
                         this.$message({ message: '输入正确哦', type: 'success' })

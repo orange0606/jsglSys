@@ -106,6 +106,10 @@ let excelmodel = {
     Create(ref,callback){   //根据范围生成空数据
         // // 引入A-Z的所有列数组
         // index = this.AZ();
+        console.log('ref')
+        console.log(ref)
+        console.log(typeof {})
+    
         if (!ref)return
         let sub = ref.indexOf(':');
 

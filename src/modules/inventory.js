@@ -3,7 +3,7 @@ const data = {
     /*
         原清单、变更清单，变更后的（新）清单、计量清单、累计计量清单、支付清单，累计支付清单
     */
-    all_headname:['original', 'change', 'update', 'meterage', 'totalmeteragge', 'pay', 'totalpay'],  
+    all_headname:['original', 'change', 'update', 'meterage', 'totalmeterage', 'pay', 'totalpay'],  
     all_head:{  //所有清单表头字段
         tenderId : null, //标段id
         sysOrder : null, //系统序号，用于排序
@@ -67,7 +67,7 @@ const data = {
         ]
         
     },
-    totalmeteragge:{    //累计计量清单
+    totalmeterage:{    //累计计量清单
         attribute:[ //属性及属性值
             {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
             {att_name: 'updateNull',zh:'“updatenull”新清单（无对应）',value:null,if:false},

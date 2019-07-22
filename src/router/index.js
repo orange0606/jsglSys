@@ -21,6 +21,11 @@ export default new Router({
       component: ()=>import('@/components/System/NewHeader.vue')
     },
     {
+      path: '/headers',
+      name: 'headers',
+      component: ()=>import('@/components/System/Allheader.vue')
+    },
+    {
       path: '/marks',
       name: 'marks',
       component: ()=>import('@/components/System/Mark.vue')
