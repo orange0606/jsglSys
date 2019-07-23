@@ -40,6 +40,7 @@
                   class="click-table12"
                   border
                   width="100%"
+                  height="300"
                   :highlight-current-row="false"
                   :data.sync="list"
                   :span-method="arraySpanMethod"
@@ -68,7 +69,6 @@
             </div>
             </el-collapse-transition>
 
-                
                 <!-- ********点击 attribute之后的选择清单类型，然后显示引入的只读表格****** -->
 
              <transition name="el-fade-in-linear">
@@ -202,7 +202,7 @@
 import XEUtils from 'xe-utils'
 import inven from '../../modules/inventory';
   export default {
-    name: 'edit',
+    name: 'headerAtt',
     props:['type','tableList','dialog','NewList'],
     data () {
       return {

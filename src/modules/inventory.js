@@ -172,9 +172,9 @@ export default {
         meterage:'变更清单？',
         fluctuate:'变更清单（变更清单增减）',
         totalpay:'累计支付清单',
-        max:'max',
-        increaseMax:'增加MAX',
-        decreaseMax:'减少MAX'
+        '1':'max', //max
+        '2':'增加MAX',  //increaseMax
+        '3':'减少MAX' //decreaseMax
     }
 
 }

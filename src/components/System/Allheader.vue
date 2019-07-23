@@ -2,6 +2,7 @@
 <el-row :gutter="0">
   <!-- <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"><div class="grid-content bg-purple"></div></el-col> -->
   <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+    <el-collapse-transition>
     <div v-loading="loading">
         <div class="manual-table2-oper">
             <el-button type="success" size="mini" ><router-link to="/newheader">新增</router-link></el-button>
@@ -61,7 +62,7 @@
                     <el-button size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor"></el-button>
+                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="seeTbale(scope.row)"></el-button>
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" effect="light">
                     <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
@@ -71,6 +72,12 @@
         </elx-editable-column>
         </elx-editable>
 
+        <!-- 引入表格编辑组件 -->
+        <transition name="el-fade-in">
+          <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :visible.sync="editShow">
+              <edit :tableList.sync="update" :heads="head"  ></edit>
+          </el-dialog>
+        </transition>
 
         <!-- 引入表格编辑组件 -->
         <!-- <headeratt :type="ruleForm.type" :NewList.sync="List" :tableList="table" :dialog.sync="dialogVisible" ></headeratt> -->
@@ -85,6 +92,7 @@
           :total="pageVO.totalResult">
         </el-pagination>
     </div>
+    </el-collapse-transition>
   </el-col>
 
 </el-row>
@@ -93,8 +101,12 @@
 
 <script>
 import XEUtils from 'xe-utils'
+//引入只读表格组件
+import edit from '@/components/assembly/edit'
+import headeratt from '@/components/assembly/header-att'
   export default {
   name: 'headers',
+  components: {edit,headeratt},
   data () {
     return {
       loading: false,
@@ -102,9 +114,10 @@ import XEUtils from 'xe-utils'
       ],
       tenderid:null,
       tenderList:[],//全部标段
-      tenderName:[
-        '测试标段','路面标段','机电标段','机电标段2'
-      ],
+      tenderName:[],
+      head:null,
+      editShow:false,//显示隐藏只读表头
+      update:[],//要修改的已组装数据
       formData: {
         name: null,
         sex: null,
@@ -160,14 +173,17 @@ import XEUtils from 'xe-utils'
         this.loading = false;
 
       })
-        // 请求成功
-        // this.list = result
-
-        // 请求不成功或者没数据
-        // this.loading = false
 
     },
+    seeTbale (row) {
+        console.log('点击查看按钮的参数')
+        console.log(row)
+        this.head ={};
+        this.head.id = row.id;
+        this.head.type = row.type;
+        this.editShow = true;
 
+    },
     searchEvent () {
       this.pageVO.currentPage = 1
       this.findList()
@@ -192,9 +208,6 @@ import XEUtils from 'xe-utils'
       }
       return cellValue ? obj[cellValue] : '未知'
     },
-    formatterFlag (row, column, cellValue, index) {
-      return cellValue ? '是' : '否'
-    },
     formatterDate (row, column, cellValue, index) {
       return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
     },
@@ -205,19 +218,7 @@ import XEUtils from 'xe-utils'
       const property = column['property']
       return row[property] === value
     },
-    // insertEvent () {    //新增标段
-    //   let activeInfo = this.$refs.elxEditable.getActiveRow()
-    //   let { insertRecords } = this.$refs.elxEditable.getAllRecords()
-    //   console.log(this.$refs.elxEditable.getAllRecords())
-    //   if (!activeInfo && !insertRecords.length) {
-    //     this.$refs.elxEditable.insert({
-    //     //   name: `New ${Date.now()}`,
- 
-    //     }).then(({ row }) => {
-    //       this.$refs.elxEditable.setActiveRow(row)
-    //     })
-    //   }
-    // },
+    
     // 点击表格外面处理
     checkOutSave (row) {
       if (!row.id) {

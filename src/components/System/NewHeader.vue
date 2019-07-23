@@ -20,7 +20,7 @@
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='totalmeterage' || ruleForm.type=='totalpay' " label="选择表头" prop="type">
+                <!-- <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='totalmeterage' || ruleForm.type=='totalpay' " label="选择表头" prop="type">
                     <el-select v-model="ruleForm.value" placeholder="请选择清单表头" clearable size="small" style=" width:100%;">
                         <el-option label="公路清单" value="公路清单"></el-option>
                         <el-option label="2号公路清单" value="2号公路清单"></el-option>
@@ -29,7 +29,7 @@
                         <el-option label="2号路面清单" value="2号路面清单"></el-option>
                         <el-option label="3号清单" value="3号清单"></el-option>
                     </el-select>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="表头编号" prop="number">
                     <el-input v-model="ruleForm.number"></el-input>
                 </el-form-item>
@@ -73,7 +73,7 @@
   import inven from '../../modules/inventory';
   export default {
     name: 'newheader',
-    components: { edits, headeratt},
+    components: {edits,headeratt},
     data () {
       return {
         regionList:[],
@@ -131,7 +131,7 @@
             let params = {
                 sysOrder: null,          //系统序号 预留，暂时不用
                 sysNum: null,           //系统编号 预留，暂时不用
-                tenderId: 29,           //标段id 
+                tenderId: this.ruleForm.region,           //标段id 
                 num: this.ruleForm.number,    //表头编号
                 name: this.ruleForm.name,           //表名
                 type: this.ruleForm.type,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
@@ -157,6 +157,7 @@
             //发起网络请求
           this.$post('/tender/getall',{})
             .then((response) => {
+            console.log('请求标段数据')
             console.log(response)
             this.regionList = response.data.tenderList;
           })
