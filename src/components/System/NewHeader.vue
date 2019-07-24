@@ -10,7 +10,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="表头类型" prop="type">
-                    <el-select v-model="ruleForm.type" placeholder="请选择表头类型" clearable size="small" style=" width:100%;">
+                    <el-select v-model="ruleForm.type" placeholder="请选择表头类型" @change="typeChange" clearable size="small" style=" width:100%;">
                         <el-option label="原清单" value="original"></el-option>
                         <el-option label="变更清单" value="change"></el-option>
                         <el-option label="变更后的（新清单）" value="update"></el-option>
@@ -20,16 +20,12 @@
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <!-- <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='totalmeterage' || ruleForm.type=='totalpay' " label="选择表头" prop="type">
-                    <el-select v-model="ruleForm.value" placeholder="请选择清单表头" clearable size="small" style=" width:100%;">
-                        <el-option label="公路清单" value="公路清单"></el-option>
-                        <el-option label="2号公路清单" value="2号公路清单"></el-option>
-                        <el-option label="2号公路清单" value="2号公路清单"></el-option>
-                        <el-option label="路面清单" value="路面清单"></el-option>
-                        <el-option label="2号路面清单" value="2号路面清单"></el-option>
-                        <el-option label="3号清单" value="3号清单"></el-option>
+                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='update'" label="选择表头" prop="type">
+                    <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择原清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
+                        <el-option v-for="(val,i) in tOrHeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
+                        
                     </el-select>
-                </el-form-item> -->
+                </el-form-item>
                 <el-form-item label="表头编号" prop="number">
                     <el-input v-model="ruleForm.number"></el-input>
                 </el-form-item>
@@ -67,9 +63,6 @@
   // 引入表头属性设置组件
   import headeratt from '@/components/assembly/header-att'
 
-  // 引入excel 表格导入js处理函数模块
-  import excelmodel from '../../modules/proces';
-
   import inven from '../../modules/inventory';
   export default {
     name: 'newheader',
@@ -79,12 +72,13 @@
         regionList:[],
         table:null,
         List:null,
+        tOrHeadList:[],//请求全部原清单表头数据
         ruleForm: {
           name: '',    //表头名字
           region: '',   //表头标段
           number: '',   //表头编号
           type: '',  //表头类型
-          value: null, //可引入的表头清单
+          tOriginalHeadId:null, //原清单表头ID，建变更清单和变更后清单表头时传
         },
 
         multipleSelection: [],
@@ -119,15 +113,11 @@
             // console.log('子组件最终传过来的数据')
             // console.log(newVal,oldVal)
         
-            let headRowList = [];
             let hd = Object.keys(newVal[0]);   //获取所有的列
             let refCol = hd.length;
             let refRow = newVal.length;
-            for (let index = 0; index < newVal.length; index++) {
-                for (let i = 0; i < hd.length; i++) {
-                      headRowList.push(newVal[index][hd[i]]);
-                }
-            }
+
+            let headRowList = this.$excel.Unpack(newVal); //调用表格解构函数
             let params = {
                 sysOrder: null,          //系统序号 预留，暂时不用
                 sysNum: null,           //系统编号 预留，暂时不用
@@ -135,7 +125,7 @@
                 num: this.ruleForm.number,    //表头编号
                 name: this.ruleForm.name,           //表名
                 type: this.ruleForm.type,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-                tOriginalHeadId: null,    //原清单ID
+                tOriginalHeadId: this.ruleForm.tOriginalHeadId,    //原清单表头ID，建变更清单和变更后清单表头时传
                 refCol,   //多少列
                 refRow,   //多少行
                 headRowList,           //表头内容
@@ -161,6 +151,26 @@
             console.log(response)
             this.regionList = response.data.tenderList;
           })
+         
+        },
+        alloriginal () {  //所有原清单的id和名字
+             this.$post('/head/alloriginal',{})
+            .then((response) => {
+            console.log('所有原清单的id和名字')
+            console.log(response)
+            this.tOrHeadList = response.data.originalHeadList;
+          })
+        },
+       
+        typeChange (req) {  //选择清单的类型
+            if (req == 'change' || req == 'update' ) {
+                console.log('请求所有的原清单数据')
+                this.alloriginal();
+            }
+        },
+        torigChang (req) {
+                console.log('打印一下所要请求的原清单id')
+                console.log(req)
         },
         submitHeader () {  //校验表头选择表单  
             this.$refs.ruleForm.validate(valid => {
@@ -179,7 +189,6 @@
               }
             })
           },
-
         impt(){ //button 按钮调用input文件选择事件
             this.$refs.input.click()
         },
@@ -194,7 +203,7 @@
               this.table = null; //归为初始化状态
               let _this = this;
 
-              excelmodel.Imports(data=>{
+              this.$excel.Imports(data=>{
                   // console.log('最终处理完成的数据')
                   // console.log(data)
 

@@ -45,6 +45,7 @@
 </template>
 
 <script>
+
 import inven from '../../modules/inventory';
 export default {
   name: 'edit',
@@ -125,46 +126,21 @@ export default {
         }else if (type == 'pay'){
           key = 'tPayHeadRows';
         }
-            this.package(data[key],data.refCol,data.refRow)
+            //调用表格组装函数（返回的是个数组对象）
+            let arr = this.$excel.Package(data[key],data.refCol,data.refRow);
+            //调用表格列名函数  （返回的是一个包括excel基本所有列的数组)
+            let AZ = this.$excel.AZ()
+
+            this.columnName = AZ.slice(0,data.refCol);
+            this.loading = false;
+            this.list = arr;
+            this.hd = Object.keys(arr[0]);
+            this.packaList = arr;
+            this.$emit("update:tableList", this.packaList)
       })
      
     },
-    package (list,colLength,rowLength){
-        let AZ = this.AZ();
-        let arr = [];
-        for (let i = 0; i < parseInt(rowLength); i++) { 
-            arr[i]={}
-            for (let j = 0; j < parseInt(colLength); j++) {
-                arr[i]['hd'+j]=null;
-            }  
-        }
-        for (let index = 0; index < list.length; index++) {
-            let row = list[index].trNum;  //行号
-            let col = AZ.indexOf(list[index].colNum); //列号A
-            // console.log('行号列号')
-            // console.log(row,col)
-            arr[row-1]['hd'+col] =list[index];
-        }
-        this.columnName = AZ.slice(0,colLength);
-        this.loading = false;
-        this.list = arr;
-        this.hd = Object.keys(arr[0]);
-        this.packaList = arr;
-        this.$emit("update:tableList", this.packaList)
-    },
-    AZ(){  //封装遍历表格的所有的列 A-Z AA-AZ ...
-        let arr = [];
-        let a = 0;
-        for (var i = 0; i < 26; i++) {
-            arr.push(String.fromCharCode((65 + i)))
-        }
-        for (let j = 0; j < 26; j++) {
-            for (var c = 0; c < 26; c++) {
-                arr.push(arr[j]+String.fromCharCode((65 + c)))  
-            }  
-        }
-        return arr;
-    },
+
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
           if (columnIndex !=0 && columnIndex < this.hd.length) {
               return {'text-align': row[this.hd[columnIndex]].textAlign,'height':row[this.hd[columnIndex]].trHigh+'px'}

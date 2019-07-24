@@ -60,7 +60,9 @@ Vue.use(EditableColumn)
 // // //将axios挂载到原型上
 // Vue.prototype.$axios = axios;
 
-
+// 引入excel 表格导入js处理函数模块
+import excelmodel from './modules/proces';
+Vue.prototype.$excel = excelmodel;
 // 引入工具类-目录自定义
 // import fetch from '@/utils/request'
 // import axios from 'axios'

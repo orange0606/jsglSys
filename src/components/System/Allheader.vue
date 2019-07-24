@@ -47,10 +47,10 @@
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <!-- <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>
                 <el-button size="mini" type="warning" @click="cancelRowEvent(scope.row)">取消</el-button> -->
-                <el-tooltip content="保存" placement="top" effect="light">
+                <el-tooltip content="保存" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-document-checked" @click="saveRowEvent(scope.row)"></el-button>
                 </el-tooltip>
-                <el-tooltip content="取消" placement="top" effect="light">
+                <el-tooltip content="取消" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="info" icon="el-icon-close" @click="cancelRowEvent(scope.row)"></el-button>
                 </el-tooltip>
 
@@ -58,13 +58,13 @@
             <template v-else>
                 <!-- <el-button size="mini" type="primary" @click="openActiveRowEvent(scope.row)">编辑</el-button>
                 <el-button size="mini" type="danger" @click="removeEvent(scope.row)">删除</el-button> -->
-                <el-tooltip content="修改" placement="top" effect="light">
+                <el-tooltip content="修改" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
-                <el-tooltip content="查看" placement="top" effect="light">
+                <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-monitor" @click="seeTbale(scope.row)"></el-button>
                 </el-tooltip>
-                <el-tooltip content="删除" placement="top" effect="light">
+                <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
                 </el-tooltip>
             </template>

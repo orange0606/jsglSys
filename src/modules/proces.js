@@ -40,7 +40,6 @@ let excelmodel = {
                         type: 'binary'
                     });
                 }
-
                 var persons = []   //数组  存储文件内的所有表数据
                 for (var sheet in wb.Sheets) {
                     var perobj ={}
@@ -85,8 +84,50 @@ let excelmodel = {
         }
 
     },
+    /*
+    数据组装表格函数
+    param list: 所有单元格基本数据(obj)
+    param colLength: 需要组装多少列(string,int)
+    param rowLength: 需要组装多少行(string,int)
+    return : 完整表格数据
+    */
+    Package (list,colLength,rowLength){ 
+        let AZ = this.AZ();
+        let arr = [];
+        for (let i = 0; i < parseInt(rowLength); i++) { 
+            arr[i]={}
+            for (let j = 0; j < parseInt(colLength); j++) {
+                arr[i]['hd'+j]=null;
+            }  
+        }
+        for (let index = 0; index < list.length; index++) {
+            let row = list[index].trNum;  //行号
+            let col = AZ.indexOf(list[index].colNum); //列号A
+            // console.log('行号列号')
+            // console.log(row,col)
+            arr[row-1]['hd'+col] =list[index];
+        }
+        return arr;
+    },
+    /*
+    表格数据解构函数
+    param list: 表格所有基本数据(数组对象)
+    return : 完整表格解构数据
+    */
+    Unpack (list) { //表格解构
+        let headRowList = [];
+        let hd = Object.keys(list[0]);   //获取所有的列
+        let refCol = hd.length;
+        let refRow = list.length;
+        for (let index = 0; index < list.length; index++) {
+            for (let i = 0; i < hd.length; i++) {
+                  headRowList.push(list[index][hd[i]]);
+            }
+        }
+        return headRowList;
+    },
     //封装遍历表格的所有的列 A-Z AA-AZ ...
-    AZ(){
+    AZ () {
         let arr = [];
         let a = 0;
         for (var i = 0; i < 26; i++) {

@@ -37,9 +37,10 @@ const data = {
         {att_name: 'sumFormula',zh:'系统默认的合计行-合计公式',value:'=SUM()',if:true,no:1}
     ],
     all_limit:[ //所有清单表头行限制限制属性的值
-        {att_name: 'max',zh:'max最大值', value:null,if:false},
-        {att_name: 'increaseMax',zh:'increasemax增加的最大值', value:null,if:false},
-        {att_name: 'decreaseMax',zh:'decreasemax减少的最大值', value:'"CA14"',if:true}
+        {att_name: 'null',zh:'无', value:null,if:true},
+        {att_name: 'max',zh:'max最大值', value:1,if:false},
+        {att_name: 'increaseMax',zh:'increasemax增加的最大值', value:2,if:false},
+        {att_name: 'decreaseMax',zh:'decreasemax减少的最大值', value:3,if:true},
     ],
     original: {  // 原清单
         attribute:[ //属性及属性值
