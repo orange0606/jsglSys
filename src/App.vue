@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    
     <!-- 头部 -->
     <header class="top">
         <el-row >
@@ -11,7 +10,7 @@
                 </div>
             </el-col>
             <el-col :span="18" :xs="12" :sm="12" :md="12" :lg="18">
-                <div class="top-main">公路建设管理系统</div>
+                <div class="top-main">建设管理系统</div>
             </el-col>
             <el-col :span="3" :xs="6" :sm="6" :md="6" :lg="3">
                 <div class="top-right">
@@ -118,8 +117,13 @@ body, html, #app{
     white-space: nowrap;
 }
 
-
-
+.el-dialog__body {
+  padding: 0 20px;
+  font-size:12px;
+}
+table tr,table tr td {
+  font-size: 12px;
+}
 
 
 </style>

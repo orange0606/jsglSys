@@ -20,10 +20,9 @@
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='update'" label="选择表头" prop="type">
+                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='update'" label="选择表头" prop="tOriginalHeadId">
                     <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择原清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
                         <el-option v-for="(val,i) in tOrHeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
-                        
                     </el-select>
                 </el-form-item>
                 <el-form-item label="表头编号" prop="number">
@@ -34,7 +33,7 @@
                 </el-form-item>
                 <el-form-item v-if="!dialogVisible">
                     <el-button type="primary" @click="submitHeader">立即创建</el-button>
-                    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                    
                     <el-button>取消</el-button>
                 </el-form-item>
             </el-form>
@@ -51,7 +50,7 @@
     </header>
 
     <!-- 引入表格编辑组件 -->
-    <headeratt :type="ruleForm.type" :NewList.sync="List" :tableList="table" :dialog.sync="dialogVisible" ></headeratt>
+    <headeratt :params="Form" :dialog.sync="dialogVisible" ></headeratt>
 
 
   </div>
@@ -73,6 +72,7 @@
         table:null,
         List:null,
         tOrHeadList:[],//请求全部原清单表头数据
+        Form:{},//传递给设置修改表头组件的整体数据格式
         ruleForm: {
           name: '',    //表头名字
           region: '',   //表头标段
@@ -97,6 +97,9 @@
           ],
           type: [
             { required: true, message: '请选择表头类型', trigger: 'change' }
+          ],
+          tOriginalHeadId: [
+            { required: true, message: '请选择原清单表头', trigger: 'change' }
           ]
         },
         dialogVisible: false,  //弹窗显示表头属性设置
@@ -130,6 +133,7 @@
                 refRow,   //多少行
                 headRowList,           //表头内容
             }
+            
 
             console.log('数据结构')
             console.log(params)
@@ -137,6 +141,8 @@
             this.$post('/head/add',params)
               .then((response) => {
               this.$message({ message: '新建成功', type: 'success' })
+              console.log('提交数据后返回参数')
+              console.log(response)
             })
         }
 
@@ -161,7 +167,6 @@
             this.tOrHeadList = response.data.originalHeadList;
           })
         },
-       
         typeChange (req) {  //选择清单的类型
             if (req == 'change' || req == 'update' ) {
                 console.log('请求所有的原清单数据')
@@ -172,7 +177,11 @@
                 console.log('打印一下所要请求的原清单id')
                 console.log(req)
         },
-        submitHeader () {  //校验表头选择表单  
+        submitHeader () {  //校验表头选择表单 
+            if ((this.ruleForm.type=='change' || this.ruleForm.type=='update') && this.tOrHeadList.length <1) {
+                return this.$message({ message: '请先建立原清单', type: 'error' })
+            }
+            
             this.$refs.ruleForm.validate(valid => {
               if (valid) {
                     if(this.ruleForm.type!='change' || this.ruleForm.type!='totalmeterage' || this.ruleForm.type!='totalpay'){
@@ -180,7 +189,20 @@
                         console.log(this.ruleForm)
                         this.$message({ message: '输入正确哦', type: 'success' })
                         //button 按钮调用input文件选择事件
-                        this.$refs.input.click()
+                        // this.$refs.input.click()
+                        this.dialogVisible = true;
+                        this.Form = {
+                            sysOrder: null,          //系统序号 预留，暂时不用
+                            sysNum: null,           //系统编号 预留，暂时不用
+                            tenderId: this.ruleForm.region,           //标段id 
+                            num: this.ruleForm.number,    //表头编号
+                            name: this.ruleForm.name,           //表名
+                            type: this.ruleForm.type,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
+                            tOriginalHeadId: this.ruleForm.tOriginalHeadId,    //原清单表头ID，建变更清单和变更后清单表头时传
+                            refCol:null,   //多少列
+                            refRow:null,   //多少行
+                            headRowList:[],           //表头内容
+                        }
                     }else if(this.ruleForm.value!= null){ //按用户选择清单导入数据 
 
                     }
@@ -190,38 +212,40 @@
             })
           },
         impt(){ //button 按钮调用input文件选择事件
-            this.$refs.input.click()
+            // this.$refs.input.click()
+            _this.dialogVisible = true;
         },
 
         importfxx() { //表头导入函数
-              this.loading = true
-              this.$notify.info({
-                  title: '提示',
-                  duration: 800,
-                  message: '正在努力导入表格噢，请稍等片刻。'
-              });
-              this.table = null; //归为初始化状态
-              let _this = this;
+              _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗
+              // this.loading = true
+              // this.$notify.info({
+              //     title: '提示',
+              //     duration: 800,
+              //     message: '正在努力导入表格噢，请稍等片刻。'
+              // });
+              // this.table = null; //归为初始化状态
+              // let _this = this;
 
-              this.$excel.Imports(data=>{
-                  // console.log('最终处理完成的数据')
-                  // console.log(data)
+              // this.$excel.Imports(data=>{
+              //     // console.log('最终处理完成的数据')
+              //     // console.log(data)
 
-                  // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
-                  _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗
+              //     // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
+              //     _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗
 
-                    //inven.Assemble(data)数据添加属性组装函数
-                  _this.table = inven.Assemble(data,_this.ruleForm.type);   // 存储表格数据
-                //   _this.table = data  // 存储表格数据
-                  _this.loading = false
-                  _this.$notify({
-                    title: '提示',
-                    duration: 3000,
-                    message: '表格成功导入啦hhh',
-                    type: 'success'
-                  });
+              //       //inven.Assemble(data)数据添加属性组装函数
+              //     _this.table = inven.Assemble(data,_this.ruleForm.type);   // 存储表格数据
+              //   //   _this.table = data  // 存储表格数据
+              //     _this.loading = false
+              //     _this.$notify({
+              //       title: '提示',
+              //       duration: 3000,
+              //       message: '表格成功导入啦hhh',
+              //       type: 'success'
+              //     });
 
-              })
+              // })
         },
         expor() {  //导出表格============
           var XLSX = require('xlsx');
@@ -251,5 +275,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.el-dialog__body {
+  padding: 10px 20px;
+}
 </style>

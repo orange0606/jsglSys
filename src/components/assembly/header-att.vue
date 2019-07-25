@@ -3,44 +3,40 @@
     <el-dialog
     title="请进行设置表头每个单元格属性"
     :visible.sync="dialog"
-    width="90%"
+    width="95%"
     :append-to-body="false" 
     top="9vh"
     :before-close="handleClose">
       <el-row :gutter="0">
-        
         <!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
         <el-col :span="18"  :xs="24" :sm="20" :md="15" :lg="17" :xl="18">
             <el-collapse-transition>
             <div class="form_editing"  >
-                <!-- v-show="!show_lead" -->
-              <!-- v-if="!show_lead" -->
+                <div v-if="From.tender" class="title">标段名称：<span class="demonstration" v-text="From.tender.name"></span></div>  
+                <div class="title">表头编号：<span class="demonstration" v-text="From.num"></span></div>
+                <div class="title">表头名称：<span class="demonstration" v-text="From.name"></span></div>
+                <div class="title">类别：<span class="demonstration" v-text="type"></span></div>
+                <div v-if="From.saveEmployee" class="title">创建人：<span class="demonstration" v-text="From.saveEmployee.name"></span></div>
+                <div class="title">创建时间：<span class="demonstration" v-text="From.saveTime"></span></div>
+
+                <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
                 <p v-if="btn.edit" style="margin:0 0 20px 0">
+                  <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
                   <el-button type="success" size="mini" @click="showEdit?showEdit=false:showEdit=true;refresfhs()">{{showEditName}}</el-button>
                   <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
                   <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
                   <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
-                  <!-- <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button> -->
-                  <!-- <el-button type="success" size="mini" @click="insertEvent(-1)">在最后新增一行</el-button> -->
                   <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                   <el-button type="info" size="mini" @click="$refs.elxEditable.revert(4)">放弃更改</el-button>
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
                   <el-button type="warning" size="mini" @click="submitEvent">保存&提交</el-button>
-                  <!-- <el-button type="primary" size="mini" @click="getInsertEvent">获取新增数据</el-button>
-                  <el-button type="primary" size="mini" @click="getUpdateEvent">获取已修改数据</el-button>
-                  <el-button type="primary" size="mini" @click="getRemoveEvent">获取已删除数据</el-button>
-                  <el-button type="primary" size="mini" @click="getSelectedEvent">获取已选中数据</el-button>
-                  <el-button type="primary" size="mini" @click="getAllEvent">获取所有数据</el-button> -->
                 </p>
-                <!-- <br>
-                <br> -->
                 <elx-editable
                   v-loading="loading" 
                   ref="elxEditable"
                   class="click-table12"
                   border
                   width="100%"
-                  height="200"
                   :highlight-current-row="false"
                   :data.sync="list"
                   :span-method="arraySpanMethod"
@@ -52,7 +48,7 @@
                   >
                   <elx-editable-column v-if="showEdit && btn.edit" type="selection" width="45"  ></elx-editable-column>
                   <elx-editable-column v-if="!showEdit || !btn.edit" type="index" width="50"> </elx-editable-column>
-                  <elx-editable-column :prop="val+'.td'" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
+                  <elx-editable-column :prop="val+'.td'" :label="columnName[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
                       <template slot-scope="scope" >
                           <el-input v-if="btn.edit && showEdit" v-model="scope.row[val].td" ></el-input>
                           <div v-else-if="!btn.edit">
@@ -84,7 +80,7 @@
                       :edit-config="{ render: 'scroll'}"
                       >
                           <elx-editable-column type="index" width="50"> </elx-editable-column>
-                          <elx-editable-column  :prop="val+'.td'" :width="`${col_width}`" :label="'标题'+(i+1)" show-overflow-tooltip v-for="(val,i) in lead.hd" :key="i"  >
+                          <elx-editable-column  :prop="val+'.td'" :label="columnName[i]" show-overflow-tooltip v-for="(val,i) in lead.hd" :key="i"  >
                           </elx-editable-column>
                     </elx-editable>
             </div>
@@ -193,12 +189,15 @@ import XEUtils from 'xe-utils'
 import inven from '../../modules/inventory';
   export default {
     name: 'headerAtt',
-    props:['type','tableList','dialog','NewList'],
+    props:['type','params','dialog'],
     data () {
       return {
+        From:{},//清单表头数据
+        From2:{},//选择变更清单与变更清单之后要引入的原清单
         btn: {  //按钮的名称,与存储信息事件
             edit: true,    //true开启单元格编辑，false开启属性设置，默认true。
         },
+        columnName:[],//列名ABCD
         showEdit: false,//显示编辑
         loading: true, //  div  加载中的样式
         list:[], //用来存储导入的数据
@@ -210,7 +209,7 @@ import inven from '../../modules/inventory';
         show_lead:false, //显示引入的清单类型表格
         col_width:130, //调整单元格的列宽
         badge_name:inven.badge_name, //属性标记名对象
-        listType:this.type,//清单类型
+        listType:'',//清单类型
         lead:{ //存储引入清单数据
             list:[],//引入的清单数据
             loding:true, //加载中
@@ -240,27 +239,35 @@ import inven from '../../modules/inventory';
       }
     },
     created () { //2
-        // console.log('this.tableList')
-        // console.log(this.tableList)
-        if(this.tableList != null){
-            this.list = this.tableList.sheet;
-            this.loading =false;
-            this.attribute = this.tableList.attribute;
-            this.tLimits = this.tableList.limit;
-            this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列（属性）名
-            this.lead.list= XEUtils.clone(this.list, true);
-            this.lead.hd = this.hd;
+        let AZ = this.$excel.AZ()
+        this.columnName = AZ.slice(0,50);
+        this.From = this.params;
+
+        if (this.From.type =='change' || this.From.type =='update') {
+            //开启请求原清单表头
+            this.tOrigina()
         }
+       
+        if (this.From.id) {
+            this.list = this.From.headRowList;
+            this.listType = this.From.type;
+            this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列(obj)（属性）名
+            let arr = inven.Assemble(null,this.From.type);   // 数据添加属性组装函数
+            this.attribute = arr.attribute;
+            this.tLimits = arr.limit;
+            this.loading = false;
+        }else{
+            this.list = this.From.headRowList;
+            this.listType = this.From.type;
+        }
+        //请求引入的原清单
     },
     mounted() {
       window.onresize = () => {
         return (() => {
           this.screenWidth = document.body.clientWidth;
-         console.log(this.screenWidth)
             if (this.screenWidth > 1900) {    //浏览器兼容自动调整列宽Math.ceil(5/2)
                 this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
-                console.log('1900this.col_width')
-                console.log(this.col_width)
                 this.hd.length <=20 ? this.col_width : this.col_width = 150
             }else if (this.screenWidth >= 1500) {
                 this.col_width = Math.floor(((this.screenWidth/24)*17)/(this.hd.length+3));
@@ -273,38 +280,38 @@ import inven from '../../modules/inventory';
       };
     },
     watch: {
-        tableList: function(newVal,oldVal){
+        params: function(newVal,oldVal){
+            this.From = newVal;
+            if (this.From.type =='change' || this.From.type =='update') {
+                //开启请求原清单表头
+                this.tOrigina()
+            }
             if (newVal == null ) {    //当没有数据的时候div 为加载中状态
                 this.loading = true;
             }else{
-                this.list = newVal.sheet;
-                this.attribute = newVal.attribute;
-                this.tLimits = newVal.limit;
-                this.hd = Object.keys(newVal.sheet[0]);
-                this.loading = false;
-
-                this.lead.list= XEUtils.clone(this.list, true);
-                // this.lead.list= this.list;
-                // console.log('watch_tablelist打印一下this.lead.list')
-                // console.log(this.lead.list)
-                this.lead.hd = this.hd;
-
+                if (this.From.id) {
+                    this.list = this.From.headRowList;
+                    this.listType = this.From.type;
+                    this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
+                    let arr = inven.Assemble(null,this.From.type);   // 数据添加属性组装函数
+                    this.attribute = arr.attribute;
+                    this.tLimits = arr.limit;
+                    this.loading = false;
+                }else{
+                    this.list = this.From.headRowList;
+                    this.listType = this.From.type;
+                }
                 this.screenWidth = document.body.clientWidth;
-                // this.screenHeight = document.body.clientHeight;
+                // // this.screenHeight = document.body.clientHeight;
                 this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
                 this.hd.length <=20 ? this.col_width : this.col_width = 150
             }
-
+            //请求引入的原清单
         },
         dialog:function(n,v){
-            console.log('子组件中监听dialog的值变化')
-            console.log(n)
-        },
-        type: function(newVal,oldVal){
-           if(newVal !=null){
-              this.listType = newVal;
-           }
-        },
+
+        }
+       
     },
     computed: {
       // 计算属性的 getter
@@ -320,16 +327,61 @@ import inven from '../../modules/inventory';
       }
     },
     methods: {
+          impt(){ //button 按钮调用input文件选择事件
+                this.$refs.input.click()
+          },
+          tOrigina () {  //请求原清单表头数据
+              let params = {id:this.From.tOriginalHeadId,type:'original'}
+              this.$post('/head/getone',params)
+                .then((response) => {
+                this.From2 = response.data.onehead;
+                let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
+                this.lead.list= arr;
+                this.lead.hd = Object.keys(arr[0]);
+              })
+          },
+          importfxx() { //表头导入函数
+                this.loading = true
+                this.$notify.info({
+                    title: '提示',
+                    duration: 800,
+                    message: '正在努力导入表格噢，请稍等片刻。'
+                });
+                this.list = null; //归为初始化状态
+                let _this = this;
+                this.$excel.Imports(data=>{
+                    // console.log('最终处理完成的数据')
+                    let arr = inven.Assemble(data,_this.From.type);   // 数据添加属性组装函数
+                     if(arr.sheet.length >0){
+                        this.list = arr.sheet;
+                        this.loading =false;
+                        this.attribute = arr.attribute;
+                        this.tLimits = arr.limit;
+                        this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列(obj)（属性）名
+                    }
+                    _this.loading = false
+                    _this.$notify({
+                      title: '提示',
+                      duration: 3000,
+                      message: '表格成功导入啦hhh',
+                      type: 'success'
+                    });
+                })
+          },
           aa(row, column, cell, event){ 
           },
           handleClose(done) {   //表格编辑弹窗关闭确认
             this.$confirm('确认关闭？ 直接关闭将不保存任何数据噢。')
               .then(_ => {
                 this.back() //设置按钮为最初样式
-                this.$emit("update:dialog", false)
+                let succre = false;
+                this.$emit("update:dialog", succre)
                 done();
               })
-              .catch(_ => {});
+              .catch(_ => {
+                let succre = false;
+                this.$emit("update:dialog", succre)
+              });
           },
           submitAtt(){  //校验属性设置的值是否成功
             // console.log('submitatt 状态')
@@ -366,7 +418,7 @@ import inven from '../../modules/inventory';
           */
           att(row){ //把数据传入属性组件
             // console.log(this.list)
-            if (!this.lead.key_click) {
+            if (this.lead.att_click_type ==null) {
                    this.row_att = row;
                   // console.log(row)
                   //显示设置属性弹窗
@@ -376,34 +428,54 @@ import inven from '../../modules/inventory';
           next(){  //编辑完成点击下一步(完成提交新建表头按钮)
               if (this.btn.edit) {
                   this.btn.edit = false;
-
-                  //此处生成合计尾行
-                  let tr = XEUtils.clone(this.tableList.sheet[this.tableList.sheet.length-1], true)
-                  this.tableList.sheet.push(tr) 
-                  let hd = Object.keys(this.tableList.sheet[0])
-                  for (let i = 0; i < hd.length; i++) {
-                    let tb = this.tableList.sheet[this.tableList.sheet.length-1][hd[i]];
-                    tb.td = '合计'+i;
-                    tb.trNum +=1;
-                    if (tb.tdRowspan >1 || tb.tdRowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
-                       tb.tdRowspan = 1;
-                    }
-                    tb.tdColspan ==0?tb.tdColspan =1:tb.tdColspan;
-                  }
-                  this.list =this.tableList.sheet;                 
+                  if (!this.From.id) {
+                      let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+                      //此处生成合计尾行
+                      let tr = XEUtils.clone(rest[rest.length-1], true)
+                      rest.push(tr) 
+                      let hd = Object.keys(rest[0])
+                      for (let i = 0; i < hd.length; i++) {
+                        let tb = rest[rest.length-1][hd[i]];
+                        tb.td = '合计'+i;
+                        tb.trNum +=1;
+                        if (tb.tdRowspan >1 || tb.tdRowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
+                          tb.tdRowspan = 1;
+                        }
+                        tb.tdColspan ==0?tb.tdColspan =1:tb.tdColspan;
+                      }
+                      this.list = rest;           
+                  }   
               }else{  //提交新建表头数据到父组件
                   // alert('直接完成')
+                  this.btn.edit = true;
                   let succre = false;
                   this.$emit("update:dialog", succre) //关闭表格显示窗口
-                  //此处调用提交数据到父组件
-                  this.$emit("update:NewList", this.list) //关闭表格显示窗口
+                  this.Submission()
+
               }
+          },
+          Submission () {
+              let url = '';
+              this.From.id ? url = '/head/update' : url = '/head/add'
+              let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+              let params = this.From;
+              // let hd = ;   //获取所有的列
+              params.refCol = Object.keys(rest[0]).length;
+              params.refRow = rest.length;
+              //进行数据解构
+              params.headRowList = this.$excel.Unpack(rest); //调用表格解构函数
+              //进行网路请求保存
+              this.$post(url,params)
+                .then((response) => {
+                this.$message({ message: '新建成功', type: 'success' })
+              })
+
           },
           back(){ //编辑完成点击上一步
             if (this.btn.edit) {
+                  this.btn.edit = true;
                   let succre = false;
                   this.$emit("update:dialog", succre)
-
               }else{
                   this.btn.edit = true
                   this.shwo_att = false;  //隐藏属性设置栏
@@ -416,10 +488,12 @@ import inven from '../../modules/inventory';
                   //点击单元格获取id 和key（位置）
                   this.lead.att_id = null;
                   this.lead.att_key = null;
-                  //此处删除合计尾行
-                  this.tableList.sheet.pop();
-                  this.list =this.tableList.sheet;
-
+                  if (!this.From.id) {
+                      //此处删除合计尾行
+                      let rest = this.$refs.elxEditable.getRecords()  //获取表格的全部数据
+                      rest.pop();
+                      this.list =rest;
+                  }
               }
           },
           
@@ -428,11 +502,6 @@ import inven from '../../modules/inventory';
             return item ? item[labelProp] : null
           },
           selectEvent (selection, row) {
-            console.log('选中行')
-            console.log(row)
-            console.log('selection')
-            
-            console.log(selection)
           },
           currentChangeEvent (currentRow, oldCurrentRow) { 
           },
@@ -501,8 +570,8 @@ import inven from '../../modules/inventory';
                     if(this.lead.att_click_type == 'formula'){    ////点击单元格设置公式属性值
                           
                           // console.log(this.lead.att_id,this.lead.att_key)
-                          console.log('this.row_att')
-                          console.log('进来了公式设置')
+                          // console.log('this.row_att')
+                          // console.log('进来了公式设置')
                           console.log(this.row_att)
                           this.row_att.attributeValue==null? this.row_att.attributeValue="":this.row_att.attributeValue+="+";
                           this.row_att.attributeValue = this.row_att.attributeValue+this.lead.att_key;
@@ -515,10 +584,7 @@ import inven from '../../modules/inventory';
                           //调用点击属性设置显示事件
                           // console.log('调用点击属性设置显示事件')
                           this.att(row[colum])
-                    }
-                   
-                    console.log('this.lead.att_id,this.lead.att_key')
-                    
+                    }  
                     //手动刷新表格
                     this.refresfhs();
                     // this.$refs.elxEditable.doLayout()
@@ -530,7 +596,7 @@ import inven from '../../modules/inventory';
           cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
               // if (this.btn.edit) {
                   if (columnIndex >0) { //带选择框的情况
-                      row = row[this.lead.hd[columnIndex-1]]
+                      row = row[this.hd[columnIndex-1]]
                       if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
                           return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
                       }
@@ -576,39 +642,12 @@ import inven from '../../modules/inventory';
           submitEvent () {  //校验(表格数据)保存  即可提交数据
             this.$refs.elxEditable.validate(valid => {
               if (valid) {
-                  console.log('这里保存数据')
-                
-                  console.log(this.list)
                   this.$message({ message: '保存成功', type: 'success' })
                 // alert('成功1')
               } else {
                 this.$message({ message: '校验不通过', type: 'error' })
               }
             })
-          },
-          getInsertEvent () { //获取新增数据
-            let rest = this.$refs.elxEditable.getInsertRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取新增数据(${rest.length}条)` }).catch(e => e)
-            console.log(rest)
-          },
-          getUpdateEvent () { //获取已修改数据
-            let rest = this.$refs.elxEditable.getUpdateRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取已修改数据(${rest.length}条)` }).catch(e => e)
-          },
-          getRemoveEvent () { //获取已删除数据
-            let rest = this.$refs.elxEditable.getRemoveRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取已删除数据(${rest.length}条)` }).catch(e => e)
-          },
-          getSelectedEvent () { //获取已选中数据
-            let rest = this.$refs.elxEditable.getSelecteds()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
-          },
-          getAllEvent () {   //获取所有数据
-            let rest = this.$refs.elxEditable.getRecords()
-            console.log('点击获取所有数据')
-            console.log(rest)
-            console.log(this.list)
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
           },
           //****************引入清单的表格函数**********
           cell_click2(row, column, cell, event){ //单元格点击事件
@@ -672,13 +711,6 @@ import inven from '../../modules/inventory';
               }
 
           },
-          remote2(req){ //请求清单数据
-              console.log('这里开始网络请求查找用户选择的清单类型的数据')
-              console.log(req)
-
-              //网络请求
-
-          },
           limiremote(req){  //限制值类型的选择改变后触发的函数（开启点击引入的单元格输入限制值）
               //数据返回后，开启清单选择
                             //隐藏引入的表格
@@ -699,7 +731,6 @@ import inven from '../../modules/inventory';
                     this.InspectAtt(row,'limit') //调用限制值状态检测设定函数
                 }
           },
-
           att_input2(row){  //属性值输入完成确定按钮
                 if(this.lead.att_click_type == 'attribute' || this.lead.att_click_type == 'formula')return this.$message({ message: '当前正在设置公式或者属性，请继续完成！', type: 'error' }); //当前是公式OR属性状态的话无法点击此按钮
                 if (row.limitValue==null || row.limitValue=='') {
@@ -759,7 +790,6 @@ import inven from '../../modules/inventory';
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-
 .click-table12 .el-table__body .el-table__row>td.elx_checked {
   box-shadow: inset 0 0 6px #409EFF;
   
@@ -793,7 +823,6 @@ import inven from '../../modules/inventory';
 .dialogm_att .dialog_att {
   right: 0;
 }
-
 
 .text {
   font-size: 14px;
@@ -837,4 +866,25 @@ import inven from '../../modules/inventory';
     /* border: 1px solid #ffffff; */
 }
 
+
+
+
+.title{
+  display: inline;
+  margin-right: 10px;
+  color: cadetblue;
+}
+.demonstration {
+  /* color: #606266; */
+  color: pink;
+
+}
+.switch {
+  /* text-align: right; */
+  position: absolute;
+  right: 0px;
+}
+.el-dialog__body {
+  padding: 10px 20px;
+}
 </style>

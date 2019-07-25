@@ -75,12 +75,12 @@
         <!-- 引入表格编辑组件 -->
         <transition name="el-fade-in">
           <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :visible.sync="editShow">
-              <edit :tableList.sync="update" :heads="head"  ></edit>
+              <edit :tableList.sync="update" :heads="head" ></edit>
           </el-dialog>
         </transition>
 
         <!-- 引入表格编辑组件 -->
-        <!-- <headeratt :type="ruleForm.type" :NewList.sync="List" :tableList="table" :dialog.sync="dialogVisible" ></headeratt> -->
+        <headeratt :params="update" :dialog.sync="dialogVisible" ></headeratt>
         <el-pagination
           class="manual-table4-pagination"
           @size-change="handleSizeChange"
@@ -115,9 +115,10 @@ import headeratt from '@/components/assembly/header-att'
       tenderid:null,
       tenderList:[],//全部标段
       tenderName:[],
-      head:null,
+      head:null,//调用表格预览的数据（obj）
       editShow:false,//显示隐藏只读表头
-      update:[],//要修改的已组装数据
+      update:[],//要修改的已组装好的整个数据
+      dialogVisible:false,//显示隐藏修改表头
       formData: {
         name: null,
         sex: null,
@@ -135,23 +136,26 @@ import headeratt from '@/components/assembly/header-att'
     this.tenList()  //发起请求所有标段
     this.findList()  //发起请求所有已建表头数据
   },
+  watch: {
+    update: function(newVal,oldVal){
+        // console.log('打印一下预览组件传过来的表头所有数据')
+        // console.log(newVal)
+        this.dialogVisible = true;
+    }
+  },
   methods: {
     tenList (){   //请求所有标段
         this.$post('/tender/getall',{})
           .then((response) => {
-          console.log(response)
           this.tenderList = response.data.tenderList;
           this.tenderName = [];
           for (let index = 0; index < this.tenderList.length; index++) {
               this.tenderName.push({label:this.tenderList[index].name,value:this.tenderList[index].name})
           }
-          console.log(this.tenderName)
 
         })
     },
     tenderUp(row){
-        console.log('name')
-        console.log(row.tender.name)
         row.tenderId = row.tender.id = row.tender.name;
         for (let index = 0; index < this.tenderList.length; index++) {
           if (row.tender.name == this.tenderList[index].id ) {
@@ -166,8 +170,6 @@ import headeratt from '@/components/assembly/header-att'
         //发起网络请求
       this.$post('/head/getall',{page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}})
         .then((response) => {
-        console.log('请求成功')
-        console.log(response)
         this.list = response.data.headList.list;
         this.pageVO.totalResult = response.data.headList.total;
         this.loading = false;
@@ -176,8 +178,6 @@ import headeratt from '@/components/assembly/header-att'
 
     },
     seeTbale (row) {
-        console.log('点击查看按钮的参数')
-        console.log(row)
         this.head ={};
         this.head.id = row.id;
         this.head.type = row.type;
@@ -300,9 +300,8 @@ import headeratt from '@/components/assembly/header-att'
           type: 'warning'
         }).then(action => {
           if (action === 'confirm') {
-              console.log(row)
             this.$refs.elxEditable.remove(row)
-            console.log('移除数据')
+            // console.log('移除数据')
             
           }
         }).catch(e => e).then(() => {
@@ -343,10 +342,8 @@ import headeratt from '@/components/assembly/header-att'
           let data = {};
           data.headList = [];
           data.headList.push({id:row.id,type:row.type})
-          console.log(data)
           this.$post('/head/delarray',data)
               .then((response) => {
-              console.log(response)
               //删除成功
               this.loading = false
               this.findList()
@@ -364,8 +361,6 @@ import headeratt from '@/components/assembly/header-att'
     },
     deleteSelectedEvent () {    //删除选中
       let removeRecords = this.$refs.elxEditable.getSelecteds()
-      console.log('deleteSelectedEvent')
-      console.log(removeRecords)//选中的对象
       if (removeRecords.length) {
         this.isClearActiveFlag = false
        this.$confirm('确定删除所选数据?', '温馨提示', {
@@ -385,7 +380,6 @@ import headeratt from '@/components/assembly/header-att'
             // 进行发起请求删除
             this.$post('/head/delarray',data)
               .then((response) => {
-              // console.log(response)
               //删除成功
               this.loading = false
               this.findList()
@@ -415,8 +409,8 @@ import headeratt from '@/components/assembly/header-att'
         if (valid) {
           // this.loading = true
           this.$refs.elxEditable.clearActive()
-          console.log('正在保存当前行数据')
-          console.log(row)
+          // console.log('正在保存当前行数据')
+          // console.log(row)
           //进行网路请求保存
           this.$post('/head/update',row)
             .then((response) => {

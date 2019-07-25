@@ -8,7 +8,7 @@
       <div v-if="all.saveEmployee" class="title">创建人：<span class="demonstration" v-text="all.saveEmployee.name"></span></div>
       <div class="title">创建时间：<span class="demonstration" v-text="all.saveTime"></span></div>
     <div class="manual-table4-oper">
-       <el-button type="success" size="mini">修改</el-button>
+       <el-button type="success" size="mini" @click="upfun">修改</el-button>
       <!--<el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button> -->
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <span class="switch">
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-
+import XEUtils from 'xe-utils'
 import inven from '../../modules/inventory';
 export default {
   name: 'edit',
@@ -61,12 +61,13 @@ export default {
       attShow:false,
       badge_name:inven.badge_name, //属性标记名对象
       columnName:[],//列的名  A B C
+      key:'',//请求清单的清单类型
 
     }
   },
   created () {
-    console.log('这里打印一下父组件传来的 id，type  对象')
-    console.log(this.heads)
+    // console.log('这里打印一下父组件传来的 id，type  对象')
+    // console.log(this.heads)
     if (this.headObj!=null) {
         this.headObj = this.heads;
         this.findList(this.headObj.id,this.headObj.type)
@@ -99,48 +100,54 @@ export default {
     }
   },
   methods: {
+    upfun () {  //修改数据函数（传值给父组件）
+
+          this.$emit("update:tableList", this.packaList)
+          let arr = XEUtils.clone(this.all, true)
+          delete arr[this.key]
+          arr.headRowList = this.packaList;
+          this.$emit("update:tableList",arr)
+    },
     findList (id,type) {
       this.loading = true
         //发起网络请求
-      console.log('发起网络请求 id')
+      // console.log('发起网络请求 id')
       this.$post('/head/getone',{id, type})
         .then((response) => {
-        console.log('请求成功')
-        console.log(response)
+        // console.log('请求成功')
+        // console.log(response)
         // this.list = response.data.oneh.headRowList;
         this.all = response.data.onehead;
         let data = response.data.onehead;
-        let key = '';
+        this.key = '';
         if (type == 'original') {
-          key = 'tOriginalHeadRows';
+          this.key = 'tOriginalHeadRows';
         }else if (type == 'change'){
-          key = 'tChangeHeadRows';
+          this.key = 'tChangeHeadRows';
         }else if (type == 'update'){
-          key = 'tUpdateHeadRows';
+          this.key = 'tUpdateHeadRows';
         }else if (type == 'totalmeterage'){
-          key = 'tTotalmeterageHeadRows';
+          this.key = 'tTotalmeterageHeadRows';
         }else if (type == 'meterage'){
-          key = 'tMeterageHeadRows';
+          this.key = 'tMeterageHeadRows';
         }else if (type == 'totalpay'){
-          key = 'tTotalpayHeadRows';
+          this.key = 'tTotalpayHeadRows';
         }else if (type == 'pay'){
-          key = 'tPayHeadRows';
+          this.key = 'tPayHeadRows';
         }
-            //调用表格组装函数（返回的是个数组对象）
-            let arr = this.$excel.Package(data[key],data.refCol,data.refRow);
-            //调用表格列名函数  （返回的是一个包括excel基本所有列的数组)
-            let AZ = this.$excel.AZ()
+        //调用表格组装函数（返回的是个数组对象）
+        let arr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
+        //调用表格列名函数  （返回的是一个包括excel基本所有列的数组)
+        let AZ = this.$excel.AZ()
+        this.columnName = AZ.slice(0,data.refCol);
+        this.loading = false;
+        this.list = arr;
+        this.hd = Object.keys(arr[0]);
+        this.packaList = arr;
 
-            this.columnName = AZ.slice(0,data.refCol);
-            this.loading = false;
-            this.list = arr;
-            this.hd = Object.keys(arr[0]);
-            this.packaList = arr;
-            this.$emit("update:tableList", this.packaList)
       })
      
     },
-
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
           if (columnIndex !=0 && columnIndex < this.hd.length) {
               return {'text-align': row[this.hd[columnIndex]].textAlign,'height':row[this.hd[columnIndex]].trHigh+'px'}

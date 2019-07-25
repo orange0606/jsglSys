@@ -108,34 +108,40 @@ export default {
         // type =data.all_headname[4];
         // var arr = objDeepCopy(Arrays);
         //先组装公有清单类型数据
-        let hd = Object.keys(arr[0]);   //获取所有的列
+        
         let attr = data.all_head_row; //合并共有属性和私有属性数组
+        // console.log('打印一下组装属性数据的arr')
+        // console.log('有没有到这里啊  ')
 
-        for (let index = 0; index < arr.length; index++) { 
-            for (let i = 0; i < hd.length; i++) {  
-                for (let e = 0; e < attr.length; e++) {    
-                    if (attr[e] =='colWidth') {        //设置单元格默认宽高
-                        arr[index][hd[i]][attr[e]] =80;
-                    }else if(attr[e] =='trHigh'){
-                        arr[index][hd[i]][attr[e]] =35;        
-                    }else if(attr[e] == 'textAlign'){  //默认居中文字
-                        arr[index][hd[i]][attr[e]] ='center';
-                    }else if(attr[e] == 'id'){  //默认id
-                        arr[index][hd[i]][attr[e]] = i;
-                    }else{
-                        arr[index][hd[i]][attr[e]] =null;   //把合并的属性一起注入数据
-                    }  
-                } 
+        if (arr!=null ) {    //     
+        // console.log(arr.length,arr)
 
+            let hd = Object.keys(arr[0]);   //获取所有的列
+            for (let index = 0; index < arr.length; index++) { 
+                for (let i = 0; i < hd.length; i++) {  
+                    for (let e = 0; e < attr.length; e++) {    
+                        if (attr[e] =='colWidth') {        //设置单元格默认宽高
+                            arr[index][hd[i]][attr[e]] =80;
+                        }else if(attr[e] =='trHigh'){
+                            arr[index][hd[i]][attr[e]] =35;        
+                        }else if(attr[e] == 'textAlign'){  //默认居中文字
+                            arr[index][hd[i]][attr[e]] ='center';
+                        }else{
+                            arr[index][hd[i]][attr[e]] =null;   //把合并的属性一起注入数据
+                        }  
+                    } 
+
+                }
             }
         }
+        Arr.sheet = arr;
         Arr.attribute = data[type].attribute.concat(data.all_attribute)
         // Arr.attribute = Object.assign(data[type].attribute,data.all_attribute);  //合并共有特殊属性以及私有特殊属性对象一起注入数据
 
         // if (data[type].head_row.indexOf("limit") !=-1) {    //先判断这个类型清单表头有无限制属性，无则不添加
-            Arr.limit = data.all_limit;
+        Arr.limit = data.all_limit;
         // }
-        Arr.sheet = arr;
+        
         console.log('重新组装好的数据')
         console.log(Arr)
         return Arr;
