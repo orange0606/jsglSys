@@ -3,9 +3,9 @@
     <header >
     <el-row>
         <el-col :span="6" :xs="24" style="min-width:300px;">
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" size="small" class="demo-ruleForm">
                 <el-form-item label="表头标段" prop="region">
-                    <el-select v-model="ruleForm.region" clearable placeholder="请选择表头标段" style=" width:100%;">
+                    <el-select v-model="ruleForm.region" clearable @change="tenChange" placeholder="请选择表头标段" style=" width:100%;">
                         <el-option v-for="(val,i) in regionList" :key="i" :label="val.name" :value="val.id"></el-option>
                     </el-select>
                 </el-form-item>
@@ -20,7 +20,7 @@
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='update'" label="选择表头" prop="tOriginalHeadId">
+                <el-form-item v-if="ruleForm.type=='change' || ruleForm.type=='update'" label="选择原清单" prop="tOriginalHeadId">
                     <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择原清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
                         <el-option v-for="(val,i) in tOrHeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
                     </el-select>
@@ -33,20 +33,13 @@
                 </el-form-item>
                 <el-form-item v-if="!dialogVisible">
                     <el-button type="primary" @click="submitHeader">立即创建</el-button>
-                    
                     <el-button>取消</el-button>
                 </el-form-item>
             </el-form>
         </el-col>
         
     </el-row>
-    <el-row>
-      <el-col :span="14" :xs="24" :sm="20" :md="18" :lg="16">
-          <el-alert title="表格数据导入后系统给予默认宽高与单元格内文字居中显示，与原表格格式有些偏差，请进行手动调整。" type="info"></el-alert>
-          <br>
-      </el-col>
 
-    </el-row>
     </header>
 
     <!-- 引入表格编辑组件 -->
@@ -107,7 +100,7 @@
       }
     },
      created () { //2
-      this.findList()
+      this.findList()//发起请求全部表头标段
     },
    watch: {
         List: function(newVal,oldVal){
@@ -159,8 +152,10 @@
           })
          
         },
-        alloriginal () {  //所有原清单的id和名字
-             this.$post('/head/alloriginal',{})
+        alloriginal () {  //所有该标段的原清单的id和名字
+            this.ruleForm.tOriginalHeadId = null, //原清单表头ID，建变更清单和变更后清单表头时传
+            this.tOrHeadList = [];//清空数据
+             this.$post('/head/alloriginal',{tenderId:this.ruleForm.region})
             .then((response) => {
             console.log('所有原清单的id和名字')
             console.log(response)
@@ -169,13 +164,19 @@
         },
         typeChange (req) {  //选择清单的类型
             if (req == 'change' || req == 'update' ) {
-                console.log('请求所有的原清单数据')
+                // console.log('请求该标段的所有的原清单数据')
+                this.alloriginal();
+            }
+        },
+        tenChange (req) {
+             if (this.ruleForm.type == 'change' || this.ruleForm.type == 'update' ) {
+                // console.log('请求该标段的所有的原清单数据')
                 this.alloriginal();
             }
         },
         torigChang (req) {
-                console.log('打印一下所要请求的原清单id')
-                console.log(req)
+                // console.log('打印一下所要请求的原清单id')
+                // console.log(req)
         },
         submitHeader () {  //校验表头选择表单 
             if ((this.ruleForm.type=='change' || this.ruleForm.type=='update') && this.tOrHeadList.length <1) {
@@ -210,64 +211,8 @@
                 this.$message({ message: '校验不通过', type: 'error' })
               }
             })
-          },
-        impt(){ //button 按钮调用input文件选择事件
-            // this.$refs.input.click()
-            _this.dialogVisible = true;
-        },
-
-        importfxx() { //表头导入函数
-              _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗
-              // this.loading = true
-              // this.$notify.info({
-              //     title: '提示',
-              //     duration: 800,
-              //     message: '正在努力导入表格噢，请稍等片刻。'
-              // });
-              // this.table = null; //归为初始化状态
-              // let _this = this;
-
-              // this.$excel.Imports(data=>{
-              //     // console.log('最终处理完成的数据')
-              //     // console.log(data)
-
-              //     // _this.dialogVisible = true;  //调用显示表格编辑确认弹窗
-              //     _this.dialogVisible = true;  //调用显示表头属性设置确认弹窗
-
-              //       //inven.Assemble(data)数据添加属性组装函数
-              //     _this.table = inven.Assemble(data,_this.ruleForm.type);   // 存储表格数据
-              //   //   _this.table = data  // 存储表格数据
-              //     _this.loading = false
-              //     _this.$notify({
-              //       title: '提示',
-              //       duration: 3000,
-              //       message: '表格成功导入啦hhh',
-              //       type: 'success'
-              //     });
-
-              // })
-        },
-        expor() {  //导出表格============
-          var XLSX = require('xlsx');
-          // let table = document.getElementById('table');
-          // let worksheet = XLSX.utils.table_to_sheet(table);
-          // let workbook = XLSX.utils.book_new();
-          // XLSX.utils.book_append_sheet(workbook, worksheet, 'sheet');
-          // 以上四行也可以直接一行搞定，如果不需要对表格数据进行修改的话
-          let table = this.$refs.table;
-
-          let workbook = XLSX.utils.table_to_book(table)
-          try {
-              XLSX.writeFile(workbook, 'text.xlsx');
-              // 饿了么弹窗提示文件导出
-        
-          } catch(e) {
-              console.log(e, workbook);
-              // 饿了么弹窗提示文件导出失败
           }
 
-        }
-        
   }
 }
 

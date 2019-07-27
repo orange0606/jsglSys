@@ -1,27 +1,27 @@
 <template>
     <!-- <div v-if="dialog"> -->
     <el-dialog
-    title="请进行设置表头每个单元格属性"
+    title="建立表头"
     :visible.sync="dialog"
     width="95%"
     :append-to-body="false" 
     top="9vh"
     :before-close="handleClose">
       <el-row :gutter="0">
-        <!-- <el-col :span="18"><div class="grid-content bg-purple"></div></el-col> -->
+        <el-collapse-transition>
         <el-col :span="18"  :xs="24" :sm="20" :md="15" :lg="17" :xl="18">
-            <el-collapse-transition>
-            <div class="form_editing"  >
-                <div v-if="From.tender" class="title">标段名称：<span class="demonstration" v-text="From.tender.name"></span></div>  
-                <div class="title">表头编号：<span class="demonstration" v-text="From.num"></span></div>
-                <div class="title">表头名称：<span class="demonstration" v-text="From.name"></span></div>
-                <div class="title">类别：<span class="demonstration" v-text="type"></span></div>
-                <div v-if="From.saveEmployee" class="title">创建人：<span class="demonstration" v-text="From.saveEmployee.name"></span></div>
-                <div class="title">创建时间：<span class="demonstration" v-text="From.saveTime"></span></div>
-
+            <div v-if="From.tender" class="title">标段名称：<span class="demonstration" v-text="From.tender.name"></span></div>  
+            <div class="title">表头编号：<span class="demonstration" v-text="From.num"></span></div>
+            <div class="title">表头名称：<span class="demonstration" v-text="From.name"></span></div>
+            <div class="title">类别：<span class="demonstration" v-text="typeName"></span></div>
+            <div v-if="From.saveEmployee" class="title">创建人：<span class="demonstration" v-text="From.saveEmployee.name"></span></div>
+            <div class="title">创建时间：<span class="demonstration" v-text="From.saveTime"></span></div>
+            
+            <div class="form_editing" >
                 <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
                 <p v-if="btn.edit" style="margin:0 0 20px 0">
                   <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
+                  <el-button type="info" size="mini" @click="impt">手动创建</el-button>
                   <el-button type="success" size="mini" @click="showEdit?showEdit=false:showEdit=true;refresfhs()">{{showEditName}}</el-button>
                   <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
                   <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
@@ -31,6 +31,8 @@
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
                   <el-button type="warning" size="mini" @click="submitEvent">保存&提交</el-button>
                 </p>
+               <el-alert title="可以点击 手动创建 按钮创建表头，也可以点击左上方按钮 导入表格 导入excel 文件噢，导入完成后可进行编辑修改。" type="info"></el-alert>
+                <p>&nbsp;</p>
                 <elx-editable
                   v-loading="loading" 
                   ref="elxEditable"
@@ -39,6 +41,7 @@
                   width="100%"
                   :highlight-current-row="false"
                   :data.sync="list"
+                  height="350"
                   :span-method="arraySpanMethod"
                   @select="selectEvent"
                   @current-change="currentChangeEvent"
@@ -61,13 +64,18 @@
                   </elx-editable-column>
                 </elx-editable>
             </div>
-            </el-collapse-transition>
-
                 <!-- ********点击 attribute之后的选择清单类型，然后显示引入的只读表格****** -->
-
-             <transition name="el-fade-in-linear">
+            <transition name="el-fade-in-linear">
             <div class="read-only_form" v-if="show_lead">
-                  <h4 v-text="lead.name"></h4>
+                  <h3 style="margin:20px 0 20px 0;">请点击下方原清单单元格选取属性</h3>
+                  <div v-if="From2.tender" class="title">标段名称：<span class="demonstration" v-text="From2.tender.name"></span></div>  
+                  <div class="title">表头编号：<span class="demonstration" v-text="From2.num"></span></div>
+                  <div class="title">表头名称：<span class="demonstration" v-text="From2.name"></span></div>
+                  <div class="title">类别：<span class="demonstration" >原清单</span></div>
+                  <div v-if="From2.saveEmployee" class="title">创建人：<span class="demonstration" v-text="From2.saveEmployee.name"></span></div>
+                  <div class="title">创建时间：<span class="demonstration" v-text="From2.saveTime"></span></div>
+                  <!-- <el-alert title="，系统已为您自动添加合并行，请点击表格的每个单元格设置相关属性以及公式，全部设置完成方可提交。" type="info"></el-alert> -->
+                  <h1>&nbsp;</h1>
                   <elx-editable
                       v-loading="lead.loading" 
                       ref="elxEditable1"
@@ -86,10 +94,11 @@
             </div>
             </transition>
       </el-col>
+      </el-collapse-transition>
 
-
+      <el-collapse-transition>
       <el-col :span="5" :offset="1" :xs="23" :sm="13" :md="8" :lg="6" :xl="5">
-            <el-collapse-transition>
+            
             <div class="tips" v-show="!shwo_att" style="margin:-40px 0 0 0">
                 <!-- <br><br> -->
                 <template>
@@ -116,9 +125,9 @@
                   </el-card>
                 </template>
             </div>
-            </el-collapse-transition>
+
             <!-- **************单元格属性*********** -->
-            <el-collapse-transition>
+         
             <div class="cell_att" v-if="shwo_att">
                 <!-- <br><br><br> -->
                 <el-form :model="row_att" :rules="rules" ref="row_att" label-width="100" width="800" size="small">
@@ -129,7 +138,7 @@
                     </el-form-item>
                     <el-form-item v-for="(val,a) in attribute" :key="a+'a'" v-show="(val.att_name==row_att.attribute && val.if && row_att.attribute!=null )?true:false" label="属性值(点击左边表格的单元格选择值)" >
                           <el-input v-model="row_att.attributeValue" :autofocus="true" :placeholder="val.value">
-                              <el-button slot="append" @click="att_input1(row_att)">确定</el-button>
+                              <el-button slot="append" type="primary" size="mini" @click="att_input1(row_att)">确定</el-button>
                           </el-input>
                     </el-form-item>
                     <el-form-item v-if="listType!='original' && listType!='update'" label="限制单元格大小值">
@@ -140,7 +149,7 @@
                     </el-form-item>
                     <el-form-item v-if="row_att.tLimit!=null" label="限制值" >
                         <el-input v-model="row_att.limitValue">
-                            <el-button slot="append" @click="att_input2(row_att)">确定</el-button>
+                            <el-button slot="append" type="primary" size="mini" @click="att_input2(row_att)">确定</el-button>
                         </el-input>
                     </el-form-item>
                     <!-- <el-form-item v-if="'attribute_value_id' in row_att" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
@@ -169,9 +178,10 @@
                     <el-button type="primary" @click="submitAtt">确 定</el-button>
                 </el-form>
             </div>
-            </el-collapse-transition>
 
       </el-col>
+      </el-collapse-transition>
+
     </el-row>
     <br>
     <!-- *************导入之后单元格编辑 取消和下一步按钮************* -->
@@ -250,8 +260,8 @@ import inven from '../../modules/inventory';
        
         if (this.From.id) {
             this.list = this.From.headRowList;
+            this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
             this.listType = this.From.type;
-            this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列(obj)（属性）名
             let arr = inven.Assemble(null,this.From.type);   // 数据添加属性组装函数
             this.attribute = arr.attribute;
             this.tLimits = arr.limit;
@@ -259,25 +269,26 @@ import inven from '../../modules/inventory';
         }else{
             this.list = this.From.headRowList;
             this.listType = this.From.type;
+            this.loading = false;
         }
         //请求引入的原清单
     },
     mounted() {
-      window.onresize = () => {
-        return (() => {
-          this.screenWidth = document.body.clientWidth;
-            if (this.screenWidth > 1900) {    //浏览器兼容自动调整列宽Math.ceil(5/2)
-                this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
-                this.hd.length <=20 ? this.col_width : this.col_width = 150
-            }else if (this.screenWidth >= 1500) {
-                this.col_width = Math.floor(((this.screenWidth/24)*17)/(this.hd.length+3));
-                this.hd.length <=15 ? this.col_width : this.col_width = 140
-            }else{
-               this.col_width = Math.floor(((this.screenWidth/24)*20)/(this.hd.length+3));
-                this.hd.length <=6 ? this.col_width : this.col_width = 80
-            }
-        })();
-      };
+      // window.onresize = () => {
+      //   return (() => {
+      //     this.screenWidth = document.body.clientWidth;
+      //       if (this.screenWidth > 1900) {    //浏览器兼容自动调整列宽Math.ceil(5/2)
+      //           this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
+      //           this.hd.length <=20 ? this.col_width : this.col_width = 150
+      //       }else if (this.screenWidth >= 1500) {
+      //           this.col_width = Math.floor(((this.screenWidth/24)*17)/(this.hd.length+3));
+      //           this.hd.length <=15 ? this.col_width : this.col_width = 140
+      //       }else{
+      //          this.col_width = Math.floor(((this.screenWidth/24)*20)/(this.hd.length+3));
+      //           this.hd.length <=6 ? this.col_width : this.col_width = 80
+      //       }
+      //   })();
+      // };
     },
     watch: {
         params: function(newVal,oldVal){
@@ -300,11 +311,12 @@ import inven from '../../modules/inventory';
                 }else{
                     this.list = this.From.headRowList;
                     this.listType = this.From.type;
+                    this.loading = false;
                 }
-                this.screenWidth = document.body.clientWidth;
-                // // this.screenHeight = document.body.clientHeight;
-                this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
-                this.hd.length <=20 ? this.col_width : this.col_width = 150
+                // this.screenWidth = document.body.clientWidth;
+                // // // this.screenHeight = document.body.clientHeight;
+                // this.col_width = Math.floor(((this.screenWidth/24)*18)/(this.hd.length+3));
+                // this.hd.length <=20 ? this.col_width : this.col_width = 150
             }
             //请求引入的原清单
         },
@@ -320,10 +332,23 @@ import inven from '../../modules/inventory';
         return this.showEdit ? '完成编辑' : '启用编辑'
       },
       nextBtnName () {
-        return this.btn.edit ? '下一步' : '完成'
+        return this.btn.edit ? '下一步' : '提交'
       },
       cancelBtnName () {
         return this.btn.edit ? '取消' : '上一步'
+      },
+      typeName () {
+        // `this` 指向 vm 实例
+        let obj = {
+          original: '原清单',
+          change: '变更清单',
+          update: '变更后的清单',
+          meterage: '计量清单',
+          totalmeterage: '累计计量清单',	
+          pay: '支付清单',
+          totalpay: '累计支付清单'
+        }
+        return this.From.type ? obj[this.From.type ] : '未知'
       }
     },
     methods: {
@@ -354,10 +379,10 @@ import inven from '../../modules/inventory';
                     let arr = inven.Assemble(data,_this.From.type);   // 数据添加属性组装函数
                      if(arr.sheet.length >0){
                         this.list = arr.sheet;
+                        this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
                         this.loading =false;
                         this.attribute = arr.attribute;
                         this.tLimits = arr.limit;
-                        this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列(obj)（属性）名
                     }
                     _this.loading = false
                     _this.$notify({
@@ -448,9 +473,7 @@ import inven from '../../modules/inventory';
               }else{  //提交新建表头数据到父组件
                   // alert('直接完成')
                   this.btn.edit = true;
-                  let succre = false;
-                  this.$emit("update:dialog", succre) //关闭表格显示窗口
-                  this.Submission()
+                  this.Submission()//提交表格数据函数
 
               }
           },
@@ -458,17 +481,66 @@ import inven from '../../modules/inventory';
               let url = '';
               this.From.id ? url = '/head/update' : url = '/head/add'
               let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+
+              console.log('检查表格的所有数据')
+              console.log(this.list)
+              console.log(rest)
+
               let params = this.From;
               // let hd = ;   //获取所有的列
-              params.refCol = Object.keys(rest[0]).length;
-              params.refRow = rest.length;
+              // let hdarr = Object.keys(rest[0])
+              params.refCol = this.hd.length;
+              if (this.length) {
+                  params.refRow = rest.length;
+
+              }else{
+                  params.refRow = rest.length;
+
+              }
+              
+              console.log('行号列好=======headatt')
+              console.log(params.refCol,params.refRow)
+
               //进行数据解构
-              params.headRowList = this.$excel.Unpack(rest); //调用表格解构函数
-              //进行网路请求保存
-              this.$post(url,params)
-                .then((response) => {
-                this.$message({ message: '新建成功', type: 'success' })
-              })
+              let list = this.$excel.Unpack(rest); //调用表格解构函数
+              
+              console.log('查看提交的数据')
+              console.log(params)
+              if (!this.From.id) {
+                  params.headRowList = list;
+                  this.$post(url,params)
+                    .then((response) => {
+                      if(response.data.repeat ==1){
+                          this.$message({ message: '保存失败，已有这个表头。', type: 'error' })
+                      }else{
+                          let succre = false;
+                          this.$emit("update:dialog", succre) //关闭表格显示窗口
+                          this.$message({ message: '保存成功', type: 'success' });
+                      }
+                    
+                  })
+              }else{
+                  params.headRowList = [];
+                  this.$post(url,params)
+                    .then((response) => {
+                        console.log('查看路劲，参数以及是否删除成功')
+                        console.log(url,params)
+                        if (response.status=='SUCCESS') {
+                            params.headRowList = list;
+                            console.log('能进来这里吗')
+                            console.log(url,params)
+                            this.$post(url,params)
+                            .then((response) => {
+                              let succre = false;
+                              this.$emit("update:dialog", succre) //关闭表格显示窗口
+                              this.$message({ message: '保存成功', type: 'success' });
+                            })
+                        }
+                        
+                  })
+              }
+
+             
 
           },
           back(){ //编辑完成点击上一步
@@ -573,7 +645,7 @@ import inven from '../../modules/inventory';
                           // console.log('this.row_att')
                           // console.log('进来了公式设置')
                           console.log(this.row_att)
-                          this.row_att.attributeValue==null? this.row_att.attributeValue="":this.row_att.attributeValue+="+";
+                          this.row_att.attributeValue==null? this.row_att.attributeValue="":this.row_att.attributeValue;
                           this.row_att.attributeValue = this.row_att.attributeValue+this.lead.att_key;
                           
                     }else if(this.lead.att_click_type =='limit'){  //点击单元格设置限制属性值与id
@@ -853,21 +925,22 @@ import inven from '../../modules/inventory';
   color: #409EFF;
   /* margin-right: 40px; */
 }
+.form_editing{
+    /* padding: 5px; */
+    /* margin: 0 auto; */
+    /* border: 1px solid pink; */
+    /* border: 1px solid #ffffff; */
+    /* border: 1px solid orange; */
+    text-align: left;
+}
 .form_editing, .read-only_form {
     /* padding: 5px; */
     /* margin: 0 auto; */
     /* border: 1px solid pink; */
-    border: 1px solid #ffffff;
-}
-.form_editing, .read-only_form  table{
-    /* padding: 5px; */
-    margin: 10px;
-    /* border: 1px solid pink; */
     /* border: 1px solid #ffffff; */
+    /* border: 1px solid orange; */
+    margin-top: 10px;
 }
-
-
-
 
 .title{
   display: inline;

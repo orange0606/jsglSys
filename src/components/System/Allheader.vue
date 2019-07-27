@@ -3,7 +3,7 @@
   <!-- <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"><div class="grid-content bg-purple"></div></el-col> -->
   <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
     <el-collapse-transition>
-    <div v-loading="loading">
+    <div v-loading="loading" element-loading-text="拼命加载中">
         <div class="manual-table2-oper">
             <el-button type="success" size="mini" ><router-link to="/newheader">新增</router-link></el-button>
             <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>

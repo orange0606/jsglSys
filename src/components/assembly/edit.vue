@@ -7,6 +7,7 @@
       <div class="title">类别：<span class="demonstration" v-text="type"></span></div>
       <div v-if="all.saveEmployee" class="title">创建人：<span class="demonstration" v-text="all.saveEmployee.name"></span></div>
       <div class="title">创建时间：<span class="demonstration" v-text="all.saveTime"></span></div>
+     
     <div class="manual-table4-oper">
        <el-button type="success" size="mini" @click="upfun">修改</el-button>
       <!--<el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button> -->
@@ -24,7 +25,7 @@
       ref="elxEditable"
       class="manual-table4"
       border
-      height="466"
+      height="400"
       :data.sync="list"
       :span-method="arraySpanMethod"
       :cell-style ="cell_select"
@@ -39,7 +40,15 @@
             </template>      
       </elx-editable-column>
     </elx-editable>
-
+     <div v-if="Form" class="form2">
+        <h3 >关联的清单</h3>
+        <div v-if="Form.tender" class="title">标段名称：<span class="demonstration" v-text="Form.tender.name"></span></div>  
+        <div class="title">表头编号：<span class="demonstration" v-text="Form.num"></span></div>
+        <div class="title">表头名称：<span class="demonstration" v-text="Form.name"></span></div>
+        <div class="title">类别：<span class="demonstration" >原清单</span></div>
+        <div v-if="Form.saveEmployee" class="title">创建人：<span class="demonstration" v-text="Form.saveEmployee.name"></span></div>
+        <div class="title">创建时间：<span class="demonstration" v-text="Form.saveTime"></span></div>
+      </div>
  
   </div>
 </template>
@@ -58,10 +67,11 @@ export default {
       hd:[],
       packaList:[],
       all:{},
-      attShow:false,
+      attShow:true,
       badge_name:inven.badge_name, //属性标记名对象
       columnName:[],//列的名  A B C
       key:'',//请求清单的清单类型
+      Form:{},//关联的清单
 
     }
   },
@@ -117,6 +127,7 @@ export default {
         // console.log('请求成功')
         // console.log(response)
         // this.list = response.data.oneh.headRowList;
+        this.Form = response.data.onehead.tOriginalHead
         this.all = response.data.onehead;
         let data = response.data.onehead;
         this.key = '';
@@ -135,14 +146,20 @@ export default {
         }else if (type == 'pay'){
           this.key = 'tPayHeadRows';
         }
+        console.log('行号列好=======edit')
+        console.log(data.refCol,data.refRow)
+
         //调用表格组装函数（返回的是个数组对象）
         let arr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
+        this.hd = Object.keys(arr[0]);
+        console.log('edit colllllllllllll')
+        console.log(this.hd)
+
         //调用表格列名函数  （返回的是一个包括excel基本所有列的数组)
         let AZ = this.$excel.AZ()
         this.columnName = AZ.slice(0,data.refCol);
         this.loading = false;
         this.list = arr;
-        this.hd = Object.keys(arr[0]);
         this.packaList = arr;
 
       })
@@ -215,5 +232,9 @@ export default {
   font-size: 5px;
   color: #409EFF;
   /* margin-right: 40px; */
+}
+.form2 {
+  margin: 30px 0 0 0;
+  height: 100px;
 }
 </style>

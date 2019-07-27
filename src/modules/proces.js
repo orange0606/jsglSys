@@ -47,34 +47,27 @@ let excelmodel = {
                     // console.log('wb.Sheets[sheet]')
                         // perobj.sheets = XLSX.utils.get_formulae(wb.Sheets[sheet]) //添加工作表的数据
                         perobj.sheets = wb.Sheets[sheet] //添加工作表的数据
-
                         perobj.ref= wb.Sheets[sheet]['!ref']  //添加表的单元格范围
                         // console.log('perobj.ref')
                         // console.log(perobj.ref)
-
                         if(wb.Sheets[sheet]['!merges']){    //检测该工作表有无单元格合并
                         perobj.merges = wb.Sheets[sheet]['!merges']   //添加单元格合并情况，是个数组
                         }else{
                         perobj.merges = null
                         }
                         persons.push(perobj)
-
                          break; //只需要单张工作表数据时才跳出循环
                     }
                 }       
-
                 // console.log(' excel文件中的所有表需要处理的数据persons')
                 // console.log(persons)
-
                 //最终处理的数据
                 _this.Table(persons,data=>{
                     callback(data)
                 })
-           
              console.log('表格导入的未经任何处理的原始数据')
              console.log(wb.Sheets[wb.SheetNames[0]]) //  为转换的原始数据，可作为提交或者另外处理
             }
-
             f?reader.readAsArrayBuffer(f):f
         }
         if(rABS) {
@@ -117,8 +110,6 @@ let excelmodel = {
     Unpack (list) { //表格解构
         let headRowList = [];
         let hd = Object.keys(list[0]);   //获取所有的列
-        let refCol = hd.length;
-        let refRow = list.length;
         for (let index = 0; index < list.length; index++) {
             for (let i = 0; i < hd.length; i++) {
                   headRowList.push(list[index][hd[i]]);
