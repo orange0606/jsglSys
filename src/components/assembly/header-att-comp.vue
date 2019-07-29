@@ -1,302 +1,313 @@
 <template>
-        <!-- 
-            **************弹窗属性选择设置**************
-        -->
-    <el-form :model="scope.row[val]" :rules="rules" ref="scope.row[val]" label-width="120" size="small">
-        <el-form-item label="设置属性" prop="attribute">
-            <el-select v-model="scope.row[val].attribute" placeholder="请选择属性" clearable size="small" style=" width:100%;">
-                <el-option label="原清单" value="1"></el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item label="属性值" prop="attribute_value">
-            <el-input v-model="scope.row[val].attribute_value"></el-input>
-        </el-form-item>
-        <el-form-item v-if="'attribute_value_id' in scope.row[val]" label="（属性id）对应新清单表头内容id" prop="attribute_value_id">
-            <el-input v-model="scope.row[val].attribute_value_id"></el-input>
-        </el-form-item>
-        <el-form-item label="列宽" prop="col_width">
-            <el-input v-model="scope.row[val].col_width"></el-input>
-        </el-form-item>
-        <el-form-item label="行高" prop="tr_high">
-            <el-input v-model="scope.row[val].tr_high"></el-input>
-        </el-form-item>
-        <el-form-item v-if="'limit' in scope.row[val]" label="限制单元格大小值" prop="limit">
-        <el-select v-model="scope.row[val].limit" placeholder="请选择限制类型" clearable size="small" style=" width:100%;">
-                <el-option label="原清单" value="1"></el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item v-if="'limit_value' in scope.row[val]" label="限制值" prop="limit_value">
-            <el-input v-model="scope.row[val].limit_value"></el-input>
-        </el-form-item>
-        <el-form-item v-if="'limit_id' in scope.row[val]" label="（限制id）对应原清单表头内容id" prop="limit_id">
-            <el-input v-model="scope.row[val].limit_id"></el-input>
-        </el-form-item>
-        <el-form-item v-if="'update_time' in scope.row[val]" label="更新时间" prop="update_time">
-            <el-input v-model="scope.row[val].update_time"></el-input>
-        </el-form-item>
+  <div>
+    <p style="color: red;font-size: 12px;">拖动排序</p>
 
-    </el-form>                 
+    <div class="click-table11-oper">
+      <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
+      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+       <el-button type="success" size="small" @click="insertEvent">新增</el-button>
+      <el-button type="success" size="small" @click="exportCsvEvent">导出</el-button>
+    </div>
+
+    <elx-editable
+      v-loading="loading"
+      element-loading-text="生成数据中，请稍后..."
+      element-loading-spinner="el-icon-loading"
+      ref="elxEditable"
+      class="click-table11"
+      border
+      height="466"
+      size="small"
+      row-key="id"
+      show-summary
+      :data.sync="list"
+      :custom-columns.sync="customColumns"
+      :summary-method="getSummaries"
+      :edit-config="{trigger: 'click', mode: 'cell'}"
+      style="width: 100%">
+      <elx-editable-column type="selection" width="55"></elx-editable-column>
+      <elx-editable-column width="40">
+        <template v-slot:header="scope">
+          <el-tooltip class="item" placement="top">
+            <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+        </template>
+        <template>
+          <i class="el-icon-rank drag-btn"></i>
+        </template>
+      </elx-editable-column>
+      <elx-editable-column type="index" width="55">
+        <template v-slot:header>
+          <i class="el-icon-setting" @click="dialogVisible = true"></i>
+        </template>
+      </elx-editable-column>
+      <elx-editable-column prop="0.name" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="1" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="2" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="3" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="4" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="5" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="6" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="7" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column prop="8" label="名字" min-width="140" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+    </elx-editable>
+    
+  </div>
 </template>
 
 <script>
 import XEUtils from 'xe-utils'
+import Sortable from 'sortablejs'
 
-  export default {
-    name: 'edit',
-    props:["tableList"],
-    data () {
-      return {
-        btn: {  //按钮的名称,与存储信息事件
-            next:'下一步',
-            cancel: '取 消',
-            edit: true,    //true开启单元格编辑，false开启属性设置，默认true。
-        },
-        loading: true, //  div  加载中的样式
-        list:[], //用来存储导入的数据
-        hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
-        attribute:{}, //用来存储特殊属性的所有类
-        limits:[],  //用来存储限制单元格大小的所有类
-
-        rules: {  //input 反馈错误
-          attribute_value: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          attribute_value_id: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          limit_value: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          limit_id: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          col_width: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          tr_high: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          update_time: [
-            { required: true, message: '请输入内容', trigger: 'blur' },
-            { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'change' },
-          ],
-          attribute: [
-            { required: true, message: '请选择属性', trigger: 'change' }
-          ],
-          limit: [
-            { required: true, message: '请选择限制类型', trigger: 'change' }
-          ]
-        },
-        pendingRemoveList: [] //存储已标记的行数
-  
-
+export default {
+  name: 'InvenEdit',
+  data () {
+    return {
+      loading: false,
+      dialogVisible: false,
+      sexList: [
         
-      }
+
+      ],
+      regionList: [],
+      customColumns: [],
+      list: [
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+        {0:{name:'洛伊'},1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
+      ]
+    }
+  },
+  computed: {
+    allCustomColumnList () {
+      console.log('sssssssssssssss',this.customColumns)
+      return this.customColumns.filter(item => item.prop)
+    }
+  },
+  created () {
+    // this.rowDrop()
+    // this.findSexList()
+    // this.findRegionList()
+    // this.findList()
+  },
+  methods: {
+    findList () {
+      this.loading = true
+      // XEAjax.doGet('/api/user/list', { sort: 'seq', order: 'asc' }).then(({ data }) => {
+      //   this.list = data
+      //   this.loading = false
+      // }).catch(e => {
+      //   this.loading = false
+      // })
     },
-     created () { //2
-        console.log('this.tableList')
-        console.log(this.tableList)
-        if(this.tableList != null){
-            this.list = this.tableList.sheet;
-            this.loading =false;
-            this.list[0] ? this.hd = Object.keys(this.list[0]) :this.hd = null; //用来所需要的所有列（属性）名
+    findSexList () {
+      // XEAjax.doGet('/api/conf/sex/list').then(({ data }) => {
+      //   this.sexList = data
+      // })
+    },
+    findRegionList () {
+      // XEAjax.doGet('/api/conf/region/list').then(({ data }) => {
+      //   this.regionList = data
+      // })
+    },
+    getSummaries (param) {  //合计
+      const { columns, data } = param
+
+      const sums = []
+      console.log(param)
+      columns.forEach((column, index) => {
+        if (index === 0) {
+          sums[index] = '汇总'
+          return
         }
-    },
-    watch: {
-        tableList: function(newVal,oldVal){
-            if (newVal == null ) {    //当没有数据的时候div 为加载中状态
-                this.loading = true;
-            }else{
-                this.list = newVal.sheet
-                this.hd = Object.keys(newVal.sheet[0])
-                this.loading = false;
-            }
-
+        switch (column.property) {
+          case '5':
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
+            break
+          case '8':
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
+            break
+          case '2':
+            sums[index] = `总分：${XEUtils.sum(data, column.property)}`
+            break
+          default:
+            sums[index] = ''
+            break
         }
+      })
+      return sums
     },
-
-
-    methods: {
-
-          next(){  //编辑完成点击下一步
-              if (this.btn.edit) {
-                  this.btn.edit = false;
-                  this.btn.next ='完  成';
-                  this.btn.cancel ='上一步';
-
-              }else{
-                  alert('直接完成')
-                  //此处调用提交数据到父组件
-              }
-          },
-          back(){
-            if (this.btn.edit) {
-                alert('直接取消')
-                //此处取消弹窗显示
-    
-              }else{
-                  this.btn.edit = true
-                  this.btn.next ='下一步';
-                  this.btn.cancel ='取  消';
-              }
-          },
-          getSelectLabel (value, valueProp, labelProp, list) {
-            let item = XEUtils.find(list, item => item[valueProp] === value)
-            return item ? item[labelProp] : null
-          },
-        
-          selectEvent (selection, row) {
-            console.log(selection)
-          },
-          currentChangeEvent (currentRow, oldCurrentRow) {
-            console.log(currentRow)
-          },
-          deleteSelectedEvent () {  //删除选中数据
-            let selection = this.$refs.elxEditable.getSelecteds()
-            if (selection.length) {
-              this.$refs.elxEditable.removeSelecteds()
-              Message({ message: '删除成功', type: 'success' })
-            } else {
-              Message({
-                type: 'info',
-                message: '请至少选择一条数据！'
-              })
+    insertEvent () {
+      this.$refs.elxEditable.insert({
+        0: `New ${Date.now()}`,
+      }).then(({ row }) => {
+        this.$refs.elxEditable.setActiveCell(row)
+      })
+      this.$refs.elxEditable.clearActive()
+    },
+    getSelectLabel (value, valueProp, labelProp, list) {
+      let item = XEUtils.find(list, item => item[valueProp] === value)
+      return item ? item[labelProp] : null
+    },
+    getCascaderLabel (value, list) {
+      let values = value || []
+      let labels = []
+      let matchCascaderData = function (index, list) {
+        let val = values[index]
+        if (list && values.length > index) {
+          list.forEach(item => {
+            if (item.value === val) {
+              labels.push(item.label)
+              matchCascaderData(++index, item.children)
             }
-          },          
-          pendingRemoveEvent () { //标记/取消
-            let selection = this.$refs.elxEditable.getSelecteds()
-            if (selection.length) {
-              let plus = []
-              let minus = []
-              selection.forEach(data => {
-                if (this.pendingRemoveList.some(item => data === item)) {
-                  minus.push(data)
-                } else {
-                  plus.push(data)
-                }
-              })
-              if (minus.length) {
-                this.pendingRemoveList = this.pendingRemoveList.filter(item => minus.some(data => data !== item)).concat(plus)
-              } else if (plus) {
-                this.pendingRemoveList = this.pendingRemoveList.concat(plus)
-              }
-              this.$refs.elxEditable.clearSelection()
-            } else {
-              this.$message({
-                type: 'info',
-                message: '请至少选择一条数据！'
-              })
-            }
-          },
-          arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-              // if (columnIndex <= this.hd.length) {   // 不带选择框的情况
-              //     return [row[this.hd[columnIndex]].td_rowspan, row[this.hd[columnIndex]].td_colspan]
-              // }
-              // return [1, 1]
-
-              if (columnIndex >0) {  //带选择框的情况
-                  if(row[this.hd[columnIndex-1]].dele !=1){
-                    if (columnIndex <= this.hd.length) {
-                        return [row[this.hd[columnIndex-1]].td_rowspan, row[this.hd[columnIndex-1]].td_colspan]
-                    }
-                  }
-              }
-                  return [1, 1]
-
-          },       
-          exportCsvEvent () { //导出表格
-            this.$refs.elxEditable.exportCsv()
-          },
-
-          insertEvent (index) { //新增一行
-
-            this.$refs.elxEditable.insertAt({
-              
-              hd0: {
-                value:789,
-                row:1,
-                cos:1
-              },
-
-            }, index)
-
-            // .then(({ row }) => {
-            //   // this.$refs.elxEditable.setActiveCell(row, 'name')
-            // })
-
-          },
-          
-          deleteSelectedEvent () {    //删除选中
-            let selection = this.$refs.elxEditable.getSelecteds()
-            if (selection.length) {
-              this.$refs.elxEditable.removeSelecteds()
-              this.$message({ message: '删除成功', type: 'success' })
-            } else {
-              this.$message({
-                type: 'info',
-                message: '请至少选择一条数据！'
-              })
-            }
-          },
-          submitEvent () {  //校验保存  即可提交数据
-            this.$refs.elxEditable.validate(valid => {
-              if (valid) {
-                  console.log(this.list.sheet[0])
-                  console.log('tbtbtb')
-                  this.$message({ message: '保存成功', type: 'success' })
-                // alert('成功1')
-              } else {
-                this.$message({ message: '校验不通过', type: 'error' })
-              }
-            })
-          },
-          getInsertEvent () { //获取新增数据
-            let rest = this.$refs.elxEditable.getInsertRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取新增数据(${rest.length}条)` }).catch(e => e)
-            console.log(rest)
-          },
-          getUpdateEvent () { //获取已修改数据
-            let rest = this.$refs.elxEditable.getUpdateRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取已修改数据(${rest.length}条)` }).catch(e => e)
-          },
-          getRemoveEvent () { //获取已删除数据
-            let rest = this.$refs.elxEditable.getRemoveRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取已删除数据(${rest.length}条)` }).catch(e => e)
-          },
-          getSelectedEvent () { //获取已选中数据
-            let rest = this.$refs.elxEditable.getSelecteds()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取已选中数据(${rest.length}条)` }).catch(e => e)
-          },
-          getAllEvent () {   //获取所有数据
-            let rest = this.$refs.elxEditable.getRecords()
-            this.$msgbox({ message: JSON.stringify(rest), title: `获取所有数据(${rest.length}条)` }).catch(e => e)
-          },
-          postJSON (data) {
-          // 提交请求
-          return new Promise(resolve => {
-            setTimeout(() => {
-              resolve('保存成功')
-            }, 300)
           })
         }
-              
       }
-    }
+      matchCascaderData(0, list)
+      return labels.join(' / ')
+    },
+    getDatePicker (value) {
+      return XEUtils.toDateString(value, 'yyyy/MM/dd')
+    },
+    formatterDate (row, column, cellValue, index) {
+      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+    },
+    rowDrop () {
+      this.$nextTick(() => {
+        Sortable.create(this.$el.querySelector('.el-table__body-wrapper tbody'), {
+          handle: '.drag-btn',
+          onEnd: ({ newIndex, oldIndex }) => {
+            let currRow = this.list.splice(oldIndex, 1)[0]
+            this.list.splice(newIndex, 0, currRow)
+          }
+        })
+      })
+    },
+    submitEvent () {
+      this.$refs.elxEditable.validate(valid => {
+        if (valid) {
+          let list = this.list
+          list.forEach((item, index) => {
+            if (XEUtils.isDate(item.date)) {
+              item.date = item.date.getTime()
+            }
+            // 重新生成排序后的序号
+            item.seq = index
+          })
+          this.loading = true
+          // XEAjax.doPost('/api/user/save', { updateRecords: list }).then(({ data }) => {
+          //   Message({
+          //     type: 'success',
+          //     message: '保存成功!'
+          //   })
+          //   this.findList()
+          // }).catch(e => {
+          //   this.loading = false
+          // })
+        }
+      })
+    },
+    exportCsvEvent () {
+      this.$refs.elxEditable.exportCsv()
+    },
 
+
+  }
+}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-
-.click-table12 .el-table__body .el-table__row>td.elx_checked {
-  box-shadow: inset 0 0 6px #409EFF;
+<style scope>
+.click-table11-oper {
+  margin-bottom: 18px;
+}
+.click-table11-pagination {
+  margin-top: 18px;
+  text-align: right;
+}
+.click-table11 .drag-btn {
+  font-size: 16px;
+  cursor: move;
+}
+.click-table11.elx-editable .elx-editable-row.new-insert,
+.click-table11.elx-editable .elx-editable-row.new-insert:hover>td {
+  background-color: #f0f9eb;
+}
+.click-table11 .el-table__body tr.hover-row>td,
+.click-table11 .el-table__body .el-table__row:hover>td {
+  background-color: inherit;
+}
+.click-table11.elx-editable .elx-editable-row.sortable-ghost,
+.click-table11.elx-editable .elx-editable-row.sortable-chosen {
+  background-color: #fff6b2;
 }
 </style>
-    

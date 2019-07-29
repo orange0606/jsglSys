@@ -54,10 +54,14 @@ import {
 } from 'vue-element-extends'
 import 'vue-element-extends/lib/index.css'
 
+
 Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Editable)
 Vue.use(EditableColumn)
+
+
+
 
 // import axios from "axios"
 // // //将axios挂载到原型上
@@ -76,9 +80,8 @@ Vue.prototype.$fetch=fetch;
 Vue.prototype.$patch=patch;
 Vue.prototype.$put=put;
 
-
-
 Vue.prototype.HOST = '/api'
+
 
 Vue.prototype.$message = Message;
 Vue.prototype.$notify = Notification;
