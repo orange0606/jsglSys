@@ -268,6 +268,7 @@ import inven from '../../modules/inventory';
             this.loading = false;
         }else{
             this.list = this.From.headRowList;
+            this.hd = [];
             this.listType = this.From.type;
             this.loading = false;
         }
@@ -310,6 +311,7 @@ import inven from '../../modules/inventory';
                     this.loading = false;
                 }else{
                     this.list = this.From.headRowList;
+                    this.hd = [];
                     this.listType = this.From.type;
                     this.loading = false;
                 }

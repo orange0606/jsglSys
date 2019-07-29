@@ -99,6 +99,7 @@ let excelmodel = {
                 let col = AZ.indexOf(list[index].colNum); //列号A
                 // console.log('行号列号')
                 // console.log(row,col)
+                // console.log(list[index])
                 arr[row-1]['hd'+col] =list[index];
             }
         }

@@ -72,6 +72,7 @@ export default {
       columnName:[],//列的名  A B C
       key:'',//请求清单的清单类型
       Form:{},//关联的清单
+      timer:null,//定时器，5秒刷新预览页面
 
     }
   },
@@ -89,6 +90,8 @@ export default {
     heads: function(newVal,oldVal){
       if (this.headObj!=null) {
         this.headObj = newVal;
+        console.log('清除定时器')
+        this.timer!=null?clearInterval(this.timer):this.timer; //清除定时器
         this.findList(this.headObj.id,this.headObj.type)
       } 
     }
@@ -109,6 +112,9 @@ export default {
       return this.all.type ? obj[this.all.type ] : '未知'
     }
   },
+ beforeDestroy() {
+      this.timer?clearInterval(this.timer):this.timer;//清除定时器
+  },
   methods: {
     upfun () {  //修改数据函数（传值给父组件）
           if (this.hd.length >0 ) {
@@ -118,11 +124,15 @@ export default {
               let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
               arr.headRowList = rest;
               this.$emit("update:tableList",arr)
+              this.timer = setInterval(()=>{
+                  this.findList(this.headObj.id,this.headObj.type)
+              },5000)
+
           }
 
     },
     findList (id,type) {
-      this.loading = true
+      // this.loading = true
         //发起网络请求
       // console.log('发起网络请求 id')
       this.$post('/head/getone',{id, type})
@@ -149,19 +159,16 @@ export default {
         }else if (type == 'pay'){
           this.key = 'tPayHeadRows';
         }
-        console.log('行号列好=======edit')
-        console.log(data.refCol,data.refRow)
+        // console.log('行号列好=======edit')
+        // console.log(data.refCol,data.refRow)
 
         //调用表格组装函数（返回的是个数组对象）
         let arr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
         this.hd = Object.keys(arr[0]);
-        console.log('edit colllllllllllll')
-        console.log(this.hd)
-
         //调用表格列名函数  （返回的是一个包括excel基本所有列的数组)
         let AZ = this.$excel.AZ()
         this.columnName = AZ.slice(0,data.refCol);
-        this.loading = false;
+        // this.loading = false;
         this.list = arr;
         // this.packaList = arr;
 

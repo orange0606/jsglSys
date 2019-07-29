@@ -192,8 +192,6 @@
             .then((response) => {
               if (response.data.head.id) {
                   return this.$message({ message: '该表头已存在，请换个表名试试吧。', type: 'error' })
-              }else{
-                  return this.$message({ message: '不重复，可以创建噢。', type: 'success' })
               }
           })
 
@@ -202,15 +200,26 @@
             if ((this.ruleForm.type=='change' || this.ruleForm.type=='update') && this.tOrHeadList.length <1) {
                 return this.$message({ message: '请先建立原清单', type: 'error' })
             }
-            this.queryHeader();
             this.$refs.ruleForm.validate(valid => {
               if (valid) {
-
-                        console.log('这里保存表头类型标段数据')
+                    let url = '/head/'+this.ruleForm.type;
+                    if (this.ruleForm.type == 'update') {
+                        url = '/head/one/'+this.ruleForm.type;
+                    }
+                    let params = {
+                      tenderId: this.ruleForm.region,
+                      num: this.ruleForm.number,
+                      name: this.ruleForm.name,
+                      type: this.ruleForm.type
+                    }
+                    this.$post(url,params)
+                    .then((response) => {
+                        if (response.data.head) {
+                            return this.$message({ message: '该表头已存在，请换个表名试试吧。', type: 'error' });
+                        }
+                        // console.log('这里保存表头类型标段数据')
                         // console.log(this.ruleForm)
                         // this.$message({ message: '输入正确哦', type: 'success' })
-                        //button 按钮调用input文件选择事件
-                        // this.$refs.input.click()
                         this.dialogVisible = true;
                         this.Form = {
                             sysOrder: null,          //系统序号 预留，暂时不用
@@ -224,6 +233,8 @@
                             refRow:null,   //多少行
                             headRowList:[],           //表头内容
                         }
+                    })
+                    
 
               } else {
                 this.$message({ message: '校验不通过', type: 'error' })

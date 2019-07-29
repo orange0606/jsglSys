@@ -157,14 +157,25 @@ import headeratt from '@/components/assembly/header-att'
         }
         this.$post(url,params)
         .then((response) => {
-          if (response.data.head.id) {
-              this.$message({ message: '该表头已存在，请换个表名试试吧。', type: 'error' })
+          if (response.data.head) {
+              this.$message({ message: '当前未作出变动', type: 'error' })
               return false;
-          }else{
-              this.$message({ message: '不重复，可以保存噢。', type: 'success' })
-              return true;
           }
+          // console.log('正在保存当前行数据')
+          //进行网路请求保存
+          this.$refs.elxEditable.clearActive(); //清除编辑状态
+          this.$post('/head/update',rows)
+            .then((response) => {
+            // console.log(response)
+            this.loading = false
+            this.findList()
+            this.$message({ message: '保存成功', type: 'success' })
+          })
+          
        })
+
+    },
+    updatas (row) {
 
     },
     tenList (){   //请求所有标段
@@ -431,21 +442,24 @@ import headeratt from '@/components/assembly/header-att'
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
           // this.loading = true
-          if(!this.queryHeader(row)){
+          if(!this.queryHeader(row)){ //查询修改表头的数据是否已存在
+          console.log('是否进来了这里啊啊啊啊啊啊啊啊啊啊啊啊啊111')
+
               return false
           }
-          this.$refs.elxEditable.clearActive()
-          // console.log('正在保存当前行数据')
-          // console.log(row)
-          //进行网路请求保存
-          this.$post('/head/update',row)
-            .then((response) => {
-            // console.log(response)
-            this.loading = false
-            this.findList()
-            this.$message({ message: '保存成功', type: 'success' })
+          console.log('是否进来了这里啊啊啊啊啊啊啊啊啊啊啊啊啊')
+          // this.$refs.elxEditable.clearActive()
+          // // console.log('正在保存当前行数据')
+          // // console.log(row)
+          // //进行网路请求保存
+          // this.$post('/head/update',row)
+          //   .then((response) => {
+          //   // console.log(response)
+          //   this.loading = false
+          //   this.findList()
+          //   this.$message({ message: '保存成功', type: 'success' })
 
-          })
+          // })
             
             //保存不成功
         
