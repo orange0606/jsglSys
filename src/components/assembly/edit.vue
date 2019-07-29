@@ -81,7 +81,7 @@ export default {
     if (this.headObj!=null) {
         this.headObj = this.heads;
         this.findList(this.headObj.id,this.headObj.type)
-        this.packaList = this.tableList;
+        // this.packaList = this.tableList;
     }
     
   },
@@ -111,12 +111,15 @@ export default {
   },
   methods: {
     upfun () {  //修改数据函数（传值给父组件）
+          if (this.hd.length >0 ) {
+              // this.$emit("update:tableList", this.packaList)
+              let arr = XEUtils.clone(this.all, true)
+              delete arr[this.key]
+              let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+              arr.headRowList = rest;
+              this.$emit("update:tableList",arr)
+          }
 
-          this.$emit("update:tableList", this.packaList)
-          let arr = XEUtils.clone(this.all, true)
-          delete arr[this.key]
-          arr.headRowList = this.packaList;
-          this.$emit("update:tableList",arr)
     },
     findList (id,type) {
       this.loading = true
@@ -160,7 +163,7 @@ export default {
         this.columnName = AZ.slice(0,data.refCol);
         this.loading = false;
         this.list = arr;
-        this.packaList = arr;
+        // this.packaList = arr;
 
       })
      

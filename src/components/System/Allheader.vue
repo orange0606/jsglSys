@@ -144,6 +144,29 @@ import headeratt from '@/components/assembly/header-att'
     }
   },
   methods: {
+    queryHeader (rows) {  //查询用户当前输入的表头名之类的是否已存在数据库
+        let url = '/head/'+rows.type;
+        if (rows.type == 'update') {
+            url = '/head/one/'+rows.type;
+        }
+        let params = {
+          tenderId: rows.tender.id,
+          num: rows.num,
+          name: rows.name,
+          type: rows.type
+        }
+        this.$post(url,params)
+        .then((response) => {
+          if (response.data.head.id) {
+              this.$message({ message: '该表头已存在，请换个表名试试吧。', type: 'error' })
+              return false;
+          }else{
+              this.$message({ message: '不重复，可以保存噢。', type: 'success' })
+              return true;
+          }
+       })
+
+    },
     tenList (){   //请求所有标段
         this.$post('/tender/getall',{})
           .then((response) => {
@@ -408,6 +431,9 @@ import headeratt from '@/components/assembly/header-att'
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
           // this.loading = true
+          if(!this.queryHeader(row)){
+              return false
+          }
           this.$refs.elxEditable.clearActive()
           // console.log('正在保存当前行数据')
           // console.log(row)
@@ -417,7 +443,7 @@ import headeratt from '@/components/assembly/header-att'
             // console.log(response)
             this.loading = false
             this.findList()
-            this.$message({ message: '保存2成功', type: 'success' })
+            this.$message({ message: '保存成功', type: 'success' })
 
           })
             

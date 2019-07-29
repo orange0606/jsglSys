@@ -866,6 +866,16 @@ import inven from '../../modules/inventory';
   box-shadow: inset 0 0 6px #409EFF;
   
 }
+.el-table td, .el-table th.is-leaf {
+    border-bottom: 1px solid #2248A2;
+}
+.el-table--border td, .el-table--border th, .el-table__body-wrapper .el-table--border.is-scrolling-left ~ .el-table__fixed {
+    border-right: 1px solid #2B4EA1;
+}
+.el-table__body td, .el-table__body th, .el-table__body tr {
+    border-bottom: 1px solid #2248A2;
+
+}
 .transition-box {
     margin-bottom: 10px;
     width: 200px;
@@ -959,5 +969,10 @@ import inven from '../../modules/inventory';
 }
 .el-dialog__body {
   padding: 10px 20px;
+}
+.el-input-group__append button.el-button {
+  /* background-color: rgb(0, 17, 255); */
+  background-color: #409EFF;
+  color: white;
 }
 </style>

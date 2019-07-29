@@ -29,6 +29,11 @@ export default new Router({
       path: '/marks',
       name: 'marks',
       component: ()=>import('@/components/System/Mark.vue')
+    },
+    {
+      path: '/newInventory',
+      name: 'newInventory',
+      component: ()=>import('@/components/InventorySys/NewInventory.vue')
     }
   ]
 })

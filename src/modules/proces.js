@@ -94,11 +94,13 @@ let excelmodel = {
             }  
         }
         for (let index = 0; index < list.length; index++) {
-            let row = list[index].trNum;  //行号
-            let col = AZ.indexOf(list[index].colNum); //列号A
-            // console.log('行号列号')
-            // console.log(row,col)
-            arr[row-1]['hd'+col] =list[index];
+            if (list[index].trNum && list[index].colNum) {
+                let row = list[index].trNum;  //行号
+                let col = AZ.indexOf(list[index].colNum); //列号A
+                // console.log('行号列号')
+                // console.log(row,col)
+                arr[row-1]['hd'+col] =list[index];
+            }
         }
         return arr;
     },

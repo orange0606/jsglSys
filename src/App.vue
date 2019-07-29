@@ -121,9 +121,21 @@ body, html, #app{
   padding: 0 20px;
   font-size:12px;
 }
-table tr,table tr td {
-  font-size: 12px;
-}
 
+.el-table--border, .el-table--group {
+    border: 1px solid #CCCCCC;
+        /* border-right-color: rgb(18, 79, 220);
+        border-right-style: solid;
+        border-right-width: 1px;
+        border-bottom-color: rgb(18, 79, 220);
+        border-bottom-style: solid;
+        border-bottom-width: 1px; */
+}
+.el-table td, .el-table th.is-leaf {
+    border-bottom: 1px solid #CCCCCC;
+}
+.el-table--border td, .el-table--border th {
+    border-right: 1px solid #CCCCCC;
+}
 
 </style>
