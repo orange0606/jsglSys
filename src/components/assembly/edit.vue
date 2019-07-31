@@ -122,6 +122,8 @@ export default {
               let arr = XEUtils.clone(this.all, true)
               delete arr[this.key]
               let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+              console.log('表格数据')
+              console.log(arr)
               arr.headRowList = rest;
               this.$emit("update:tableList",arr)
               this.timer = setInterval(()=>{

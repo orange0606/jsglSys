@@ -24,7 +24,7 @@
         <el-tab-pane label="清单">
           <!-- 清单模块开始编写 -->
               <h3>清单模块</h3>
-              <InvenEdit></InvenEdit>
+              <!-- <InvenEdit></InvenEdit> -->
 
 
 

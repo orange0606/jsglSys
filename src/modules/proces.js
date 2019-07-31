@@ -65,8 +65,8 @@ let excelmodel = {
                 _this.Table(persons,data=>{
                     callback(data)
                 })
-             console.log('表格导入的未经任何处理的原始数据')
-             console.log(wb.Sheets[wb.SheetNames[0]]) //  为转换的原始数据，可作为提交或者另外处理
+            //  console.log('表格导入的未经任何处理的原始数据')
+            //  console.log(wb.Sheets[wb.SheetNames[0]]) //  为转换的原始数据，可作为提交或者另外处理
             }
             f?reader.readAsArrayBuffer(f):f
         }
@@ -200,8 +200,8 @@ let excelmodel = {
                         // }
                     }
                 }
-                console.log('已注入数据')
-                console.log(data)
+                // console.log('已注入数据')
+                // console.log(data)
 
                 
 

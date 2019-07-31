@@ -1,33 +1,37 @@
 <template>
-  <div>
-    <p style="color: red;font-size: 12px;">拖动排序</p>
-
+  <div
+    v-loading="loading"
+    element-loading-text="正在努力为你加载数据，请稍后..."
+    element-loading-spinner="el-icon-loading"
+  >
+    <p style="color: red;font-size: 12px;">拖动排序/、右键菜单</p>
+    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
     <div class="click-table11-oper">
+      <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
       <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-       <el-button type="success" size="small" @click="insertEvent">新增</el-button>
+      <el-button type="success" size="small" @click="insertEvent">新增</el-button>
       <el-button type="success" size="small" @click="exportCsvEvent">导出</el-button>
+      <el-button type="success" size="small" @click="newcloum()">新增</el-button>
     </div>
          <!-- :data.sync="list" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
-      v-loading="loading"
-      element-loading-text="生成数据中，请稍后..."
-      element-loading-spinner="el-icon-loading"
+      
       ref="elxEditable"
       class="click-table11 scroll-table4"
       border
-      height="500"
+      height="600"
       size="small"
-      row-key="id"
       show-summary
- 
+      :span-method="arraySpanMethod"
       :summary-method="getSummaries"
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 60, useDefaultValidTip: true}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
-      <elx-editable-column type="selection" width="55"></elx-editable-column>
-      <elx-editable-column width="40">
+      
+      <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+      <elx-editable-column width="40" align="center" >
         <template v-slot:header="scope">
           <el-tooltip class="item" placement="top">
             <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
@@ -38,173 +42,130 @@
           <i class="el-icon-rank drag-btn"></i>
         </template>
       </elx-editable-column>
-      <elx-editable-column type="index" width="55">
+      <elx-editable-column type="index" width="55" align="center" >
         <template v-slot:header>
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
         </template>
       </elx-editable-column>
-      <elx-editable-column prop="0" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="1" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="2" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="3" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="4" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="5" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="6" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="7" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-      <elx-editable-column prop="8" label="名字" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+      <elx-editable-column :prop="val+'.td'" label="aa" v-for="(val,i) in hd" :key="i" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"  >
+      </elx-editable-column>
+      <!-- <elx-editable-column v-for='(item,i) in col' :label="item.label" :prop='item.prop' :key="i+'b'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+          <elx-editable-column v-show='item.children||item.children.length>0' v-for="(item1,a) in item.children"
+          :label="item1.label" :prop='item1.prop'  :key="a+'a'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                <elx-editable-column v-show='item1.children||item1.children.length>0' v-for="(item2,c) in item1.children"
+                :label="item2.label" :prop='item2.prop'  :key="c+'b'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                      <elx-editable-column v-show='item2.children||item2.children.length>0' v-for="(item3,d) in item2.children"
+                      :label="item3.label" :prop='item3.prop'  :key="d+'i'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                            <elx-editable-column v-show='item3.children||item3.children.length>0' v-for="(item4,f) in item3.children"
+                            :label="item4.label" :prop='item4.prop'  :key="f+'ii'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                  <elx-editable-column v-show='item4.children||item4.children.length>0' v-for="(item5,h) in item4.children"
+                                  :label="item5.label" :prop='item5.prop'  :key="h+'iii'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                        <elx-editable-column v-show='item5.children||item5.children.length>0' v-for="(item6,j) in item5.children"
+                                        :label="item6.label" :prop='item6.prop'  :key="j+'j'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                              <elx-editable-column v-show='item6.children||item6.children.length>0' v-for="(item7,k) in item6.children"
+                                              :label="item7.label" :prop='item7.prop'  :key="k+'jj'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                                    
+                                              </elx-editable-column>
+                                        </elx-editable-column>
+                                  </elx-editable-column>
+                            </elx-editable-column>
+                      </elx-editable-column>
+                </elx-editable-column>
+          </elx-editable-column>
+      </elx-editable-column> -->
+
+      <!-- <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column> -->
+
     </elx-editable>
     
   </div>
 </template>
 
 <script>
+import MyColumn from './MyColumn'
 import XEUtils from 'xe-utils'
 import Sortable from 'sortablejs'
 
 export default {
   name: 'InvenEdit',
+  components: {
+    MyColumn
+  },
   data () {
     return {
+      hd:null,
+      startTime:null,
       loading: false,
       dialogVisible: true,
+      column:'',
+      // col:[],//表头数据.
+      col: [
+        {
+          prop: '0',
+          label: '2222222222222'
+        },
+        {
+          label: '配送信息',
+          children: [
+            {
+              prop: '1',
+              label: '1'
+            },
+            {
+              label: '2',
+              children: [
+                {
+                  prop: '6',
+                  label: '3',
+                  children:[
+                    {
+                      prop: '3',
+                      label: '4',
+                      children:[
+                        {
+                          prop: '1',
+                          label: '噢5',
+                          children:[
+                            {
+                              prop: '3',
+                              label: '哦6',
+                              children:[
+                                {
+                                  prop: '3',
+                                  label: '哦7',
+                                  children:[
+                                    {
+                                      prop: '3',
+                                      label: '哦8',
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  prop: '3',
+                  label: '3'
+                },
+                {
+                  prop: '4',
+                  label: '4'
+                }
+              ]
+            }
+          ]
+        }
+      ],
 
       regionList: [],
       customColumns: [],
       list: [
-        {0:'洛伊',1:'陈淑惠',2:1, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:1, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-
-        {0:'洛伊',1:'陈淑惠',2:2, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:3, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:4, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:6, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:7, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:8, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:9, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:10, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:11, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:12, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:13, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:1, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:2, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:3, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:4, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:6, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:7, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:8, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:9, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:10, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:11, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:12, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:13, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-        {0:'洛伊',1:'陈淑惠',2:5, 3:'小丽',4:'陈淑惠',5:5, 6:'小丽',7:'陈淑惠',8:5},
-      ],
+      ], //表格数据
        headerMenus: [
         [
           {
@@ -257,56 +218,113 @@ export default {
       
   },
   created () {
+    // this.loading = true
     this.rowDrop()
-
-    // this.findSexList()
-    // this.findRegionList()
+    // let startTime = Date.now()
+    // for (let index = 0; index < 10000; index++) {
+    //   this.list.push({0:'洛伊',1:'陈淑惠'+index,2:2, 3:'小丽',4:'陈淑惠',5:5, 6:index+1,7:'陈淑惠',8:5})
+      
+    // }
+    // this.$nextTick(() => {
+    //   this.$message({ message: `渲染 ${this.list.length} 条耗时 ${Date.now() - startTime} ms`, type: 'info', duration: 3000, showClose: true })
+    // })
     // this.findList()
-    this.findList()
 
   },
   mounted (){
+      
   },
   methods: {
+    impt(){ //button 按钮调用input文件选择事件
+        this.$refs.input.click()
+    },
+    importfxx() { //表头导入函数
+
+        this.loading = true
+        // this.$notify.info({
+        //     title: '提示',
+        //     duration: 800,
+        //     message: '正在努力导入表格噢，请稍等片刻。'
+        // });
+        this.list = []; //归为初始化状态
+        let _this = this;
+        this.startTime = Date.now()
+        try {
+            this.$excel.Imports(data=>{
+                console.log('打印一下data')
+                // console.log(data)
+                // this.list = data;
+                // let hd = Object.keys(data[0]); //用来所需要的所有列(obj)（属性）名
+                
+                this.list = [];
+                this.list = data;
+                // for (let index = 0; index < data.length; index++) {
+                //     this.list.push({});
+                //     for (let i = 0; i < hd.length; i++) {
+                //       if (data[index][hd[i]].td) {
+                //         this.list[index][i] = data[index][hd[i]].td;
+                        
+                //       }
+                        
+                //     }
+                // }
+                console.log('打印一下list')
+                console.log(this.list)
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
+                console.log(this.hd)
+                
+                this.findList()
+                // this.$nextTick(() => {
+                //   this.$message({ message: `导入 ${data.length} 条耗时 ${Date.now() - this.startTime} ms`, type: 'info', duration: 3000, showClose: true })
+                // })
+
+                // _this.loading = false
+
+                
+            })
+
+        } catch (e) {
+            this.list = [];
+            this.loading =false;
+            this.$message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
+            console.log('打印一下list2222222')
+
+        }
+        
+    },
+    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+        if (columnIndex >2) {  //带选择框的情况
+            if (columnIndex) {
+        console.log(columnIndex)
+
+                return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
+            }
+        }
+        // if (columnIndex < this.hd.length) {   //不带选择框的情况
+        //     return [row[this.hd[columnIndex]].tdRowspan, row[this.hd[columnIndex]].tdColspan]
+        // }
+        return [1, 1]
+             
+  
+    }, 
     findList () {
-      this.loading = true
-      let size = Number(this.$route.params.number)
+      // this.loading = true
       this.$nextTick(() => {
         this.$refs.elxEditable.reload([])
         setTimeout(() => {
-          // let list = window.CACHE_DATA_LIST.slice(0, size)
           let list = this.list;
-          let startTime = Date.now()
+          // let startTime = Date.now()
           this.$refs.elxEditable.reload(list)
           this.loading = false
-          this.$nextTick(() => {
-            this.$message({ message: `渲染 ${list.length} 条耗时 ${Date.now() - startTime} ms`, type: 'info', duration: 8000, showClose: true })
-          })
+         this.$nextTick(() => {
+              this.$message({ message: `导入 ${this.list.length} 条耗时 ${Date.now() - this.startTime} ms`, type: 'info', duration: 3000, showClose: true })
+            })
         }, 300)
       })
     },
-    // findList () {
-    //   this.loading = true
-    //   // XEAjax.doGet('/api/user/list', { sort: 'seq', order: 'asc' }).then(({ data }) => {
-    //   //   this.list = data
-    //   //   this.loading = false
-    //   // }).catch(e => {
-    //   //   this.loading = false
-    //   // })
-    // },
-    findSexList () {
-      // XEAjax.doGet('/api/conf/sex/list').then(({ data }) => {
-      //   this.sexList = data
-      // })
-    },
-    findRegionList () {
-      // XEAjax.doGet('/api/conf/region/list').then(({ data }) => {
-      //   this.regionList = data
-      // })
-    },
+
     getSummaries (param) {  //合计
       const { columns, data } = param
-
       const sums = []
       console.log(param)
       columns.forEach((column, index) => {
@@ -315,13 +333,13 @@ export default {
           return
         }
         switch (column.property) {
+          case '2':
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
+            break
           case '5':
             sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
             break
-          case '8':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
-            break
-          case '2':
+          case '6':
             sums[index] = `总分：${XEUtils.sum(data, column.property)}`
             break
           default:
