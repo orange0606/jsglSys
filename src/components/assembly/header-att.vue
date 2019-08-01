@@ -99,7 +99,7 @@
       <el-collapse-transition>
       <el-col :span="5" :offset="1" :xs="23" :sm="13" :md="8" :lg="6" :xl="5">
             
-            <div class="tips" v-show="!shwo_att" style="margin:-40px 0 0 0">
+            <div class="tips" v-show="!shwo_att" style="margin:-10px 0 0 0">
                 <!-- <br><br> -->
                 <template>
                   <el-card class="box-card">
@@ -354,9 +354,7 @@ import inven from '../../modules/inventory';
       }
     },
     methods: {
-          impt(){ //button 按钮调用input文件选择事件
-                this.$refs.input.click()
-          },
+
           tOrigina () {  //请求原清单表头数据
               let params = {id:this.From.tOriginalHeadId,type:'original'}
               this.$post('/head/getone',params)
@@ -366,6 +364,9 @@ import inven from '../../modules/inventory';
                 this.lead.list= arr;
                 this.lead.hd = Object.keys(arr[0]);
               })
+          },
+          impt(){ //button 按钮调用input文件选择事件
+                this.$refs.input.click()
           },
           importfxx() { //表头导入函数
                 this.loading = true

@@ -1,4 +1,4 @@
-
+import { MessageBox, Message } from 'element-ui'
 let patt1=/[A-Z+]*/g;
 let patt2=/\d+/g;
 
@@ -163,12 +163,12 @@ let excelmodel = {
 
         //生成空数据数组
         //key 为单元格所在位置例如A1，td 是单元格的值， formula为单元格公式，tdRowspan tdColspan 为单元格合并的列数与行数
-        //dele是单元格合并后需要标记删除的元素，0为无需删除，1为需要删除。
+        //edit  是单元格是否后需要打开编辑，0为无需，1为需要。
         let arr = [];
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
-                arr[i]['hd'+j]={trNum:i+1, colNum:index[j], td:null, tdColspan:1, tdRowspan:1}
+                arr[i]['hd'+j]={trNum:i+1, colNum:index[j], td:null, tdColspan:1, tdRowspan:1,edit:0}
   
             }
             
@@ -188,10 +188,19 @@ let excelmodel = {
 
                 for(let key in arr[i].sheets){ //遍历sheet对象键与键值，进行数据存储
                     //做优化，直接用下标来设置值
-                    if (key!='!ref' && key!='!merges' && key!='!margins') {
-                        let cos = index.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
-                        let row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
-                        data[row]['hd'+cos].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
+                    if (key!='!ref' && key!='!merges' && key!='!margins' && key!='!rows' && key!='!autofilter') {
+                        try{
+                            // console.log(key)
+                            let cos = index.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
+                            let row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
+                            data[row]['hd'+cos].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
+                        }
+                        catch (e) {
+                            Message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
+        
+                        }
+
+                       
                         // data[row][cos].value = arr[i].sheets[key].w;    
 
                         // //若单元格有公式的话，对公式进行保存
@@ -256,19 +265,28 @@ let excelmodel = {
                 // }
 
                     // 标记需要清除数据的合并的单元格
-                for (let a = 0; a< row; a++) {   //dele是单元格合并后需要标记删除的元素，0为无需删除，1为需要删除。
+                for (let a = 0; a< row; a++) {  
                         if (a==0) {
                             for(let b =1 ; b < cos; b++){
                                 // data[start_r-1].splice(parseInt(arr[i].s.c)+1,cos-1);
-                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].td =null;
-                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].tdRowspan =0;   //在饿了么单元格合并，被合并了的单元格需要设置为rowspan: 0, colspan: 0,  
-                                data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].tdColspan =0;
+                                if (data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]]) {
+                                    // console.log((parseInt(arr[i].s.c)+b))
+                                    // console.log(data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]])
+                                    // data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].td =null;
+                                    data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].tdRowspan =0;   //在饿了么单元格合并，被合并了的单元格需要设置为rowspan: 0, colspan: 0,  
+                                    data[start_r][hdobj[(parseInt(arr[i].s.c)+b)]].tdColspan =0;
+                                }
+                                                         
                             }
                         }else{  //因为只保留最初始位置左上角的值，所以其他值都得删除掉
                             for(let b =0 ; b < cos; b++){
-                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].td =null;
-                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].tdRowspan =0;
-                                data[start_r+a][hdobj[(parseInt(arr[i].s.c)+b)]].tdColspan =0;
+                                let num = (parseInt(arr[i].s.c)+b);
+
+                                if (data[start_r+a]) {
+                                    // data[start_r+a][hdobj[num]].td =null;
+                                    data[start_r+a][hdobj[num]].tdRowspan =0;
+                                    data[start_r+a][hdobj[num]].tdColspan =0;
+                                }
                             }
                         } 
                 }             

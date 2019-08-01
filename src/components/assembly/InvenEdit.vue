@@ -11,9 +11,13 @@
       <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button type="success" size="small" @click="insertEvent">新增</el-button>
-      <el-button type="success" size="small" @click="exportCsvEvent">导出</el-button>
-      <el-button type="success" size="small" @click="newcloum()">新增</el-button>
+      <el-button type="danger" size="mini" @click="$refs.elxEditable.removeSelecteds()">删除选中</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button>
+      <el-button type="success" size="small" @click="consoles">控制台打印所有数据</el-button>
     </div>
+          <!-- show-summary
+      :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
@@ -23,10 +27,8 @@
       border
       height="600"
       size="small"
-      show-summary
       :span-method="arraySpanMethod"
-      :summary-method="getSummaries"
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 60, useDefaultValidTip: true}"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 70}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       
@@ -96,8 +98,11 @@ export default {
       hd:null,
       startTime:null,
       loading: false,
+      datelist:[],//未更改的所有表格数据
+      datehd:[],//未更改的所有表格列名
       dialogVisible: true,
       column:'',
+      rest:[],
       // col:[],//表头数据.
       col: [
         {
@@ -190,6 +195,11 @@ export default {
         ],
         [
           {
+            code: 'SELECT_REMOVE',
+            name: '删除选中的行',
+            prefixIcon: 'el-icon-close'
+          },
+          {
             code: 'CELL_RESET',
             name: '清除内容',
             prefixIcon: 'el-icon-close'
@@ -214,6 +224,12 @@ export default {
     }
     
   },
+ watch: {
+      list: function(newVal,oldVal){
+          console.log('数据有发生改变吗')
+          console.log(newVal)
+      }
+  },
   computed: {
       
   },
@@ -232,9 +248,15 @@ export default {
 
   },
   mounted (){
+    this.rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
       
   },
   methods: {
+    consoles () {
+        let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+        console.log('检验一下数据对不对')
+        console.log(rest)
+    },
     impt(){ //button 按钮调用input文件选择事件
         this.$refs.input.click()
     },
@@ -247,64 +269,101 @@ export default {
         //     message: '正在努力导入表格噢，请稍等片刻。'
         // });
         this.list = []; //归为初始化状态
+        this.hd = [];
         let _this = this;
         this.startTime = Date.now()
-        try {
+        
             this.$excel.Imports(data=>{
+                try {
                 console.log('打印一下data')
                 // console.log(data)
                 // this.list = data;
                 // let hd = Object.keys(data[0]); //用来所需要的所有列(obj)（属性）名
                 
                 this.list = [];
+                this.hd = [];
+
                 this.list = data;
+                console.log('打印一下list')
+                // console.log(this.list)
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
+                // console.log(this.hd)
+                // this.datehd= [];
+                // this.datelist =[];
+                // this.list = data;
+                // let AZ = this.$excel.AZ();
+                // let hd = Object.keys(data[0])
+
+                // this.datehd = hd;
+                // this.datelist = data;
+                // console.log(this.datehd)
+
+                // this.hd = AZ.slice(0,data.refCol);
                 // for (let index = 0; index < data.length; index++) {
                 //     this.list.push({});
                 //     for (let i = 0; i < hd.length; i++) {
-                //       if (data[index][hd[i]].td) {
-                //         this.list[index][i] = data[index][hd[i]].td;
-                        
-                //       }
-                        
+                //       if (data[index][hd[i]]) {
+                //         this.list[index][AZ[i]] = data[index][hd[i]].td;
+                //       }  
                 //     }
                 // }
-                console.log('打印一下list')
-                console.log(this.list)
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
-                console.log(this.hd)
-                
+
                 this.findList()
                 // this.$nextTick(() => {
                 //   this.$message({ message: `导入 ${data.length} 条耗时 ${Date.now() - this.startTime} ms`, type: 'info', duration: 3000, showClose: true })
                 // })
 
                 // _this.loading = false
-
-                
+                 } catch (e) {
+                    this.list = [];
+                    this.loading =false;
+                    this.$message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
+                }
             })
+    },
+    deleteSelectedEvent () {
+      let removeRecords = this.$refs.elxEditable.getSelecteds() //获取被选中的数据
+      if (removeRecords.length) {
+          this.$msgbox.confirm('确定删除所选数据?', '温馨提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+            console.log('打印选中的数据')
+            console.log(removeRecords)
+          // this.loading = true
+          //   this.$message({
+          //     type: 'success',
+          //     message: '删除成功!'
+          //   })
 
-        } catch (e) {
-            this.list = [];
-            this.loading =false;
-            this.$message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
-            console.log('打印一下list2222222')
-
-        }
-        
+        }).catch(e => e)
+      } else {
+        this.$message({
+          type: 'info',
+          message: '请至少选择一条数据！'
+        })
+      }
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >2) {  //带选择框的情况
-            if (columnIndex) {
-        console.log(columnIndex)
-
+            if (row[this.hd[columnIndex-3]]) {
                 return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
             }
         }
-        // if (columnIndex < this.hd.length) {   //不带选择框的情况
-        //     return [row[this.hd[columnIndex]].tdRowspan, row[this.hd[columnIndex]].tdColspan]
-        // }
         return [1, 1]
-             
+
+        // if (columnIndex >2) {  //带选择框和序列框和操作框的情况
+        // // console.log(rowIndex);
+        //     try {
+        //       if (this.datelist[rowIndex][this.datehd[columnIndex-3]]) {
+        //             return [this.datelist[rowIndex][this.datehd[columnIndex-3]].tdRowspan, this.datelist[rowIndex][this.datehd[columnIndex-3]].tdColspan]
+        //         }
+        //     } catch (error) {
+              
+        //     }
+        // }
+        // return [1, 1]    
   
     }, 
     findList () {
@@ -326,20 +385,20 @@ export default {
     getSummaries (param) {  //合计
       const { columns, data } = param
       const sums = []
-      console.log(param)
+      // console.log(param)
       columns.forEach((column, index) => {
         if (index === 0) {
           sums[index] = '汇总'
           return
         }
         switch (column.property) {
-          case '2':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
+          case 'C':
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}`
             break
-          case '5':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
+          case 'B':
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}`
             break
-          case '6':
+          case 'A':
             sums[index] = `总分：${XEUtils.sum(data, column.property)}`
             break
           default:
@@ -350,6 +409,7 @@ export default {
       return sums
     },
     insertEvent () {
+      console.log('进来了吗')
       this.$refs.elxEditable.insert({
         '0': `New ${Date.now()}`,
       }).then(({ row }) => {
