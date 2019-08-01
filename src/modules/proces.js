@@ -90,17 +90,17 @@ let excelmodel = {
         for (let i = 0; i < parseInt(rowLength); i++) { 
             arr[i]={}
             for (let j = 0; j < parseInt(colLength); j++) {
-                arr[i]['hd'+j]=null;
+                arr[i][ABC[j]]=null;
             }  
         }
         for (let index = 0; index < list.length; index++) {
             if (list[index].trNum && list[index].colNum) {
                 let row = list[index].trNum;  //行号
-                let col = AZ.indexOf(list[index].colNum); //列号A
+                let col = ABC.indexOf(list[index].colNum); //列号A
                 // console.log('行号列号')
                 // console.log(row,col)
                 // console.log(list[index])
-                arr[row-1]['hd'+col] =list[index];
+                arr[row-1][ABC[col]] =list[index];
             }
         }
         return arr;
@@ -145,11 +145,11 @@ let excelmodel = {
         let sub = ref.indexOf(':');
 
         //先获取开始的列坐标
-        let start_c = index.indexOf(ref.substr(0,sub).match(patt1)[0])+1;
+        let start_c = ABC.indexOf(ref.substr(0,sub).match(patt1)[0])+1;
         //获取开始的行坐标
         let start_r = ref.substr(0,sub).match(patt2)[0];
         //获取结束的列坐标
-        let end_c = index.indexOf(ref.substr(sub+1).match(patt1)[0])+1;
+        let end_c = ABC.indexOf(ref.substr(sub+1).match(patt1)[0])+1;
         //获取结束的行坐标
         let end_r = ref.substr(sub+1).match(patt2)[0];
 
@@ -168,7 +168,7 @@ let excelmodel = {
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
-                arr[i]['hd'+j]={trNum:i+1, colNum:index[j], td:null, tdColspan:1, tdRowspan:1,edit:0}
+                arr[i][ABC[j]]={trNum:i+1, colNum:ABC[j], td:null, tdColspan:1, tdRowspan:1,edit:0}
   
             }
             
@@ -191,9 +191,9 @@ let excelmodel = {
                     if (key!='!ref' && key!='!merges' && key!='!margins' && key!='!rows' && key!='!autofilter') {
                         try{
                             // console.log(key)
-                            let cos = index.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
+                            let cos = ABC.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
                             let row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
-                            data[row]['hd'+cos].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
+                            data[row][ABC[cos]].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
                         }
                         catch (e) {
                             Message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
@@ -241,7 +241,7 @@ let excelmodel = {
             for (let i = 0; i<arr.length;i++){
 
                 //开始位置的列key A1
-                let start_c = index[parseInt(arr[i].s.c)]
+                let start_c = ABC[parseInt(arr[i].s.c)]
 
                 //开始位置的列下标
                 let st_c = parseInt(arr[i].s.c);
@@ -290,8 +290,6 @@ let excelmodel = {
                             }
                         } 
                 }             
-               
-
             }    
 
             // //  对已经标记了合并需要删除的数组元素进行删除
@@ -316,7 +314,7 @@ let excelmodel = {
         for (let index = data.length-1; index >= 0; index--) {
             for (let r = 0; r < Object.keys(data[index]).length; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
-                if (data[index]['hd'+r].td ==null && data[index]['hd'+r].tdRowspan == 1 && data[index]['hd'+r].tdColspan == 1) {
+                if (data[index][ABC[r]].td ==null && data[index][ABC[r]].tdRowspan == 1 && data[index][ABC[r]].tdColspan == 1) {
                     if (r==Object.keys(data[index]).length-1) {
                         Rnum++;
                     }
@@ -358,7 +356,7 @@ let excelmodel = {
     }
 
 }
-let index =excelmodel.AZ();
+let ABC =excelmodel.AZ();
 
 // export { AZ,Table }
 module.exports = excelmodel;
