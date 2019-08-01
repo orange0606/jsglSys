@@ -28,6 +28,7 @@
       height="600"
       size="small"
       :span-method="arraySpanMethod"
+      @cell-click ="cell_click"
       :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 70}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
@@ -49,8 +50,14 @@
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
         </template>
       </elx-editable-column>
-      <elx-editable-column :prop="val+'.td'" label="aa" v-for="(val,i) in hd" :key="i" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"  >
+      <elx-editable-column :prop="val+'.td'" :label="'a'+i" align="center" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
+            <template v-if="scope.row[val] && scope.row[val].edit == 1" slot-scope="scope" >
+                <el-input :value="scope.row[val].td" v-model="scope.row[val].td" ></el-input>
+                
+            </template>
       </elx-editable-column>
+      <!-- <elx-editable-column :prop="val+'.td'" label="aa" v-for="(val,i) in hd" :key="i" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"  >
+      </elx-editable-column> -->
       <!-- <elx-editable-column v-for='(item,i) in col' :label="item.label" :prop='item.prop' :key="i+'b'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
           <elx-editable-column v-show='item.children||item.children.length>0' v-for="(item1,a) in item.children"
           :label="item1.label" :prop='item1.prop'  :key="a+'a'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
@@ -102,6 +109,7 @@ export default {
       datehd:[],//未更改的所有表格列名
       dialogVisible: true,
       column:'',
+      editRow:null, //单元格编辑的存储上一个已点击单元格数据
       rest:[],
       // col:[],//表头数据.
       col: [
@@ -167,8 +175,6 @@ export default {
         }
       ],
 
-      regionList: [],
-      customColumns: [],
       list: [
       ], //表格数据
        headerMenus: [
@@ -249,7 +255,7 @@ export default {
   },
   mounted (){
     this.rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-      
+   
   },
   methods: {
     consoles () {
@@ -282,7 +288,7 @@ export default {
                 
                 this.list = [];
                 this.hd = [];
-
+                this.editRow = null; //初始化编辑状态
                 this.list = data;
                 console.log('打印一下list')
                 // console.log(this.list)
@@ -320,6 +326,18 @@ export default {
                     this.$message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
                 }
             })
+    },
+    cell_click(row, column, cell, event){ //单元格点击事件
+        this.editRow != null && this.editRow ? this.editRow.edit = 0 :this.editRow; //清除上一个单元格编辑状态
+        console.log('表格单击事件====row, column, cell, event')
+        console.log(row, column, cell, event)
+        let str = column.property;
+        let colName = str.substr(0,str.indexOf(".td"))
+        // console.log(colName)
+        this.editRow = row[colName];
+        row[colName].edit = 1;  //1为编辑模式0为只读状态
+        // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+
     },
     deleteSelectedEvent () {
       let removeRecords = this.$refs.elxEditable.getSelecteds() //获取被选中的数据

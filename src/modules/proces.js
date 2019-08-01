@@ -85,7 +85,7 @@ let excelmodel = {
     return : 完整表格数据
     */
     Package (list,colLength,rowLength){ 
-        let AZ = this.AZ();
+        // let AZ = this.AZ();
         let arr = [];
         for (let i = 0; i < parseInt(rowLength); i++) { 
             arr[i]={}
