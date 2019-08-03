@@ -109,9 +109,387 @@ export default {
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       rest:[],
       // col:[],//表头数据.
-      col: [
-        
-      ],
+      col: [],//已对PackHeader再次组装的多级表头数据.
+      PackHeader:[  //已组装的表头数据
+  {
+    "A": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "A",
+      "td": "ԭ�嵥��ͷ��",
+      "tdRowspan": 1,
+      "tdColspan": 8,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "B": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "B",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "C": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "C",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "D": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "D",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "E": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "E",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "F": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "F",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "G": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "G",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "H": {
+      "tOriginalHeadId": 137,
+      "trNum": 1,
+      "colNum": "H",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    }
+  },
+  {
+    "A": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "A",
+      "td": "���\r\n?",
+      "tdRowspan": 2,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "B": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "B",
+      "td": "����\r\n?",
+      "tdRowspan": 2,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "C": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "C",
+      "td": "��λ\r\n?",
+      "tdRowspan": 2,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "D": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "D",
+      "td": "����\r\n?",
+      "tdRowspan": 1,
+      "tdColspan": 3,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "E": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "E",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "F": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "F",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "G": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "G",
+      "td": "���� \r\n��",
+      "tdRowspan": 2,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "H": {
+      "tOriginalHeadId": 137,
+      "trNum": 2,
+      "colNum": "H",
+      "td": "�ϼ�   \r\n��ʽ��=G3*F4",
+      "tdRowspan": 2,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    }
+  },
+  {
+    "A": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "A",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "B": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "B",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "C": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "C",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "D": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "D",
+      "td": "����\r\n?",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "E": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "E",
+      "td": "�շ�վ\r\n?",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "F": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "F",
+      "td": "�ϼ�\r\n��ʽ��=D4+E4",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "G": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "G",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "H": {
+      "tOriginalHeadId": 137,
+      "trNum": 3,
+      "colNum": "H",
+      "tdRowspan": 0,
+      "tdColspan": 0,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    }
+  },
+  {
+    "A": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "A",
+      "td": "�ϼ�0",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "B": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "B",
+      "td": "�ϼ�1",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "C": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "C",
+      "td": "�ϼ�2",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "D": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "D",
+      "td": "�ϼ�3",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "E": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "E",
+      "td": "�ϼ�4",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "F": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "F",
+      "td": "�ϼ�5",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "G": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "G",
+      "td": "�ϼ�6",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    },
+    "H": {
+      "tOriginalHeadId": 137,
+      "trNum": 4,
+      "colNum": "H",
+      "td": "�ϼ�7",
+      "tdRowspan": 1,
+      "tdColspan": 1,
+      "colWidth": 80,
+      "trHigh": 35,
+      "textAlign": "center",
+      "edit": 0
+    }
+  }
+],
 
       list: [
       ], //表格数据
@@ -179,8 +557,8 @@ export default {
   },
   created () {
 
-      this.$post('/head/getone',{id:142,type:'original'})
-        .then((response) => {
+      // this.$post('/head/getone',{id:142,type:'original'})
+      //   .then((response) => {
       //   console.log('请求成功')
         // console.log(response)
         // this.list = response.data.oneh.headRowList;
@@ -203,53 +581,15 @@ export default {
         // }else if (type == 'pay'){
         //   this.key = 'tPayHeadRows';
         // }
-        let data = response.data.onehead;
-        let arr = this.$excel.Package(data.tOriginalHeadRows,data.refCol,data.refRow);
-        console.log('arr.length')
-        console.log(arr.length)
-
-        // let arr = this.arr;
-        
-        console.log('这里打印已组装的表头')
-        // console.log(ABC)
-        let arrHd = Object.keys(arr[0]);
-        console.log(arr,arrHd)
+        // let data = response.data.onehead;
+        // let headsArr = this.$excel.Package(data.tOriginalHeadRows,data.refCol,data.refRow);
+        let headsArr = this.PackHeader;
         this.col = new Array();  //新建一个数组存储多级表头嵌套
+        this.col = this.$excel.Nesting(headsArr);
+        console.log('这里打印已组装的表头')
 
-        // let ABC = this.$excel.AZ();
-        // if (arr[0]) {
-        //     let hhh = [];
-        //     for (let index = (arr.length)-2; index >=0 ; index--) {
-        //         for (let i = 0; i < arrHd.length; i++) {  //添加第一层
-        //               if (index !=0) {
-        //                   if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
-        //                       arr[index-1][arrHd[i]].children =new Array();
-        //                       for (let e = 0; e < arrHd.length; e++) {
-        //                           if (arr[index][arrHd[e]] && arr[index][arrHd[e]].tdRowspan !=0 && arr[index][arrHd[e]].tdColspan !=0) {
-        //                               if ((arr[index][arrHd[e]].trNum == arr[index-1][arrHd[i]].trNum+1) && (arr[index][arrHd[e]].colNum == arr[index-1][arrHd[i]].colNum)) {
-        //                                   arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
-        //                               }else if(arr[index-1][arrHd[i]].tdColspan > 1  && ABC.indexOf(arr[index][arrHd[e]].colNum) > ABC.indexOf(arr[index-1][arrHd[i]].colNum)){
-        //                                   arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
-        //                               }
-        //                           }
-        //                       }
-        //                   }
-        //               }else{
-        //                   if (arr[index][arrHd[i]] && arr[index][arrHd[i]].tdRowspan !=0 && arr[index][arrHd[i]].tdColspan !=0) {
-        //                       hhh.push(arr[index][arrHd[i]])
-        //                   }
-        //               }
-                    
-        //         }
-        //     }
-        // console.log('这里打印已组装的表头222')
-        // console.log(hhh)
-        // this.col = hhh
 
-        // }
-        
-
-      })
+      // })
 
 
 
@@ -257,14 +597,6 @@ export default {
 
     // this.loading = true
     this.rowDrop()
-    // let startTime = Date.now()
-    // for (let index = 0; index < 10000; index++) {
-    //   this.list.push({0:'洛伊',1:'陈淑惠'+index,2:2, 3:'小丽',4:'陈淑惠',5:5, 6:index+1,7:'陈淑惠',8:5})
-      
-    // }
-    // this.$nextTick(() => {
-    //   this.$message({ message: `渲染 ${this.list.length} 条耗时 ${Date.now() - startTime} ms`, type: 'info', duration: 3000, showClose: true })
-    // })
     // this.findList()
 
   },
