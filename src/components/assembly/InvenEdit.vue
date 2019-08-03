@@ -27,9 +27,10 @@
       border
       height="600"
       size="small"
+      row-key="id"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 70}"
+      :edit-config="{ render: 'scroll', renderSize: 50}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       
@@ -50,29 +51,25 @@
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
         </template>
       </elx-editable-column>
-      <elx-editable-column :prop="val+'.td'" :label="'a'+i" align="center" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
-            <template v-if="scope.row[val] && scope.row[val].edit == 1" slot-scope="scope" >
-                <el-input :value="scope.row[val].td" v-model="scope.row[val].td" ></el-input>
-                
-            </template>
-      </elx-editable-column>
+     
+  
       <!-- <elx-editable-column :prop="val+'.td'" label="aa" v-for="(val,i) in hd" :key="i" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"  >
       </elx-editable-column> -->
-      <!-- <elx-editable-column v-for='(item,i) in col' :label="item.label" :prop='item.prop' :key="i+'b'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+      <elx-editable-column v-for='(item,i) in col' :label="item.td" :prop='item.colNum+".td"' :key="i+'b'" show-overflow-tooltip align="center"  >
           <elx-editable-column v-show='item.children||item.children.length>0' v-for="(item1,a) in item.children"
-          :label="item1.label" :prop='item1.prop'  :key="a+'a'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+          :label="item1.td" :prop='item1.colNum+".td"'  :key="a+'a'" align="center" show-overflow-tooltip  >
                 <elx-editable-column v-show='item1.children||item1.children.length>0' v-for="(item2,c) in item1.children"
-                :label="item2.label" :prop='item2.prop'  :key="c+'b'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                :label="item2.td" :prop='item2.colNum+".td"'  :key="c+'b'" align="center" show-overflow-tooltip  >
                       <elx-editable-column v-show='item2.children||item2.children.length>0' v-for="(item3,d) in item2.children"
-                      :label="item3.label" :prop='item3.prop'  :key="d+'i'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                      :label="item3.td" :prop='item3.colNum+".td"'  :key="d+'i'" show-overflow-tooltip  >
                             <elx-editable-column v-show='item3.children||item3.children.length>0' v-for="(item4,f) in item3.children"
-                            :label="item4.label" :prop='item4.prop'  :key="f+'ii'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                            :label="item4.td" :prop='item4.colNum+".td"'  :key="f+'ii'" show-overflow-tooltip  >
                                   <elx-editable-column v-show='item4.children||item4.children.length>0' v-for="(item5,h) in item4.children"
-                                  :label="item5.label" :prop='item5.prop'  :key="h+'iii'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                  :label="item5.td" :prop='item5.colNum+".td"'  :key="h+'iii'" show-overflow-tooltip  >
                                         <elx-editable-column v-show='item5.children||item5.children.length>0' v-for="(item6,j) in item5.children"
-                                        :label="item6.label" :prop='item6.prop'  :key="j+'j'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                        :label="item6.td" :prop='item6.colNum+".td"'  :key="j+'j'" show-overflow-tooltip  >
                                               <elx-editable-column v-show='item6.children||item6.children.length>0' v-for="(item7,k) in item6.children"
-                                              :label="item7.label" :prop='item7.prop'  :key="k+'jj'" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+                                              :label="item7.td" :prop='item7.colNum+".td"'  :key="k+'jj'" show-overflow-tooltip  >
                                                     
                                               </elx-editable-column>
                                         </elx-editable-column>
@@ -81,7 +78,7 @@
                       </elx-editable-column>
                 </elx-editable-column>
           </elx-editable-column>
-      </elx-editable-column> -->
+      </elx-editable-column>
 
       <!-- <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column> -->
 
@@ -113,66 +110,7 @@ export default {
       rest:[],
       // col:[],//表头数据.
       col: [
-        {
-          prop: '0',
-          label: '2222222222222'
-        },
-        {
-          label: '配送信息',
-          children: [
-            {
-              prop: '1',
-              label: '1'
-            },
-            {
-              label: '2',
-              children: [
-                {
-                  prop: '6',
-                  label: '3',
-                  children:[
-                    {
-                      prop: '3',
-                      label: '4',
-                      children:[
-                        {
-                          prop: '1',
-                          label: '噢5',
-                          children:[
-                            {
-                              prop: '3',
-                              label: '哦6',
-                              children:[
-                                {
-                                  prop: '3',
-                                  label: '哦7',
-                                  children:[
-                                    {
-                                      prop: '3',
-                                      label: '哦8',
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  prop: '3',
-                  label: '3'
-                },
-                {
-                  prop: '4',
-                  label: '4'
-                }
-              ]
-            }
-          ]
-        }
+        
       ],
 
       list: [
@@ -240,6 +178,83 @@ export default {
       
   },
   created () {
+
+      this.$post('/head/getone',{id:142,type:'original'})
+        .then((response) => {
+      //   console.log('请求成功')
+        // console.log(response)
+        // this.list = response.data.oneh.headRowList;
+        // this.Form = response.data.onehead.tOriginalHead
+        // this.all = response.data.onehead;
+        // let data = response.data.onehead.tOriginalHeadRows;
+        // this.key = '';
+        // if (type == 'original') {
+        //   this.key = 'tOriginalHeadRows';
+        // }else if (type == 'change'){
+        //   this.key = 'tChangeHeadRows';
+        // }else if (type == 'update'){
+        //   this.key = 'tUpdateHeadRows';
+        // }else if (type == 'totalmeterage'){
+        //   this.key = 'tTotalmeterageHeadRows';
+        // }else if (type == 'meterage'){
+        //   this.key = 'tMeterageHeadRows';
+        // }else if (type == 'totalpay'){
+        //   this.key = 'tTotalpayHeadRows';
+        // }else if (type == 'pay'){
+        //   this.key = 'tPayHeadRows';
+        // }
+        let data = response.data.onehead;
+        let arr = this.$excel.Package(data.tOriginalHeadRows,data.refCol,data.refRow);
+        console.log('arr.length')
+        console.log(arr.length)
+
+        // let arr = this.arr;
+        
+        console.log('这里打印已组装的表头')
+        // console.log(ABC)
+        let arrHd = Object.keys(arr[0]);
+        console.log(arr,arrHd)
+        this.col = new Array();  //新建一个数组存储多级表头嵌套
+
+        // let ABC = this.$excel.AZ();
+        // if (arr[0]) {
+        //     let hhh = [];
+        //     for (let index = (arr.length)-2; index >=0 ; index--) {
+        //         for (let i = 0; i < arrHd.length; i++) {  //添加第一层
+        //               if (index !=0) {
+        //                   if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
+        //                       arr[index-1][arrHd[i]].children =new Array();
+        //                       for (let e = 0; e < arrHd.length; e++) {
+        //                           if (arr[index][arrHd[e]] && arr[index][arrHd[e]].tdRowspan !=0 && arr[index][arrHd[e]].tdColspan !=0) {
+        //                               if ((arr[index][arrHd[e]].trNum == arr[index-1][arrHd[i]].trNum+1) && (arr[index][arrHd[e]].colNum == arr[index-1][arrHd[i]].colNum)) {
+        //                                   arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+        //                               }else if(arr[index-1][arrHd[i]].tdColspan > 1  && ABC.indexOf(arr[index][arrHd[e]].colNum) > ABC.indexOf(arr[index-1][arrHd[i]].colNum)){
+        //                                   arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+        //                               }
+        //                           }
+        //                       }
+        //                   }
+        //               }else{
+        //                   if (arr[index][arrHd[i]] && arr[index][arrHd[i]].tdRowspan !=0 && arr[index][arrHd[i]].tdColspan !=0) {
+        //                       hhh.push(arr[index][arrHd[i]])
+        //                   }
+        //               }
+                    
+        //         }
+        //     }
+        // console.log('这里打印已组装的表头222')
+        // console.log(hhh)
+        // this.col = hhh
+
+        // }
+        
+
+      })
+
+
+
+		
+
     // this.loading = true
     this.rowDrop()
     // let startTime = Date.now()
@@ -260,8 +275,9 @@ export default {
   methods: {
     consoles () {
         let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-        console.log('检验一下数据对不对')
+        console.log('检验一下数据对不对 rest list')
         console.log(rest)
+        console.log(this.list)
     },
     impt(){ //button 按钮调用input文件选择事件
         this.$refs.input.click()
@@ -328,16 +344,20 @@ export default {
             })
     },
     cell_click(row, column, cell, event){ //单元格点击事件
-        this.editRow != null && this.editRow ? this.editRow.edit = 0 :this.editRow; //清除上一个单元格编辑状态
-        console.log('表格单击事件====row, column, cell, event')
-        console.log(row, column, cell, event)
-        let str = column.property;
-        let colName = str.substr(0,str.indexOf(".td"))
-        // console.log(colName)
-        this.editRow = row[colName];
-        row[colName].edit = 1;  //1为编辑模式0为只读状态
-        // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+        if (column.property) {
+            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            this.editRow != null && this.editRow ? this.editRow.edit = 0 :this.editRow; //清除上一个单元格编辑状态
+            // console.log('表格单击事件====row, column, cell, event')
+            // console.log(row, column, cell, event)
+            let str = column.property;
+            let colName = str.substr(0,str.indexOf(".td"))
+            // console.log(colName)
+            this.editRow = row[colName];
+            row[colName].edit = 1;  //1为编辑模式0为只读状态
+            
 
+        }
+        
     },
     deleteSelectedEvent () {
       let removeRecords = this.$refs.elxEditable.getSelecteds() //获取被选中的数据
@@ -447,7 +467,7 @@ export default {
         if (list && values.length > index) {
           list.forEach(item => {
             if (item.value === val) {
-              labels.push(item.label)
+              labels.push(item.td)
               matchCascaderData(++index, item.children)
             }
           })

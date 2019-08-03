@@ -14,7 +14,7 @@
         ref="elxEditable"
         class="manual-table2"
         border
-        height="550"
+        max-height="600"
         :data.sync="list"
         :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
@@ -157,22 +157,22 @@ import headeratt from '@/components/assembly/header-att'
         }
         this.$post(url,params)
         .then((response) => {
-          if (response.data.head) {
-              this.$message({ message: '当前未作出变动', type: 'error' })
-              return false;
-          }
-          // console.log('正在保存当前行数据')
-          //进行网路请求保存
-          this.$refs.elxEditable.clearActive(); //清除编辑状态
-          this.$post('/head/update',rows)
-            .then((response) => {
-            // console.log(response)
-            this.loading = false
-            this.findList()
-            this.$message({ message: '保存成功', type: 'success' })
-          })
-          
-       })
+            if (response.data.head) {
+                this.$message({ message: '当前未作出变动', type: 'error' })
+                return false;
+            }
+            // console.log('正在保存当前行数据')
+            //进行网路请求保存
+            this.$refs.elxEditable.clearActive(); //清除编辑状态
+            this.$post('/head/update',rows)
+              .then((response) => {
+              // console.log(response)
+              this.loading = false
+              this.findList()
+              this.$message({ message: '保存成功', type: 'success' })
+            })
+            
+         })
 
     },
     updatas (row) {

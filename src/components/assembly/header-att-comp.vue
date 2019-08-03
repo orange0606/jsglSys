@@ -223,6 +223,9 @@ export default {
     }
     
   },
+  watch () {
+
+  },
   computed: {
       
   },
@@ -311,13 +314,8 @@ export default {
                     this.list = [];
                     this.loading =false;
                     this.$message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
-
                 }
-                
             })
-
-       
-        
     },
     deleteSelectedEvent () {
       let removeRecords = this.$refs.elxEditable.getSelecteds() //获取被选中的数据

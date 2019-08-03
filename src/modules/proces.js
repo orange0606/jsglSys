@@ -100,11 +100,52 @@ let excelmodel = {
                 // console.log('行号列号')
                 // console.log(row,col)
                 // console.log(list[index])
+                list[index].edit = 0 //加入编辑状态
                 arr[row-1][ABC[col]] =list[index];
             }
         }
         return arr;
     },
+    /*
+    多级表头嵌套组装函数
+    param arr: 已组装的表格数据(数组对象)
+    return : 完整多级嵌套数据(已除去合并行)
+    */
+    Nesting (arr) {
+        let arrHd = Object.keys(arr[0]);
+        // let ABC = this.$excel.AZ();
+        if (arr[0]) {
+            let headers = [];
+            for (let index = (arr.length)-2; index >=0 ; index--) {
+                for (let i = 0; i < arrHd.length; i++) {  //添加第一层
+                      if (index !=0) {
+                          if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
+                              arr[index-1][arrHd[i]].children =new Array();
+                              for (let e = 0; e < arrHd.length; e++) {
+                                  if (arr[index][arrHd[e]] && arr[index][arrHd[e]].tdRowspan !=0 && arr[index][arrHd[e]].tdColspan !=0) {
+                                      if ((arr[index][arrHd[e]].trNum == arr[index-1][arrHd[i]].trNum+1) && (arr[index][arrHd[e]].colNum == arr[index-1][arrHd[i]].colNum)) {
+                                          arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+                                      }else if(arr[index-1][arrHd[i]].tdColspan > 1  && ABC.indexOf(arr[index][arrHd[e]].colNum) > ABC.indexOf(arr[index-1][arrHd[i]].colNum)){
+                                          arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+                                      }
+                                  }
+                              }
+                          }
+                      }else{
+                          if (arr[index][arrHd[i]] && arr[index][arrHd[i]].tdRowspan !=0 && arr[index][arrHd[i]].tdColspan !=0) {
+                            headers.push(arr[index][arrHd[i]])
+                          }
+                      }
+                    
+                }
+            }
+        return headers
+
+        }
+        
+    },
+
+
     /*
     表格数据解构函数
     param list: 表格所有基本数据(数组对象)
@@ -115,7 +156,8 @@ let excelmodel = {
         let hd = Object.keys(list[0]);   //获取所有的列
         for (let index = 0; index < list.length; index++) {
             for (let i = 0; i < hd.length; i++) {
-                  headRowList.push(list[index][hd[i]]);
+                delete list[index][hd[i]].edit; //删除编辑状态
+                headRowList.push(list[index][hd[i]]);
             }
         }
         return headRowList;
