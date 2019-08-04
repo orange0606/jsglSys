@@ -3,7 +3,8 @@
   <!-- <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"><div class="grid-content bg-purple"></div></el-col> -->
   <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
     <el-collapse-transition>
-    <div v-loading="loading" element-loading-text="拼命加载中">
+    <div >
+        <h3>已建表头</h3>
         <div class="manual-table2-oper">
             <el-button type="success" size="mini" ><router-link to="/newheader">新增</router-link></el-button>
             <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
@@ -18,31 +19,33 @@
         :data.sync="list"
         :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
+        v-loading="loading" 
+        element-loading-text="拼命加载中"
         style="width: 100%">
-        <elx-editable-column type="selection" width="50"></elx-editable-column>
-        <elx-editable-column type="index" width="50"> </elx-editable-column>
+        <elx-editable-column type="selection" align="center" width="50"></elx-editable-column>
+        <elx-editable-column type="index" align="center" width="50"> </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
-        <elx-editable-column prop="tender.num" width="120" show-overflow-tooltip label="标段编号" >
+        <elx-editable-column prop="tender.num" width="120" align="center" show-overflow-tooltip label="标段编号" >
         </elx-editable-column>
-        <elx-editable-column prop="tender.name" label="标段名称" show-overflow-tooltip >
+        <elx-editable-column prop="tender.name" label="标段名称" align="center" show-overflow-tooltip >
             <template slot-scope="scope" v-if="scope.row.tender.select ==true">
                 <el-select v-model="scope.row.tender.name" @change="tenderUp(scope.row)" placeholder="请选择标段" size="small" style=" width:100%;">
                       <el-option v-for="(val,i) in tenderList" :key="i" :label="val.name" :value="val.id"></el-option>
                 </el-select>
             </template>
         </elx-editable-column>
-        <elx-editable-column prop="num" label="表头编号" width="100" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-        <elx-editable-column prop="name" label="表头名称" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-        <elx-editable-column prop="type" label="类别" show-overflow-tooltip :formatter="formatterType">
+        <elx-editable-column prop="num" label="表头编号" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+        <elx-editable-column prop="name" label="表头名称" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+        <elx-editable-column prop="type" label="类别" align="center" show-overflow-tooltip :formatter="formatterType">
         </elx-editable-column>
-        <elx-editable-column prop="saveEmployee.name" width="80" label="创建人" >
+        <elx-editable-column prop="saveEmployee.name" align="center" width="80" label="创建人" >
         </elx-editable-column>
-        <elx-editable-column prop="saveTime" label="创建时间" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
-        <elx-editable-column prop="updateEmployee.name" width="80" label="更改人" >
+        <elx-editable-column prop="saveTime" label="创建时间" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
+        <elx-editable-column prop="updateEmployee.name" align="center" width="80" label="更改人" >
         </elx-editable-column>
-        <elx-editable-column prop="updateTime" label="更新时间" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
+        <elx-editable-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" width="185">
+        <elx-editable-column label="操作" align="center" width="185">
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <!-- <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>
@@ -441,13 +444,9 @@ import headeratt from '@/components/assembly/header-att'
       delete row.tender.select
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-          // this.loading = true
-          if(!this.queryHeader(row)){ //查询修改表头的数据是否已存在
-          console.log('是否进来了这里啊啊啊啊啊啊啊啊啊啊啊啊啊111')
-
-              return false
-          }
-          console.log('是否进来了这里啊啊啊啊啊啊啊啊啊啊啊啊啊')
+          
+           //查询修改表头的数据是否已存在
+          this.queryHeader(row)
           // this.$refs.elxEditable.clearActive()
           // // console.log('正在保存当前行数据')
           // // console.log(row)

@@ -5,16 +5,16 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-    {
-      path: '/home',
-      name: 'Home',
-      component: ()=>import('@/components/Home')
-    },
-    {
-      path: '/',
-      name: 'newheader',
-      component: ()=>import('@/components/System/NewHeader.vue')
-    },
+    // {
+    //   path: '/home',
+    //   name: 'Home',
+    //   component: ()=>import('@/components/Home')
+    // },
+    // {
+    //   path: '/',
+    //   name: 'newheader',
+    //   component: ()=>import('@/components/System/NewHeader.vue')
+    // },
     {
       path: '/newheader',
       name: 'newheader',
@@ -34,6 +34,11 @@ export default new Router({
       path: '/newInventory',
       name: 'newInventory',
       component: ()=>import('@/components/InventorySys/NewInventory.vue')
+    },
+    {
+      path: '/Originals',
+      name: 'Originals',
+      component: ()=>import('@/components/InventorySys/Originals.vue')
     }
   ]
 })

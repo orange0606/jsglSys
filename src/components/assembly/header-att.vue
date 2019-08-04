@@ -19,7 +19,7 @@
             
             <div class="form_editing" >
                 <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-                <p v-if="btn.edit" style="margin:0 0 20px 0">
+                <p v-show="btn.edit" style="margin:0 0 20px 0">
                   <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
                   <el-button type="info" size="mini" @click="impt">手动创建</el-button>
                   <el-button type="success" size="mini" @click="showEdit?showEdit=false:showEdit=true;refresfhs()">{{showEditName}}</el-button>
@@ -27,11 +27,13 @@
                   <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
                   <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
                   <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-                  <el-button type="info" size="mini" @click="$refs.elxEditable.revert(4)">放弃更改</el-button>
+                  <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
                   <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
                   <el-button type="warning" size="mini" @click="submitEvent">保存&提交</el-button>
                 </p>
-               <el-alert title="可以点击 手动创建 按钮创建表头，也可以点击左上方按钮 导入表格 导入excel 文件噢，导入完成后可进行编辑修改。" type="info"></el-alert>
+                <h4 style="margin:10px 0 10px 0;" v-show="!btn.edit">请点击每个单元格设置相关属性</h4>
+               <el-alert v-show="btn.edit" title="可以点击 手动创建 按钮创建表头，也可以点击左上方按钮 导入表格 导入excel 文件噢，导入完成后可进行编辑修改。" type="info"></el-alert>
+               <el-alert v-show="!btn.edit" title="系统已为你自动添加合计行" type="info"></el-alert>
                 <p>&nbsp;</p>
                 <elx-editable
                   v-loading="loading" 
@@ -49,9 +51,9 @@
                   :cell-style ="cell_select"
                   :edit-config="{ render: 'scroll',showIcon: true, showStatus: true, isTabKey: true, isArrowKey: true, isCheckedEdit: true}"
                   >
-                  <elx-editable-column v-if="showEdit && btn.edit" type="selection" width="45"  ></elx-editable-column>
-                  <elx-editable-column v-if="!showEdit || !btn.edit" type="index" width="50"> </elx-editable-column>
-                  <elx-editable-column :prop="val+'.td'" :label="columnName[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
+                  <elx-editable-column v-if="showEdit && btn.edit" type="selection" align="center" width="45"  ></elx-editable-column>
+                  <elx-editable-column v-if="!showEdit || !btn.edit" type="index" align="center" width="50"> </elx-editable-column>
+                  <elx-editable-column :prop="val+'.td'" :label="columnName[i]" align="center" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
                       <template slot-scope="scope" >
                           <el-input v-if="btn.edit && showEdit" v-model="scope.row[val].td" ></el-input>
                           <div v-else-if="!btn.edit">
@@ -99,7 +101,7 @@
       <el-collapse-transition>
       <el-col :span="5" :offset="1" :xs="23" :sm="13" :md="8" :lg="6" :xl="5">
             
-            <div class="tips" v-show="!shwo_att" style="margin:-10px 0 0 0">
+            <div class="tips" v-show="!shwo_att" style="margin:72px 0 0 0">
                 <!-- <br><br> -->
                 <template>
                   <el-card class="box-card">
@@ -224,7 +226,6 @@ import inven from '../../modules/inventory';
             list:[],//引入的清单数据
             loding:true, //加载中
             hd:[],//用来存储数据中对象的所有（列）的key值 (处理饿了么单元格合并该行中的所有列)
-            name:'高速公路1-1清单', //引入的清单名字
             att_id:null,
             att_key:null,
             key_click:false, //当前是否点击获取属性值状态  默认不开启false
@@ -293,6 +294,7 @@ import inven from '../../modules/inventory';
     },
     watch: {
         params: function(newVal,oldVal){
+  
             this.From = newVal;
             if (this.From.type =='change' || this.From.type =='update') {
                 //开启请求原清单表头
@@ -354,7 +356,6 @@ import inven from '../../modules/inventory';
       }
     },
     methods: {
-
           tOrigina () {  //请求原清单表头数据
               let params = {id:this.From.tOriginalHeadId,type:'original'}
               this.$post('/head/getone',params)
@@ -366,6 +367,8 @@ import inven from '../../modules/inventory';
               })
           },
           impt(){ //button 按钮调用input文件选择事件
+      
+
                 this.$refs.input.click()
           },
           importfxx() { //表头导入函数
@@ -631,6 +634,7 @@ import inven from '../../modules/inventory';
   
           }, 
           cell_click(row, column, cell, event){ //单元格点击事件
+
               if (column.property && !this.btn.edit) {  //做容错处理，防止点击到选择框触发此事件
                     let colum =column.property;
                     colum = colum.substr(0,colum.indexOf('.'));

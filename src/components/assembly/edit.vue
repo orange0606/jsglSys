@@ -31,8 +31,8 @@
       :cell-style ="cell_select"
       style="width: 100%">
       <!-- <elx-editable-column type="selection" width="55"></elx-editable-column> -->
-     <elx-editable-column type="index" width="50"> </elx-editable-column>
-      <elx-editable-column :prop="val+'.td'" :label="columnName[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  > 
+     <elx-editable-column type="index" align="center" width="50"> </elx-editable-column>
+      <elx-editable-column :prop="val+'.td'" :label="columnName[i]" align="center" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  > 
            <template v-if="attShow" slot-scope="scope" >
                 <span style="width:100%;height:100%;display:block;">{{scope.row[val].td}}</span>
                 <el-badge  v-if="scope.row[val].attribute !=null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>

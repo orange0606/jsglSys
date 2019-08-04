@@ -15,13 +15,13 @@
             <!-- <template slot="title">分组一</template> -->
             <el-menu-item index="1-1"><router-link to="/newInventory" >新建清单</router-link></el-menu-item>
 
-            <el-menu-item index="1-2">原清单</el-menu-item>
-            <el-menu-item index="1-3">变更清单</el-menu-item>
+            <el-menu-item index="1-2"><router-link to="/Originals" >原清单</router-link></el-menu-item>
+            <!-- <el-menu-item index="1-3">变更清单</el-menu-item>
             <el-menu-item index="1-4">变更后的清单</el-menu-item>
             <el-menu-item index="1-5">待审清单</el-menu-item>
             <el-menu-item index="1-6">正审合同</el-menu-item>
             <el-menu-item index="1-7">已审合同</el-menu-item>
-            <el-menu-item index="1-8">全部合同</el-menu-item>
+            <el-menu-item index="1-8">全部合同</el-menu-item> -->
         </el-submenu>
         <el-submenu index="2">
             <template slot="title">

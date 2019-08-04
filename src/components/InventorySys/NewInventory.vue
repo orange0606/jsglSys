@@ -36,7 +36,7 @@
 </template>
 <script>
   // 引入单元格列编辑组件
-  import InvenEdit from '@/components/assembly/InvenEdit'
+  import InvenEdit from './InvenEdit'
   export default {
     name: 'newInventory',
     components: {InvenEdit},

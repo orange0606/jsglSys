@@ -1,23 +1,16 @@
 <template>
-  <!-- <elx-editable-column :prop="col.prop"
-   :label="col.label" min-width="80" show-overflow-tooltip :edit-render="{name: 'ElInput'}">
-    <template v-if="col.children">
-      <my-column v-for="(item, index) in col.children"
-        :key="index"
-        :col="item">
-      </my-column>
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td" show-overflow-tooltip :align="col.textAlign">
+    <template v-if="!col.children" slot-scope="scope">
+      <span v-if="scope.row.data[col.colNum].edit =='N'">{{scope.row.data[col.colNum].td}}</span>
+      <el-input v-else style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" :autofocus="true" size="mini" ></el-input>
     </template>
-  </elx-editable-column> -->
-
-  <el-table-column :prop="col.prop" :label="col.label">
     <template v-if="col.children">
-      <my-column v-for="(item, index) in col.children"
+      <my-column  v-for="(item, index) in col.children"
         :key="index"
         :col="item">
-      </my-column>   
+      </my-column> 
     </template>
   </el-table-column> 
-
 
 </template>
 
@@ -33,4 +26,5 @@ export default {
 }
 </script>
 <style scoped>
+
 </style>

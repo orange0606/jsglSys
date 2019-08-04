@@ -97,11 +97,9 @@ let excelmodel = {
             if (list[index].trNum && list[index].colNum) {
                 let row = list[index].trNum;  //行号
                 let col = ABC.indexOf(list[index].colNum); //列号A
-                // console.log('行号列号')
-                // console.log(row,col)
-                // console.log(list[index])
-                list[index].edit = 0 //加入编辑状态
                 arr[row-1][ABC[col]] =list[index];
+                arr[row-1][ABC[col]].edit = 'N'; //加入编辑状态
+
             }
         }
         return arr;
@@ -140,7 +138,6 @@ let excelmodel = {
                 }
             }
         return headers
-
         }
         
     },
@@ -210,7 +207,7 @@ let excelmodel = {
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
-                arr[i][ABC[j]]={trNum:i+1, colNum:ABC[j], td:null, tdColspan:1, tdRowspan:1,edit:0}
+                arr[i][ABC[j]]={trNum:i+1, colNum:ABC[j], td:null, tdColspan:1, tdRowspan:1,edit:'N'}
   
             }
             
