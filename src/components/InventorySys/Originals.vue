@@ -21,8 +21,8 @@
         :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
         style="width: 100%">
-        <elx-editable-column type="selection" width="50"></elx-editable-column>
-        <elx-editable-column type="index" width="50"> </elx-editable-column>
+        <elx-editable-column type="selection" width="50" align="center" ></elx-editable-column>
+        <elx-editable-column type="index" width="50" align="center"> </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
         <elx-editable-column prop="type" label="类别" align="center" show-overflow-tooltip :formatter="formatterType">
@@ -42,7 +42,7 @@
         </elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column> -->
         
-        <elx-editable-column label="操作" width="185">
+        <elx-editable-column label="操作" width="185" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <!-- <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>

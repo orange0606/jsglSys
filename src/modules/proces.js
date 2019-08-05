@@ -8,9 +8,8 @@ let excelmodel = {
     //表格读取处理函数============
     Imports(callback){
 
-        // this.table = [null]; //归为初始化状态
+
         let _this = this;
-        // let inputDOM = this.$refs.inputer;
         // 通过DOM取文件数据
         this.file = event.currentTarget.files[0];
         var rABS = false; //是否将文件读取为二进制字符串
@@ -20,9 +19,9 @@ let excelmodel = {
         FileReader.prototype.readAsBinaryString = function(f) {
             var binary = "";
             var rABS = false; //是否将文件读取为二进制字符串
-            var pt = this;
+            // var pt = this;
             var wb; //读取完成的数据
-            var outdata;
+            // var outdata;
             var reader = new FileReader();
             reader.onload = function(e) {
                 var bytes = new Uint8Array(reader.result);
@@ -63,18 +62,22 @@ let excelmodel = {
                 // console.log(persons)
                 //最终处理的数据
                 _this.Table(persons,data=>{
-                    callback(data)
+                    callback(data);
                 })
+                persons = null;
+                perobj = null;
+                reader = wb = null;
             //  console.log('表格导入的未经任何处理的原始数据')
             //  console.log(wb.Sheets[wb.SheetNames[0]]) //  为转换的原始数据，可作为提交或者另外处理
             }
-            f?reader.readAsArrayBuffer(f):f
+            f?reader.readAsArrayBuffer(f):f;
         }
         if(rABS) {
             reader.readAsArrayBuffer(f);
         } else {
             reader.readAsBinaryString(f);
         }
+        reader = f = null;
 
     },
     /*
@@ -99,6 +102,7 @@ let excelmodel = {
                 let col = ABC.indexOf(list[index].colNum); //列号A
                 arr[row-1][ABC[col]] =list[index];
                 arr[row-1][ABC[col]].edit = 'N'; //加入编辑状态
+                row = col = null;
 
             }
         }
@@ -137,7 +141,8 @@ let excelmodel = {
                     
                 }
             }
-        return headers
+        arrHd = arr = null;
+        return headers;
         }
         
     },
@@ -157,6 +162,8 @@ let excelmodel = {
                 headRowList.push(list[index][hd[i]]);
             }
         }
+        // list = null;
+        hd = null;
         return headRowList;
     },
     //封装遍历表格的所有的列 A-Z AA-AZ ...
@@ -175,12 +182,13 @@ let excelmodel = {
             }  
         }
         // console.log(arr)
+
         return arr;
     },
     Create(ref,callback){   //根据范围生成空数据
         // // 引入A-Z的所有列数组
         // index = this.AZ();
-        if (!ref)return
+        if (!ref)return;
         let sub = ref.indexOf(':');
 
         //先获取开始的列坐标
@@ -215,6 +223,7 @@ let excelmodel = {
         // console.log('已经生成的空数据')
         // console.log(arr)
         callback(arr)
+        arr = null;
     },
 
     Table(arr,callback){    //表格完整数据生成函数
@@ -262,7 +271,7 @@ let excelmodel = {
 
                 //把数据添加到即将要回调的数组中
                 sheet = data;
-
+                data =null;
                 // //把表头所有列信息提交到回调函数中
                 // oktable.hd.push(Object.getOwnPropertyNames(data[0]))
 
@@ -270,7 +279,8 @@ let excelmodel = {
         }
         // console.log('oktable')
         //最终生成好的数据
-        callback(sheet)
+        callback(sheet);
+        sheet =null;
     },
     Merge(arr,data){  //arr是合并信息 数组，data 是生成的数据
         // console.log('这里开始设置合并单元格啦')
@@ -280,7 +290,7 @@ let excelmodel = {
             for (let i = 0; i<arr.length;i++){
 
                 //开始位置的列key A1
-                let start_c = ABC[parseInt(arr[i].s.c)]
+                // let start_c = ABC[parseInt(arr[i].s.c)];
 
                 //开始位置的列下标
                 let st_c = parseInt(arr[i].s.c);
@@ -302,7 +312,6 @@ let excelmodel = {
                     data[start_r][hdobj[st_c]].tdColspan = cos;
                     data[start_r][hdobj[st_c]].tdRowspan = row;
                 // }
-
                     // 标记需要清除数据的合并的单元格
                 for (let a = 0; a< row; a++) {  
                         if (a==0) {
@@ -320,7 +329,6 @@ let excelmodel = {
                         }else{  //因为只保留最初始位置左上角的值，所以其他值都得删除掉
                             for(let b =0 ; b < cos; b++){
                                 let num = (parseInt(arr[i].s.c)+b);
-
                                 if (data[start_r+a]) {
                                     // data[start_r+a][hdobj[num]].td =null;
                                     data[start_r+a][hdobj[num]].tdRowspan =0;
@@ -330,7 +338,7 @@ let excelmodel = {
                         } 
                 }             
             }    
-
+            arr = hdobj = null;
             // //  对已经标记了合并需要删除的数组元素进行删除
             // for (let b = data.length-1; b >= 0; b--) {
             //     let hdobj = Object.keys(data[b]);
@@ -351,10 +359,11 @@ let excelmodel = {
         
         // data[index][r].value.match(patt3) ==null
         for (let index = data.length-1; index >= 0; index--) {
-            for (let r = 0; r < Object.keys(data[index]).length; r++) {
+            let hdobj = Object.keys(data[index]).length;
+            for (let r = 0; r < hdobj; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
                 if (data[index][ABC[r]].td ==null && data[index][ABC[r]].tdRowspan == 1 && data[index][ABC[r]].tdColspan == 1) {
-                    if (r==Object.keys(data[index]).length-1) {
+                    if (r== hdobj - 1) {
                         Rnum++;
                     }
                 }else{
@@ -383,7 +392,8 @@ let excelmodel = {
                     }
                     continue;                  
                 } 
-            }  
+            } 
+            hdobj = null; 
         }
         for (let index = 0; index < data.length; index++) {
             let hdobj = Object.keys(data[index]);
@@ -391,6 +401,7 @@ let excelmodel = {
                 // delete data[index]['hd'+(Object.keys(data[index]).length-1)];
                 delete data[index][hdobj[(Object.keys(data[index]).length-1)]]
             }
+            hdobj = null;
         }
     }
 

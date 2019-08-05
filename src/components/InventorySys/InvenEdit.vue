@@ -28,7 +28,9 @@
       size="small"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
-      :edit-config="{trigger: 'click', mode: 'cell',render: 'scroll', renderSize: 80, useDefaultValidTip: true}"
+      show-summary
+      :summary-method="getSummaries"
+      :edit-config="{trigger: 'click', mode: 'cell',render: 'scroll', renderSize: 300, useDefaultValidTip: true}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       
@@ -44,23 +46,21 @@
           <i class="el-icon-rank drag-btn"></i>
         </template>
       </elx-editable-column>
-      <elx-editable-column type="index" width="55" align="center" >
+      <elx-editable-column type="index" width="60" align="center" >
         <template v-slot:header>
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
         </template>
       </elx-editable-column>
-
       <!-- 此处使用多级表头嵌套组件 -->
       <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column>
     </elx-editable>
-    
   </div>
 </template>
 
 <script>
-import MyColumn from '@/components/assembly/MyColumn'
-import XEUtils from 'xe-utils'
-import Sortable from 'sortablejs'
+import MyColumn from '@/components/assembly/MyColumn';
+import XEUtils from 'xe-utils';
+import Sortable from 'sortablejs';
 
 export default {
   name: 'InvenEdit',
@@ -131,20 +131,19 @@ export default {
         ]
       ]
     }
-    
   },
  watch: {
       list: function(newVal,oldVal){
           console.log('数据有发生改变吗')
-          console.log(newVal)
+          // console.log(newVal)
       }
   },
   computed: {
       
   },
   created () {
-      let id = 41;
-      let type = "change";
+      let id = 142;
+      let type = "original";
       this.$post('/head/getone',{id,type})
         .then((response) => {
         console.log('请求成功')
@@ -171,35 +170,42 @@ export default {
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
         console.log(this.PackHeader)
+        headsArr = data = null; //释放内存
 
       })
     // this.loading = true
-    this.rowDrop()
+    this.rowDrop();
     // this.findList()
 
   },
-  mounted (){
+  mounted () {
     this.rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
    
+  },
+  beforeDestroy () {
+    this.rest = null;
+    this.hd = null;
+    this.col = null;
+    this.PackHeader = null;
+    this.list = null;
+    this.$refs.input = null;
   },
   methods: {
     consoles () {
         let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
         console.log('检验一下数据对不对 rest list')
-        console.log(rest)
-        console.log(this.list)
+        console.log(rest);
+        console.log(this.list);
     },
     impt(){ //button 按钮调用input文件选择事件
-        this.$refs.input.click()
+        this.$refs.input.click();
     },
     importfxx() { //表头导入函数
-
-        this.loading = true
+        this.loading = true;
         this.list = []; //归为初始化状态
         this.hd = [];
         let _this = this;
-        this.startTime = Date.now()
-        
+        this.startTime = Date.now();
         this.$excel.Imports(data=>{ //数据导入组装函数
             try { //先判断表头是否一致
                 let hd = Object.keys(data[0]); //用来所需要的所有列(obj)（属性）名
@@ -212,25 +218,31 @@ export default {
                             this.loading =false;                                
                             return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true })
                         }
+                        headrs = Rows = null;
                     };
                 };
             } catch (error) {
+                data =[];
                 this.loading =false;
-                return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+                
+                return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入'+error, type: 'warning', duration: 6000, showClose: true });
             };
 
             try {  //把数据载入表格
                 data.splice(0,this.PackHeader.length-1); //去掉表头
                 this.list = data;
                 console.log('打印一下list')
-                console.log(this.list)
+                // console.log(this.list)
+                
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
                 this.findList() //调用滚动渲染数据
+                data = null; //内存释放
+
             } catch (e) {
-                this.list = [];
+                data = this.list = [];
                 this.loading =false;
+                console.log(e);
                 this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
-                console.log(e)
             }
         })
     },
@@ -244,7 +256,7 @@ export default {
             let colName = str.substr(0,str.indexOf(".td"))
             // console.log(colName)
             this.editRow = row[colName];
-            row[colName].edit = "Y";  //1为编辑模式0为只读状态
+            row[colName].edit = "Y";  //Y为编辑模式N为只读状态
         }  
     },
     deleteSelectedEvent () {
@@ -284,10 +296,9 @@ export default {
       this.$nextTick(() => {
         this.$refs.elxEditable.reload([])
         setTimeout(() => {
-          let list = this.list;
           // let startTime = Date.now()
-          this.$refs.elxEditable.reload(list)
-          this.loading = false
+          this.$refs.elxEditable.reload(this.list);
+          this.loading = false;
          this.$nextTick(() => {
               this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms  系统已为你自动去除表头`, type: 'success', duration: 6000, showClose: true })
             })
@@ -296,74 +307,81 @@ export default {
     },
 
     getSummaries (param) {  //合计
-      const { columns, data } = param
-      const sums = []
+      let { columns, data } = param;
+      const sums = [];
+      
       // console.log(param)
+      data = this.list;
+      console.log('data[0]')
+
+      console.log(data[0])
       columns.forEach((column, index) => {
+      console.log(column.property);
+
         if (index === 0) {
-          sums[index] = '汇总'
-          return
+          sums[index] = '汇总';
+          return;
         }
         switch (column.property) {
           case 'C':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}`
-            break
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}`;
+            break;
           case 'B':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}`
-            break
-          case 'A':
-            sums[index] = `总分：${XEUtils.sum(data, column.property)}`
-            break
+            sums[index] = `平均：${XEUtils.mean(data, column.property)}`;
+            break;
+          case 'D.td':
+            sums[index] = `总分：${column.property.td}`;
+            break;
           default:
             sums[index] = ''
-            break
+            break;
         }
       })
-      return sums
+      return sums;
     },
     insertEvent () {
       console.log('进来了吗')
       this.$refs.elxEditable.insert({
         '0': `New ${Date.now()}`,
       }).then(({ row }) => {
-        this.$refs.elxEditable.setActiveCell(row)
+        this.$refs.elxEditable.setActiveCell(row);
       })
-      this.$refs.elxEditable.clearActive()
+      this.$refs.elxEditable.clearActive();
     },
     getSelectLabel (value, valueProp, labelProp, list) {
       let item = XEUtils.find(list, item => item[valueProp] === value)
       return item ? item[labelProp] : null
     },
     getCascaderLabel (value, list) {
-      let values = value || []
-      let labels = []
+      let values = value || [];
+      let labels = [];
       let matchCascaderData = function (index, list) {
-        let val = values[index]
+        let val = values[index];
         if (list && values.length > index) {
           list.forEach(item => {
             if (item.value === val) {
-              labels.push(item.td)
-              matchCascaderData(++index, item.children)
+              labels.push(item.td);
+              matchCascaderData(++index, item.children);
             }
           })
         }
       }
       matchCascaderData(0, list)
-      return labels.join(' / ')
+      return labels.join(' / ');
     },
     getDatePicker (value) {
-      return XEUtils.toDateString(value, 'yyyy/MM/dd')
+      return XEUtils.toDateString(value, 'yyyy/MM/dd');
     },
     formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
     },
     rowDrop () {
       this.$nextTick(() => {
         Sortable.create(this.$el.querySelector('.el-table__body-wrapper tbody'), {
           handle: '.drag-btn',
           onEnd: ({ newIndex, oldIndex }) => {
-            let currRow = this.list.splice(oldIndex, 1)[0]
-            this.list.splice(newIndex, 0, currRow)
+            let currRow = this.list.splice(oldIndex, 1)[0];
+            this.list.splice(newIndex, 0, currRow);
           }
         })
       })
@@ -372,15 +390,15 @@ export default {
     submitEvent () {
       this.$refs.elxEditable.validate(valid => {
         if (valid) {
-          let list = this.list
+          let list = this.list;
           list.forEach((item, index) => {
             if (XEUtils.isDate(item.date)) {
-              item.date = item.date.getTime()
+              item.date = item.date.getTime();
             }
             // 重新生成排序后的序号
-            item.seq = index
+            item.seq = index;
           })
-          this.loading = true
+          this.loading = true;
           // XEAjax.doPost('/api/user/save', { updateRecords: list }).then(({ data }) => {
           //   this.$message({
           //     type: 'success',
@@ -394,7 +412,7 @@ export default {
       })
     },
     exportCsvEvent () {
-      this.$refs.elxEditable.exportCsv()
+      this.$refs.elxEditable.exportCsv();
     },
 
 
