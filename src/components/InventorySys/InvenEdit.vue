@@ -24,13 +24,13 @@
       ref="elxEditable"
       class="scroll-table4 click-table11"
       border
-      height="600"
-      size="small"
+      height="400"
+      size="mini"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       show-summary
       :summary-method="getSummaries"
-      :edit-config="{trigger: 'click', mode: 'cell',render: 'scroll', renderSize: 300, useDefaultValidTip: true}"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 70, useDefaultValidTip: true}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       
@@ -76,7 +76,14 @@ export default {
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       rest:[],
       // col:[],//表头数据.
-      col: [],//已对PackHeader再次组装的多级表头数据.
+      col: [
+        {colNum:'A',td:'A1',textAlign:'center',edit:'N'},
+        {colNum:'B',td:'B1',textAlign:'center',edit:'N'},
+        {colNum:'C',td:'C1',textAlign:'center',edit:'N'},
+        {colNum:'D',td:'D1',textAlign:'center',edit:'N'},
+        {colNum:'E',td:'E1',textAlign:'center',edit:'N'},
+        {colNum:'F',td:'F1',textAlign:'center',edit:'N'},
+      ],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
@@ -142,7 +149,7 @@ export default {
       
   },
   created () {
-      let id = 142;
+      let id = 149;
       let type = "original";
       this.$post('/head/getone',{id,type})
         .then((response) => {
@@ -202,44 +209,47 @@ export default {
     },
     importfxx() { //表头导入函数
         this.loading = true;
-        this.list = []; //归为初始化状态
-        this.hd = [];
-        let _this = this;
+        this.hd = this.list = []; //归为初始化状态
         this.startTime = Date.now();
         this.$excel.Imports(data=>{ //数据导入组装函数
             try { //先判断表头是否一致
-                let hd = Object.keys(data[0]); //用来所需要的所有列(obj)（属性）名
-                let headnum = this.PackHeader.length-1;
-                for (let index = 0; index < headnum; index++) {
-                    for (let i = 0; i<hd.length; i++) {
-                        let headrs = this.PackHeader[index][hd[i]];
-                        let Rows = data[index][hd[i]];
-                        if (headrs.colNum != Rows.colNum || headrs.td != Rows.td || headrs.tdRowspan != Rows.tdRowspan || headrs.tdColspan != Rows.tdColspan || headrs.trNum != Rows.trNum) {
-                            this.loading =false;                                
-                            return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true })
-                        }
-                        headrs = Rows = null;
-                    };
-                };
+                let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+                let datahd = Object.keys(data[0]);
+                if ( datahd.length < hd.length ) {
+                    hd.length = datahd.length = 0;
+                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+                }else{
+                    hd.length = datahd.length = 0;
+                }
+                let arr = [...this.PackHeader];
+                arr.length = arr.length-1;
+                let dataSplice = data.splice(0,arr.length); //去掉表头并且用来作判断是否一致
+                let ff = arr.some( function( item, index, array ){ 
+                      let hdsome = hd.some( function( val, i){ 
+                          let headrs = array[index][val];
+                          let Rows = dataSplice[index][val];
+                          return headrs.colNum != Rows.colNum || headrs.td != Rows.td || headrs.tdRowspan != Rows.tdRowspan || headrs.tdColspan != Rows.tdColspan || headrs.trNum != Rows.trNum;
+                      }); 
+                      return hdsome;
+                }); 
+                if (ff) {
+                    arr.length = hd.length = dataSplice.length = 0; //释放内存
+                    this.loading = false;
+                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+                }
             } catch (error) {
-                data =[];
-                this.loading =false;
-                
-                return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入'+error, type: 'warning', duration: 6000, showClose: true });
-            };
+               this.loading = false;
+               return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+            }
 
             try {  //把数据载入表格
-                data.splice(0,this.PackHeader.length-1); //去掉表头
-                this.list = data;
-                console.log('打印一下list')
-                // console.log(this.list)
-                
+                this.list = [...data];
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
                 this.findList() //调用滚动渲染数据
-                data = null; //内存释放
+                data.length = 0; //内存释放
 
             } catch (e) {
-                data = this.list = [];
+                data.length = this.list.length = 0;
                 this.loading =false;
                 console.log(e);
                 this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
@@ -250,8 +260,6 @@ export default {
         this.editRow != null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            // console.log('表格单击事件====row, column, cell, event')
-            // console.log(row, column, cell, event)
             let str = column.property;
             let colName = str.substr(0,str.indexOf(".td"))
             // console.log(colName)
@@ -307,37 +315,72 @@ export default {
     },
 
     getSummaries (param) {  //合计
-      let { columns, data } = param;
-      const sums = [];
-      
-      // console.log(param)
-      data = this.list;
-      console.log('data[0]')
+          const { columns, data } = param
+          const sums = []
+          // console.log(param)
+          let list = [...this.list];
+          console.log('data[0]')
+         
+          if (this.PackHeader.length >0) {
+              let sumArr = this.PackHeader.slice(-1); //截取合计尾行
+              const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+              const listlen = this.list.length;
+              let Total = new Array();
+              for (let i = 0; i < header.length; i++) {
+                  let sum = sumArr[0][header[i]];
+                  if (sum.attribute && sum.attribute == 'sumFormula') {
+                      Total.push(sum.colNum);
+                  }
+              }
+              let TotalObj = new Object();
+              for (let a = 0; a < Total.length; a++) {
+                  let num = 0;
+                  for (let index = 0; index < listlen; index++) {
+                      num += parseInt(this.list[index][Total[a]].td);
+                  }
+                  TotalObj[Total[a]+'.td'] = num;
+              }
 
-      console.log(data[0])
-      columns.forEach((column, index) => {
-      console.log(column.property);
+              // for (let index = 0; index < listlen; index++) {
+              //     for (let a = 0; a < Total.length; a++) {
+              //         TotalObj[Total[a]+'.td'] += parseInt(this.list[index][Total[a]].td);
+              //     }
+              // }
+              console.log(TotalObj)
+          // console.log(data[0])
+          columns.forEach((column, index) => {
+          // console.log(column.property);
 
-        if (index === 0) {
-          sums[index] = '汇总';
-          return;
-        }
-        switch (column.property) {
-          case 'C':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}`;
-            break;
-          case 'B':
-            sums[index] = `平均：${XEUtils.mean(data, column.property)}`;
-            break;
-          case 'D.td':
-            sums[index] = `总分：${column.property.td}`;
-            break;
-          default:
-            sums[index] = ''
-            break;
-        }
-      })
-      return sums;
+            if (index === 0) {
+              sums[index] = '汇总';
+              return;
+            }else if(index >2){
+              sums[index] = TotalObj[column.property];
+            }
+            
+          //  switch (column.property) {
+          //     case 'sex':
+          //       let rest = XEUtils.groupBy(data, column.property)
+          //       sums[index] = `男：${rest[1] ? rest[1].length : 0}，女：${rest[0] ? rest[0].length : 0}`
+          //       break
+          //     case 'age':
+          //       sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
+          //       break
+          //     case 'birthdate':
+          //       sums[index] = `平均年份：${XEUtils.toInteger(XEUtils.mean(data.map(item => XEUtils.toDateString(item[column.property], 'yyyy'))))}`
+          //       break
+          //     case 'rate':
+          //       sums[index] = `总分：${XEUtils.sum(data, column.property)}`
+          //       break
+          //     default:
+          //       sums[index] = ''
+          //       break
+          //   }
+          })
+          return sums
+          }
+          return sums
+
     },
     insertEvent () {
       console.log('进来了吗')

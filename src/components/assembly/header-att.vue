@@ -503,7 +503,6 @@ import inven from '../../modules/inventory';
                   params.refRow = rest.length;
 
               }
-              
               console.log('行号列好=======headatt')
               console.log(params.refCol,params.refRow)
 
@@ -545,9 +544,6 @@ import inven from '../../modules/inventory';
                         
                   })
               }
-
-             
-
           },
           back(){ //编辑完成点击上一步
             if (this.btn.edit) {

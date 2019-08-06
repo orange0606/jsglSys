@@ -118,8 +118,10 @@ let excelmodel = {
         // let ABC = this.$excel.AZ();
         if (arr[0]) {
             let headers = [];
-            for (let index = (arr.length)-2; index >=0 ; index--) {
-                for (let i = 0; i < arrHd.length; i++) {  //添加第一层
+            let arrlen = (arr.length)-2;
+            for (let index = arrlen; index >=0 ; index--) {
+                let arrHdlen = arrHd.length;
+                for (let i = 0; i < arrHdlen; i++) {  //添加第一层
                       if (index !=0) {
                           if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
                               arr[index-1][arrHd[i]].children =new Array();
@@ -156,8 +158,10 @@ let excelmodel = {
     Unpack (list) { //表格解构
         let headRowList = [];
         let hd = Object.keys(list[0]);   //获取所有的列
-        for (let index = 0; index < list.length; index++) {
-            for (let i = 0; i < hd.length; i++) {
+        let listlen = list.length;
+        for (let index = 0; index < listlen; index++) {
+            const hdlen = hd.length;
+            for (let i = 0; i < hdlen; i++) {
                 delete list[index][hd[i]].edit; //删除编辑状态
                 headRowList.push(list[index][hd[i]]);
             }
@@ -216,9 +220,7 @@ let excelmodel = {
             arr[i]={}
             for (let j = 0; j < cos; j++) {
                 arr[i][ABC[j]]={trNum:i+1, colNum:ABC[j], td:null, tdColspan:1, tdRowspan:1,edit:'N'}
-  
             }
-            
         }
         // console.log('已经生成的空数据')
         // console.log(arr)
@@ -229,7 +231,8 @@ let excelmodel = {
     Table(arr,callback){    //表格完整数据生成函数
         let sheet=[] //储存处理好的数据（二维数组）
         // console.log('arr')
-        for (let i = 0; i < arr.length; i++) {
+        const arrlen = arr.length;
+        for (let i = 0; i < arrlen; i++) {
 
             //调用生成工作表 i 空数据函数
             this.Create(arr[i].ref,data=>{
@@ -238,14 +241,13 @@ let excelmodel = {
                     //做优化，直接用下标来设置值
                     if (key!='!ref' && key!='!merges' && key!='!margins' && key!='!rows' && key!='!autofilter') {
                         try{
-                            // console.log(key)
+                            // console.log(arr[i].sheets[key])
                             let cos = ABC.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
                             let row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
-                            data[row][ABC[cos]].td = arr[i].sheets[key].w;   //给空数据加入真实的数据
+                            data[row][ABC[cos]].td = arr[i].sheets[key].v;   //给空数据加入真实的数据
                         }
                         catch (e) {
                             Message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
-        
                         }
 
                        
@@ -287,7 +289,8 @@ let excelmodel = {
         // console.log(arr[0])
         if(arr!=null){
             // console.log(arr)
-            for (let i = 0; i<arr.length;i++){
+            const arrlen = arr.length;
+            for (let i = 0; i<arrlen;i++){
 
                 //开始位置的列key A1
                 // let start_c = ABC[parseInt(arr[i].s.c)];
@@ -307,7 +310,7 @@ let excelmodel = {
             
 
                 //储存单元格合并,进行合并处理，添加合并数量
-                let hdobj = Object.keys(data[start_r])  //储存第几行对象的所有属性名  返回的是个数组
+                let hdobj = Object.keys(data[start_r]);  //储存第几行对象的所有属性名  返回的是个数组
                 // if (data[start_r][hdobj[st_c]].key==(start_c+`${start_r+1}`)) {
                     data[start_r][hdobj[st_c]].tdColspan = cos;
                     data[start_r][hdobj[st_c]].tdRowspan = row;
@@ -358,7 +361,8 @@ let excelmodel = {
         // 删除多余的行
         
         // data[index][r].value.match(patt3) ==null
-        for (let index = data.length-1; index >= 0; index--) {
+        const datalen = data.length-1;
+        for (let index = datalen; index >= 0; index--) {
             let hdobj = Object.keys(data[index]).length;
             for (let r = 0; r < hdobj; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
@@ -377,7 +381,8 @@ let excelmodel = {
         //删除多余的列
         //判断每行最少有几列是多余的,然后统一删除最少列的数量
         let Cnum =0;
-        for (let index = data.length-1; index >= 0; index--) {
+        const datalen = data.length-1;
+        for (let index = datalen; index >= 0; index--) {
             let num =0;
             let hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
@@ -385,7 +390,7 @@ let excelmodel = {
                 if (data[index][hdobj[r]].td ==null  && data[index][hdobj[r]].tdRowspan == 1 && data[index][hdobj[r]].tdColspan == 1) {
                     num++;
                 }else{
-                    if (index==data.length-1) {
+                    if (index == datalen) {
                         Cnum = num;
                     }else{
                         if (Cnum > num) Cnum = num;
@@ -395,11 +400,12 @@ let excelmodel = {
             } 
             hdobj = null; 
         }
-        for (let index = 0; index < data.length; index++) {
+        var dataleng = data.length;
+        for (let index = 0; index < dataleng; index++) {
             let hdobj = Object.keys(data[index]);
             for (let c = 0; c < Cnum; c++) {
                 // delete data[index]['hd'+(Object.keys(data[index]).length-1)];
-                delete data[index][hdobj[(Object.keys(data[index]).length-1)]]
+                delete data[index][hdobj[(Object.keys(data[index]).length-1)]];
             }
             hdobj = null;
         }
