@@ -75,6 +75,7 @@ export default {
       dialogVisible: true,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       rest:[],
+      formula:{}, //存储表头的公式数据
       // col:[],//表头数据.
       col: [
         {colNum:'A',td:'A1',textAlign:'center',edit:'N'},
@@ -85,6 +86,7 @@ export default {
         {colNum:'F',td:'F1',textAlign:'center',edit:'N'},
       ],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
+      nn:[{"tOriginalHeadId":149,"trNum":1,"colNum":"A","td":"工 程 量 清 单","tdRowspan":1,"tdColspan":6,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":1,"colNum":"B","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"C","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"D","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"E","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"F","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"A","td":"第100章   总 则","tdRowspan":1,"tdColspan":6,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":2,"colNum":"B","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"C","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"D","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"E","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"F","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":3,"colNum":"A","td":"子目号","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"B","td":"子目名称","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"C","td":"单位","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"D","td":"数量","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"E","td":"单价（元）","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"F","td":"合价（元）","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"formula","attributeValue":"D3*E3"},{"tOriginalHeadId":149,"trNum":4,"colNum":"A","td":"合计0","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumNull"},{"tOriginalHeadId":149,"trNum":4,"colNum":"B","td":"合计1","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumNull"},{"tOriginalHeadId":149,"trNum":4,"colNum":"C","td":"合计2","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumNull"},{"tOriginalHeadId":149,"trNum":4,"colNum":"D","td":"合计3","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumFormula","attributeValue":"D4"},{"tOriginalHeadId":149,"trNum":4,"colNum":"E","td":"合计4","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumFormula","attributeValue":"E4"},{"tOriginalHeadId":149,"trNum":4,"colNum":"F","td":"合计5","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumFormula","attributeValue":"F4"}],
       list: [
       ], //表格数据
        headerMenus: [
@@ -149,79 +151,50 @@ export default {
       
   },
   created () {
-      let str = 'BBB3+A11+BB111+A111*2*B2';
-      let patt = /[^A-Za-z0-9]+$/g;
-      console.log('str1')
-      console.log(str)
-      let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
-      let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
-      str = filterStr(str);  //去除空格与特殊符号
-      let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
-      let arr2 = [...arr];//先存一遍；
-      let aa ='A';
-      let patt3 = /[0-9]/;  //判断是否有数字
-      let patt4 = /[a-z]/i;
-      for (let i = 0; i < arr.length; i++) {
-          let key = arr[i].match(patt2);
-          let arrlen = arr[i].length;
-          for (let a = 0; a < str.length; a++) {
-              let index = str.indexOf(arr[i],a);
-              if ((str.length - index) < arrlen) break;
-              if (index != -1) {
-                  if (index == 0 && !patt3.test(str[index+arrlen])) {
-                      str = str.slice(0, index) +'parseInt(row["'+key[0]+'"])' + str.slice(index+arrlen);
-                  }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                      str = str.slice(0, index) +'parseInt(row["'+key[0]+'"])' + str.slice(index+arrlen);
-                  }
-              }
-          }
-      }
-      console.log('str2')
-      console.log(str)
 
-    function filterStr(str){  //去除空白以及特殊字符串
-        str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>/?~！@#￥……&（）——|{}【】‘；：”“'。，、？_]");  
-        var specialStr = "";  
-        for(var i=0;i<str.length;i++){  
-            specialStr += str.substr(i, 1).replace(pattern, '');   
-        }  
-        return specialStr;  
-    }  
+
+
       let id = 149;
       let type = "original";
-      this.$post('/head/getone',{id,type})
-        .then((response) => {
-        console.log('请求成功')
-        console.log(response)
-        this.key = '';
-        if (type == 'original') {
-          this.key = 'tOriginalHeadRows';
-        }else if (type == 'change'){
-          this.key = 'tChangeHeadRows';
-        }else if (type == 'update'){
-          this.key = 'tUpdateHeadRows';
-        }else if (type == 'totalmeterage'){
-          this.key = 'tTotalmeterageHeadRows';
-        }else if (type == 'meterage'){
-          this.key = 'tMeterageHeadRows';
-        }else if (type == 'totalpay'){
-          this.key = 'tTotalpayHeadRows';
-        }else if (type == 'pay'){
-          this.key = 'tPayHeadRows';
-        }
-        let data = response.data.onehead;
-        let headsArr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
+      // this.$post('/head/getone',{id,type})
+      //   .then((response) => {
+      //   console.log('请求成功')
+      //   console.log(response)
+      //   this.key = '';
+      //   if (type == 'original') {
+      //     this.key = 'tOriginalHeadRows';
+      //   }else if (type == 'change'){
+      //     this.key = 'tChangeHeadRows';
+      //   }else if (type == 'update'){
+      //     this.key = 'tUpdateHeadRows';
+      //   }else if (type == 'totalmeterage'){
+      //     this.key = 'tTotalmeterageHeadRows';
+      //   }else if (type == 'meterage'){
+      //     this.key = 'tMeterageHeadRows';
+      //   }else if (type == 'totalpay'){
+      //     this.key = 'tTotalpayHeadRows';
+      //   }else if (type == 'pay'){
+      //     this.key = 'tPayHeadRows';
+      //   }
+        // let data = response.data.onehead;
+        // let headsArr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
+
+        let headsArr = this.$excel.Package(this.nn,6,4);
         this.PackHeader = XEUtils.clone(headsArr,true) //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
         console.log(this.PackHeader)
-        headsArr = data = null; //释放内存
+        // headsArr = data = null; //释放内存
 
-      })
+      // })
+      
+      
+    
     // this.loading = true
+    this.Formula();//调用表格公式解析
     this.rowDrop();
     // this.findList()
+
 
   },
   mounted () {
@@ -263,7 +236,7 @@ export default {
                 let arr = [...this.PackHeader];
                 arr.length = arr.length-1;
                 let dataSplice = data.splice(0,arr.length); //去掉表头并且用来作判断是否一致
-                let ff = arr.some( function( item, index, array ){ 
+                let ff = arr.some( function( item, index, array ){ //判断导入的清单表头与网络清单表头如果是否相等
                       let hdsome = hd.some( function( val, i){ 
                           let headrs = array[index][val];
                           let Rows = dataSplice[index][val];
@@ -284,6 +257,31 @@ export default {
             try {  //把数据载入表格
                 this.list = [...data];
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
+
+                let formuHd = Object.keys(this.formula); //用来所需要的所有列(obj)（属性）名
+                let listlen = this.list.length;
+                let formuHdlen = formuHd.length;
+                for (let index = 0; index < listlen; index++) {  
+                    console.log('jin')
+                    // console.log(formuHdlen)
+                    for (let a = 0; a < formuHdlen; a++) {
+                      console.log('建立阿勒阿三')
+                      console.log(formuHd[a])
+                      let sum = this.formula[formuHd[a]];
+                      let row = this.list[index];
+                      this.list[index][formuHd[a]].td = eval(sum);
+                      console.log(sum)
+                      
+                    }
+                    // this.[index] 
+                    // for (let i = 0; i < this.formula.length; i++) {
+                    //   cols = this.list[index][this.formula[i]].colNum;
+                      
+                    //   if (row.colNum in this.formula) {
+                        
+                    //   }
+                    // }
+                }
                 this.findList() //调用滚动渲染数据
                 data.length = 0; //内存释放
 
@@ -359,8 +357,6 @@ export default {
           // console.log(param)
           let list = [...this.list];
           // console.log('data[0]')
-
-         
           if (this.PackHeader.length >0 && this.list) {
               let sumArr = this.PackHeader.slice(-1); //截取合计尾行
               const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
@@ -380,14 +376,6 @@ export default {
                   }
                   TotalObj[Total[a]+'.td'] = num;
               }
-
-              // for (let index = 0; index < listlen; index++) {
-              //     for (let a = 0; a < Total.length; a++) {
-              //         TotalObj[Total[a]+'.td'] += parseInt(this.list[index][Total[a]].td);
-              //     }
-              // }
-              // console.log(TotalObj)
-          // console.log(data[0])
           columns.forEach((column, index) => {
           // console.log(column.property);
 
@@ -397,30 +385,60 @@ export default {
             }else if(index >2){
               sums[index] = TotalObj[column.property];
             }
-            
-          //  switch (column.property) {
-          //     case 'sex':
-          //       let rest = XEUtils.groupBy(data, column.property)
-          //       sums[index] = `男：${rest[1] ? rest[1].length : 0}，女：${rest[0] ? rest[0].length : 0}`
-          //       break
-          //     case 'age':
-          //       sums[index] = `平均：${XEUtils.mean(data, column.property)}岁`
-          //       break
-          //     case 'birthdate':
-          //       sums[index] = `平均年份：${XEUtils.toInteger(XEUtils.mean(data.map(item => XEUtils.toDateString(item[column.property], 'yyyy'))))}`
-          //       break
-          //     case 'rate':
-          //       sums[index] = `总分：${XEUtils.sum(data, column.property)}`
-          //       break
-          //     default:
-          //       sums[index] = ''
-          //       break
-          //   }
           })
           return sums
           }
           return sums
 
+    },
+    Formula () {  //公式计算
+        let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
+          let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
+          let patt3 = /[0-9]/;  //判断是否有数字
+          let patt4 = /[a-z]/i;
+          if (this.PackHeader.length <2) return false; 
+          let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
+          const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+          for (let index = 0; index < header.length; index++) {
+              // console.log('进来了几次了呀 ',index)
+              let sumRow = sumArr[header[index]];
+              // console.log('sumRow')
+              // console.log(sumRow.attribute,sumRow.attributeValue,sumRow.td)
+              if (sumRow.attribute && sumRow.attribute == "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
+                  let str = sumRow.attributeValue;
+                  console.log('str1');
+                  console.log(str);
+                  str = this.filterStr(str);  //去除空格与特殊符号
+                  let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+                  for (let i = 0; i < arr.length; i++) {
+                      let key = arr[i].match(patt2);
+                      let arrlen = arr[i].length;
+                      for (let a = 0; a < str.length; a++) {
+                          let index = str.indexOf(arr[i],a);
+                          if ((str.length - index) < arrlen) break;
+                          if (index != -1) {
+                              if (index == 0 && !patt3.test(str[index+arrlen])) {
+                                  str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
+                              }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                                  str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
+                              }
+                          }
+                      }
+                  }
+                  console.log(str)
+                  this.formula[sumRow.colNum] = str;
+                  console.log(this.formula)
+            }      
+        }
+    },
+    filterStr (str) {  //去除空白以及特殊字符串
+        str = str.replace(/\s*/g,"");
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>/?~！@#￥……&（）——|{}【】‘；：”“'。，、？_]");  
+        var specialStr = "";  
+        for(var i=0;i<str.length;i++){  
+            specialStr += str.substr(i, 1).replace(pattern, '');   
+        }  
+        return specialStr;  
     },
     insertEvent () {
       console.log('进来了吗')
