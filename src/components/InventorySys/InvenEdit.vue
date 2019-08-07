@@ -24,13 +24,13 @@
       ref="elxEditable"
       class="scroll-table4 click-table11"
       border
-      height="400"
+      height="450"
       size="mini"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       show-summary
       :summary-method="getSummaries"
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 70, useDefaultValidTip: true}"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
       :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       
@@ -149,6 +149,45 @@ export default {
       
   },
   created () {
+      let str = 'BBB3+A11+BB111+A111*2*B2';
+      let patt = /[^A-Za-z0-9]+$/g;
+      console.log('str1')
+      console.log(str)
+      let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
+      let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
+      str = filterStr(str);  //去除空格与特殊符号
+      let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+      let arr2 = [...arr];//先存一遍；
+      let aa ='A';
+      let patt3 = /[0-9]/;  //判断是否有数字
+      let patt4 = /[a-z]/i;
+      for (let i = 0; i < arr.length; i++) {
+          let key = arr[i].match(patt2);
+          let arrlen = arr[i].length;
+          for (let a = 0; a < str.length; a++) {
+              let index = str.indexOf(arr[i],a);
+              if ((str.length - index) < arrlen) break;
+              if (index != -1) {
+                  if (index == 0 && !patt3.test(str[index+arrlen])) {
+                      str = str.slice(0, index) +'parseInt(row["'+key[0]+'"])' + str.slice(index+arrlen);
+                  }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                      str = str.slice(0, index) +'parseInt(row["'+key[0]+'"])' + str.slice(index+arrlen);
+                  }
+              }
+          }
+      }
+      console.log('str2')
+      console.log(str)
+
+    function filterStr(str){  //去除空白以及特殊字符串
+        str = str.replace(/\s*/g,"");
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>/?~！@#￥……&（）——|{}【】‘；：”“'。，、？_]");  
+        var specialStr = "";  
+        for(var i=0;i<str.length;i++){  
+            specialStr += str.substr(i, 1).replace(pattern, '');   
+        }  
+        return specialStr;  
+    }  
       let id = 149;
       let type = "original";
       this.$post('/head/getone',{id,type})
@@ -319,9 +358,10 @@ export default {
           const sums = []
           // console.log(param)
           let list = [...this.list];
-          console.log('data[0]')
+          // console.log('data[0]')
+
          
-          if (this.PackHeader.length >0) {
+          if (this.PackHeader.length >0 && this.list) {
               let sumArr = this.PackHeader.slice(-1); //截取合计尾行
               const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
               const listlen = this.list.length;
@@ -346,7 +386,7 @@ export default {
               //         TotalObj[Total[a]+'.td'] += parseInt(this.list[index][Total[a]].td);
               //     }
               // }
-              console.log(TotalObj)
+              // console.log(TotalObj)
           // console.log(data[0])
           columns.forEach((column, index) => {
           // console.log(column.property);
