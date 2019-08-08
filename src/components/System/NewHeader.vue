@@ -39,26 +39,21 @@
         </el-col>
         
     </el-row>
-
     </header>
-
     <!-- 引入表格编辑组件 -->
     <headeratt :params="Form" :dialog.sync="dialogVisible" ></headeratt>
-
-
   </div>
 </template>
 
 <script>
-  // 引入单元格列编辑组件
-  import edits from '@/components/assembly/edit'
+
   // 引入表头属性设置组件
-  import headeratt from '@/components/assembly/header-att'
+  import headeratt from '@/components/System/header-att'
 
   import inven from '../../modules/inventory';
   export default {
     name: 'newheader',
-    components: {edits,headeratt},
+    components: {headeratt},
     data () {
       return {
         regionList:[],

@@ -24,7 +24,7 @@
       ref="elxEditable"
       class="scroll-table4 click-table11"
       border
-      height="450"
+      height="550"
       size="mini"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
@@ -52,7 +52,7 @@
         </template>
       </elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column>
+      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" ></my-column>
     </elx-editable>
   </div>
 </template>
@@ -69,13 +69,14 @@ export default {
   },
   data () {
     return {
-      hd:null,
+      hd:[],
       startTime:null,
       loading: false,
       dialogVisible: true,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       rest:[],
       formula:{}, //存储表头的公式数据
+      row:null,//公式字符串转代码的全局变量
       // col:[],//表头数据.
       col: [
         {colNum:'A',td:'A1',textAlign:'center',edit:'N'},
@@ -143,7 +144,7 @@ export default {
   },
  watch: {
       list: function(newVal,oldVal){
-          console.log('数据有发生改变吗')
+          // console.log('数据有发生改变吗')
           // console.log(newVal)
       }
   },
@@ -151,55 +152,45 @@ export default {
       
   },
   created () {
-
-
-
       let id = 149;
       let type = "original";
-      // this.$post('/head/getone',{id,type})
-      //   .then((response) => {
-      //   console.log('请求成功')
-      //   console.log(response)
-      //   this.key = '';
-      //   if (type == 'original') {
-      //     this.key = 'tOriginalHeadRows';
-      //   }else if (type == 'change'){
-      //     this.key = 'tChangeHeadRows';
-      //   }else if (type == 'update'){
-      //     this.key = 'tUpdateHeadRows';
-      //   }else if (type == 'totalmeterage'){
-      //     this.key = 'tTotalmeterageHeadRows';
-      //   }else if (type == 'meterage'){
-      //     this.key = 'tMeterageHeadRows';
-      //   }else if (type == 'totalpay'){
-      //     this.key = 'tTotalpayHeadRows';
-      //   }else if (type == 'pay'){
-      //     this.key = 'tPayHeadRows';
-      //   }
-        // let data = response.data.onehead;
-        // let headsArr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
+      this.$post('/head/getone',{id,type})
+        .then((response) => {
+        // console.log('请求成功')
+        // console.log(response)
+        this.key = '';
+        if (type == 'original') {
+          this.key = 'tOriginalHeadRows';
+        }else if (type == 'change'){
+          this.key = 'tChangeHeadRows';
+        }else if (type == 'update'){
+          this.key = 'tUpdateHeadRows';
+        }else if (type == 'totalmeterage'){
+          this.key = 'tTotalmeterageHeadRows';
+        }else if (type == 'meterage'){
+          this.key = 'tMeterageHeadRows';
+        }else if (type == 'totalpay'){
+          this.key = 'tTotalpayHeadRows';
+        }else if (type == 'pay'){
+          this.key = 'tPayHeadRows';
+        }
+        let data = response.data.onehead;
+        let headsArr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
 
-        let headsArr = this.$excel.Package(this.nn,6,4);
+        // let headsArr = this.$excel.Package(this.nn,6,4);
         this.PackHeader = XEUtils.clone(headsArr,true) //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        console.log(this.PackHeader)
+        // console.log('this.PackHeader')
+        // console.log(this.PackHeader)
         // headsArr = data = null; //释放内存
-
-      // })
-      
-      
-    
-    // this.loading = true
-    this.Formula();//调用表格公式解析
-    this.rowDrop();
+        this.Analysis();//调用表格公式解析
+      })
+    this.rowDrop();//调用表格行拖拽函数
     // this.findList()
-
-
   },
   mounted () {
     this.rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-   
   },
   beforeDestroy () {
     this.rest = null;
@@ -212,16 +203,16 @@ export default {
   methods: {
     consoles () {
         let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-        console.log('检验一下数据对不对 rest list')
-        console.log(rest);
-        console.log(this.list);
+        // console.log('检验一下数据对不对 rest list')
+        // console.log(rest);
+        // console.log(this.list);
     },
     impt(){ //button 按钮调用input文件选择事件
         this.$refs.input.click();
     },
     importfxx() { //表头导入函数
         this.loading = true;
-        this.hd = this.list = []; //归为初始化状态
+        this.hd.length = this.list.length = 0; //归为初始化状态
         this.startTime = Date.now();
         this.$excel.Imports(data=>{ //数据导入组装函数
             try { //先判断表头是否一致
@@ -256,39 +247,14 @@ export default {
 
             try {  //把数据载入表格
                 this.list = [...data];
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名
-
-                let formuHd = Object.keys(this.formula); //用来所需要的所有列(obj)（属性）名
-                let listlen = this.list.length;
-                let formuHdlen = formuHd.length;
-                for (let index = 0; index < listlen; index++) {  
-                    console.log('jin')
-                    // console.log(formuHdlen)
-                    for (let a = 0; a < formuHdlen; a++) {
-                      console.log('建立阿勒阿三')
-                      console.log(formuHd[a])
-                      let sum = this.formula[formuHd[a]];
-                      let row = this.list[index];
-                      this.list[index][formuHd[a]].td = eval(sum);
-                      console.log(sum)
-                      
-                    }
-                    // this.[index] 
-                    // for (let i = 0; i < this.formula.length; i++) {
-                    //   cols = this.list[index][this.formula[i]].colNum;
-                      
-                    //   if (row.colNum in this.formula) {
-                        
-                    //   }
-                    // }
-                }
-                this.findList() //调用滚动渲染数据
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                this.Formula();  //调用公式计算
+                this.findList(); //调用滚动渲染数据
                 data.length = 0; //内存释放
-
             } catch (e) {
                 data.length = this.list.length = 0;
                 this.loading =false;
-                console.log(e);
+                // console.log(e);
                 this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
             }
         })
@@ -312,8 +278,8 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-            console.log('打印选中的数据')
-            console.log(removeRecords)
+            // console.log('打印选中的数据')
+            // console.log(removeRecords)
           // this.loading = true
           //   this.$message({
           //     type: 'success',
@@ -350,7 +316,6 @@ export default {
         }, 300)
       })
     },
-
     getSummaries (param) {  //合计
           const { columns, data } = param
           const sums = []
@@ -386,62 +351,103 @@ export default {
               sums[index] = TotalObj[column.property];
             }
           })
-          return sums
+          return sums;
           }
-          return sums
-
+          return sums;
     },
-    Formula () {  //公式计算
+    Analysis () {  //公式解析化为可运算的字符串
         let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
-          let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
-          let patt3 = /[0-9]/;  //判断是否有数字
-          let patt4 = /[a-z]/i;
-          if (this.PackHeader.length <2) return false; 
-          let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
-          const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
-          for (let index = 0; index < header.length; index++) {
-              // console.log('进来了几次了呀 ',index)
-              let sumRow = sumArr[header[index]];
-              // console.log('sumRow')
-              // console.log(sumRow.attribute,sumRow.attributeValue,sumRow.td)
-              if (sumRow.attribute && sumRow.attribute == "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
-                  let str = sumRow.attributeValue;
-                  console.log('str1');
-                  console.log(str);
-                  str = this.filterStr(str);  //去除空格与特殊符号
-                  let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
-                  for (let i = 0; i < arr.length; i++) {
-                      let key = arr[i].match(patt2);
-                      let arrlen = arr[i].length;
-                      for (let a = 0; a < str.length; a++) {
-                          let index = str.indexOf(arr[i],a);
-                          if ((str.length - index) < arrlen) break;
-                          if (index != -1) {
-                              if (index == 0 && !patt3.test(str[index+arrlen])) {
-                                  str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
-                              }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                                  str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
-                              }
-                          }
-                      }
+        let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
+        let patt3 = /[0-9]/;  //判断是否有数字
+        let patt4 = /[A-Z]/;
+          // console.log('this.col')
+        //  console.log(this.col )
+        let cols = [...this.col]
+        function BikoFoArr (col) {
+            let obj = new Object();
+            Biko(col);
+            function Biko (colArr) { //表头尾行 真正显示对应列的数据
+                for (let c = 0; c < colArr.length; c++) {
+                  if (colArr[c].children && colArr[c].children.length >0) {
+                      Biko(colArr[c].children);
+                  }else{
+                      obj[colArr[c].colNum] = colArr[c];
                   }
-                  console.log(str)
-                  this.formula[sumRow.colNum] = str;
-                  console.log(this.formula)
+                }
+            }
+            return obj;
+        }
+        if (this.PackHeader.length <2) return false; 
+        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
+
+        let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
+        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        for (let index = 0; index < header.length; index++) {
+            // console.log('进来了几次了呀 ',index)
+            let sumRow = sumArr[header[index]];
+            // console.log('sumRow')
+            // console.log(sumRow.attribute,sumRow.attributeValue,sumRow.td)
+            if (sumRow.attribute && sumRow.attribute == "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
+                let str = sumRow.attributeValue;
+                // console.log('str1');
+                // console.log(str);
+                str = this.filterStr(str);  //去除空格与特殊符号
+                let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+                for (let i = 0; i < arr.length; i++) {
+                    let key = arr[i].match(patt2);
+                    let arrlen = arr[i].length;
+                    for (let a = 0; a < str.length; a++) {
+                        let index = str.indexOf(arr[i],a);
+                        if ((str.length - index) < arrlen) break;
+                        if (index != -1) {
+                            if (index == 0 && !patt3.test(str[index+arrlen])) {
+                                str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
+                            }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                                str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
+                            }
+                        }
+                    }
+                }
+                // console.log(str)
+                this.formula[sumRow.colNum] = str;
+                // console.log(this.formula)
             }      
         }
     },
     filterStr (str) {  //去除空白以及特殊字符串
         str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>/?~！@#￥……&（）——|{}【】‘；：”“'。，、？_]");  
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]");  
         var specialStr = "";  
         for(var i=0;i<str.length;i++){  
             specialStr += str.substr(i, 1).replace(pattern, '');   
         }  
         return specialStr;  
     },
+    Formula () { //表格载入时进行处理公式计算
+        let formuHd = Object.keys(this.formula); //用来所需要的所有有公式的列(obj)（属性）名
+        let listlen = this.list.length;
+        let formuHdlen = formuHd.length;
+        for (let index = 0; index < listlen; index++) {  
+            let row = this.list[index];
+            try {
+                for (let a = 0; a < formuHdlen; a++) {
+                  let sum = this.formula[formuHd[a]];
+                  if (row[formuHd[a]].td == "" || row[formuHd[a]].td == " " || row[formuHd[a]].td == null) {
+                      // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
+                      index == 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
+                      eval(sum) ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td = "";  //字符串转代码计算
+                      // sum = 'parseInt(row["D"].td)*parseInt(row["E"].td)'
+                      // this.list[index][formuHd[a]].td = new Function(sum)(); 
+                  }
+                }
+            } catch (error) {
+                console.log(error)
+                return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
+            }
+        }
+    },
     insertEvent () {
-      console.log('进来了吗')
+      // console.log('进来了吗')
       this.$refs.elxEditable.insert({
         '0': `New ${Date.now()}`,
       }).then(({ row }) => {
@@ -499,7 +505,9 @@ export default {
             // 重新生成排序后的序号
             item.seq = index;
           })
-          this.loading = true;
+          // this.loading = true;
+          console.log('list')
+          console.log(list)
           // XEAjax.doPost('/api/user/save', { updateRecords: list }).then(({ data }) => {
           //   this.$message({
           //     type: 'success',

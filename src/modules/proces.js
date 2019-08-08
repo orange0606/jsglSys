@@ -148,10 +148,19 @@ let excelmodel = {
         }
         
     },
-
+    /*
+    清单数据解构函数
+    param list: 表格所有基本数据(数组对象)
+    return : 完整表格解构数据
+    */
+    Inventory (list, hdlen) {
+        for (let index = 0; index < list.length; index++) {
+            // list[index]
+        }
+    },
 
     /*
-    表格数据解构函数
+    表头数据解构函数
     param list: 表格所有基本数据(数组对象)
     return : 完整表格解构数据
     */

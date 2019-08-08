@@ -105,8 +105,8 @@
 <script>
 import XEUtils from 'xe-utils'
 //引入只读表格组件
-import edit from '@/components/assembly/edit'
-import headeratt from '@/components/assembly/header-att'
+import edit from '@/components/System/edit'
+import headeratt from '@/components/System/header-att'
   export default {
   name: 'headers',
   components: {edit,headeratt},

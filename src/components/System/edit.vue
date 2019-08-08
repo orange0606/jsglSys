@@ -114,6 +114,7 @@ export default {
   },
  beforeDestroy() {
       this.timer?clearInterval(this.timer):this.timer;//清除定时器
+      console.log('清除定时器')
   },
   methods: {
     upfun () {  //修改数据函数（传值给父组件）
