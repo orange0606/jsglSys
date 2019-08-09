@@ -48,7 +48,6 @@ Vue.use(Tooltip);
 Vue.component(CollapseTransition.name, CollapseTransition)
 
 import {
-
   Editable,
   EditableColumn
 } from 'vue-element-extends'
@@ -60,7 +59,11 @@ Vue.use(TableColumn)
 Vue.use(Editable)
 Vue.use(EditableColumn)
 
-
+Vue.prototype.$message = Message;
+Vue.prototype.$notify = Notification;
+Vue.prototype.$loading = Loading.service;
+Vue.prototype.$msgbox = MessageBox;
+Vue.prototype.$confirm = MessageBox.confirm;
 
 
 // import axios from "axios"
@@ -73,6 +76,8 @@ Vue.prototype.$excel = excelmodel;
 // 引入工具类-目录自定义
 // import fetch from '@/utils/request'
 // import axios from 'axios'
+import store from '@/utils/Store'
+Vue.prototype.$store = store;
 import {post,fetch,patch,put} from '@/utils/request'
 //定义全局变量
 Vue.prototype.$post=post;
@@ -80,17 +85,22 @@ Vue.prototype.$fetch=fetch;
 Vue.prototype.$patch=patch;
 Vue.prototype.$put=put;
 
-Vue.prototype.HOST = '/api'
+// Vue.prototype.HOST = '/api'
 
 
-Vue.prototype.$message = Message;
-Vue.prototype.$notify = Notification;
-Vue.prototype.$loading = Loading.service;
-Vue.prototype.$msgbox = MessageBox;
-Vue.prototype.$confirm = MessageBox.confirm;
+//路由拦截器
+router.beforeEach(function (to, from, next) {
+  if (to.meta.requireAuth){
+    if (store.state.token){
+      next()
+    }else {
+      next({name: "login",query:{backUrl:to.fullPath}})
+    }
+  } else {
+    next()
+  }
 
-Vue.prototype.orginal = null;  //全局变量，用来存储原清单
-/* eslint-disable no-new */
+});
 new Vue({
   el: '#app',
   router,

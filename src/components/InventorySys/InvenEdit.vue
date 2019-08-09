@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import MyColumn from '@/components/assembly/MyColumn';
+import MyColumn from '@/components/InventorySys/MyColumn';
 import XEUtils from 'xe-utils';
 import Sortable from 'sortablejs';
 
@@ -401,9 +401,9 @@ export default {
                         if ((str.length - index) < arrlen) break;
                         if (index != -1) {
                             if (index == 0 && !patt3.test(str[index+arrlen])) {
-                                str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
+                                str = str.slice(0, index)+`row["${key[0]}"].td`+str.slice(index+arrlen);
                             }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                                str = str.slice(0, index)+`parseInt(row["${key[0]}"].td)`+str.slice(index+arrlen);
+                                str = str.slice(0, index)+`row["${key[0]}"].td`+str.slice(index+arrlen);
                             }
                         }
                     }
@@ -435,7 +435,8 @@ export default {
                   if (row[formuHd[a]].td == "" || row[formuHd[a]].td == " " || row[formuHd[a]].td == null) {
                       // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
                       index == 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
-                      eval(sum) ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td = "";  //字符串转代码计算
+                      eval(sum) || eval(sum)==0 ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td;  //字符串转代码计算
+
                       // sum = 'parseInt(row["D"].td)*parseInt(row["E"].td)'
                       // this.list[index][formuHd[a]].td = new Function(sum)(); 
                   }
@@ -507,16 +508,60 @@ export default {
           })
           // this.loading = true;
           console.log('list')
-          console.log(list)
-          // XEAjax.doPost('/api/user/save', { updateRecords: list }).then(({ data }) => {
-          //   this.$message({
-          //     type: 'success',
-          //     message: '保存成功!'
-          //   })
-          //   this.findList()
-          // }).catch(e => {
-          //   this.loading = false
-          // })
+          // console.log(list)
+          if (list.length == 0) {
+              this.$message({
+                type: 'success',
+                message: '请先导入数据!'
+              })
+              return false;
+          }
+          //解构数据进行提交
+          const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+          const refCol = header.length;
+          const refRow = list.length;
+          let originalRowList = new Array();
+          for (let index = 0; index < refRow; index++) {
+              for (let i = 0; i < refCol; i++) {
+                  if (list[index][header[i]] && list[index][header[i]].colNum == header[i] ) {
+                      delete list[index][header[i]].edit;
+                      list[index][header[i]].formula = '';                     
+                      list[index][header[i]].attribute = '';                  
+                      list[index][header[i]].upload = 1;    
+
+                      originalRowList.push(list[index][header[i]]);
+                  }
+              }
+          }
+          let originalList = new Array();
+          let obj = new Object();
+          obj = {
+              originalHeadId:149,
+              processId:6,
+              sysOrder:'',
+              sysNum:'',
+              name:'原清单名1',
+              num:'yq-01',
+              tenderId:37,
+              type:'original',
+              originalRowList
+          }
+          originalList.push(obj)
+          console.log(originalList);
+          // this.loading = true;
+          this.$post('/original/save',{ originalList })
+              .then((response) => {
+              console.log(response)
+              // this.loading = false
+              this.$message({
+                type: 'success',
+                message: `保存原清单成功，共保存 ${refRow} 条数据!`
+              })
+            })
+          //保存原清单
+          
+
+
         }
       })
     },

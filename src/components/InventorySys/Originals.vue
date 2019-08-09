@@ -3,7 +3,7 @@
   <!-- <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"><div class="grid-content bg-purple"></div></el-col> -->
   <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
     <el-collapse-transition>
-    <div v-loading="loading" element-loading-text="拼命加载中">
+    <div v-loading="loading" element-loading-text="飞速加载中">
         <h3>全部原清单</h3>
 
         <div class="manual-table2-oper">
@@ -16,7 +16,8 @@
         ref="elxEditable"
         class="manual-table2"
         border
-        max-height="600"
+        size="mini"
+        height="480"
         :data.sync="list"
         :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
@@ -25,28 +26,31 @@
         <elx-editable-column type="index" width="50" align="center"> </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <elx-editable-column prop="type" label="类别" align="center" show-overflow-tooltip :formatter="formatterType">
+        <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="originalHead.name" label="原清单表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="processId.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="processId.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="num" label="原清单编号" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="原清单名称" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="tender.num" label="标段编号" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="tender.name" label="标段名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="type" label="审批单类别" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
+        <elx-editable-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
+            <template slot-scope="scope">
+                <i v-if="scope.row.enter ==0" size="small" class="el-icon-circle-close"></i>
+                <i v-if="scope.row.enter ==1" size="small" class="el-icon-circle-check"></i>
+                <i v-if="scope.row.enter ==2" size="small" class="el-icon-warning-outline"></i>
+            </template>
         </elx-editable-column>
-        <elx-editable-column prop="num" label="清单" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-        
-        <elx-editable-column prop="name" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="name1" label="清单名称" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-        <elx-editable-column prop="name1" label="录入" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-        <elx-editable-column prop="name1" label="已发" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-
-
-        <!-- <elx-editable-column prop="saveEmployee.name" width="80" label="创建人" >
-        </elx-editable-column>
+        <elx-editable-column prop="startTime" label="发起时间" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
+        <elx-editable-column prop="saveEmployee.name" width="80" label="创建人" ></elx-editable-column>
         <elx-editable-column prop="saveTime" label="创建时间" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
-        <elx-editable-column prop="updateEmployee.name" width="80" label="更改人" >
-        </elx-editable-column>
-        <elx-editable-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column> -->
+        <elx-editable-column prop="updateEmployee.name" width="80" label="更改人" ></elx-editable-column>
+        <elx-editable-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" width="185" align="center" >
+        <elx-editable-column label="操作" fixed="right" width="185" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
-                <!-- <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>
-                <el-button size="mini" type="warning" @click="cancelRowEvent(scope.row)">取消</el-button> -->
                 <el-tooltip content="保存" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-document-checked" @click="saveRowEvent(scope.row)"></el-button>
                 </el-tooltip>
@@ -56,13 +60,11 @@
 
             </template>
             <template v-else>
-                <!-- <el-button size="mini" type="primary" @click="openActiveRowEvent(scope.row)">编辑</el-button>
-                <el-button size="mini" type="danger" @click="removeEvent(scope.row)">删除</el-button> -->
                 <el-tooltip content="修改" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="seeTbale(scope.row)"></el-button>
+                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
@@ -118,26 +120,29 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
-    // this.findList()  //发起请求所有已录入原清单
+    this.findList()  //发起请求所有已录入原清单
   },
   watch: {
 
+  },
+  computed: {
+    // enter: function () {
+    // }
   },
   methods: {
     
     findList () {   //请求所有已建表头数据函数
       this.loading = true
-        //发起网络请求
-    //   this.$post('/head/getall',{page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}})
-    //     .then((response) => {
-    //     this.list = response.data.headList.list;
-    //     this.pageVO.totalResult = response.data.headList.total;
-    //     this.loading = false;
-
-    //   })
+      // 发起网络请求
+      this.$post('/original/all',{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
+        .then((response) => {
+        this.list = response.data.originalList.list;
+        this.pageVO.totalResult = response.data.originalList.total;
+        this.loading = false;
+      })
 
     },
-    seeTbale (row) {
+    see (row) {
         console.log('预览清单')
     },
     searchEvent () {
@@ -163,6 +168,14 @@ import XEUtils from 'xe-utils'
         totalpay: '累计支付清单'
       }
       return cellValue ? obj[cellValue] : '未知'
+    },
+    enterIcon (row, column, cellValue, index) {
+      let obj = new Object();
+      obj = {
+        "0" :'',
+        "1" :''
+      }
+      return cellValue ? obj[cellValue] : cellValue
     },
     formatterDate (row, column, cellValue, index) {
       return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
@@ -192,7 +205,7 @@ import XEUtils from 'xe-utils'
             this.$refs.elxEditable.remove(row)
           }
         }).then(() => {
-          this.isClearActiveFlag = true
+          this.isClearActiveFlag = true;
         })
       } else if (this.$refs.elxEditable.hasRowChange(row)) {
         this.isClearActiveFlag = false

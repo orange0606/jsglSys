@@ -15,12 +15,13 @@
         ref="elxEditable"
         class="manual-table2"
         border
+        size="mini"
         max-height="600"
         :data.sync="list"
         :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
         v-loading="loading" 
-        element-loading-text="拼命加载中"
+        element-loading-text="飞速加载中"
         style="width: 100%">
         <elx-editable-column type="selection" align="center" width="50"></elx-editable-column>
         <elx-editable-column type="index" align="center" width="50"> </elx-editable-column>
@@ -45,7 +46,7 @@
         </elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" align="center" width="185">
+        <elx-editable-column label="操作" align="center" fixed="right" width="185">
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <!-- <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>

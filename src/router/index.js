@@ -16,29 +16,49 @@ export default new Router({
     //   component: ()=>import('@/components/System/NewHeader.vue')
     // },
     {
+      path: '/login',
+      name: 'login',
+      component: ()=>import('@/components/Login.vue'),
+    },
+    {
       path: '/newheader',
       name: 'newheader',
-      component: ()=>import('@/components/System/NewHeader.vue')
+      component: ()=>import('@/components/System/NewHeader.vue'),
+      meta:{
+        "requireAuth": true
+      }
     },
     {
       path: '/headers',
       name: 'headers',
-      component: ()=>import('@/components/System/Allheader.vue')
+      component: ()=>import('@/components/System/Allheader.vue'),
+      meta:{
+        "requireAuth": true
+      }
     },
     {
       path: '/marks',
       name: 'marks',
-      component: ()=>import('@/components/System/Mark.vue')
+      component: ()=>import('@/components/System/Mark.vue'),
+      meta:{
+        "requireAuth": true
+      }
     },
     {
       path: '/newInventory',
       name: 'newInventory',
-      component: ()=>import('@/components/InventorySys/NewInventory.vue')
+      component: ()=>import('@/components/InventorySys/NewInventory.vue'),
+      meta:{
+        "requireAuth": true
+      }
     },
     {
       path: '/Originals',
       name: 'Originals',
-      component: ()=>import('@/components/InventorySys/Originals.vue')
+      component: ()=>import('@/components/InventorySys/Originals.vue'),
+      meta:{
+        "requireAuth": true
+      }
     }
   ]
 })

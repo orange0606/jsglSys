@@ -13,15 +13,20 @@
                 <div class="top-main">建设管理系统</div>
             </el-col>
             <el-col :span="3" :xs="6" :sm="6" :md="6" :lg="3">
-                <div class="top-right">
+                <div v-if="this.$store.state.token" class="top-right">
                     <i class="el-icon-chat-line-round"></i>
-                    <span>张三</span>
+                    <span>{{this.$store.state.username}}</span>
+                    <i class="el-icon-user"></i>
+                    <span @click="outlogin">注销</span>
+                </div>
+                <div v-else class="top-right">
+                    <i class="el-icon-chat-line-round"></i>
+                    <span>未登录</span>
                     <i class="el-icon-user"></i>
                 </div>
             </el-col>
         </el-row>
     </header>
-
     <section class="main">
           <div class="nav">
                 <!-- 引入侧边栏组件 -->
@@ -44,6 +49,14 @@ import sidebar from '@/components/sidebar'
 export default {
   name: 'App',
   components: { sidebar },
+  methods:{
+    outlogin(){
+      sessionStorage.clear();
+      this.$store.commit("clearToken",{"username": this.$store.state.username,"token":this.$store.state.username});
+
+      this.$router.push({path:"/login"})
+    }
+  }
 }
 </script>
 
