@@ -52,8 +52,7 @@ export default {
   methods:{
     outlogin(){
       sessionStorage.clear();
-      this.$store.commit("clearToken",{"username": this.$store.state.username,"token":this.$store.state.username});
-
+      this.$store.commit("clearToken",{"username": this.$store.state.username,"token":this.$store.state.token});
       this.$router.push({path:"/login"})
     }
   }

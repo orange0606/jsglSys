@@ -540,8 +540,8 @@ export default {
               processId:6,
               sysOrder:'',
               sysNum:'',
-              name:'原清单名1',
-              num:'yq-01',
+              name:'原清单名2',
+              num:'yq-02',
               tenderId:37,
               type:'original',
               originalRowList
