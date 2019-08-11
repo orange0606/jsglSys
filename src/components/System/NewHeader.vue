@@ -48,7 +48,7 @@
 <script>
 
   // 引入表头属性设置组件
-  import headeratt from '@/components/System/header-att'
+  import headeratt from './header-att';
 
   import inven from '../../modules/inventory';
   export default {

@@ -59,6 +59,14 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
+    },    
+    {
+      path: '/NewChange',
+      name: 'NewChange',
+      component: ()=>import('@/components/ChangeSys/NewChange.vue'),
+      meta:{
+        "requireAuth": true
+      }
     }
   ]
 })

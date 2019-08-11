@@ -47,7 +47,7 @@
 </template>
 
 <script>
-    import XEUtils from 'xe-utils'
+  import XEUtils from 'xe-utils'
   export default {
   name: 'marks',
   data () {

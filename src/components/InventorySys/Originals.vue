@@ -157,7 +157,6 @@
 
 <script>
 import XEUtils from 'xe-utils'
-
   export default {
   name: 'Originals',
   components: {},
@@ -495,7 +494,7 @@ import XEUtils from 'xe-utils'
                 data.originalIdList.push({id:removeRecords[index].id})
             };
             console.log(data)
-            this.loading = true
+            this.loading = true;
             // 进行发起请求删除
             this.$post('/original/delarray',data)
               .then((response) => {
@@ -528,13 +527,13 @@ import XEUtils from 'xe-utils'
       delete row.tender.select
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-          console.log('row')
-          console.log(row)
+          // console.log('row')
+          // console.log(row)
           let data = new Object();
           data = {
               id: row.id,                                    //原清单id
-              originalHeadId: originalHead.id,               //原清单表头id
-              processId:  process.id,                         //审批单流程id
+              originalHeadId: row.originalHead.id,               //原清单表头id
+              processId:  row.process.id,                         //审批单流程id
               sysOrder: null,                    //系统序号  预留，暂不使用
               sysNum: null,                     //系统编号  预留，暂不使用
               name: row.name,                       //原清单名称
@@ -558,19 +557,15 @@ import XEUtils from 'xe-utils'
                 this.loading = false;
                 this.$message({
                 type: 'info',
-                message: '删除失败，请重试！'
+                message: '保存失败，请重试！'
                 })
           })
-            
-            //保存不成功
-        
-           // this.loading = false
-          
+      
         }
       })
     },
     exportCsvEvent () {
-      this.$refs.elxEditable.exportCsv()
+      this.$refs.elxEditable.exportCsv();
     },
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
         if (columnIndex >0) { //带选择框的情况

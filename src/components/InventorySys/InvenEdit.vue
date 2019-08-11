@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import MyColumn from '@/components/InventorySys/MyColumn';
+import MyColumn from './MyColumn';
 import XEUtils from 'xe-utils';
 import Sortable from 'sortablejs';
 
@@ -517,6 +517,7 @@ export default {
               return false;
           }
           //解构数据进行提交
+          this.loading = true;
           const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
           const refCol = header.length;
           const refRow = list.length;
@@ -547,17 +548,22 @@ export default {
               originalRowList
           }
           originalList.push(obj)
-          console.log(originalList);
-          // this.loading = true;
+          // console.log(originalList);
           this.$post('/original/save',{ originalList })
               .then((response) => {
               console.log(response)
-              // this.loading = false
+              this.loading = false;
               this.$message({
                 type: 'success',
                 message: `保存原清单成功，共保存 ${refRow} 条数据!`
               })
-            })
+            }).catch(e => {
+                this.loading = false;
+                this.$message({
+                type: 'info',
+                message: '保存失败，请重试！'
+                })
+          })
           //保存原清单
           
 

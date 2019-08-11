@@ -89,18 +89,18 @@ Vue.prototype.$put=put;
 
 
 //路由拦截器
-router.beforeEach(function (to, from, next) {
-  if (to.meta.requireAuth){
-    if (store.state.token){
-      next()
-    }else {
-      next({name: "login",query:{backUrl:to.fullPath}})
-    }
-  } else {
-    next()
-  }
+// router.beforeEach(function (to, from, next) {
+//   if (to.meta.requireAuth){
+//     if (store.state.token){
+//       next()
+//     }else {
+//       next({name: "login",query:{backUrl:to.fullPath}})
+//     }
+//   } else {
+//     next()
+//   }
 
-});
+// });
 new Vue({
   el: '#app',
   router,

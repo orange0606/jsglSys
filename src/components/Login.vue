@@ -32,8 +32,8 @@ export default {
         this.loading = true;
         
         // this.$refs.form.resetFields();
-        console.log('submit!');
-        console.log(this.form)
+        // console.log('submit!');
+        // console.log(this.form)
         let username = this.form.username;
         let password = this.form.password;
         this.$post('/login',{ username,password})
