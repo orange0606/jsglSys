@@ -31,11 +31,11 @@
             <template slot="title">
             <span>变更管理</span>
             </template>
-            <el-menu-item index="3-1"><router-link to="/NewChange" >新建变更</router-link></el-menu-item>
-            <el-menu-item index="3-2"><router-link to="/NewChange" >待审变更</router-link></el-menu-item>
-            <el-menu-item index="3-3"><router-link to="/NewChange" >正审变更</router-link></el-menu-item>
-            <el-menu-item index="3-4"><router-link to="/NewChange" >已审变更</router-link></el-menu-item>
-            <el-menu-item index="3-3"><router-link to="/NewChange" >全部变更</router-link></el-menu-item>
+            <el-menu-item index="3-1"><router-link to="/ChangeList" >新建变更</router-link></el-menu-item>
+            <el-menu-item index="3-2"><router-link to="/ChangeList" >待审变更</router-link></el-menu-item>
+            <el-menu-item index="3-3"><router-link to="/ChangeList" >正审变更</router-link></el-menu-item>
+            <el-menu-item index="3-4"><router-link to="/ChangeList" >已审变更</router-link></el-menu-item>
+            <el-menu-item index="3-3"><router-link to="/ChangeList" >全部变更</router-link></el-menu-item>
         </el-submenu>
         <el-submenu index="4">
             <template slot="title">

@@ -4,7 +4,7 @@
   <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
-        <h3>全部原清单</h3>
+        <h3>原清单列表</h3>
         <div class="manual-table2-oper">
             <p style="color: red;font-size: 12px;">按条件进行筛选</p>
             <!-- 清单搜索 -->
@@ -59,7 +59,6 @@
             </el-form>
         </div>
         
-
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
             <el-button type="success" size="mini" ><router-link to="/newInventory">新增</router-link></el-button>
@@ -82,7 +81,7 @@
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
         <!-- <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <!-- <elx-editable-column prop="originalHead.name" label="原清单表头名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
+        <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
@@ -98,11 +97,11 @@
                 <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
             </template>
         </elx-editable-column>
-        <elx-editable-column prop="startTime" label="发起时间" min-width="120" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
+        <elx-editable-column prop="startTime" label="发起时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
         <elx-editable-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
-        <elx-editable-column prop="saveTime" label="创建时间" min-width="120" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
+        <elx-editable-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
-        <elx-editable-column prop="updateTime" label="更新时间" min-width="120" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
+        <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
         <elx-editable-column label="操作" fixed="right" width="185" align="center" >
             <template v-slot="scope">
@@ -158,7 +157,7 @@
 <script>
 import XEUtils from 'xe-utils'
   export default {
-  name: 'Originals',
+  name: 'OriginalList',
   components: {},
   data () {
     return {
@@ -188,27 +187,29 @@ import XEUtils from 'xe-utils'
           ]
         },
       pickerOptions: {
-          disabledDate(time) {
-            return time.getTime() > Date.now();
-          },
           shortcuts: [{
-            text: '今天',
+            text: '最近一周',
             onClick(picker) {
-              picker.$emit('pick', new Date());
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
             }
           }, {
-            text: '昨天',
+            text: '最近一个月',
             onClick(picker) {
-              const date = new Date();
-              date.setTime(date.getTime() - 3600 * 1000 * 24);
-              picker.$emit('pick', date);
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
             }
           }, {
-            text: '一周前',
+            text: '最近三个月',
             onClick(picker) {
-              const date = new Date();
-              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', date);
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
             }
           }]
         },
@@ -242,16 +243,16 @@ import XEUtils from 'xe-utils'
             type: 'info',
             message: '发生错误！'
           });
-          this.findList();
+          // this.findList();
       })
 
     },
-    tenList (){   //请求所有标段
+    tenList (){   //请求所有原清单标段列表
         this.$post('/tender/getall',{})
           .then((response) => {
           this.tenderList = response.data.tenderList;
         }).catch(e => {
-          this.tenList();
+          // this.tenList();
       })
     },
     see (row) {
@@ -491,16 +492,16 @@ import XEUtils from 'xe-utils'
             let data= new Object();
             data.originalIdList=[];
             for (let index = 0; index < removeRecords.length; index++) {
-                data.originalIdList.push({id:removeRecords[index].id})
+                data.originalIdList.push(removeRecords[index].id);
             };
-            console.log(data)
+            // console.log(data)
             this.loading = true;
             // 进行发起请求删除
             this.$post('/original/delarray',data)
               .then((response) => {
               //删除成功
               this.loading = false
-              this.findList()
+              this.findList();
               this.$message({
                 type: 'success',
                 message: '删除所选选项成功!'
@@ -527,8 +528,7 @@ import XEUtils from 'xe-utils'
       delete row.tender.select
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-          // console.log('row')
-          // console.log(row)
+          console.log(row)
           let data = new Object();
           data = {
               id: row.id,                                    //原清单id
@@ -542,16 +542,19 @@ import XEUtils from 'xe-utils'
               type: row.type,                 //原清单类别为”original”
               originalRowList:null,          
           };
+
+          let originalList = new Array();
+          originalList.push(data);
           this.loading = true;
           this.$refs.elxEditable.clearActive();
           // console.log('正在保存当前行数据')
           // console.log(row)
           //进行网路请求保存
-          this.$post('/original/update',row)
+          this.$post('/original/update',{ originalList })
             .then((response) => {
             // console.log(response)
-            this.loading = false
-            this.findList()
+            this.loading = false;
+            this.findList();
             this.$message({ message: '保存成功', type: 'success' })
           }).catch(e => {
                 this.loading = false;

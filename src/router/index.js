@@ -55,15 +55,15 @@ export default new Router({
     {
       path: '/Originals',
       name: 'Originals',
-      component: ()=>import('@/components/InventorySys/Originals.vue'),
+      component: ()=>import('@/components/InventorySys/OriginalList.vue'),
       meta:{
         "requireAuth": true
       }
     },    
     {
-      path: '/NewChange',
-      name: 'NewChange',
-      component: ()=>import('@/components/ChangeSys/NewChange.vue'),
+      path: '/ChangeList',
+      name: 'ChangeList',
+      component: ()=>import('@/components/ChangeSys/ChangeList.vue'),
       meta:{
         "requireAuth": true
       }

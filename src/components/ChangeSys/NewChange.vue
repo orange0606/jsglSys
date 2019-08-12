@@ -9,8 +9,7 @@
 
       <el-tabs :tab-position="tabPosition" style="height: 100%;">
         <el-tab-pane label="变更审批单">
-              <h3>变更审批单</h3>
-
+            <h3>变更审批单</h3> 
 
         </el-tab-pane>
         <el-tab-pane label="清单列表">
