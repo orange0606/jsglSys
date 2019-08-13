@@ -78,7 +78,7 @@
 
         <!-- 引入表格编辑组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :visible.sync="editShow">
+          <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
               <edit :tableList.sync="update" :heads="head" ></edit>
           </el-dialog>
         </transition>

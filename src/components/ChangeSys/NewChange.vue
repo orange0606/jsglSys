@@ -1,49 +1,650 @@
 <template>
-  <!-- <div>
-      <el-radio-group v-model="tabPosition" style="margin-bottom: 30px;">
-        <el-radio-button label="top">top</el-radio-button>
-        <el-radio-button label="right">right</el-radio-button>
-        <el-radio-button label="bottom">bottom</el-radio-button>
-        <el-radio-button label="left">left</el-radio-button>
-      </el-radio-group> -->
+  <div
+    v-loading="loading"
+    element-loading-text="正在加速处理数据"
+    element-loading-spinner="el-icon-loading"
+  >
+    <div class="click-table11-oper">
+      <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
+        <el-form-item label="清单名称">
+          <el-input v-model="form.name" placeholder="请输入清单名称"></el-input>
+        </el-form-item>
+        <el-form-item label="表头">
+          <el-select v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+                  <el-option
+                    v-for="item in form.headerList"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </div>
 
-      <el-tabs :tab-position="tabPosition" style="height: 100%;">
-        <el-tab-pane label="变更审批单">
-            <h3>变更审批单</h3> 
-
-        </el-tab-pane>
-        <el-tab-pane label="清单列表">
-          <!-- 清单模块开始编写 -->
-              <h3>清单列表</h3>
-              <!-- <InvenEdit></InvenEdit> -->
-
-
-
-        </el-tab-pane>
-        <el-tab-pane label="附件">
-          <!-- 清单模块开始编写 -->
-              <h3>附件模块</h3>
-
-
-
-
-        </el-tab-pane>
-        <el-tab-pane label="审批节点">审批节点</el-tab-pane>
-        <el-tab-pane label="全览">全览</el-tab-pane>
-      </el-tabs>
-  <!-- </div> -->
+    <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序/、右键菜单</p>
+    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+    <div class="click-table11-oper">
+      <el-button type="primary" size="mini" @click="impt">导入清单</el-button>
+      <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
+      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+      <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+      <el-button type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+      <el-button type="success" size="mini" @click="consoles">控制台打印所有数据</el-button>
+    </div>
+          <!-- show-summary
+      :summary-method="getSummaries" -->
+         <!-- :data.sync="list" -->
+    <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
+    <elx-editable
+      ref="elxEditable1"
+      class="scroll-table4 click-table11"
+      border
+      height="550"
+      size="mini"
+      :show-header="showHeader"
+      v-if="showHeader"
+      :span-method="arraySpanMethod"
+      @cell-click ="cell_click"
+      show-summary
+      :summary-method="getSummaries"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
+      :context-menu-config="{headerMenus, bodyMenus}"
+      style="width: 100%">
+      <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+      <elx-editable-column width="40" align="center" >
+        <template v-slot:header="scope">
+          <el-tooltip class="item" placement="top">
+            <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+        </template>
+        <template>
+          <i class="el-icon-rank drag-btn"></i>
+        </template>
+      </elx-editable-column>
+      <elx-editable-column type="index" width="60" align="center" >
+        <template v-slot:header>
+          <i class="el-icon-setting" @click="dialogVisible = true"></i>
+        </template>
+      </elx-editable-column>
+      <!-- 此处使用多级表头嵌套组件 -->
+      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" ></my-column>
+    </elx-editable>
+  </div>
 </template>
-<script>
-  export default {
-    name: 'NewChange',
-    data() {
-      return {
-        tabPosition: 'right',
-    
-      };
-    }
-  };
-</script>
-<style scope>
 
+<script>
+import MyColumn from './MyColumn';
+import XEUtils from 'xe-utils';
+import Sortable from 'sortablejs';
+
+export default {
+  name: 'NewChange',
+  components: {
+    MyColumn
+  },
+  props: {
+    tender:{
+      type: Object,
+    }
+  },
+  data () {
+    return {
+      form:{
+        name:'',
+        headerId:'',
+        headerList:[],//表头列表
+      },
+      showHeader:true,
+      hd:[],
+      startTime:null,
+      loading: false,
+      dialogVisible: true,
+      editRow:null, //单元格编辑的存储上一个已点击单元格数据
+      formula:{}, //存储表头的公式数据
+      row:null,//公式字符串转代码的全局变量
+      // col:[],//表头数据.
+      col: [
+        // {colNum:'A',td:'A1',textAlign:'center',edit:'N'},
+        // {colNum:'B',td:'B1',textAlign:'center',edit:'N'},
+        // {colNum:'C',td:'C1',textAlign:'center',edit:'N'},
+        // {colNum:'D',td:'D1',textAlign:'center',edit:'N'},
+        // {colNum:'E',td:'E1',textAlign:'center',edit:'N'},
+        // {colNum:'F',td:'F1',textAlign:'center',edit:'N'},
+      ],//已对PackHeader再次组装的多级表头数据.
+      PackHeader:[],//已组装的表头数据
+      list: [
+      ], //表格数据
+       headerMenus: [
+        [
+          {
+            code: 'ALL_EXPORT',
+            name: '导出全部.csv',
+            prefixIcon: 'el-icon-download'
+          }
+        ]
+      ],
+      bodyMenus: [
+        [
+          {
+            code: 'ROW_INSERT_ACTIVE',
+            name: '插入新行',
+            prefixIcon: 'el-icon-plus'
+          },
+          {
+            code: 'ROW_REMOVE',
+            name: '删除行',
+            prefixIcon: 'el-icon-minus'
+          }
+        ],
+        [
+          {
+            code: 'SELECT_REMOVE',
+            name: '删除选中的行',
+            prefixIcon: 'el-icon-close'
+          },
+          {
+            code: 'CELL_RESET',
+            name: '清除内容',
+            prefixIcon: 'el-icon-close'
+          },
+          {
+            code: 'CELL_REVERT',
+            name: '还原数据'
+          }
+        ],
+        [
+          {
+            code: 'ROW_EXPORT',
+            name: '导出行.csv',
+            prefixIcon: 'el-icon-download'
+          },
+          {
+            code: 'ALL_EXPORT',
+            name: '导出全部.csv'
+          }
+        ]
+      ]
+    }
+  },
+
+ watch: {
+      // list: function(newVal,oldVal){
+      //     // console.log('数据有发生改变吗')
+      //     // console.log(newVal)
+      // }
+  },
+  computed: {
+      
+  },
+  created () {
+      let tenderId = this.tender.id; 
+      this.allHeader( tenderId);//调用请求一个标段的所有变更表头
+      console.log('this.tender')
+      console.log(this.tender)
+      let id = 149;
+      let type = "original";
+
+    this.rowDrop();//调用表格行拖拽函数
+    // this.findList()
+  },
+  mounted () {
+
+  },
+  beforeDestroy () {
+    this.hd = null;
+    this.col = null;
+    this.PackHeader = null;
+    this.list = null;
+    this.$refs.input = null;
+  },
+  methods: {
+    allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
+        this.$post('/head/allchange',{tenderId})
+        .then((response) => {
+          this.form.headerList = response.data.changeHeadList;
+        }).catch(e => {
+            this.$message({
+              type: 'info',
+              message: '发生错误！'
+            });
+        });
+    },
+    oneHeader (id) {  //请求单个表头 表头id  表头类型
+       this.$post('/head/getone',{id,type:'change'})
+        .then((response) => {
+        let data = response.data.onehead;
+        let headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
+        this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+        this.col = new Array();  //新建一个数组存储多级表头嵌套
+        this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+        // headsArr = data = null; //释放内存
+        this.showHeader = false;
+        this.$nextTick(() => {  //强制重新渲染
+	          this.showHeader = true;
+          })
+        this.Analysis();//调用表格公式解析
+        
+      })
+    },
+    consoles () {
+        let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
+        // console.log('检验一下数据对不对 rest list')
+        // console.log(rest);
+        // console.log(this.list);
+    },
+    
+    impt(){ //button 按钮调用input文件选择事件
+        this.$refs.input.click();
+    },
+    importfxx() { //表头导入函数
+        this.loading = true;
+        this.hd.length = this.list.length = 0; //归为初始化状态
+        this.startTime = Date.now();
+        this.$excel.Imports(data=>{ //数据导入组装函数
+            try { //先判断表头是否一致
+                let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+                let datahd = Object.keys(data[0]);
+                if ( datahd.length < hd.length ) {
+                    hd.length = datahd.length = 0;
+                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+                }else{
+                    hd.length = datahd.length = 0;
+                }
+                let arr = [...this.PackHeader];
+                arr.length = arr.length-1;
+                let dataSplice = data.splice(0,arr.length); //去掉表头并且用来作判断是否一致
+                let ff = arr.some( function( item, index, array ){ //判断导入的清单表头与网络清单表头如果是否相等
+                      let hdsome = hd.some( function( val, i){ 
+                          let headrs = array[index][val];
+                          let Rows = dataSplice[index][val];
+                          return headrs.colNum != Rows.colNum || headrs.td != Rows.td || headrs.tdRowspan != Rows.tdRowspan || headrs.tdColspan != Rows.tdColspan || headrs.trNum != Rows.trNum;
+                      }); 
+                      return hdsome;
+                }); 
+                if (ff) {
+                    arr.length = hd.length = dataSplice.length = 0; //释放内存
+                    this.loading = false;
+                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+                }
+            } catch (error) {
+               this.loading = false;
+               return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+            }
+
+            try {  //把数据载入表格
+                this.list = [...data];
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                this.findList(); //调用滚动渲染数据
+                this.Formula();  //调用公式计算
+                data.length = 0; //内存释放
+            } catch (e) {
+                data.length = this.list.length = 0;
+                this.loading =false;
+                // console.log(e);
+                this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
+            }
+        })
+    },
+    cell_click(row, column, cell, event){ //单元格点击编辑事件
+        this.editRow != null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
+        if (column.property) {
+            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            let str = column.property;
+            let colName = str.substr(0,str.indexOf(".td"))
+            // console.log(colName)
+            this.editRow = row[colName];
+            row[colName].edit = "Y";  //Y为编辑模式N为只读状态
+        }  
+    },
+    deleteSelectedEvent () {
+      let removeRecords = this.$refs.elxEditable1.getSelecteds() //获取被选中的数据
+      if (removeRecords.length) {
+          this.$msgbox.confirm('确定删除所选数据?', '温馨提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+            // console.log('打印选中的数据')
+            // console.log(removeRecords)
+          // this.loading = true
+          //   this.$message({
+          //     type: 'success',
+          //     message: '删除成功!'
+          //   })
+
+        }).catch(e => e)
+      } else {
+        this.$message({
+          type: 'info',
+          message: '请至少选择一条数据！'
+        })
+      }
+    },
+    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+        if (columnIndex >2) {  //带选择框的情况
+            if (row[this.hd[columnIndex-3]]) {
+                return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
+            }
+        }
+        return [1, 1]
+    }, 
+    findList () { //表格滚动渲染函数
+      // this.loading = true
+      this.$nextTick(() => {
+        this.$refs.elxEditable1.reload([])
+        setTimeout(() => {
+          // let startTime = Date.now()
+          this.$refs.elxEditable1.reload(this.list);
+          this.loading = false;
+         this.$nextTick(() => {
+              this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms  系统已为你自动去除表头`, type: 'success', duration: 6000, showClose: true })
+            })
+        }, 300)
+      })
+    },
+    getSummaries (param) {  //合计
+          const { columns, data } = param
+          const sums = []
+          // console.log(param)
+          let list = [...this.list];
+          // console.log('data[0]')
+          if (this.PackHeader.length >0 && this.list) {
+              let sumArr = this.PackHeader.slice(-1); //截取合计尾行
+              const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+              const listlen = this.list.length;
+              let Total = new Array();
+              for (let i = 0; i < header.length; i++) {
+                  let sum = sumArr[0][header[i]];
+                  if (sum.attribute && sum.attribute == 'sumFormula') {
+                      Total.push(sum.colNum);
+                  }
+              }
+              let TotalObj = new Object();
+              for (let a = 0; a < Total.length; a++) {
+                  let num = 0;
+                  for (let index = 0; index < listlen; index++) {
+                      num += parseInt(this.list[index][Total[a]].td);
+                  }
+                  TotalObj[Total[a]+'.td'] = num;
+              }
+          columns.forEach((column, index) => {
+          // console.log(column.property);
+
+            if (index === 0) {
+              sums[index] = '汇总';
+              return;
+            }else if(index >2){
+              sums[index] = TotalObj[column.property];
+            }
+          })
+          return sums;
+          }
+          return sums;
+    },
+    Analysis () {  //公式解析化为可运算的字符串
+        console.log('有无进来公式解析')
+        let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
+        let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
+        let patt3 = /[0-9]/;  //判断是否有数字
+        let patt4 = /[A-Z]/;
+          // console.log('this.col')
+        //  console.log(this.col )
+        let cols = [...this.col]
+        function BikoFoArr (col) {
+            let obj = new Object();
+            Biko(col);
+            function Biko (colArr) { //表头尾行 真正显示对应列的数据
+                for (let c = 0; c < colArr.length; c++) {
+                  if (colArr[c].children && colArr[c].children.length >0) {
+                      Biko(colArr[c].children);
+                  }else{
+                      obj[colArr[c].colNum] = colArr[c];
+                  }
+                }
+            }
+            return obj;
+        }
+        if (this.PackHeader.length <2) return false; 
+        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
+
+        let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
+        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        for (let index = 0; index < header.length; index++) {
+            // console.log('进来了几次了呀 ',index)
+            let sumRow = sumArr[header[index]];
+            // console.log('sumRow')
+            // console.log(sumRow.attribute,sumRow.attributeValue,sumRow.td)
+            if (sumRow.attribute && sumRow.attribute == "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
+                let str = sumRow.attributeValue;
+                // console.log('str1');
+                // console.log(str);
+                str = this.filterStr(str);  //去除空格与特殊符号
+                let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+                for (let i = 0; i < arr.length; i++) {
+                    let key = arr[i].match(patt2);
+                    let arrlen = arr[i].length;
+                    for (let a = 0; a < str.length; a++) {
+                        let index = str.indexOf(arr[i],a);
+                        if ((str.length - index) < arrlen) break;
+                        if (index != -1) {
+                            if (index == 0 && !patt3.test(str[index+arrlen])) {
+                                str = str.slice(0, index)+`row["${key[0]}"].td`+str.slice(index+arrlen);
+                            }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                                str = str.slice(0, index)+`row["${key[0]}"].td`+str.slice(index+arrlen);
+                            }
+                        }
+                    }
+                }
+                // console.log(str)
+                this.formula[sumRow.colNum] = str;
+                // console.log(this.formula)
+            }      
+        }
+    },
+    filterStr (str) {  //去除空白以及特殊字符串
+        str = str.replace(/\s*/g,"");
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]");  
+        var specialStr = "";  
+        for(var i=0;i<str.length;i++){  
+            specialStr += str.substr(i, 1).replace(pattern, '');   
+        }  
+        return specialStr;  
+    },
+    Formula () { //表格载入时进行处理公式计算
+        let formuHd = Object.keys(this.formula); //用来所需要的所有有公式的列(obj)（属性）名
+        let listlen = this.list.length;
+        let formuHdlen = formuHd.length;
+        for (let index = 0; index < listlen; index++) {  
+            let row = this.list[index];
+            try {
+                for (let a = 0; a < formuHdlen; a++) {
+                  let sum = this.formula[formuHd[a]];
+                  if (row[formuHd[a]].td == "" || row[formuHd[a]].td == " " || row[formuHd[a]].td == null) {
+                      // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
+                      index == 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
+                      eval(sum) || eval(sum)==0 ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td;  //字符串转代码计算
+
+                      // sum = 'parseInt(row["D"].td)*parseInt(row["E"].td)'
+                      // this.list[index][formuHd[a]].td = new Function(sum)(); 
+                  }
+                }
+            } catch (error) {
+                console.log(error)
+                return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
+            }
+        }
+    },
+    insertEvent () {
+      // console.log('进来了吗')
+      this.$refs.elxEditable1.insert({
+        '0': `New ${Date.now()}`,
+      }).then(({ row }) => {
+        this.$refs.elxEditable1.setActiveCell(row);
+      })
+      this.$refs.elxEditable1.clearActive();
+    },
+    getSelectLabel (value, valueProp, labelProp, list) {
+      let item = XEUtils.find(list, item => item[valueProp] === value)
+      return item ? item[labelProp] : null
+    },
+    getCascaderLabel (value, list) {
+      let values = value || [];
+      let labels = [];
+      let matchCascaderData = function (index, list) {
+        let val = values[index];
+        if (list && values.length > index) {
+          list.forEach(item => {
+            if (item.value === val) {
+              labels.push(item.td);
+              matchCascaderData(++index, item.children);
+            }
+          })
+        }
+      }
+      matchCascaderData(0, list)
+      return labels.join(' / ');
+    },
+    getDatePicker (value) {
+      return XEUtils.toDateString(value, 'yyyy/MM/dd');
+    },
+    formatterDate (row, column, cellValue, index) {
+      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
+    },
+    rowDrop () {
+      this.$nextTick(() => {
+        Sortable.create(this.$el.querySelector('.el-table__body-wrapper tbody'), {
+          handle: '.drag-btn',
+          onEnd: ({ newIndex, oldIndex }) => {
+            let currRow = this.list.splice(oldIndex, 1)[0];
+            this.list.splice(newIndex, 0, currRow);
+          }
+        })
+      })
+
+    },
+    submitEvent () {
+      this.$refs.elxEditable1.validate(valid => {
+        if (valid) {
+          let list = this.list;
+          list.forEach((item, index) => {
+            if (XEUtils.isDate(item.date)) {
+              item.date = item.date.getTime();
+            }
+            // 重新生成排序后的序号
+            item.seq = index;
+          })
+          // this.loading = true;
+          console.log('list')
+          // console.log(list)
+          if (list.length == 0) {
+              this.$message({
+                type: 'success',
+                message: '请先导入数据!'
+              })
+              return false;
+          }
+          //解构数据进行提交
+          this.loading = true;
+          const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+          const refCol = header.length;
+          const refRow = list.length;
+          let originalRowList = new Array();
+          for (let index = 0; index < refRow; index++) {
+              for (let i = 0; i < refCol; i++) {
+                  if (list[index][header[i]] && list[index][header[i]].colNum == header[i] ) {
+                      delete list[index][header[i]].edit;
+                      list[index][header[i]].formula = '';                     
+                      list[index][header[i]].attribute = '';                  
+                      list[index][header[i]].upload = 1;    
+
+                      originalRowList.push(list[index][header[i]]);
+                  }
+              }
+          }
+          let originalList = new Array();
+          let obj = new Object();
+          obj = {
+              originalHeadId:149,
+              processId:6,
+              sysOrder:'',
+              sysNum:'',
+              name:'原清单名2',
+              num:'yq-02',
+              tenderId:37,
+              type:'original',
+              originalRowList
+          }
+          originalList.push(obj)
+          // console.log(originalList);
+          this.$post('/original/save',{ originalList })
+              .then((response) => {
+              console.log(response)
+              this.loading = false;
+              this.$message({
+                type: 'success',
+                message: `保存原清单成功，共保存 ${refRow} 条数据!`
+              })
+            }).catch(e => {
+                this.loading = false;
+                this.$message({
+                type: 'info',
+                message: '保存失败，请重试！'
+                })
+          })
+          //保存原清单
+          
+
+
+        }
+      })
+    },
+    exportCsvEvent () {
+      this.$refs.elxEditable1.exportCsv();
+    },
+
+
+  }
+}
+</script>
+
+<style scope>
+.click-table11-oper {
+  margin-bottom: 18px;
+  text-align: left;
+  position: relative;
+}
+.click-table11-oper .right {
+  position: absolute;
+}
+.click-table11-pagination {
+  margin-top: 18px;
+  text-align: right;
+}
+.click-table11 .drag-btn {
+  font-size: 16px;
+  cursor: move;
+}
+.click-table11.elx-editable .elx-editable-row.new-insert,
+.click-table11.elx-editable .elx-editable-row.new-insert:hover>td {
+  background-color: #f0f9eb;
+}
+.click-table11 .el-table__body tr.hover-row>td,
+.click-table11 .el-table__body .el-table__row:hover>td {
+  background-color: inherit;
+}
+.click-table11.elx-editable .elx-editable-row.sortable-ghost,
+.click-table11.elx-editable .elx-editable-row.sortable-chosen {
+  background-color: #fff6b2;
+}
+.scroll-table4-oper {
+  margin-bottom: 18px;
+}
+.scroll-table4.elx-editable .elx-editable-row.new-insert,
+.scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
+  background-color: #f0f9eb;
+}
 </style>

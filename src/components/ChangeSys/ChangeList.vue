@@ -61,7 +61,7 @@
         
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
-            <el-button type="success" size="mini" ><router-link to="/newInventory">新增</router-link></el-button>
+            <el-button type="success" size="mini" @click="visibleNew = true">新增</el-button>
             <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
             <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
         </div>
@@ -129,13 +129,7 @@
         </elx-editable-column>
         </elx-editable>
 
-        <!-- 引入表格预览组件 -->
-        <!-- <transition name="el-fade-in">
-          <el-dialog title="清单预览" width="85%" top="10vh" :center="false" :visible.sync="">
-              <edit :tableList.sync="update" :heads="head" ></edit>
-          </el-dialog>
-        </transition> -->
-
+        
         <el-pagination
           class="manual-table4-pagination"
           @size-change="handleSizeChange"
@@ -146,6 +140,13 @@
           layout="total, sizes, prev, pager, next, jumper"
           :total="pageVO.totalResult">
         </el-pagination>
+
+        <!-- 引入新建变更清单组件 -->
+        <transition name="el-fade-in">
+          <el-dialog title="新建变更" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
+              <new-change :tender="tender" ></new-change>
+          </el-dialog>
+        </transition>
     </div>
     </el-collapse-transition>
   </el-col>
@@ -155,10 +156,25 @@
 </template>
 
 <script>
+import NewChange from './NewChange';
 import XEUtils from 'xe-utils'
-  export default {
+export default {
   name: 'ChangeList',
-  components: {},
+  components: {
+    NewChange
+  },
+  props: {
+     changeList:{    //变更数据列表，这个数据用于返回给父组件
+      type: Array,
+      required: false,
+      default: () => []
+    },
+    tender:{
+      type: Object,
+      required: false,
+      default: () => ({id:37, name:"机电标段"})
+    }
+  },
   data () {
     return {
       loading: false,
@@ -178,7 +194,7 @@ import XEUtils from 'xe-utils'
         number: null,
         enter: null,
       },
-      allTender: [],
+      visibleNew: false,
       isClearActiveFlag: true,
       rules: {
           name: [
@@ -216,6 +232,8 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
+
+
     this.findList();  //发起请求所有已录入变更清单
     this.tenList();  //发起请求所有标段
 
