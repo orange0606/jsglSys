@@ -467,11 +467,13 @@ import inven from '../../modules/inventory';
                       let hd = Object.keys(rest[0])
                       for (let i = 0; i < hd.length; i++) {
                         let tb = rest[rest.length-1][hd[i]];
+                        let tb2 = rest[rest.length-2][hd[i]];
                         tb.td = '合计'+i;
                         tb.trNum +=1;
-                        if (tb.tdRowspan >1 || tb.tdRowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
-                          tb.tdRowspan = 1;
+                        if (tb2.tdRowspan >1 || tb.tdRowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
+                          tb2.tdRowspan = 1;
                         }
+                        tb.tdRowspan >1?tb.tdColspan =1:tb.tdColspan=1;
                         tb.tdColspan ==0?tb.tdColspan =1:tb.tdColspan;
                       }
                       this.list = rest;           

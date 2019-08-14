@@ -5,59 +5,6 @@
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
         <h3>变更清单列表</h3>
-        <div class="manual-table2-oper">
-            <p style="color: red;font-size: 12px;">按条件进行筛选</p>
-            <!-- 清单搜索 -->
-            <el-form ref="tableform" class="click-table6-form" size="mini" :inline="true" :model="formData">
-              <el-form-item label="清单名称" prop="name1">
-                <el-input v-model="formData.name" placeholder="清单名称" clearable ></el-input>
-              </el-form-item>
-              <el-form-item label="标段" prop="tenderId">
-                <el-select clearable v-model="formData.tenderId" placeholder="请选择标段">
-                  <!-- <el-option v-for="(item, index) in sexList" :key="index" :label="item.label" :value="item.value"></el-option> -->
-                  <el-option
-                    v-for="item in tenderList"
-                    :key="item.id"
-                    :label="item.name"
-                    :value="item.id">
-                    <span style="float: left">{{ item.num }}</span>
-                    <span style="float: right; color: #8492a6; font-size: 13px">{{ item.name }}</span>
-                  </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="录入状态" prop="enter">
-                <el-select clearable v-model="formData.enter" placeholder="请选择录入状态">
-                  <el-option label="未录入" value="0"></el-option>
-                  <el-option label="已录入" value="1"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="流水号" prop="number">
-                  <el-input v-model="formData.number" placeholder="流水号" clearable ></el-input>
-              </el-form-item>
- 
-              <el-form-item label="选择发起时间" prop="rows">
-                <el-date-picker
-                  v-model="formData.data"
-                  type="datetimerange"
-                  align="right"
-                  size="mini"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期"
-                  :default-time="['00:00:00', '23:59:59']"
-                  :picker-options="pickerOptions">
-                </el-date-picker>
-              </el-form-item>
-              
-              <el-form-item label="表格内容" prop="rows">
-                <el-input v-model="formData.rows" placeholder="请输入内容" clearable ></el-input>
-              </el-form-item>
-              
-              <el-form-item>
-                <el-button type="primary" @click="searchEvent">查询</el-button>
-                <el-button @click="$refs.tableform.resetFields()">重置</el-button>
-              </el-form-item>
-            </el-form>
-        </div>
         
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
@@ -179,63 +126,19 @@ export default {
     return {
       loading: false,
       list: null,
-      tenderList:null,  //全部标段
+      // tenderList:null,  //全部标段
       dialogVisible:false,//显示隐藏
       pageVO: {
         currentPage: 1,
         pageSize: 10,
         totalResult: 0
       },
-      formData: {
-        name: null,
-        tenderId: null,
-        rows: null,
-        date: null,
-        number: null,
-        enter: null,
-      },
-      visibleNew: false,
-      isClearActiveFlag: true,
-      rules: {
-          name: [
-            { required: true, message: '请输入活动名称', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-          ]
-        },
-      pickerOptions: {
-          shortcuts: [{
-            text: '最近一周',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近一个月',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近三个月',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit('pick', [start, end]);
-            }
-          }]
-        },
+    
     }
   },
   created () {
-
-
     this.findList();  //发起请求所有已录入变更清单
-    this.tenList();  //发起请求所有标段
+    // this.tenList();  //发起请求所有标段
 
   },
   watch: {
@@ -265,54 +168,46 @@ export default {
       });
 
     },
-    tenList (){   //请求所有标段
-        this.$post('/tender/getall',{})
-          .then((response) => {
-          this.tenderList = response.data.tenderList;
-        }).catch(e => {
-          // this.tenList();
-      })
-    },
     see (row) {
         console.log('预览清单')
     },
-    searchEvent () {
-      //条件搜索
-      this.loading = true;
-      this.pageVO.currentPage = 1;
-      let data = new Object();
-      let startEmployeeId = this.$store.state.token;
-      let fromTimeStart = this.formData.date!=null && this.formData.date.length >2?this.formData.date[0]:'';
-      let toTimeStart = this.formData.date!=null && this.formData.date.length >2?this.formData.date[1]:'';
-      data = {
-        name: this.formData.name , //清单名称
-        tenderId: this.formData.tenderId, //标段id
-        startEmployeeId, //发起人ID
-        fromTimeStart, //时间段开始时间（发起时间）
-        toTimeStart, //时间段结束时间（发起时间）
-        number: this.formData.number, //流水号（年月+清单ID）      
-        enter: this.formData.enter,   // 录入状态
-        rows: [ this.formData.rows ], //表格内容搜索
-        current: this.pageVO.currentPage,  //当前页码
-        pageSize: this.pageVO.pageSize,   //每页数量
+    // searchEvent () {
+    //   //条件搜索
+    //   this.loading = true;
+    //   this.pageVO.currentPage = 1;
+    //   let data = new Object();
+    //   let startEmployeeId = this.$store.state.token;
+    //   let fromTimeStart = this.formData.date!=null && this.formData.date.length >2?this.formData.date[0]:'';
+    //   let toTimeStart = this.formData.date!=null && this.formData.date.length >2?this.formData.date[1]:'';
+    //   data = {
+    //     name: this.formData.name , //清单名称
+    //     tenderId: this.formData.tenderId, //标段id
+    //     startEmployeeId, //发起人ID
+    //     fromTimeStart, //时间段开始时间（发起时间）
+    //     toTimeStart, //时间段结束时间（发起时间）
+    //     number: this.formData.number, //流水号（年月+清单ID）      
+    //     enter: this.formData.enter,   // 录入状态
+    //     rows: [ this.formData.rows ], //表格内容搜索
+    //     current: this.pageVO.currentPage,  //当前页码
+    //     pageSize: this.pageVO.pageSize,   //每页数量
 
-      }
-      console.log(this.formData);
-      console.log(data);
-      this.$post('/change/all/not/start/search',data)
-        .then((response) => {
-          this.list = response.data.changeList.list;
-          this.pageVO.totalResult = response.data.changeList.total;
-          this.loading = false;
-      }).catch(e => {
-          this.loading = false;
-          this.$message({
-            type: 'info',
-            message: '发生错误！'
-          })
-      })
+    //   }
+    //   console.log(this.formData);
+    //   console.log(data);
+    //   this.$post('/change/all/not/start/search',data)
+    //     .then((response) => {
+    //       this.list = response.data.changeList.list;
+    //       this.pageVO.totalResult = response.data.changeList.total;
+    //       this.loading = false;
+    //   }).catch(e => {
+    //       this.loading = false;
+    //       this.$message({
+    //         type: 'info',
+    //         message: '发生错误！'
+    //       })
+    //   })
 
-    },
+    // },
     handleSizeChange (pageSize) {
       this.pageVO.pageSize = pageSize
       this.findList()

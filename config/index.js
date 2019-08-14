@@ -12,8 +12,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-          // target: 'http://192.168.0.226:8080',  //将target设置为我们需要访问的域名
-          target: 'http://192.168.0.196:8080',  //将target设置为我们需要访问的域名
+          target: 'http://192.168.0.226:8080',  //将target设置为我们需要访问的域名
+          // target: 'http://192.168.0.196:8080',  //将target设置为我们需要访问的域名
           changeOrigin: true,
           pathRewrite: {
               '^/api': ''

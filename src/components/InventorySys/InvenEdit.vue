@@ -4,6 +4,28 @@
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
+  <div class="click-table11-oper">
+      <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
+        <el-form-item label="清单编号">
+          <el-input v-model="form.num" placeholder="请输入清单编号"></el-input>
+        </el-form-item>
+        <el-form-item label="清单名称">
+          <el-input v-model="form.name" placeholder="请输入清单名称"></el-input>
+        </el-form-item>
+        <el-form-item label="表头">
+          <el-select v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+                  <el-option
+                    v-for="item in form.headerList"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </div>
+
+
     <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序/、右键菜单</p>
     <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
     <div class="click-table11-oper">
@@ -26,6 +48,8 @@
       border
       height="550"
       size="mini"
+      :show-header="showHeader"
+      v-if="showHeader"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       show-summary
@@ -67,8 +91,20 @@ export default {
   components: {
     MyColumn
   },
+  props: {
+    tender:{
+      type: Object,
+    }
+  },
   data () {
     return {
+      form:{
+        name:'',
+        num:'',
+        headerId:'',
+        headerList:[],//表头列表
+      },
+      showHeader:true,
       hd:[],
       startTime:null,
       loading: false,
@@ -79,15 +115,8 @@ export default {
       row:null,//公式字符串转代码的全局变量
       // col:[],//表头数据.
       col: [
-        {colNum:'A',td:'A1',textAlign:'center',edit:'N'},
-        {colNum:'B',td:'B1',textAlign:'center',edit:'N'},
-        {colNum:'C',td:'C1',textAlign:'center',edit:'N'},
-        {colNum:'D',td:'D1',textAlign:'center',edit:'N'},
-        {colNum:'E',td:'E1',textAlign:'center',edit:'N'},
-        {colNum:'F',td:'F1',textAlign:'center',edit:'N'},
       ],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
-      nn:[{"tOriginalHeadId":149,"trNum":1,"colNum":"A","td":"工 程 量 清 单","tdRowspan":1,"tdColspan":6,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":1,"colNum":"B","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"C","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"D","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"E","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":1,"colNum":"F","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"A","td":"第100章   总 则","tdRowspan":1,"tdColspan":6,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":2,"colNum":"B","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"C","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"D","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"E","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":2,"colNum":"F","tdRowspan":0,"tdColspan":0,"colWidth":80,"trHigh":35,"textAlign":"center"},{"tOriginalHeadId":149,"trNum":3,"colNum":"A","td":"子目号","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"B","td":"子目名称","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"C","td":"单位","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"D","td":"数量","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"E","td":"单价（元）","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"originalNull"},{"tOriginalHeadId":149,"trNum":3,"colNum":"F","td":"合价（元）","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"formula","attributeValue":"D3*E3"},{"tOriginalHeadId":149,"trNum":4,"colNum":"A","td":"合计0","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumNull"},{"tOriginalHeadId":149,"trNum":4,"colNum":"B","td":"合计1","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumNull"},{"tOriginalHeadId":149,"trNum":4,"colNum":"C","td":"合计2","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumNull"},{"tOriginalHeadId":149,"trNum":4,"colNum":"D","td":"合计3","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumFormula","attributeValue":"D4"},{"tOriginalHeadId":149,"trNum":4,"colNum":"E","td":"合计4","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumFormula","attributeValue":"E4"},{"tOriginalHeadId":149,"trNum":4,"colNum":"F","td":"合计5","tdRowspan":1,"tdColspan":1,"colWidth":80,"trHigh":35,"textAlign":"center","attribute":"sumFormula","attributeValue":"F4"}],
       list: [
       ], //表格数据
        headerMenus: [
@@ -152,40 +181,10 @@ export default {
       
   },
   created () {
-      let id = 149;
-      let type = "original";
-      this.$post('/head/getone',{id,type})
-        .then((response) => {
-        // console.log('请求成功')
-        // console.log(response)
-        this.key = '';
-        if (type == 'original') {
-          this.key = 'tOriginalHeadRows';
-        }else if (type == 'change'){
-          this.key = 'tChangeHeadRows';
-        }else if (type == 'update'){
-          this.key = 'tUpdateHeadRows';
-        }else if (type == 'totalmeterage'){
-          this.key = 'tTotalmeterageHeadRows';
-        }else if (type == 'meterage'){
-          this.key = 'tMeterageHeadRows';
-        }else if (type == 'totalpay'){
-          this.key = 'tTotalpayHeadRows';
-        }else if (type == 'pay'){
-          this.key = 'tPayHeadRows';
-        }
-        let data = response.data.onehead;
-        let headsArr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
-
-        // let headsArr = this.$excel.Package(this.nn,6,4);
-        this.PackHeader = XEUtils.clone(headsArr,true) //深拷贝
-        this.col = new Array();  //新建一个数组存储多级表头嵌套
-        this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        // console.log('this.PackHeader')
-        // console.log(this.PackHeader)
-        // headsArr = data = null; //释放内存
-        this.Analysis();//调用表格公式解析
-      })
+    console.log('this.tender.id')
+    console.log(this.tender.id)
+    let tenderId = this.tender.id; 
+    this.allHeader( tenderId);//调用请求一个标段的所有原清单表头 
     this.rowDrop();//调用表格行拖拽函数
     // this.findList()
   },
@@ -201,11 +200,43 @@ export default {
     this.$refs.input = null;
   },
   methods: {
+    allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
+        this.$post('/head/alloriginal',{tenderId})
+        .then((response) => {
+          console.log('请求37标段id成功')
+          this.form.headerList = response.data.originalHeadList;
+        }).catch(e => {
+            this.$message({
+              type: 'info',
+              message: 'id发生错误！'+e
+            });
+        });
+    },
+    oneHeader (id) {  //请求单个表头 表头id  表头类型
+       this.$post('/head/getone',{id,type:'original'})
+        .then((response) => {
+        let data = response.data.onehead;
+        let headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
+        this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+        this.col = new Array();  //新建一个数组存储多级表头嵌套
+        this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+        console.log('this.col')
+        // console.log(JSON.stringify(this.col))
+        
+        // headsArr = data = null; //释放内存
+        this.showHeader = false;
+        this.$nextTick(() => {  //强制重新渲染
+	          this.showHeader = true;
+          })
+        this.Analysis();//调用表格公式解析
+        
+      })
+    },
     consoles () {
         let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-        // console.log('检验一下数据对不对 rest list')
-        // console.log(rest);
-        // console.log(this.list);
+        console.log('检验一下数据对不对 rest list')
+        console.log(rest);
+        console.log(this.list);
     },
     impt(){ //button 按钮调用input文件选择事件
         this.$refs.input.click();
@@ -219,6 +250,7 @@ export default {
                 let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
                 let datahd = Object.keys(data[0]);
                 if ( datahd.length < hd.length ) {
+                    this.loading = false;
                     hd.length = datahd.length = 0;
                     return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
                 }else{
@@ -248,8 +280,13 @@ export default {
             try {  //把数据载入表格
                 this.list = [...data];
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-                this.Formula();  //调用公式计算
-                this.findList(); //调用滚动渲染数据
+                this.showHeader = false;
+                this.$nextTick(() => {  //强制重新渲染
+                    this.showHeader = true;
+                    this.findList(); //调用滚动渲染数据
+                  })
+                // this.Formula();  //调用公式计算
+                
                 data.length = 0; //内存释放
             } catch (e) {
                 data.length = this.list.length = 0;
@@ -337,7 +374,7 @@ export default {
               for (let a = 0; a < Total.length; a++) {
                   let num = 0;
                   for (let index = 0; index < listlen; index++) {
-                      num += parseInt(this.list[index][Total[a]].td);
+                      num += this.list[index][Total[a]].td*1;
                   }
                   TotalObj[Total[a]+'.td'] = num;
               }
@@ -401,9 +438,9 @@ export default {
                         if ((str.length - index) < arrlen) break;
                         if (index != -1) {
                             if (index == 0 && !patt3.test(str[index+arrlen])) {
-                                str = str.slice(0, index)+`row["${key[0]}"].td`+str.slice(index+arrlen);
+                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
                             }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                                str = str.slice(0, index)+`row["${key[0]}"].td`+str.slice(index+arrlen);
+                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
                             }
                         }
                     }
@@ -415,6 +452,9 @@ export default {
         }
     },
     filterStr (str) {  //去除空白以及特殊字符串
+        if (str==null) {
+            return '';
+        }
         str = str.replace(/\s*/g,"");
         var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]");  
         var specialStr = "";  
@@ -537,13 +577,13 @@ export default {
           let originalList = new Array();
           let obj = new Object();
           obj = {
-              originalHeadId:149,
+              originalHeadId:this.form.headerId,
               processId:6,
               sysOrder:'',
               sysNum:'',
-              name:'原清单名2',
-              num:'yq-02',
-              tenderId:37,
+              name:this.form.name,
+              num:this.form.num,
+              tenderId:this.tender.id,
               type:'original',
               originalRowList
           }

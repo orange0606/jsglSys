@@ -23,9 +23,25 @@
     </div>
 
     <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序/、右键菜单</p>
-    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+    <!-- <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" /> -->
     <div class="click-table11-oper">
-      <el-button type="primary" size="mini" @click="impt">导入清单</el-button>
+
+      <el-popover
+        placement="right"
+        width="800"
+        trigger="click">
+        <el-table 
+        @cell-click ="selectOriginal"
+        :data="gridData">
+          <el-table-column width="100" property="name" label="清单编号"></el-table-column>
+          <el-table-column width="150" property="date" label="清单名称"></el-table-column>
+          <el-table-column width="300" property="address" label="清单类型"></el-table-column>
+        </el-table>
+        <el-button type="primary" size="mini" slot="reference">导入清单</el-button>
+        <!-- <el-button >click 激活</el-button> -->
+      </el-popover>
+
+
       <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
@@ -106,15 +122,7 @@ export default {
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       formula:{}, //存储表头的公式数据
       row:null,//公式字符串转代码的全局变量
-      // col:[],//表头数据.
-      col: [
-        // {colNum:'A',td:'A1',textAlign:'center',edit:'N'},
-        // {colNum:'B',td:'B1',textAlign:'center',edit:'N'},
-        // {colNum:'C',td:'C1',textAlign:'center',edit:'N'},
-        // {colNum:'D',td:'D1',textAlign:'center',edit:'N'},
-        // {colNum:'E',td:'E1',textAlign:'center',edit:'N'},
-        // {colNum:'F',td:'F1',textAlign:'center',edit:'N'},
-      ],//已对PackHeader再次组装的多级表头数据.
+      col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
@@ -181,12 +189,8 @@ export default {
       
   },
   created () {
-      let tenderId = this.tender.id; 
-      this.allHeader( tenderId);//调用请求一个标段的所有变更表头
-      console.log('this.tender')
-      console.log(this.tender)
-      let id = 149;
-      let type = "original";
+    let tenderId = this.tender.id; 
+    this.allHeader( tenderId);//调用请求一个标段的所有变更表头
 
     this.rowDrop();//调用表格行拖拽函数
     // this.findList()
@@ -202,6 +206,10 @@ export default {
     this.$refs.input = null;
   },
   methods: {
+    selectOriginal (row, column, cell, event) { //导入清单按钮的显示原清单
+        console.log('row, column, cell, event22')
+        console.log(row, column, cell, event);
+    },
     allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
         this.$post('/head/allchange',{tenderId})
         .then((response) => {
@@ -237,9 +245,9 @@ export default {
         // console.log(this.list);
     },
     
-    impt(){ //button 按钮调用input文件选择事件
-        this.$refs.input.click();
-    },
+    // impt(){ //button 按钮调用input文件选择事件
+    //     this.$refs.input.click();
+    // },
     importfxx() { //表头导入函数
         this.loading = true;
         this.hd.length = this.list.length = 0; //归为初始化状态

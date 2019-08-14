@@ -1,6 +1,6 @@
 <template>
   <el-table-column :prop="col.colNum+'.td'" :label="col.td" show-overflow-tooltip :align="col.textAlign">
-    <template v-if="!col.children" slot-scope="scope">
+    <template  slot-scope="scope">
       <span v-if="!scope.row.data[col.colNum].edit || scope.row.data[col.colNum].edit =='N'">{{scope.row.data[col.colNum].td}}</span>
       <el-input v-else style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
@@ -52,8 +52,8 @@ export default {
         try {
             for (let index = 0; index < this.fkeys.length; index++) {
                 let sum = this.F[this.fkeys[index]];
-                // console.log('公式是啥')
-                // console.log(sum)
+                console.log('公式是啥')
+                console.log(sum)
                 // console.log(eval(sum))
                 // console.log(parseInt(row["D"].td)*parseInt(row["E"].td))
                 eval(sum) || eval(sum)==0 ? row[this.fkeys[index]].td = eval(sum): row[this.fkeys[index]].td;  //字符串转代码计算
