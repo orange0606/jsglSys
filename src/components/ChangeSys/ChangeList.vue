@@ -1,18 +1,13 @@
 <template>
-<el-row :gutter="0">
-  <!-- <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"><div class="grid-content bg-purple"></div></el-col> -->
-  <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
         <h3>变更清单列表</h3>
-        
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
-            <el-button type="success" size="mini" @click="visibleNew = true">新增</el-button>
+            <el-button type="success" size="mini" @click="visibleNew = true" >新增</el-button>
             <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
             <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
         </div>
-
         <!-- 主体表格 -->
         <elx-editable
         ref="elxEditable"
@@ -27,24 +22,24 @@
         <elx-editable-column type="index" width="50" align="center" fixed="left" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <!-- <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="changeHead.name" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+        <!-- <elx-editable-column prop="changeHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
+        <elx-editable-column prop="changeHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
-        <elx-editable-column prop="tender.num" label="标段编号" align="center" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="tender.name" label="标段名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
         <elx-editable-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
             <template slot-scope="scope">
                 <!-- 1已录入 0未录入 其他出错-->
                 <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
                 <i v-if="scope.row.enter ==1" style="color:#67c23a;width:20px;" class="el-icon-circle-check"></i>
-                <!-- <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i> -->
+                <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
             </template>
         </elx-editable-column>
-        <elx-editable-column prop="startTime" label="发起时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
+        <!-- <elx-editable-column prop="startTime" label="发起时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column> -->
         <elx-editable-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
         <elx-editable-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
@@ -76,7 +71,6 @@
         </elx-editable-column>
         </elx-editable>
 
-        
         <el-pagination
           class="manual-table4-pagination"
           @size-change="handleSizeChange"
@@ -88,30 +82,28 @@
           :total="pageVO.totalResult">
         </el-pagination>
 
-        <!-- 引入新建变更清单组件 -->
+         <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建变更" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <new-change :tender="tender" ></new-change>
+          <el-dialog title="新建变更清单" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
+              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="list" ></new-change>
           </el-dialog>
         </transition>
+
     </div>
     </el-collapse-transition>
-  </el-col>
-
-</el-row>
 
 </template>
 
 <script>
 import NewChange from './NewChange';
 import XEUtils from 'xe-utils'
-export default {
+  export default {
   name: 'ChangeList',
   components: {
     NewChange
   },
   props: {
-     changeList:{    //变更数据列表，这个数据用于返回给父组件
+     changeList:{    //原清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
@@ -124,90 +116,48 @@ export default {
   },
   data () {
     return {
+      list: this.changeList,
+      visibleNew:false,
+      refresh:false,
       loading: false,
       list: null,
-      // tenderList:null,  //全部标段
+      tenderList:null,  //全部标段
       dialogVisible:false,//显示隐藏
       pageVO: {
         currentPage: 1,
         pageSize: 10,
         totalResult: 0
       },
-    
+      isClearActiveFlag: true,
+      rules: {
+          name: [
+            { required: true, message: '请输入活动名称', trigger: 'blur' },
+            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          ]
+        },
     }
   },
   created () {
-    this.findList();  //发起请求所有已录入变更清单
-    // this.tenList();  //发起请求所有标段
-
+    // this.findList();  //发起请求所有已录入原清单
+    // this.changeList = this.list;
   },
   watch: {
-
+    
+    visibleNew: function(newVal,oldVal){
+        if (!newVal && this.list.length >0) {
+          this.changeList.push(this.list.slice(-1));
+          this.visibleNew = false; //关闭显示
+        }
+    }
   },
   computed: {
     // enter: function () {
     // }
   },
   methods: {
-    
-    findList () {   //请求所有已建表头数据函数
-      this.loading = true
-      // 发起网络请求
-      this.$post('/change/all',{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
-        .then((response) => {
-          this.list = response.data.changeList.list;
-          this.pageVO.totalResult = response.data.changeList.total;
-          this.loading = false;
-      }).catch(e => {
-          this.loading = false;
-          this.$message({
-            type: 'info',
-            message: '发生错误！'
-          });
-          // this.findList();
-      });
-
-    },
     see (row) {
         console.log('预览清单')
     },
-    // searchEvent () {
-    //   //条件搜索
-    //   this.loading = true;
-    //   this.pageVO.currentPage = 1;
-    //   let data = new Object();
-    //   let startEmployeeId = this.$store.state.token;
-    //   let fromTimeStart = this.formData.date!=null && this.formData.date.length >2?this.formData.date[0]:'';
-    //   let toTimeStart = this.formData.date!=null && this.formData.date.length >2?this.formData.date[1]:'';
-    //   data = {
-    //     name: this.formData.name , //清单名称
-    //     tenderId: this.formData.tenderId, //标段id
-    //     startEmployeeId, //发起人ID
-    //     fromTimeStart, //时间段开始时间（发起时间）
-    //     toTimeStart, //时间段结束时间（发起时间）
-    //     number: this.formData.number, //流水号（年月+清单ID）      
-    //     enter: this.formData.enter,   // 录入状态
-    //     rows: [ this.formData.rows ], //表格内容搜索
-    //     current: this.pageVO.currentPage,  //当前页码
-    //     pageSize: this.pageVO.pageSize,   //每页数量
-
-    //   }
-    //   console.log(this.formData);
-    //   console.log(data);
-    //   this.$post('/change/all/not/start/search',data)
-    //     .then((response) => {
-    //       this.list = response.data.changeList.list;
-    //       this.pageVO.totalResult = response.data.changeList.total;
-    //       this.loading = false;
-    //   }).catch(e => {
-    //       this.loading = false;
-    //       this.$message({
-    //         type: 'info',
-    //         message: '发生错误！'
-    //       })
-    //   })
-
-    // },
     handleSizeChange (pageSize) {
       this.pageVO.pageSize = pageSize
       this.findList()
@@ -227,14 +177,6 @@ export default {
         totalpay: '累计支付清单'
       }
       return cellValue ? obj[cellValue] : '未知'
-    },
-    enterIcon (row, column, cellValue, index) {
-      let obj = new Object();
-      obj = {
-        "0" :'',
-        "1" :''
-      }
-      return cellValue ? obj[cellValue] : cellValue
     },
     formatterDate (row, column, cellValue, index) {
       return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
@@ -290,7 +232,6 @@ export default {
     },
     // 编辑处理
     openActiveRowEvent (row) {
-      row.tender.select = true; //显示标段选择下拉框
       this.$nextTick(() => {
         let activeInfo = this.$refs.elxEditable.getActiveRow()
         if (activeInfo && activeInfo.isUpdate) {
@@ -318,7 +259,6 @@ export default {
     },
     // 取消处理
     cancelRowEvent (row) {
-      delete row.tender.select  //隐藏标段选择下拉框
       if (!row.id) {
         this.isClearActiveFlag = false
         this.$confirm('该数据未保存，是否移除?', '温馨提示', {
@@ -330,7 +270,6 @@ export default {
           if (action === 'confirm') {
             this.$refs.elxEditable.remove(row)
             // console.log('移除数据')
-            
           }
         }).catch(e => e).then(() => {
           this.isClearActiveFlag = true
@@ -343,17 +282,17 @@ export default {
           cancelButtonText: '返回继续',
           type: 'warning'
         }).then(action => {
-          this.$refs.elxEditable.clearActive();
-          this.$refs.elxEditable.revert(row);
+          this.$refs.elxEditable.clearActive()
+          this.$refs.elxEditable.revert(row)
         }).catch(action => {
           if (action === 'cancel') {
-            this.$refs.elxEditable.setActiveRow(row);
+            this.$refs.elxEditable.setActiveRow(row)
           }
         }).then(() => {
-          this.isClearActiveFlag = true;
+          this.isClearActiveFlag = true
         })
       } else {
-        this.$refs.elxEditable.clearActive();
+        this.$refs.elxEditable.clearActive()
       }
     },
     removeEvent (row) {     //删除单个清单
@@ -365,71 +304,38 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.loading = true
-          // 进行发起请求删除
-          this.$post('/change/del',{id:row.id})
-              .then((response) => {
-              //删除成功
-              this.loading = false
-              this.findList()
-              this.$message({
-                type: 'success',
-                message: '删除所选选项成功!'
-              })
-            }).catch(e => {
-                this.loading = false;
-                this.$message({
-                type: 'info',
-                message: '删除失败，请重试！'
-                })
-            })
+          // this.loading = true
+          this.$refs.elxEditable.remove(row);
         }).catch(action => action).then(() => {
           this.isClearActiveFlag = true;
         })
       } else {
         this.$refs.elxEditable.remove(row);
+        let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+        this.changeList.length = 0;
+        for (let index = 0; index < rest.length; index++) {
+          this.changeList.push(rest[index]); 
+        }
       }
     },
     deleteSelectedEvent () {    //删除选中
-      let removeRecords = this.$refs.elxEditable.getSelecteds();
+      let removeRecords = this.$refs.elxEditable.getSelecteds()
       if (removeRecords.length) {
-        this.isClearActiveFlag = false;
+        this.isClearActiveFlag = false
        this.$confirm('确定删除所选数据?', '温馨提示', {
           distinguishCancelAndClose: true,
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.loading = true
-            // 进行发起请求删除
-            let data= new Object();
-            data.changeIdList=  new Array();
-            for (let index = 0; index < removeRecords.length; index++) {
-                data.changeIdList.push(removeRecords[index].id);
-            };
-            // console.log(data)
-            this.loading = true;
-            // 进行发起请求删除
-            this.$post('/change/delarray',data)
-              .then((response) => {
-              //删除成功
-              this.loading = false
-              this.findList();
-              this.$message({
-                type: 'success',
-                message: '删除所选选项成功!'
-              })
-            }).catch(e => {
-                this.loading = false;
-                this.$message({
-                type: 'info',
-                message: '删除失败，请重试！'
-                })
-            })
-          })
-        
-        //   this.isClearActiveFlag = true
-
+          this.$refs.elxEditable.remove(removeRecords);
+          let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+          this.changeList.length = 0;
+          for (let index = 0; index < rest.length; index++) {
+            this.changeList.push(rest[index]); 
+          }
+        })
+          // this.isClearActiveFlag = true;
       } else {
         this.$message({
           type: 'info',
@@ -437,46 +343,15 @@ export default {
         })
       }
     },
-    saveRowEvent (row) {  //网络保存(修改表头)
-      delete row.tender.select
+    saveRowEvent (row) {  //保存
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-          console.log(row)
-          let data = new Object();
-          data = {
-              id: row.id,                                    //原清单id
-              originalHeadId: row.originalHead.id,               //原清单表头id
-              processId:  row.process.id,                         //审批单流程id
-              sysOrder: null,                    //系统序号  预留，暂不使用
-              sysNum: null,                     //系统编号  预留，暂不使用
-              name: row.name,                       //原清单名称
-              num:  row.num,                        //原清单编号
-              tender_id: row.tender.id,                    //标段id
-              type: row.type,                 //原清单类别为”original”
-              changeRowList:null,          
-          };
-
-          let changeRowList = new Array();
-          changeRowList.push(data);
-          this.loading = true;
-          this.$refs.elxEditable.clearActive();
-          // console.log('正在保存当前行数据')
-          // console.log(row)
-          //进行网路请求保存
-          this.$post('/change/update',{ changeRowList })
-            .then((response) => {
-            // console.log(response)
-            this.loading = false;
-            this.findList();
-            this.$message({ message: '保存成功', type: 'success' })
-          }).catch(e => {
-                this.loading = false;
-                this.$message({
-                type: 'info',
-                message: '保存失败，请重试！'
-                })
-          })
-      
+            let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+            this.changeList.length = 0;
+            for (let index = 0; index < rest.length; index++) {
+              this.changeList.push(rest[index]); 
+            }
+            this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
         }
       })
     },

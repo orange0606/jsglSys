@@ -6,6 +6,9 @@
   >
     <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
+        <el-form-item label="清单编号">
+          <el-input v-model="form.num" placeholder="请输入清单编号"></el-input>
+        </el-form-item>
         <el-form-item label="清单名称">
           <el-input v-model="form.name" placeholder="请输入清单名称"></el-input>
         </el-form-item>
@@ -23,22 +26,58 @@
     </div>
 
     <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序/、右键菜单</p>
-    <!-- <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" /> -->
     <div class="click-table11-oper">
-
       <el-popover
         placement="right"
-        width="800"
+        width="1050"
         trigger="click">
-        <el-table 
-        @cell-click ="selectOriginal"
-        :data="gridData">
-          <el-table-column width="100" property="name" label="清单编号"></el-table-column>
-          <el-table-column width="150" property="date" label="清单名称"></el-table-column>
-          <el-table-column width="300" property="address" label="清单类型"></el-table-column>
-        </el-table>
-        <el-button type="primary" size="mini" slot="reference">导入清单</el-button>
-        <!-- <el-button >click 激活</el-button> -->
+          <p style="color: red;font-size: 12px;margin:20px 0 15px 0;text-align:left;">请单击选择你要导入的清单</p>
+          <elx-editable
+            ref="elxEditable"
+            class="click-table2"
+            border
+            height="300"
+            size="small"
+            :default-sort="{prop: 'updateTime', order: 'descending'}"
+            :data.sync="original"
+            @cell-click ="selectOriginal"
+            :row-class-name="tableRowClassName"
+            :edit-config="{trigger: 'click', mode: 'row'}"
+            style="width: 100%">
+            <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
+            <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
+            <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
+            <elx-editable-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
+              <template slot-scope="scope">
+                <!-- 1已录入 0未录入 其他出错-->
+                <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
+                <i v-if="scope.row.enter ==1" style="color:#67c23a;width:20px;" class="el-icon-circle-check"></i>
+                <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
+              </template>
+            </elx-editable-column>
+            <elx-editable-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
+            <elx-editable-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
+            <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
+            <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
+          </elx-editable>
+          <el-pagination
+            class="click-table2-pagination"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pageVO.currentPage"
+            :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
+            :page-size="pageVO.pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="pageVO.totalResult">
+          </el-pagination>
+          <el-button type="primary" size="mini" slot="reference">导入清单</el-button>
       </el-popover>
 
 
@@ -103,19 +142,30 @@ export default {
     MyColumn
   },
   props: {
+    changeList: {
+      type: Array,
+    },
     tender:{
       type: Object,
     }
   },
   data () {
     return {
-      form:{
+      form:{  //选择表头输入清单名称与编号
         name:'',
+        num:'',
         headerId:'',
         headerList:[],//表头列表
       },
-      showHeader:true,
-      hd:[],
+      original:[],//所有关联的原清单列表
+      originalList:[],//原清单内容
+      pageVO: { //所有关联的原清单列表数据分页
+        currentPage: 1,
+        pageSize: 10,
+        totalResult: 0
+      },
+      showHeader:true,  //是否显示表头以及表格强制渲染
+      hd:[],  //表格单元格用来合并的所有列数数据（列名，对象的属性名集合）
       startTime:null,
       loading: false,
       dialogVisible: true,
@@ -126,6 +176,7 @@ export default {
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
+      pendingRemoveList:[],
        headerMenus: [
         [
           {
@@ -193,27 +244,23 @@ export default {
     this.allHeader( tenderId);//调用请求一个标段的所有变更表头
 
     this.rowDrop();//调用表格行拖拽函数
-    // this.findList()
+
   },
   mounted () {
 
   },
   beforeDestroy () {
-    this.hd = null;
-    this.col = null;
-    this.PackHeader = null;
-    this.list = null;
-    this.$refs.input = null;
+      this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
+
   },
   methods: {
-    selectOriginal (row, column, cell, event) { //导入清单按钮的显示原清单
-        console.log('row, column, cell, event22')
-        console.log(row, column, cell, event);
-    },
+
     allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
         this.$post('/head/allchange',{tenderId})
         .then((response) => {
           this.form.headerList = response.data.changeHeadList;
+          console.log('this.form.headerList')
+          console.log(this.form.headerList)
         }).catch(e => {
             this.$message({
               type: 'info',
@@ -229,25 +276,85 @@ export default {
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        // headsArr = data = null; //释放内存
+        this.originalHead = { //保存表头信息
+          name:data.name,
+          num: data.num
+        }
         this.showHeader = false;
         this.$nextTick(() => {  //强制重新渲染
 	          this.showHeader = true;
           })
         this.Analysis();//调用表格公式解析
-        
+        let changeHeadId = response.data.onehead.id;
+        this.allRelationOriginal(changeHeadId)
       })
     },
+    allRelationOriginal (id) {  //请求可导入的关联原清单列表
+        this.$post('/original/onetender/bychangeheadId',{ tenderId:this.tender.id, changeHeadId:id, current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
+        .then((response) => {
+          this.original = response.data.originalList.list;
+      }).catch(e => {
+          this.$message({
+            type: 'info',
+            message: '发生错误！'
+          });
+      });
+    },
+    oneOriginal (id) {  //请求可导入的关联原清单列表
+        this.$post('/originalrow/getone',{ id })
+        .then((response) => {
+          this.originalList = response.data;
+      }).catch(e => {
+          this.$message({
+            type: 'info',
+            message: '发生错误！'
+          });
+      });
+    },
+    handleSizeChange (pageSize) { 
+      this.pageVO.pageSize = pageSize;
+      this.allRelationOriginal();
+    },
+    handleCurrentChange (currentPage) {
+      this.pageVO.currentPage = currentPage
+      this.allRelationOriginal();
+    },
+    formatterDate (row, column, cellValue, index) {
+      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+    },
+    formatterType (row, column, cellValue, index) {
+      let obj = {
+        original: '原清单',
+        change: '变更清单',
+        update: '变更后的清单',
+        meterage: '计量清单',
+        totalmeterage: '累计计量清单',	
+        pay: '支付清单',
+        totalpay: '累计支付清单'
+      }
+      return cellValue ? obj[cellValue] : '未知'
+    },
+    tableRowClassName ({ row, rowIndex }) {
+      if (this.pendingRemoveList.some(item => item === row)) {
+        return 'delete-row'
+      }
+      return ''
+    },
+    selectOriginal (row, column, cell, event) { //原清单列表数据表格单击事件
+        console.log('row, column, cell, event22')
+        console.log(row, column, cell, event);
+        let id = row.id;
+        this.oneOriginal(id); //调用请求清单
+    },
+
     consoles () {
         let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
         // console.log('检验一下数据对不对 rest list')
         // console.log(rest);
         // console.log(this.list);
     },
+
     
-    // impt(){ //button 按钮调用input文件选择事件
-    //     this.$refs.input.click();
-    // },
     importfxx() { //表头导入函数
         this.loading = true;
         this.hd.length = this.list.length = 0; //归为初始化状态
@@ -560,7 +667,7 @@ export default {
           const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
           const refCol = header.length;
           const refRow = list.length;
-          let originalRowList = new Array();
+          let changeRowList = new Array();
           for (let index = 0; index < refRow; index++) {
               for (let i = 0; i < refCol; i++) {
                   if (list[index][header[i]] && list[index][header[i]].colNum == header[i] ) {
@@ -568,45 +675,38 @@ export default {
                       list[index][header[i]].formula = '';                     
                       list[index][header[i]].attribute = '';                  
                       list[index][header[i]].upload = 1;    
-
-                      originalRowList.push(list[index][header[i]]);
+                      changeRowList.push(list[index][header[i]]);
                   }
               }
           }
-          let originalList = new Array();
           let obj = new Object();
           obj = {
-              originalHeadId:149,
+              changeHeadId:this.form.headerId,
               processId:6,
               sysOrder:'',
               sysNum:'',
-              name:'原清单名2',
-              num:'yq-02',
-              tenderId:37,
-              type:'original',
-              originalRowList
+              name:this.form.name,
+              num:this.form.num,
+              tenderId:this.tender.id,
+              type:'change',
+              changeRowList,
+              changeHead,//表头数据
+              enter:this.list.length>0?1:0,
+              tender:this.tender,
+              saveTime:new Date(),
+              saveEmployee:{name:this.$store.state.username}
+
           }
-          originalList.push(obj)
-          // console.log(originalList);
-          this.$post('/original/save',{ originalList })
-              .then((response) => {
-              console.log(response)
-              this.loading = false;
-              this.$message({
-                type: 'success',
-                message: `保存原清单成功，共保存 ${refRow} 条数据!`
-              })
-            }).catch(e => {
-                this.loading = false;
-                this.$message({
-                type: 'info',
-                message: '保存失败，请重试！'
-                })
+          this.changeList.push(obj)
+          let succre = false;
+          this.$emit("update:refresh", succre)
+          this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
+
+          this.showHeader = false;
+          this.$nextTick(() => {  //强制重新渲染
+              this.showHeader = true;
           })
-          //保存原清单
-          
-
-
+         
         }
       })
     },

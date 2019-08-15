@@ -94,6 +94,11 @@ export default {
   props: {
     tender:{
       type: Object,
+    },
+    originalList:{
+      type: Array,
+    },
+    refresh:{
     }
   },
   data () {
@@ -106,6 +111,7 @@ export default {
       },
       showHeader:true,
       hd:[],
+      originalHead:null, //用来存储表头信息
       startTime:null,
       loading: false,
       dialogVisible: true,
@@ -181,8 +187,6 @@ export default {
       
   },
   created () {
-    console.log('this.tender.id')
-    console.log(this.tender.id)
     let tenderId = this.tender.id; 
     this.allHeader( tenderId);//调用请求一个标段的所有原清单表头 
     this.rowDrop();//调用表格行拖拽函数
@@ -215,15 +219,19 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'original'})
         .then((response) => {
+        console.log('response');
+        console.log(response);
         let data = response.data.onehead;
         let headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        console.log('this.col')
-        // console.log(JSON.stringify(this.col))
-        
-        // headsArr = data = null; //释放内存
+        // console.log('this.col')
+        this.originalHead = {
+          name:data.name,
+          num: data.num
+        }
+
         this.showHeader = false;
         this.$nextTick(() => {  //强制重新渲染
 	          this.showHeader = true;
@@ -547,7 +555,7 @@ export default {
             item.seq = index;
           })
           // this.loading = true;
-          console.log('list')
+          // console.log('list')
           // console.log(list)
           if (list.length == 0) {
               this.$message({
@@ -557,7 +565,7 @@ export default {
               return false;
           }
           //解构数据进行提交
-          this.loading = true;
+          // this.loading = true;
           const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
           const refCol = header.length;
           const refRow = list.length;
@@ -576,38 +584,49 @@ export default {
           }
           let originalList = new Array();
           let obj = new Object();
+          let originalHead = this.originalHead;
           obj = {
               originalHeadId:this.form.headerId,
-              processId:6,
+              processId:93,
               sysOrder:'',
               sysNum:'',
               name:this.form.name,
               num:this.form.num,
               tenderId:this.tender.id,
               type:'original',
-              originalRowList
+              originalRowList,
+              originalHead,//表头数据
+              enter:this.list.length>0?1:0,
+              tender:this.tender,
+              saveTime:new Date(),
+              saveEmployee:{name:this.$store.state.username}
+
           }
+          this.originalList.push(obj)
+          // let originalList = [];
           originalList.push(obj)
-          // console.log(originalList);
-          this.$post('/original/save',{ originalList })
-              .then((response) => {
-              console.log(response)
-              this.loading = false;
-              this.$message({
-                type: 'success',
-                message: `保存原清单成功，共保存 ${refRow} 条数据!`
-              })
-            }).catch(e => {
-                this.loading = false;
-                this.$message({
-                type: 'info',
-                message: '保存失败，请重试！'
-                })
+          //  //进行网路请求保存
+          // this.$post('/original/save',{ originalList })
+          //   .then((response) => {
+          //   // console.log(response)
+          //   this.loading = false;
+          //   // this.findList();
+          //   this.$message({ message: '保存成功', type: 'success' })
+          // }).catch(e => {
+          //       this.loading = false;
+          //       this.$message({
+          //       type: 'info',
+          //       message: '保存失败，请重试！'
+          //       })
+          // })
+
+          let succre = false;
+          this.$emit("update:refresh", succre)
+          this.rest.length = this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
+          this.showHeader = false;
+          this.$nextTick(() => {  //强制重新渲染
+              this.showHeader = true;
           })
-          //保存原清单
-          
-
-
         }
       })
     },
