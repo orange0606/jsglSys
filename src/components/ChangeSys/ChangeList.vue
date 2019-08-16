@@ -84,7 +84,7 @@
 
          <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建变更清单" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog title="新建变更清单" width="100%" top="0vh" height="100%" :fullscreen="true" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
               <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="list" ></new-change>
           </el-dialog>
         </transition>

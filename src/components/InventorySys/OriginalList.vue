@@ -142,7 +142,10 @@ import XEUtils from 'xe-utils'
   watch: {
     visibleNew: function(newVal,oldVal){
         if (!newVal && this.list.length >0) {
-          this.originalList.push(this.list.slice(-1));
+          this.originalList.length = 0;
+          for (let index = 0; index < this.list.length; index++) {
+              this.originalList.push(this.list[index]); 
+          }
           this.visibleNew = false; //关闭显示
         }
     }

@@ -55,7 +55,6 @@
       show-summary
       :summary-method="getSummaries"
       :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
-      :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
@@ -125,56 +124,6 @@ export default {
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
-       headerMenus: [
-        [
-          {
-            code: 'ALL_EXPORT',
-            name: '导出全部.csv',
-            prefixIcon: 'el-icon-download'
-          }
-        ]
-      ],
-      bodyMenus: [
-        [
-          {
-            code: 'ROW_INSERT_ACTIVE',
-            name: '插入新行',
-            prefixIcon: 'el-icon-plus'
-          },
-          {
-            code: 'ROW_REMOVE',
-            name: '删除行',
-            prefixIcon: 'el-icon-minus'
-          }
-        ],
-        [
-          {
-            code: 'SELECT_REMOVE',
-            name: '删除选中的行',
-            prefixIcon: 'el-icon-close'
-          },
-          {
-            code: 'CELL_RESET',
-            name: '清除内容',
-            prefixIcon: 'el-icon-close'
-          },
-          {
-            code: 'CELL_REVERT',
-            name: '还原数据'
-          }
-        ],
-        [
-          {
-            code: 'ROW_EXPORT',
-            name: '导出行.csv',
-            prefixIcon: 'el-icon-download'
-          },
-          {
-            code: 'ALL_EXPORT',
-            name: '导出全部.csv'
-          }
-        ]
-      ]
     }
   },
  watch: {
@@ -603,6 +552,8 @@ export default {
 
           }
           this.originalList.push(obj)
+          console.log('this.originalList')
+          console.log(this.originalList)
           // let originalList = [];
           originalList.push(obj)
           //  //进行网路请求保存

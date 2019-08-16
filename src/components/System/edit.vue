@@ -168,6 +168,7 @@ export default {
         //调用表格组装函数（返回的是个数组对象）
         let arr = this.$excel.Package(data[this.key],data.refCol,data.refRow);
         this.hd = Object.keys(arr[0]);
+        
         //调用表格列名函数  （返回的是一个包括excel基本所有列的数组)
         let AZ = this.$excel.AZ()
         this.columnName = AZ.slice(0,data.refCol);

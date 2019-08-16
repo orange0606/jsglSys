@@ -81,7 +81,7 @@ let excelmodel = {
 
     },
     /*
-    数据组装表格函数
+    表头数据组装表格函数
     param list: 所有单元格基本数据(obj)
     param colLength: 需要组装多少列(string,int)
     param rowLength: 需要组装多少行(string,int)
@@ -98,10 +98,11 @@ let excelmodel = {
         }
         for (let index = 0; index < list.length; index++) {
             if (list[index].trNum && list[index].colNum) {
+                let coll = list[index].colNum;
                 let row = list[index].trNum;  //行号
-                let col = ABC.indexOf(list[index].colNum); //列号A
-                arr[row-1][ABC[col]] =list[index];
-                arr[row-1][ABC[col]].edit = 'N'; //加入编辑状态
+                // let col = ABC.indexOf(list[index].colNum); //列号A
+                arr[row-1][coll] =list[index];
+                arr[row-1][coll].edit = 'N'; //加入编辑状态
                 row = col = null;
 
             }
@@ -147,6 +148,36 @@ let excelmodel = {
         return headers;
         }
         
+    },
+    /*
+    清单数据组装表格函数
+    param list: 所有单元格基本数据(obj)
+    return : 完整表格数据
+    */
+   ListAssemble (list){ 
+        let arr = [];
+        for (let index = 0; index < list.length; index++) {
+            let coll = list[index].colNum;
+            let col = ABC.indexOf(list[index].colNum); //列号A
+            let row = list[index].trNum;  //行号
+            if (col>=0 && coll) {
+                if (arr[row-1]) {    //判断是否有这个下标,有的话直接添加数据
+                    arr[row-1][coll] =list[index];
+                }else{ //无此下标，先创建
+                    arr[row-1]= new Object();
+                    arr[row-1][coll] =list[index];
+                }
+                arr[row-1][coll].edit = 'N'; //加入编辑状态
+
+            }
+        };
+        // console.log(arr[0])
+        for (let index = arr.length-1; index >= 0; index--) {
+            if (!arr[index]) {
+                arr.splice(index,1)
+            }
+        }
+        return arr;
     },
     /*
     清单数据解构函数
@@ -350,7 +381,7 @@ let excelmodel = {
                         } 
                 }             
             }    
-            arr = hdobj = null;
+            // arr = hdobj = null;
             // //  对已经标记了合并需要删除的数组元素进行删除
             // for (let b = data.length-1; b >= 0; b--) {
             //     let hdobj = Object.keys(data[b]);

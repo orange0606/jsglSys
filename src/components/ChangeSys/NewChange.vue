@@ -27,10 +27,14 @@
 
     <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序/、右键菜单</p>
     <div class="click-table11-oper">
-      <el-popover
-        placement="right"
-        width="1050"
-        trigger="click">
+      <el-dialog
+      width="85%"
+      title="选择清单"
+      top="10vh"
+      :visible.sync="innerVisible"
+      :destroy-on-close="true"
+      append-to-body>
+      <div v-if="showList">
           <p style="color: red;font-size: 12px;margin:20px 0 15px 0;text-align:left;">请单击选择你要导入的清单</p>
           <elx-editable
             ref="elxEditable"
@@ -46,7 +50,7 @@
             style="width: 100%">
             <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
             <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
@@ -77,17 +81,18 @@
             layout="total, sizes, prev, pager, next, jumper"
             :total="pageVO.totalResult">
           </el-pagination>
-          <el-button type="primary" size="mini" slot="reference">导入清单</el-button>
-      </el-popover>
+        </div>
+        <!-- 此处引入原清单数据选择组件（最终返回集合，选中的数据列表） -->
+        <choice-row v-else :inventory.sync="originalList" :innerVisible.sync="innerVisible" ></Choice-row>
 
-
-      <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
+    </el-dialog>
+      <el-button type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
+      <el-button type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
       <el-button type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
       <el-button type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
       <el-button type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
-      <el-button type="success" size="mini" @click="consoles">控制台打印所有数据</el-button>
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -97,7 +102,7 @@
       ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
-      height="550"
+      height="500"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
@@ -106,7 +111,6 @@
       show-summary
       :summary-method="getSummaries"
       :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
-      :context-menu-config="{headerMenus, bodyMenus}"
       style="width: 100%">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column width="40" align="center" >
@@ -133,13 +137,15 @@
 
 <script>
 import MyColumn from './MyColumn';
+import ChoiceRow from '../MultiplexCom/ChoiceRow';
 import XEUtils from 'xe-utils';
 import Sortable from 'sortablejs';
 
 export default {
   name: 'NewChange',
   components: {
-    MyColumn
+    MyColumn,
+    ChoiceRow
   },
   props: {
     changeList: {
@@ -157,8 +163,10 @@ export default {
         headerId:'',
         headerList:[],//表头列表
       },
+      innerVisible: false,//弹窗显示相关联原清单的两个表格
+      showList: true,//显示可导入的相关清单列表表格（为fasle显示清单数据选择组件）
       original:[],//所有关联的原清单列表
-      originalList:[],//原清单内容
+      originalList: null,//原清单内容(传给子组件，然后返回回来数据)
       pageVO: { //所有关联的原清单列表数据分页
         currentPage: 1,
         pageSize: 10,
@@ -177,64 +185,18 @@ export default {
       list: [
       ], //表格数据
       pendingRemoveList:[],
-       headerMenus: [
-        [
-          {
-            code: 'ALL_EXPORT',
-            name: '导出全部.csv',
-            prefixIcon: 'el-icon-download'
-          }
-        ]
-      ],
-      bodyMenus: [
-        [
-          {
-            code: 'ROW_INSERT_ACTIVE',
-            name: '插入新行',
-            prefixIcon: 'el-icon-plus'
-          },
-          {
-            code: 'ROW_REMOVE',
-            name: '删除行',
-            prefixIcon: 'el-icon-minus'
-          }
-        ],
-        [
-          {
-            code: 'SELECT_REMOVE',
-            name: '删除选中的行',
-            prefixIcon: 'el-icon-close'
-          },
-          {
-            code: 'CELL_RESET',
-            name: '清除内容',
-            prefixIcon: 'el-icon-close'
-          },
-          {
-            code: 'CELL_REVERT',
-            name: '还原数据'
-          }
-        ],
-        [
-          {
-            code: 'ROW_EXPORT',
-            name: '导出行.csv',
-            prefixIcon: 'el-icon-download'
-          },
-          {
-            code: 'ALL_EXPORT',
-            name: '导出全部.csv'
-          }
-        ]
-      ]
     }
   },
 
  watch: {
-      // list: function(newVal,oldVal){
-      //     // console.log('数据有发生改变吗')
-      //     // console.log(newVal)
-      // }
+    originalList: function(newVal,oldVal){  //子组件返回来的数据
+        //此处可进行判断，然后进行清单导入
+        if (Array.isArray(newVal)) {  //判断返回的是不是一个数组
+           console.log('最终用户选择的需要引入的清单数据在这里返回啦沙雕')
+           console.log(newVal)
+        }
+       
+    }
   },
   computed: {
       
@@ -300,16 +262,25 @@ export default {
           });
       });
     },
-    oneOriginal (id) {  //请求可导入的关联原清单列表
-        this.$post('/originalrow/getone',{ id })
+
+    oneOriginal (id) {  //请求选择可导入原清单内容
+        this.$post('/original/process/getone',{ id })
         .then((response) => {
-          this.originalList = response.data;
+          this.originalList = response.data.process;
       }).catch(e => {
           this.$message({
             type: 'info',
             message: '发生错误！'
           });
       });
+    },
+    selectOriginal (row, column, cell, event) { //原清单列表数据表格单击事件
+        // console.log('row, column, cell, event22')
+        // console.log(row, column, cell, event);
+        let id = row.id;
+        this.oneOriginal(id); //调用请求清单
+        //关闭显示关联清单列表页面
+        this.showList = false;
     },
     handleSizeChange (pageSize) { 
       this.pageVO.pageSize = pageSize;
@@ -340,13 +311,7 @@ export default {
       }
       return ''
     },
-    selectOriginal (row, column, cell, event) { //原清单列表数据表格单击事件
-        console.log('row, column, cell, event22')
-        console.log(row, column, cell, event);
-        let id = row.id;
-        this.oneOriginal(id); //调用请求清单
-    },
-
+    
     consoles () {
         let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
         // console.log('检验一下数据对不对 rest list')
