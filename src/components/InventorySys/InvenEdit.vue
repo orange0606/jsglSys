@@ -552,24 +552,21 @@ export default {
 
           }
           this.originalList.push(obj)
-          console.log('this.originalList')
-          console.log(this.originalList)
-          // let originalList = [];
           originalList.push(obj)
-          //  //进行网路请求保存
-          // this.$post('/original/save',{ originalList })
-          //   .then((response) => {
-          //   // console.log(response)
-          //   this.loading = false;
-          //   // this.findList();
-          //   this.$message({ message: '保存成功', type: 'success' })
-          // }).catch(e => {
-          //       this.loading = false;
-          //       this.$message({
-          //       type: 'info',
-          //       message: '保存失败，请重试！'
-          //       })
-          // })
+           //进行网路请求保存
+          this.$post('/original/save',{ originalList })
+            .then((response) => {
+            // console.log(response)
+            this.loading = false;
+            // this.findList();
+            this.$message({ message: '保存成功', type: 'success' })
+          }).catch(e => {
+                this.loading = false;
+                this.$message({
+                type: 'info',
+                message: '保存失败，请重试！'
+                })
+          })
 
           let succre = false;
           this.$emit("update:refresh", succre)

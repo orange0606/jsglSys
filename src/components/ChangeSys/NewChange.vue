@@ -192,10 +192,11 @@ export default {
     originalList: function(newVal,oldVal){  //子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         if (Array.isArray(newVal)) {  //判断返回的是不是一个数组
-           console.log('最终用户选择的需要引入的清单数据在这里返回啦沙雕')
-           console.log(newVal)
+           console.log('最终用户选择的需要引入的清单数据在这里返回啦沙雕');
+           console.log(newVal);
+           this.importfxx(newVal);//这里调用表格处理函数
+          //这里进行处理
         }
-       
     }
   },
   computed: {
@@ -213,10 +214,8 @@ export default {
   },
   beforeDestroy () {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
-
   },
   methods: {
-
     allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
         this.$post('/head/allchange',{tenderId})
         .then((response) => {
@@ -262,11 +261,10 @@ export default {
           });
       });
     },
-
     oneOriginal (id) {  //请求选择可导入原清单内容
-        this.$post('/original/process/getone',{ id })
+        this.$post('/original/row/getone',{ id })
         .then((response) => {
-          this.originalList = response.data.process;
+          this.originalList = response.data.original;
       }).catch(e => {
           this.$message({
             type: 'info',
@@ -319,57 +317,114 @@ export default {
         // console.log(this.list);
     },
 
-    
-    importfxx() { //表头导入函数
-        this.loading = true;
-        this.hd.length = this.list.length = 0; //归为初始化状态
-        this.startTime = Date.now();
-        this.$excel.Imports(data=>{ //数据导入组装函数
-            try { //先判断表头是否一致
-                let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
-                let datahd = Object.keys(data[0]);
-                if ( datahd.length < hd.length ) {
-                    hd.length = datahd.length = 0;
-                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
-                }else{
-                    hd.length = datahd.length = 0;
-                }
-                let arr = [...this.PackHeader];
-                arr.length = arr.length-1;
-                let dataSplice = data.splice(0,arr.length); //去掉表头并且用来作判断是否一致
-                let ff = arr.some( function( item, index, array ){ //判断导入的清单表头与网络清单表头如果是否相等
-                      let hdsome = hd.some( function( val, i){ 
-                          let headrs = array[index][val];
-                          let Rows = dataSplice[index][val];
-                          return headrs.colNum != Rows.colNum || headrs.td != Rows.td || headrs.tdRowspan != Rows.tdRowspan || headrs.tdColspan != Rows.tdColspan || headrs.trNum != Rows.trNum;
-                      }); 
-                      return hdsome;
-                }); 
-                if (ff) {
-                    arr.length = hd.length = dataSplice.length = 0; //释放内存
-                    this.loading = false;
-                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
-                }
-            } catch (error) {
-               this.loading = false;
-               return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
-            }
+    importfxx(data) { //表头导入函数
 
-            try {  //把数据载入表格
-                this.list = [...data];
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-                this.findList(); //调用滚动渲染数据
-                this.Formula();  //调用公式计算
-                data.length = 0; //内存释放
-            } catch (e) {
-                data.length = this.list.length = 0;
-                this.loading =false;
-                // console.log(e);
-                this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
+        // 先生成一个完整表格数据
+        this.list = new Array();
+        let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+        let hdlen = hd.length;
+        let datalen = data.length;
+        console.log('hd,hdlen,datalen')
+        console.log(hd,hdlen,datalen)
+        for (let index = 0; index < datalen; index++) {
+            this.list[index] = new Object();
+            for (let i = 0; i < hdlen; i++) {
+              this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td: hd[i],tdColspan: 1,tdRowspan: 1,trNum: index+1,upload: 1 };
             }
-        })
+          
+        }
+        //截取最后一行表头遍历进行对应处理（非合计行）
+        let cols = [...this.col]
+        function BikoFoArr (col) {
+            let obj = new Object();
+            Biko(col);
+            function Biko (colArr) { //表头尾行 真正显示对应列的数据
+                for (let c = 0; c < colArr.length; c++) {
+                  if (colArr[c].children && colArr[c].children.length >0) {
+                      Biko(colArr[c].children);
+                  }else{
+                      obj[colArr[c].colNum] = colArr[c];
+                  }
+                }
+            }
+            return obj;
+        }
+        if (this.PackHeader.length <2) return false; 
+        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
+        let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
+        console.log('sumArr')
+        console.log(sumArr)
+        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        for (let index = 0; index < header.length; index++) {
+            let sumRow = sumArr[header[index]];
+            if (sumRow.attribute && sumRow.attribute == "original" && sumRow.attributeValue && sumRow.attributeValue !="") {
+                let str = sumRow.attributeValue;
+                console.log(str)
+                let patt1=/[A-Z+]*/g;
+                let colName = str.match(patt1)[0];
+                for (let a = 0; a < this.list.length; a++) {
+                    this.list[a][sumRow.colNum] = new Object();
+                    this.list[a][sumRow.colNum] = data[a][colName];
+                }
+            }
+        }
+        // this.list = rest;
+        // console.log('this.list')
+
+        // console.log(this.list)
+         this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+        this.findList(); //调用滚动渲染数据
+        
+        // this.loading = true;
+        // this.hd.length = this.list.length = 0; //归为初始化状态
+        // this.startTime = Date.now();
+        // this.$excel.Imports(data=>{ //数据导入组装函数
+        //     try { //先判断表头是否一致
+        //         let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+        //         let datahd = Object.keys(data[0]);
+        //         if ( datahd.length < hd.length ) {
+        //             hd.length = datahd.length = 0;
+        //             return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+        //         }else{
+        //             hd.length = datahd.length = 0;
+        //         }
+        //         let arr = [...this.PackHeader];
+        //         arr.length = arr.length-1;
+        //         let dataSplice = data.splice(0,arr.length); //去掉表头并且用来作判断是否一致
+        //         let ff = arr.some( function( item, index, array ){ //判断导入的清单表头与网络清单表头如果是否相等
+        //               let hdsome = hd.some( function( val, i){ 
+        //                   let headrs = array[index][val];
+        //                   let Rows = dataSplice[index][val];
+        //                   return headrs.colNum != Rows.colNum || headrs.td != Rows.td || headrs.tdRowspan != Rows.tdRowspan || headrs.tdColspan != Rows.tdColspan || headrs.trNum != Rows.trNum;
+        //               }); 
+        //               return hdsome;
+        //         }); 
+        //         if (ff) {
+        //             arr.length = hd.length = dataSplice.length = 0; //释放内存
+        //             this.loading = false;
+        //             return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+        //         }
+        //     } catch (error) {
+        //        this.loading = false;
+        //        return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+        //     }
+
+            // try {  //把数据载入表格
+            //     this.list = [...data];
+            //     this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            //     this.findList(); //调用滚动渲染数据
+            //     this.Formula();  //调用公式计算
+            //     data.length = 0; //内存释放
+            // } catch (e) {
+            //     data.length = this.list.length = 0;
+            //     this.loading =false;
+            //     // console.log(e);
+            //     this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
+            // }
+        // })
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
+
         this.editRow != null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
