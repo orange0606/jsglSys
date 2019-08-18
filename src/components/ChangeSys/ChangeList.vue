@@ -85,7 +85,7 @@
          <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
           <el-dialog title="新建变更清单" width="100%" top="0vh" height="100%" :fullscreen="true" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
-              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="list" ></new-change>
+              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="list" :uplist="uprow" ></new-change>
           </el-dialog>
         </transition>
 
@@ -121,6 +121,7 @@ import XEUtils from 'xe-utils'
       refresh:false,
       loading: false,
       list: null,
+      uprow:  null,//修改清单（传入子组件的数据）
       tenderList:null,  //全部标段
       dialogVisible:false,//显示隐藏
       pageVO: {
@@ -144,11 +145,15 @@ import XEUtils from 'xe-utils'
   watch: {
     
     visibleNew: function(newVal,oldVal){
-        if (!newVal && this.list.length >0) {
-          this.changeList.push(this.list.slice(-1));
+        if (!newVal && this.list.length >0) { //把数据返回到父组件
+          this.changeList.length = 0;
+          for (let index = 0; index < this.list.length; index++) {
+              this.changeList.push(this.list[index]); 
+          }
           this.visibleNew = false; //关闭显示
         }
-    }
+    },
+
   },
   computed: {
     // enter: function () {
@@ -156,7 +161,11 @@ import XEUtils from 'xe-utils'
   },
   methods: {
     see (row) {
+        this.uprow = row;
+        this.visibleNew = true; //显示建立清单组件
         console.log('预览清单')
+        console.log(row);
+        console.log(this.changeList)
     },
     handleSizeChange (pageSize) {
       this.pageVO.pageSize = pageSize

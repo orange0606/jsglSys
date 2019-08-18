@@ -4,8 +4,8 @@
     element-loading-text="生成数据中，请稍后..."
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
-    <p style="color: red;font-size: 12px;">影响性能的参数：data、rowKey、fixed</p>
-    <p style="color: red;font-size: 12px;">兼容性：不兼容动态行高；不支持树结构</p>
+    <p style="color: red;font-size: 12px;margin:10px 0;">请选择你需要导入的原清单数据</p>
+    <!-- <p style="color: red;font-size: 12px;">兼容性：不兼容动态行高；不支持树结构</p> -->
     <elx-editable
       ref="elxEditable"
       class="scroll-table4"
@@ -100,7 +100,7 @@ export default {
       }
   },
   methods: {
-    handle (list) { //数据处理 进行组装表头 表格数据等等 数据、列数、行数、
+    handle (list) { //数据处理表格数据等等 数据、列数、行数、
         if (!list.length >0) {
             return false
         }

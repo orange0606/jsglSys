@@ -526,12 +526,11 @@ export default {
                       list[index][header[i]].formula = '';                     
                       list[index][header[i]].attribute = '';                  
                       list[index][header[i]].upload = 1;    
-
                       originalRowList.push(list[index][header[i]]);
                   }
               }
           }
-          let originalList = new Array();
+          // let originalList = new Array();
           let obj = new Object();
           let originalHead = this.originalHead;
           obj = {
@@ -552,25 +551,25 @@ export default {
 
           }
           this.originalList.push(obj)
-          originalList.push(obj)
-           //进行网路请求保存
-          this.$post('/original/save',{ originalList })
-            .then((response) => {
-            // console.log(response)
-            this.loading = false;
-            // this.findList();
-            this.$message({ message: '保存成功', type: 'success' })
-          }).catch(e => {
-                this.loading = false;
-                this.$message({
-                type: 'info',
-                message: '保存失败，请重试！'
-                })
-          })
+          // originalList.push(obj)
+          //  //进行网路请求保存
+          // this.$post('/original/save',{ originalList })
+          //   .then((response) => {
+          //   // console.log(response)
+          //   this.loading = false;
+          //   // this.findList();
+          //   this.$message({ message: '保存成功', type: 'success' })
+          // }).catch(e => {
+          //       this.loading = false;
+          //       this.$message({
+          //       type: 'info',
+          //       message: '保存失败，请重试！'
+          //       })
+          // })
 
           let succre = false;
           this.$emit("update:refresh", succre)
-          this.rest.length = this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
+          this.rest.length = this.list.length = this.hd.length = 0;
           this.showHeader = false;
           this.$nextTick(() => {  //强制重新渲染
               this.showHeader = true;
