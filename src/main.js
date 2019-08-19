@@ -1,14 +1,15 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from 'vue'
+import 'babel-polyfill';
+import Vue from 'vue';
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
   DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification, Tabs, TabPane,
   Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip} from 'element-ui';
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
-import App from './App'
-import router from './router'
+import App from './App';
+import router from './router';
 // Table,TableColumn,
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 // Vue.use(Loading);
 
 Vue.use(Tabs);

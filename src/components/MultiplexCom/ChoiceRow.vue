@@ -182,7 +182,9 @@ export default {
 }
 </script>
 
-<style>
+
+
+<style scoped>
 .scroll-table4-oper {
   margin-bottom: 18px;
 }

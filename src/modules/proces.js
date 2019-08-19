@@ -103,8 +103,7 @@ let excelmodel = {
                 // let col = ABC.indexOf(list[index].colNum); //列号A
                 arr[row-1][coll] =list[index];
                 arr[row-1][coll].edit = 'N'; //加入编辑状态
-                row = col = null;
-
+            
             }
         }
         return arr;

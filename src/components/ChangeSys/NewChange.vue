@@ -105,12 +105,12 @@
       class="scroll-table4 click-table11"
       border
       height="500"
-      size="mini"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       show-summary
+      size="small"
       :summary-method="getSummaries"
       :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
       style="width: 100%">
@@ -389,6 +389,7 @@ export default {
                 for (let a = 0; a < this.list.length; a++) {
                     this.list[a][sumRow.colNum] = new Object();
                     this.list[a][sumRow.colNum] = data[a][colName];
+                    this.list[a][sumRow.colNum].colNum = sumRow.colNum;
                 }
             }
         }
@@ -404,7 +405,6 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
-
         this.editRow != null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）

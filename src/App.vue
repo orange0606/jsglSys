@@ -134,7 +134,7 @@ body, html, #app{
   font-size:12px;
 }
 
-.el-table--border, .el-table--group {
+/* .el-table--border, .el-table--group {
     border: 1px solid #CCCCCC;
 }
 .el-table td, .el-table th.is-leaf {
@@ -142,9 +142,18 @@ body, html, #app{
 }
 .el-table--border td, .el-table--border th {
     border-right: 1px solid #CCCCCC;
+} */
+
+
+.el-table--border, .el-table--group {
+    border: 1px solid #909399;
 }
-
-
+.el-table td, .el-table th.is-leaf, .el-table--border th{
+    border-bottom: 1px solid #909399;
+}
+.el-table--border td, .el-table--border th {
+    border-right: 1px solid #909399;
+}
 
 
 </style>
