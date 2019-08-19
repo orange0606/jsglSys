@@ -1,7 +1,7 @@
 <template>
   <div
     v-loading="loading"
-    element-loading-text="正在加速处理数据222222222"
+    element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
     <div class="click-table11-oper">
@@ -207,13 +207,11 @@ export default {
     uplist: function(newVal,oldVal){  //子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         if (newVal != null) {  //判断返回的是不是一个数组
-           console.log('准备修改清单数据啦');
-           console.log(newVal);
-           //请求表头
+          this.form.name = newVal.name;
+          this.form.num = newVal.num;
+           //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
            let id = newVal.changeHeadId;
            this.oneHeader(id)
-           //组装表格数据
-
 
         }
     }
@@ -250,33 +248,34 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'change'})
         .then((response) => {
-        let data = response.data.onehead;
-        let headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
-        this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-        this.col = new Array();  //新建一个数组存储多级表头嵌套
-        this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        this.changeHead = { //保存表头信息
-          name:data.name,
-          num: data.num
-        }
-        this.showHeader = false;
-        this.$nextTick(() => {  //强制重新渲染
-            this.showHeader = true;
-            if (this.uplist != null) {  //this.uplist变更清单列表传来需要修改的数据
-              //调用表格组装函数（返回的是个数组对象）
-              console.log('进来了吗')
-              let list = this.uplist.changeRowList;
-              let arr = this.$excel.ListAssemble(list);
-              this.list = [...arr];
-              console.log('this.list')
-              console.log(arr)
-              this.findList(); //调用滚动渲染数据
-              this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-            }
-          })
-        this.Analysis();//调用表格公式解析
-        let changeHeadId = response.data.onehead.id;
-        this.allRelationOriginal(changeHeadId)
+          let data = response.data.onehead;
+          let headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
+          this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+          this.col = new Array();  //新建一个数组存储多级表头嵌套
+          this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+          this.changeHead = { //保存表头信息
+            name:data.name,
+            num: data.num
+          }
+          this.showHeader = false;
+          this.list.length = this.hd.length = 0;
+          this.$nextTick(() => {  //强制重新渲染
+              this.showHeader = true;
+
+              //作个防止数据错误处理表头得对应才开启修改清单的数据组装
+              if (this.uplist != null && this.uplist.changeHeadId == data.id) {  //this.uplist变更清单列表传来需要修改的数据
+                  //调用表格组装函数（返回的是个数组对象）
+                  this.startTime = Date.now(); 
+                  let list = this.uplist.changeRowList;
+                  let arr = this.$excel.ListAssemble(list);
+                  this.list = [...arr];
+                  this.findList(); //调用滚动渲染数据
+                  this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              }
+            })
+          this.Analysis();//调用表格公式解析
+          let changeHeadId = response.data.onehead.id;
+          this.allRelationOriginal(changeHeadId)
         
       })
     },
@@ -359,7 +358,7 @@ export default {
         for (let index = 0; index < datalen; index++) {
             this.list[index] = new Object();
             for (let i = 0; i < hdlen; i++) {
-              this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum: index+1,upload: 1 };
+              this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:index+1,upload: 1 };
             }
         }
         //截取最后一行表头遍历进行对应处理（非合计行）（实际上是取的多级嵌套表头里的最后一层）
@@ -533,14 +532,9 @@ export default {
         let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
         const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         for (let index = 0; index < header.length; index++) {
-            // console.log('进来了几次了呀 ',index)
             let sumRow = sumArr[header[index]];
-            // console.log('sumRow')
-            // console.log(sumRow.attribute,sumRow.attributeValue,sumRow.td)
             if (sumRow.attribute && sumRow.attribute == "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
                 let str = sumRow.attributeValue;
-                // console.log('str1');
-                // console.log(str);
                 str = this.filterStr(str);  //去除空格与特殊符号
                 let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
                 for (let i = 0; i < arr.length; i++) {
@@ -558,9 +552,7 @@ export default {
                         }
                     }
                 }
-                // console.log(str)
                 this.formula[sumRow.colNum] = str;
-                // console.log(this.formula)
             }      
         }
     },
@@ -586,9 +578,6 @@ export default {
                       // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
                       index == 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
                       eval(sum) || eval(sum)==0 ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td;  //字符串转代码计算
-
-                      // sum = 'parseInt(row["D"].td)*parseInt(row["E"].td)'
-                      // this.list[index][formuHd[a]].td = new Function(sum)(); 
                   }
                 }
             } catch (error) {
@@ -656,9 +645,6 @@ export default {
             // 重新生成排序后的序号
             item.seq = index;
           })
-          // this.loading = true;
-          console.log('list')
-          // console.log(list)
           if (list.length == 0) {
               this.$message({
                 type: 'success',
@@ -671,43 +657,64 @@ export default {
           const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
           const refCol = header.length;
           const refRow = list.length;
-          console.log('refCol,refRow')
-          console.log(refCol,refRow)
           let changeRowList = new Array();
           for (let index = 0; index < refRow; index++) {
               for (let i = 0; i < refCol; i++) {
                   if (list[index][header[i]] && list[index][header[i]].colNum) {
                       // delete list[index][header[i]].edit;
-                      list[index][header[i]].formula = '';                     
+                      list[index][header[i]].formula = '';
+                      list[index][header[i]].trNum = index+1;                  
                       list[index][header[i]].attribute = '';                  
                       list[index][header[i]].upload = 1;    
                       changeRowList.push(list[index][header[i]]);
                   }
               }
           }
-          console.log('changeRowList.length')
-          console.log(changeRowList.length)
-          console.log(changeRowList)
-          let obj = new Object();
-          let changeHead = this.changeHead;
-          obj = {
-              changeHeadId:this.form.headerId,
-              processId:6,
-              sysOrder:'',
-              sysNum:'',
-              name:this.form.name,
-              num:this.form.num,
-              tenderId:this.tender.id,
-              type:'change',
-              changeRowList,
-              changeHead,//表头数据
-              enter:this.list.length>0?1:0,
-              tender:this.tender,
-              saveTime:new Date(),
-              saveEmployee:{name:this.$store.state.username}
 
+          //此处做个判断，判断是新建还是修改。
+          if (this.uplist != null) {
+              let time = this.uplist.saveTime;
+              for (let index = 0; index < this.changeList.length; index++) {
+                  if (this.changeList[index].saveTime == time) {
+                    // delete this.changeList[index];
+                    this.changeList.splice(index,1);
+                    this.uplist.changeHeadId = this.form.headerId;
+                    this.uplist.name = this.form.name;
+                    this.uplist.num = this.form.num;
+                    this.uplist.changeHead = this.changeHead;
+                    this.uplist.changeRowList = changeRowList; //表格数据
+                    this.uplist.updateTime = new Date();//更改时间
+                    this.uplist.updateEmployee = {name:this.$store.state.username};//更改人
+                    this.changeList.push(this.uplist);//保存修改信息
+                    let succre = null;
+                    this.$emit("update:uplist", succre)  //清空uplist
+                    break;
+                  }
+                
+              }
+          }else{  //此处为新建
+              let obj = new Object();
+              let changeHead = this.changeHead;
+              obj = {
+                  changeHeadId:this.form.headerId,
+                  processId:6,
+                  sysOrder:'',
+                  sysNum:'',
+                  name:this.form.name,
+                  num:this.form.num,
+                  tenderId:this.tender.id,
+                  type:'change',
+                  changeRowList,
+                  changeHead,//表头数据
+                  enter:this.list.length>0?1:0,
+                  tender:this.tender,
+                  saveTime:new Date(),
+                  saveEmployee:{name:this.$store.state.username}
+              }
+              this.changeList.push(obj);
           }
-          this.changeList.push(obj);
+
+          
           let succre = false;
           this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
           this.loading = false;

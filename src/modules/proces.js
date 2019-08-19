@@ -155,23 +155,22 @@ let excelmodel = {
     return : 完整表格数据
     */
    ListAssemble (list){ 
+       let i =0;
         let arr = [];
-        for (let index = 0; index < list.length; index++) {
+        for (let index = list.length-1; index >= 0; index--) {
             let coll = list[index].colNum;
             let col = ABC.indexOf(list[index].colNum); //列号A
             let row = list[index].trNum;  //行号
             if (col>=0 && coll) {
-                if (arr[row-1]) {    //判断是否有这个下标,有的话直接添加数据
+                if (!arr[row-1]) {    //判断是否有这个下标,有的话直接添加数据
+                    arr[row-1]= new Object();
                     arr[row-1][coll] =list[index];
                 }else{ //无此下标，先创建
-                    arr[row-1]= new Object();
                     arr[row-1][coll] =list[index];
                 }
                 arr[row-1][coll].edit = 'N'; //加入编辑状态
-
             }
         };
-        // console.log(arr[0])
         for (let index = arr.length-1; index >= 0; index--) {
             if (!arr[index]) {
                 arr.splice(index,1)

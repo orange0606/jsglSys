@@ -91,13 +91,16 @@ export default {
     MyColumn
   },
   props: {
-    tender:{
+    uplist:{  //查看和修改清单数据
       type: Object,
     },
-    originalList:{
+    tender:{  //标段数据
+      type: Object,
+    },
+    originalList:{  //父组件的清单列表
       type: Array,
     },
-    refresh:{
+    refresh:{ //显示此组件的变量
     }
   },
   data () {
@@ -130,7 +133,18 @@ export default {
       list: function(newVal,oldVal){
           // console.log('数据有发生改变吗')
           // console.log(newVal)
-      }
+      },
+      uplist: function(newVal,oldVal){  //子组件返回来的数据
+        //此处可进行判断，然后进行清单导入
+        if (newVal != null) {  //判断返回的是不是一个数组
+          this.form.name = newVal.name;
+          this.form.num = newVal.num;
+           //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
+          let id = newVal.originalHeadId;
+          this.oneHeader(id);
+          
+        }
+    }
   },
   computed: {
       
@@ -156,7 +170,6 @@ export default {
     allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
         this.$post('/head/alloriginal',{tenderId})
         .then((response) => {
-          console.log('请求37标段id成功')
           this.form.headerList = response.data.originalHeadList;
         }).catch(e => {
             this.$message({
@@ -168,22 +181,29 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'original'})
         .then((response) => {
-        console.log('response');
-        console.log(response);
         let data = response.data.onehead;
         let headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        // console.log('this.col')
-        this.originalHead = {
+        this.originalHead = { //保存表头编号与名称
           name:data.name,
           num: data.num
         }
-
         this.showHeader = false;
+        this.list.length = this.hd.length = 0;
         this.$nextTick(() => {  //强制重新渲染
-	          this.showHeader = true;
+            this.showHeader = true;
+              //作个防止数据错误处理表头得对应才开启修改清单的数据组装
+              if (this.uplist != null && this.uplist.originalHeadId == data.id) {  //this.uplist变更清单列表传来需要修改的数据
+                  //调用表格组装函数（返回的是个数组对象）
+                  this.startTime = Date.now(); 
+                  let list = this.uplist.originalRowList;
+                  let arr = this.$excel.ListAssemble(list);
+                  this.list = [...arr];
+                  this.findList(); //调用滚动渲染数据
+                  this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              }
           })
         this.Analysis();//调用表格公式解析
         
@@ -515,61 +535,90 @@ export default {
           }
           //解构数据进行提交
           // this.loading = true;
+
+
+        //解构数据进行提交
+          this.loading = true;
           const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
           const refCol = header.length;
           const refRow = list.length;
           let originalRowList = new Array();
           for (let index = 0; index < refRow; index++) {
               for (let i = 0; i < refCol; i++) {
-                  if (list[index][header[i]] && list[index][header[i]].colNum == header[i] ) {
-                      delete list[index][header[i]].edit;
-                      list[index][header[i]].formula = '';                     
+                  if (list[index][header[i]] && list[index][header[i]].colNum) {
+                      // delete list[index][header[i]].edit;
+                      list[index][header[i]].formula = '';
+                      list[index][header[i]].trNum = index+1;                  
                       list[index][header[i]].attribute = '';                  
                       list[index][header[i]].upload = 1;    
                       originalRowList.push(list[index][header[i]]);
                   }
+
               }
           }
-          // let originalList = new Array();
-          let obj = new Object();
-          let originalHead = this.originalHead;
-          obj = {
-              originalHeadId:this.form.headerId,
-              processId:93,
-              sysOrder:'',
-              sysNum:'',
-              name:this.form.name,
-              num:this.form.num,
-              tenderId:this.tender.id,
-              type:'original',
-              originalRowList,
-              originalHead,//表头数据
-              enter:this.list.length>0?1:0,
-              tender:this.tender,
-              saveTime:new Date(),
-              saveEmployee:{name:this.$store.state.username}
 
-          }
-          this.originalList.push(obj)
-          // originalList.push(obj)
-          //  //进行网路请求保存
-          // this.$post('/original/save',{ originalList })
-          //   .then((response) => {
-          //   // console.log(response)
-          //   this.loading = false;
-          //   // this.findList();
-          //   this.$message({ message: '保存成功', type: 'success' })
-          // }).catch(e => {
-          //       this.loading = false;
-          //       this.$message({
-          //       type: 'info',
-          //       message: '保存失败，请重试！'
-          //       })
-          // })
+          //此处做个判断，判断是新建还是修改。
+          if (this.uplist != null) {
+              let time = this.uplist.saveTime;
+              for (let index = 0; index < this.originalList.length; index++) {
+                  if (this.originalList[index].saveTime == time) {
+                    // delete this.changeList[index];
+                    this.originalList.splice(index,1);
+                    this.uplist.originalHeadId = this.form.headerId;
+                    this.uplist.name = this.form.name;
+                    this.uplist.num = this.form.num;
+                    this.uplist.originalHead = this.originalHead;
+                    this.uplist.originalRowList = originalRowList; //表格数据
+                    this.uplist.updateTime = new Date();//更改时间
+                    this.uplist.updateEmployee = {name:this.$store.state.username};//更改人
+                    this.originalList.push(this.uplist);//保存修改信息
+                    let succre = null;
+                    this.$emit("update:uplist", succre)  //清空uplist
+                    break;
+                  }
+                
+              }
+          }else{  //此处为新建
+              let obj = new Object();
+              let originalHead = this.originalHead;
+              obj = {
+                  originalHeadId:this.form.headerId,
+                  processId:93,
+                  sysOrder:'',
+                  sysNum:'',
+                  name:this.form.name,
+                  num:this.form.num,
+                  tenderId:this.tender.id,
+                  type:'original',
+                  originalRowList,
+                  originalHead,//表头数据
+                  enter:this.list.length>0?1:0,
+                  tender:this.tender,
+                  saveTime:new Date(),
+                  saveEmployee:{name:this.$store.state.username}
 
+              }
+              this.originalList.push(obj)
+              // originalList.push(obj)
+              //  //进行网路请求保存
+              // this.$post('/original/save',{ originalList })
+              //   .then((response) => {
+              //   // console.log(response)
+              //   this.loading = false;
+              //   // this.findList();
+              //   this.$message({ message: '保存成功', type: 'success' })
+              // }).catch(e => {
+              //       this.loading = false;
+              //       this.$message({
+              //       type: 'info',
+              //       message: '保存失败，请重试！'
+              //       })
+              // })
+          }   
           let succre = false;
-          this.$emit("update:refresh", succre)
-          this.rest.length = this.list.length = this.hd.length = 0;
+          this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
+          this.loading = false;
+          this.list.length = this.hd.length = 0;
           this.showHeader = false;
           this.$nextTick(() => {  //强制重新渲染
               this.showHeader = true;

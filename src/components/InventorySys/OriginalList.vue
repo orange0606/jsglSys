@@ -85,7 +85,7 @@
          <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
           <el-dialog title="新建原清单" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" ></inven-edit>
+              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" :uplist.sync="uprow" ></inven-edit>
           </el-dialog>
         </transition>
     </div>
@@ -119,6 +119,7 @@ import XEUtils from 'xe-utils'
       refresh:false,
       loading: false,
       list: null,
+      uprow: null, //修改清单传入保存清单组组件的数据
       tenderList:null,  //全部标段
       dialogVisible:false,//显示隐藏
       pageVO: {
@@ -155,8 +156,9 @@ import XEUtils from 'xe-utils'
     // }
   },
   methods: {
-    see (row) {
-        console.log('预览清单')
+    see (row) { //预览和修改清单
+        this.uprow = row;
+        this.visibleNew = true; //显示建立清单组件
     },
     handleSizeChange (pageSize) {
       this.pageVO.pageSize = pageSize

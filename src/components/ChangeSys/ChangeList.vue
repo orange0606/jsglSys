@@ -85,7 +85,7 @@
          <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
           <el-dialog title="新建变更清单" width="100%" top="0vh" height="100%" :fullscreen="true" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
-              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="list" :uplist="uprow" ></new-change>
+              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="list" :uplist.sync="uprow" ></new-change>
           </el-dialog>
         </transition>
 
@@ -160,12 +160,9 @@ import XEUtils from 'xe-utils'
     // }
   },
   methods: {
-    see (row) {
+    see (row) { //预览和修改清单
         this.uprow = row;
         this.visibleNew = true; //显示建立清单组件
-        console.log('预览清单')
-        console.log(row);
-        console.log(this.changeList)
     },
     handleSizeChange (pageSize) {
       this.pageVO.pageSize = pageSize
