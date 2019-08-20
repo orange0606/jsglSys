@@ -59,9 +59,11 @@
             <span>系统管理</span>
             </template>
             <!-- <template slot="title">分组一</template> -->
-            <el-menu-item index="6-1"><router-link to="/newheader" >新建表头</router-link></el-menu-item>
-            <el-menu-item index="6-2"><router-link to="/headers" >已建表头</router-link></el-menu-item>
-            <el-menu-item index="6-3"><router-link to="/marks" >标段管理</router-link></el-menu-item>
+            <el-menu-item index="6-1"><router-link to="/newheader">新建表头</router-link></el-menu-item>
+            <el-menu-item index="6-2"><router-link to="/headers">已建表头</router-link></el-menu-item>
+            <el-menu-item index="6-3"><router-link to="/marks">标段管理</router-link></el-menu-item>
+            <el-menu-item index="6-1"><router-link to="/newhd">新建表头</router-link></el-menu-item>
+
         </el-submenu>
 
 

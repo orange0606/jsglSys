@@ -1,18 +1,19 @@
 
 const data = {
     /*
-        原清单、变更清单，变更后的（新）清单、计量清单、累计计量清单、支付清单，累计支付清单
+        原清单、变更清单，、计量清单、累计计量清单、支付清单，累计支付清单
     */
-    all_headname:['original', 'change', 'update', 'meterage', 'totalmeterage', 'pay', 'totalpay'],  
-    all_head:{  //所有清单表头字段
-        tenderId : null, //标段id
-        sysOrder : null, //系统序号，用于排序
-        sysNum : null, // 系统编号，用于处理清单编号的去空格、转换中文符号为英文等。
-        num : null, //表头编号
-        name : null, //表头名称
-        type : null, //清单类别
-        tOriginalHeadId:null,//原清单id 
-    },
+//    'update'变更后的（新）清单,
+    all_headname:['original', 'change', 'meterage', 'totalmeterage', 'pay', 'totalpay'],  
+    // all_head:{  //所有清单表头字段
+    //     tenderId : null, //标段id
+    //     sysOrder : null, //系统序号，用于排序
+    //     sysNum : null, // 系统编号，用于处理清单编号的去空格、转换中文符号为英文等。
+    //     num : null, //表头编号
+    //     name : null, //表头名称
+    //     type : null, //清单类别
+    //     tOriginalHeadId:null,//原清单id 
+    // },
     all_head_row:[  //所有表头行共有的key值
         'name', //名称
         'colWidth', //列宽（注意上行与下行的列宽要相等）
@@ -22,11 +23,10 @@ const data = {
         'attribute', //属性
         'attributeValue', //属性值
         'textAlign', //文本对齐对齐方式
-        'tOriginalHeadRowId',//原清单表头内容ID
-        'tUpdateHeadRowId',//原清单表头内容ID
+        'tOriginalHeadRowId', //原清单表头内容ID
+        'tUpdateHeadRowId', //变更后新清单表头内容ID
         'tLimit',    //限制值类型 int
         'limitValue', //限制值
-
     ],
     all_attribute: [   //所有清单表头共有的属性
         {att_name: 'sysOrder',zh:'系统序号列“sysOrder”（用于系统的排序，导入导出时无需匹配）',value:null,if:false,no:1},
@@ -44,7 +44,7 @@ const data = {
     ],
     original: {  // 原清单
         attribute:[ //属性及属性值
-            {att_name: 'originalNull',zh:'“originalnull”新清单（无对应）',value:null,if:false},
+            {att_name: 'originalNull',zh:'“originalnull”原清单（无对应）',value:null,if:false},
         ]
     },
     change:{    //变更清单
@@ -52,19 +52,21 @@ const data = {
             {att_name: 'original',zh:'“original”原清单',value:'CA14',if:true},
             {att_name: 'originalNull',zh:'“originalnull”新清单（无对应）',value:null,if:false},
             {att_name: 'change',zh:'“change”变更清单',value:null,if:false},
+            {att_name: 'fluctuate',zh:'“fluctuate”变更清单增减',value:'DC12',if:true},
         ]
 
     },
-    update:{    //变更后（新）清单
-        attribute:[ //属性及属性值
-        ]
+    // update:{    //变更后（新）清单
+    //     attribute:[ //属性及属性值
+    //     ]
 
-    },
+    // },
     meterage:{    //计量清单
         attribute:[ //属性及属性值
             {att_name: 'update',zh:'“update”新清单',value:'CA14',if:true},
             {att_name: 'updateNull',zh:'“updatenull”新清单（无对应）',value:null,if:false},
-            {att_name: 'meterage',zh:'“meterage”变更清单',value:null,if:false},
+            {att_name: 'meterage',zh:'“meterage”计量清单',value:null,if:false},
+            {att_name: 'totalmeterage-meterage',zh:'累计计量对应的计量清单',value:"H4",if:false},
         ]
         
     },

@@ -29,6 +29,14 @@ export default new Router({
       }
     },
     {
+      path: '/newhd',
+      name: 'newhd',
+      component: ()=>import('@/components/System/NewHeader02.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    },
+    {
       path: '/headers',
       name: 'headers',
       component: ()=>import('@/components/System/Allheader.vue'),

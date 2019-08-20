@@ -741,7 +741,10 @@ import inven from '../../modules/inventory';
                             // console.log(column)
                             this.lead.cell_hd = colum;
                             //点击单元格获取id 和key（位置）
-                            this.lead.att_id = row[colum].id;
+                            console.log('row[colum].id')
+                            console.log(row[colum])
+                            console.log(row[colum].toId)
+                            this.lead.att_id = row[colum].toId;
                             this.lead.att_key = `${row[colum].colNum}${row[colum].trNum}`;
                             // console.log(this.lead.att_id,this.lead.att_key)
                             // console.log('cell_click2打印一下this.row_att')
@@ -749,14 +752,16 @@ import inven from '../../modules/inventory';
                             // console.log('点击单元格设置属性值')
                             this.row_att.attributeValue = this.lead.att_key;
                             let attribute = this.row_att.attribute;
-                            if (attribute =="original") {  //原清单表头内容ID
+                            if (attribute =="original") {  //原清单内容ID 
                                 this.row_att.tOriginalHeadRowId =  this.lead.att_id;
+                                console.log('现在打印一下有无记录到属性')
+                                console.log('this.row_att')
+                                console.log(this.row_att)
                             }else if(attribute =="change" || attribute =="meterage" || attribute =="fluctuate"){  //变更后清单表头内容ID
                                 this.row_att.tUpdateHeadRowId =  this.lead.att_id;
                   
                             }
                         }
-                    
                     //手动刷新表格
                     this.$refs.elxEditable?this.$refs.elxEditable.refresh():this.$refs.elxEditable1.refresh()
                     // this.$refs.elxEditable.doLayout()

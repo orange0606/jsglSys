@@ -148,13 +148,50 @@ let excelmodel = {
         }
         
     },
+     /*
+    表头属性数据组装函数
+    param list: 所有表头单元格单元格基本数据(obj)
+    return : 完整表头数据
+    */
+    HeaderAtt (list) {
+        list = [...list];
+        let arr = new Array();
+        let listhd = Object.keys(list[0]);
+        let listhdlen = listhd.length;
+        console.log('listhd,listhdlen')
+        console.log(listhd,listhdlen)
+        for (let index = 0; index < list.length; index++) {
+            console.log('index')
+            console.log(index)
+            arr[index] = {};
+            for (let i = 0; i < listhdlen; i++) {
+                let arrObj = arr[index][listhd[i]] = list[index][listhd[i]];;
+                arrObj.name = null; //名称
+                arrObj.colWidth = 80; //列宽（注意上行与下行的列宽要相等）
+                arrObj.colWdthProportion = null;//列宽比例
+                arrObj.trHigh = 35; // 行高
+                arrObj.trHighproportion = null;//行高比例
+                arrObj.attribute = null; //属性
+                arrObj.attributeValue = null; //属性值
+                arrObj.textAlign = 'center'; //文本对齐对齐方式
+                arrObj.tOriginalHeadRowId = null; //原清单表头内容ID
+                arrObj.tUpdateHeadRowId = null; //变更后新清单表头内容ID
+                arrObj.tLimit = null;    //限制值类型 int
+                arrObj.limitValue = null; //限制值
+                console.log('i,list[index][listhd[i]],arr[index]')
+                console.log(i,list[index][listhd[i]],arr[index])
+            }
+            
+        }
+        return arr;
+    },
+    
     /*
     清单数据组装表格函数
     param list: 所有单元格基本数据(obj)
     return : 完整表格数据
     */
-   ListAssemble (list){ 
-       let i =0;
+    ListAssemble (list){ 
         let arr = [];
         for (let index = list.length-1; index >= 0; index--) {
             let coll = list[index].colNum;
