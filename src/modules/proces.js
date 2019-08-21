@@ -158,11 +158,7 @@ let excelmodel = {
         let arr = new Array();
         let listhd = Object.keys(list[0]);
         let listhdlen = listhd.length;
-        console.log('listhd,listhdlen')
-        console.log(listhd,listhdlen)
         for (let index = 0; index < list.length; index++) {
-            console.log('index')
-            console.log(index)
             arr[index] = {};
             for (let i = 0; i < listhdlen; i++) {
                 let arrObj = arr[index][listhd[i]] = list[index][listhd[i]];;
@@ -178,10 +174,7 @@ let excelmodel = {
                 arrObj.tUpdateHeadRowId = null; //变更后新清单表头内容ID
                 arrObj.tLimit = null;    //限制值类型 int
                 arrObj.limitValue = null; //限制值
-                console.log('i,list[index][listhd[i]],arr[index]')
-                console.log(i,list[index][listhd[i]],arr[index])
             }
-            
         }
         return arr;
     },

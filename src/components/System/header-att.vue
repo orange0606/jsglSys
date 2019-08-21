@@ -484,12 +484,12 @@ import inven from '../../modules/inventory';
                         return one == arrindex; 
                       });
                       if (tru) {
-                          console.log('进来了吗')
+                          // console.log('进来了吗')
                           for (let index = 0; index < arr.length; index++) {
                               lastTwo[arr[index]].tdRowspan = 1;
                           }
                       }
-                      console.log(this.list.slice(-2))
+                      // console.log(this.list.slice(-2))
 
                   }   
               }else{  //提交新建表头数据到父组件
