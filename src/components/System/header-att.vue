@@ -460,9 +460,9 @@ import inven from '../../modules/inventory';
                   if (!this.From.id) {
                       let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
                       //此处生成合计尾行
-                      let tr = XEUtils.clone(rest[rest.length-1], true)
-                      rest.push(tr) 
-                      let hd = Object.keys(rest[0])
+                      let tr = XEUtils.clone(rest[rest.length-1], true);
+                      rest.push(tr);
+                      let hd = Object.keys(rest[0]);
                       for (let i = 0; i < hd.length; i++) {
                         let tb = rest[rest.length-1][hd[i]];
                         // let tb2 = rest[rest.length-2][hd[i]];
@@ -471,10 +471,26 @@ import inven from '../../modules/inventory';
                         // if (tb.tdRowspan >1 || tb.tdRowspan == 0) {	//这里进行不复制上一行的行合并，默认全部显示。
                         //   tb.tdRowspan = 1;
                         // }
-                        tb.tdRowspan >1?tb.tdRowspan =1:tb.tdRowspan=1;
-                        tb.tdColspan ==0?tb.tdColspan =1:tb.tdColspan=1;
+                        tb.tdRowspan >=0?tb.tdRowspan =1:tb.tdRowspan=1;
+                        tb.tdColspan >=0?tb.tdColspan =1:tb.tdColspan=1;
                       }
-                      this.list = rest;           
+                      this.list = rest;   
+                      let lastTwo = this.list.slice(-2)[0];
+                      let arr = Object.keys(lastTwo);
+
+                      let one = lastTwo[arr[0]].tdRowspan;
+                      let tru = arr.every( function( item, index, array ){ 
+                        let arrindex = lastTwo[arr[index]].tdRowspan;
+                        return one == arrindex; 
+                      });
+                      if (tru) {
+                          console.log('进来了吗')
+                          for (let index = 0; index < arr.length; index++) {
+                              lastTwo[arr[index]].tdRowspan = 1;
+                          }
+                      }
+                      console.log(this.list.slice(-2))
+
                   }   
               }else{  //提交新建表头数据到父组件
                   // alert('直接完成')
@@ -626,8 +642,6 @@ import inven from '../../modules/inventory';
                   //     return [row[this.hd[columnIndex]].tdRowspan, row[this.hd[columnIndex]].tdColspan]
                   // }
                   return [1, 1]
-             
-  
           }, 
           cell_click(row, column, cell, event){ //单元格点击事件
 
