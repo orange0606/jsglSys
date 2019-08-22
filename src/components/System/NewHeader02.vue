@@ -52,7 +52,9 @@
 
                 </elx-editable-column>
             </elx-editable>
-                
+            
+
+            <click-table :Obj="headerTypeObj" :attVal.sync="attVal"></click-table>
         </el-col>
 
 
@@ -124,6 +126,7 @@
 
 <script>
 import headerForm from './headerAtt/headerForm';
+import clickTable from './headerAtt/clickTable';
 
 import inven from '../../modules/newheaderAtt';
 // import inven from '../../modules/inventory';
@@ -146,7 +149,7 @@ import XEUtils from 'xe-utils';
                 name: null,           //表名
                 type: null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
                 tOriginalHeadId: null,    //原清单表头ID，建变更清单和变更后清单表头时传
-                tUpdateHeadId:null,   //变更后新清单表头ID，建计量清单表头时需要
+                tUpdateHeadId: null,   //变更后新清单表头ID，建计量清单表头时需要
                 refCol:null,   //多少列
                 refRow:null,   //多少行
                 headRowList:[],           //表头单元格内容
@@ -169,6 +172,11 @@ import XEUtils from 'xe-utils';
             ifInput: [],    //该表头类型要设置属性值的所有属性名
             Limit: [], //选择表头类型的所有限制值属性
             setState: null, //null,为不需要选中单元格值 true此表格中单击单元格选中为值，false为需要外联显示单击其他表格单元格
+            attVal: {   //点击显示关联的表的单元格，获取到的属性值和id
+                id: null,
+                key: null
+            },
+            headerTypeObj: {}, //传给关联表格子组件获取表头的数据  （object）表头类型type  表头id
 
             loading: false,
             headerMenus: [
@@ -252,20 +260,44 @@ import XEUtils from 'xe-utils';
         'Form.type': function(New, Old){
             // console.log('子组件传表头类型值过来了')
             // console.log(New);
-
+            if(!New) return false;
             //对于表头类型的更改，每次改变，应把表格数据为空
             this.hd.length = this.list.length = 0; 
             this.btn.stateEdit = false;
             this.btn.editAtt = true;
             this.$refs.elxEditable.reload([]);
 
+            if (New != 'original' && New== 'change') {
+                this.headerTypeObj.type = 'original';
+                this.headerTypeObj.id = this.Form.tOriginalHeadId;
+            }else if (New != 'original' && New != 'change') {
+                this.headerTypeObj.type = 'update';
+                this.headerTypeObj.id = this.Form.tUpdateHeadId;
+            }
+            
             // 组装属性
             this.Attribute = inven.Attribute(New);  //该表头类型的所有可设置的属性
             this.ifInput = inven.ifInput(New);    //该表头类型要设置属性值的所有属性名
             this.Limit = inven.Limit(New);  //该表头类型要设置的所有限制值属性
-            console.log('this.Limit')
-            console.log(this.Limit)
-        }
+
+            // console.log('this.Limit')
+            // console.log(this.Limit)
+        },
+        attVal: function(New, Old){ //点击显示关联的表的单元格，获取到的属性值和id
+            console.log('关联表格单击事件的单元格的行列号和id发送过来了')
+            console.log(New)
+            if (New.id && New.key ) {
+                this.row.attributeValue = New.key;
+                if (attribute =="original") {  //原清单内容ID 
+                    this.row.tOriginalHeadRowId = New.id;
+                    console.log('现在打印一下有无记录到属性')
+                    console.log('this.row')
+                    console.log(this.row)
+                }else {  //变更后清单表头内容ID
+                    this.row.tUpdateHeadRowId =  New.id;
+                }
+            }
+        },
 
     },
     mounted() {
@@ -485,8 +517,6 @@ import XEUtils from 'xe-utils';
         },
 
 
-
-        
         formatterDate (row, column, cellValue, index) {
             return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
         },
@@ -553,7 +583,7 @@ import XEUtils from 'xe-utils';
         background-color: #f0f9eb;
     }
     .headerform {
-        margin: 70px 0 0 0;
+        margin: 30px 0 0 0;
     }
     /* 属性设置状态 未与已 */
 
@@ -570,7 +600,7 @@ import XEUtils from 'xe-utils';
 .box-card {
   width: 100%;
   text-align: left;
-  margin-top: 40px;
+  margin-top: 50px;
   /* top: 15vh; */
 }
 

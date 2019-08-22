@@ -4,11 +4,11 @@
     <el-row>
         <el-col :span="6" :xs="24" style="min-width:300px;">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
-                <el-form-item label="表头标段" prop="region">
+                <!-- <el-form-item label="表头标段" prop="region">
                     <el-select v-model="ruleForm.region" clearable @change="tenChange" placeholder="请选择表头标段" style=" width:100%;">
                         <el-option v-for="(val,i) in regionList" :key="i" :label="val.name" :value="val.id"></el-option>
                     </el-select>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="表头类型" prop="type">
                     <el-select v-model="ruleForm.type" placeholder="请选择表头类型" @change="typeChange" clearable size="small" style=" width:100%;">
                         <el-option label="原清单" value="original"></el-option>
@@ -20,16 +20,16 @@
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type=='change'" label="选择表头" prop="tOriginalHeadId">
+                <!-- <el-form-item v-if="ruleForm.type=='change'" label="选择表头" prop="tOriginalHeadId">
                     <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择原清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
                         <el-option v-for="(val,i) in HeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type=='meterage'" label="选择表头" prop="tOriginalHeadId">
+                <el-form-item v-if="ruleForm.type!='original' && ruleForm.type!='change' " label="选择表头" prop="tOriginalHeadId">
                     <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择变更后新清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
                         <el-option v-for="(val,i) in HeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
                     </el-select>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="表头编号" prop="number">
                     <el-input v-model="ruleForm.number"></el-input>
                 </el-form-item>
@@ -73,7 +73,7 @@
           number: '',   //表头编号
           type: '',  //表头类型
           tOriginalHeadId:null, //原清单表头ID，建变更清单和变更后清单表头时传
-          tUpdateHeadId:null,   //变更后新清单表头ID，建计量清单表头时需要
+          tUpdateHeadId:null,   //变更后新清单表头ID，除了建原清单与变更清单表头时不需要
         },
 
         multipleSelection: [],
@@ -210,38 +210,38 @@
           })
 
         },
-        submitHeader () {  //校验表头选择表单 
-            if ((this.ruleForm.type=='change' || this.ruleForm.type=='update') && this.HeadList.length <1) {
-                return this.$message({ message: '请先建立原清单', type: 'error' })
-            }
-            this.$refs.ruleForm.validate(valid => {
-              if (valid) {
-                    let url = '/head/'+this.ruleForm.type;
-                    if (this.ruleForm.type == 'update') {
-                        url = '/head/one/'+this.ruleForm.type;
-                    }
-                    let params = {
-                      tenderId: this.ruleForm.region,
-                      num: this.ruleForm.number,
-                      name: this.ruleForm.name,
-                      type: this.ruleForm.type
-                    }
-                    this.$post(url,params)
-                    .then((response) => {
-                        if (response.data.head) {
-                            return this.$message({ message: '该表头已存在，请换个表名试试吧。', type: 'error' });
-                        }
-                        //此处传值给父组件
-                        this.saveForm()
-                        console.log(this.Form)
-                    })
+        // submitHeader () {  //校验表头选择表单 
+        //     if ((this.ruleForm.type=='change' || this.ruleForm.type=='update') && this.HeadList.length <1) {
+        //         return this.$message({ message: '请先建立原清单', type: 'error' })
+        //     }
+        //     this.$refs.ruleForm.validate(valid => {
+        //       if (valid) {
+        //             let url = '/head/'+this.ruleForm.type;
+        //             if (this.ruleForm.type == 'update') {
+        //                 url = '/head/one/'+this.ruleForm.type;
+        //             }
+        //             let params = {
+        //               tenderId: this.ruleForm.region,
+        //               num: this.ruleForm.number,
+        //               name: this.ruleForm.name,
+        //               type: this.ruleForm.type
+        //             }
+        //             this.$post(url,params)
+        //             .then((response) => {
+        //                 if (response.data.head) {
+        //                     return this.$message({ message: '该表头已存在，请换个表名试试吧。', type: 'error' });
+        //                 }
+        //                 //此处传值给父组件
+        //                 this.saveForm()
+        //                 console.log(this.Form)
+        //             })
                     
 
-              } else {
-                this.$message({ message: '校验不通过', type: 'error' })
-              }
-            })
-          }
+        //       } else {
+        //         this.$message({ message: '校验不通过', type: 'error' })
+        //       }
+        //     })
+        //   }
 
   }
 }
