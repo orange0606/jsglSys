@@ -114,8 +114,8 @@
    watch: {
         ruleForm:{  
             handler(New, Old) {
-                console.log("---nnn---")
-                console.log('传值给父组件')
+                // console.log("---nnn---")
+                // console.log('传值给父组件')
                 // console.log(New)
                 this.Form.tenderId = New.region;   //标段id 
                 this.Form.num = New.number;    //表头编号
@@ -133,8 +133,8 @@
             //发起网络请求
           this.$post('/tender/getall',{})
             .then((response) => {
-            console.log('请求标段数据')
-            console.log(response)
+            // console.log('请求标段数据')
+            // console.log(response)
             this.regionList = response.data.tenderList;
           })
          

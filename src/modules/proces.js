@@ -163,7 +163,7 @@ let excelmodel = {
             for (let i = 0; i < listhdlen; i++) {
                 let arrObj = arr[index][listhd[i]] = list[index][listhd[i]];;
                 arrObj.name = null; //名称
-                arrObj.colWidth = 80; //列宽（注意上行与下行的列宽要相等）
+                arrObj.col_width = 120; //列宽（注意上行与下行的列宽要相等）
                 arrObj.colWdthProportion = null;//列宽比例
                 arrObj.trHigh = 35; // 行高
                 arrObj.trHighproportion = null;//行高比例

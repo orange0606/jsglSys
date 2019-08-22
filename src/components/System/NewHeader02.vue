@@ -1,6 +1,6 @@
 <template>
     <div>
-    <h4 style="margin:10px 0 10px 0;" v-show="!btn.edit">请点击每个单元格设置相关属性</h4>
+    <h4 style="margin:10px 0 10px 0;" v-show="!btn.editAtt">请点击每个单元格设置相关属性</h4>
     <el-row :gutter="0">
         
         <el-col :span="18"  :xs="24" :sm="20" :md="15" :lg="17" :xl="18">
@@ -39,11 +39,15 @@
                     <template slot-scope="scope" >
                         <el-input v-if="btn.stateEdit" v-model="scope.row[val].td" ></el-input>
                         <div v-else-if="!btn.stateEdit">
+                            
                             <!-- <el-badge is-dot :class="[scope.row[val].attribute == null ? 'state':'statenull']">{{scope.row[val].td}}</el-badge> -->
-                            <el-badge style="display:block;" :hidden="scope.row[val].attribute !=null" is-dot class="item_red">{{scope.row[val].td ==null || scope.row[val].td == ''?'&nbsp;&nbsp;':scope.row[val].td}}</el-badge>
+                            <el-badge :style="{display:'block','text-align':scope.row[val].textAlign}" :hidden="scope.row[val].attribute !=null" is-dot class="item_red">{{scope.row[val].td ==null || scope.row[val].td == ''?'&nbsp;&nbsp;':scope.row[val].td}}</el-badge>
+                            
                             <el-badge v-show="scope.row[val].attribute !=null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>
                             <el-badge v-show="scope.row[val].tLimit !=null" type="success" :value="badge_name[scope.row[val].tLimit]" class="new"></el-badge>
+                       
                         </div>
+
                     </template>
 
                 </elx-editable-column>
@@ -57,9 +61,56 @@
                 <!-- 此处引入表头名称标段选择Form表单组件 -->
                 <header-form v-show="!showAtt" :Form="Form"></header-form>
 
-                <att-form v-show="!btn.editAtt && showAtt" :row="rowAtt" :type="Form.type"></att-form>
+
+                <!-- 此处引入表头单元格内容属性设置Form表单组件 -->
+                <el-form v-show="showAtt" :model="row" ref="row" label-width="100" width="800" size="small">
+                    <el-form-item label="设置属性" prop="attribute">
+                        <el-select  v-model="row.attribute" placeholder="请选择属性" filterable remote  clearable @change="attChange" size="small" style=" width:100%;" prop="attribute">
+                            <!-- <el-option v-for="(val,i) in allAttribute" :key="i" :label="val.name" :value="val.value"></el-option> -->
+                            <el-option v-for="(val,i) in Attribute" :key="i+'a'" :label="val.name" :value="val.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item v-for="(val,i) in Attribute" :key="i+'b'" v-show="row.attribute!=null && val.value == row.attribute && val.input && row.attribute !='sumText'" label="属性值(点击左边表格的单元格选择值)" >
+                        <el-input ref="attValue" v-model="row.attributeValue" :autofocus="true" @focus="attValueFocus">
+                            <el-button slot="append" type="primary" size="mini" @click="attValBtn(row.attributeValue)">确定</el-button>
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item  v-if="row.attribute =='sumText'" label="合计尾行单元格内容" >
+                        <el-input ref="attValue" v-model="row.td" :autofocus="true">
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item v-if="Limit.length >0" label="限制单元格大小值">
+                        <el-select v-model="row.tLimit" placeholder="请选择限制类型" @change="LimitChange" clearable size="small" style=" width:100%;">
+                            <el-option v-for="(val,i) in Limit" :key="i+'c'" :label="val.name" :value="val.value"></el-option>
+
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="row.tLimit!=null" label="限制值" >
+                        <el-input v-model="row.limitValue" @focus="LimitValFocus">
+                            <el-button slot="append" type="primary" size="mini" @click="LimitValBtn(row.limitValue)">确定</el-button>
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item :label="`表格列宽 ( 系统已自动调整，请根据内容自行调整 )`" >
+                    <br>
+                      <!-- <el-slider v-model="row.col_width" :max="500" :min="0" :step="5"> </el-slider> -->
+                    <el-slider v-model="row.col_width" :max="500" :min="50" :step="5"> </el-slider>
+
+                    </el-form-item>
+                    <el-form-item label="此行行高 ( 默认为最低30px 请根据内容适当调整 )" >
+                      <br>
+                      <el-slider v-model="row.trHigh" :max="300" :min="30" :step="5"> </el-slider>
+                      <div :style="{width:row.col_width+'px',height:row.trHigh+'px','text-align':row.textAlign,'line-height':row.trHigh+'px',border:'1px solid pink'}" >{{row.td}}</div>
+                    </el-form-item>
+                     <el-form-item label="单元格文字对齐" >
+                        <el-select v-model="row.textAlign" placeholder="请选择对齐方式" clearable size="small" style=" width:100%;">
+                            <el-option  label="居中" value="center"></el-option>
+                            <el-option  label="靠左" value="left"></el-option>
+                            <el-option  label="靠右" value="right"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
             </div>
-            <!-- 此处引入表头单元格内容属性设置Form表单组件 -->
+
         </el-col>
 
     </el-row>
@@ -73,16 +124,15 @@
 
 <script>
 import headerForm from './headerAtt/headerForm';
-import attForm from './headerAtt/attForm';
 
-
+import inven from '../../modules/newheaderAtt';
+// import inven from '../../modules/inventory';
 import XEUtils from 'xe-utils';
 // import inven from '../../modules/inventory';
   export default {
     name: 'NewHeader02',
     components: {
-        headerForm,
-        attForm
+        headerForm
     },
     props: {
         Form:{  //表单数据
@@ -112,8 +162,14 @@ import XEUtils from 'xe-utils';
                 stateEdit: false, //单元格编辑状态
                 editAtt: true, //编辑属性状态（第一步true，第二步为false）
             },
+
             showAtt: false, //显示属性设置子组件
-            rowAtt: {}, //属性设置传给子组件（引入赋值）
+            row: {}, //属性设置传给子组件（引入赋值）
+            Attribute: [], //选择表头类型的所有属性
+            ifInput: [],    //该表头类型要设置属性值的所有属性名
+            Limit: [], //选择表头类型的所有限制值属性
+            setState: null, //null,为不需要选中单元格值 true此表格中单击单元格选中为值，false为需要外联显示单击其他表格单元格
+
             loading: false,
             headerMenus: [
                 [
@@ -164,7 +220,7 @@ import XEUtils from 'xe-utils';
                 sysOrder:'序号',
                 sysNum:'编号',
                 formula:'公式',
-                sumText:'合计（普通）',
+                sumText:'合计（文本）',
                 sumNull:'合计（空）',
                 sumFormula:'合计（公式）',
                 original:'原清单',
@@ -172,12 +228,12 @@ import XEUtils from 'xe-utils';
                 change:'变更清单',
                 update:'新清单',
                 updateNull:'新清单（无）',
-                meterage:'变更清单？',
-                fluctuate:'变更清单（变更清单增减）',
+                meterage:'计量清单',
+                fluctuate:'变更清单增减',
                 totalpay:'累计支付清单',
-                '1':'max', //max
-                '2':'增加MAX',  //increaseMax
-                '3':'减少MAX' //decreaseMax
+                max:'max', //max
+                increaseMax:'增加MAX',  //increaseMax
+                decreaseMax:'减少MAX' //decreaseMax
             }
       }
     },
@@ -194,13 +250,21 @@ import XEUtils from 'xe-utils';
     },
     watch: {
         'Form.type': function(New, Old){
-            console.log('子组件传表头类型值过来了')
-            console.log(New);
+            // console.log('子组件传表头类型值过来了')
+            // console.log(New);
+
             //对于表头类型的更改，每次改变，应把表格数据为空
             this.hd.length = this.list.length = 0; 
             this.btn.stateEdit = false;
             this.btn.editAtt = true;
             this.$refs.elxEditable.reload([]);
+
+            // 组装属性
+            this.Attribute = inven.Attribute(New);  //该表头类型的所有可设置的属性
+            this.ifInput = inven.ifInput(New);    //该表头类型要设置属性值的所有属性名
+            this.Limit = inven.Limit(New);  //该表头类型要设置的所有限制值属性
+            console.log('this.Limit')
+            console.log(this.Limit)
         }
 
     },
@@ -332,46 +396,97 @@ import XEUtils from 'xe-utils';
               if (column.property && !this.btn.editAtt) {  //做容错处理，防止点击到选择框触发此事件
                     //显示属性设置子组件
                     this.showAtt = true;
-
                     //从单击单元格获取单元格的数据
                     let colum =column.property;
                     colum = colum.substr(0,colum.indexOf('.'));
 
-                    //赋值传到属性设置子组件中
-                    this.rowAtt = row[colum];
+                     //点击单元格获取 和key（位置）
+                    let key = `${row[colum].colNum}${row[colum].trNum}`;
+                    // console.log('key.......................................')
+                    // console.log(key)
+                    if (this.setState == null) {
+                        //赋值传到属性设置子组件中
+                        this.row = row[colum];
+                        //显示属性设置组件
+                        this.showAtt = true;
+                    }else{
+                        if (this.setState == 'formula') {
+                            this.row.attributeValue == null? this.row.attributeValue ="":this.row.attributeValue ;
+                            this.row.attributeValue += key;  
+                        }else if (this.setState == 'attribute') {
+                            this.row.attributeValue = key;
+                        }else if (this.setState == 'limit') {
+                            console.log('this.row')
+                            console.log(this.row)
+                            this.row.limitValue = key;
+                        }
+                    }
+                    
 
-                    // this.lead.cell_row = row[colum].trNum;
-                    // this.lead.cell_col = column.id;
-                    // // console.log(column)
-                    // this.lead.cell_hd = colum;
-                    // //点击单元格获取id 和key（位置）
-                    // this.lead.att_id = row[colum].id;
-                    // this.lead.att_key = `${row[colum].colNum}${row[colum].trNum}`;
 
-                //     if(this.lead.att_click_type == 'formula'){    ////点击单元格设置公式属性值
-                          
-                //           // console.log(this.lead.att_id,this.lead.att_key)
-                //           // console.log('this.row_att')
-                //           // console.log('进来了公式设置')
-                //           console.log(this.row_att)
-                //           this.row_att.attributeValue==null? this.row_att.attributeValue="":this.row_att.attributeValue;
-                //           this.row_att.attributeValue = this.row_att.attributeValue+this.lead.att_key;
-                          
-                //     }else if(this.lead.att_click_type =='limit'){  //点击单元格设置限制属性值与id
-                //             // console.log('点击单元格设置限制属性值与')
-                //             this.row_att.limitValue = this.lead.att_key;
- 
-                //    }else if(this.lead.att_click_type == null){
-                //           //调用点击属性设置显示事件
-                //           // console.log('调用点击属性设置显示事件')
-                //           this.att(row[colum])
-                //     }  
-                //     //手动刷新表格
-                //     this.refresfhs();
-                //     // this.$refs.elxEditable.doLayout()
               }
           },
 
+        //-----有关属性的处理函数-----
+
+        typeAttState (type) {   //判断属性 然后设置属性值状态 
+            if(!type)return false;
+            if (type =='sysOrder' || type == 'sysNum') {
+                return this.setState = null; //初始状态，可随意切换单元格设置属性状态
+            }else if (type =='original' || type == 'update'){
+                return this.setState = 'relation'; //改为外联设置属性状态
+                // 显示引入的表格
+            }else if(type == 'formula'){ //设置公式                        
+                return this.setState = 'formula'; //改为公式状态
+            }else if(type == 'sumText'){ //设置合计尾行文字            
+                return this.setState = null;  //改为设置合计尾行单元格文字状态
+            }else if(type == 'sumNull'){ //设置合计尾行空                       
+                this.row.td ='';    //直接把单元格内容清除为空
+                return this.setState = null;   //状态改为空
+            }else if (this.ifInput.indexOf(type)!=-1 || type == 'sumFormula') {
+                return this.setState = 'attribute';    //改为设置属性状态
+            }else{
+                this.setState = null; //初始状态，可随意切换单元格设置属性状态。
+            }
+        },
+        attChange (type) {  //选择属性的选择框改变事件
+            this.typeAttState(type);  //调用属性值设置状态
+        },
+        attValueFocus (e) { //属性值输入框获取焦点时触发的函数
+            if (!this.setState) {   //当属性值状态为null时,判断设定属性值设置状态
+                let type = this.row.attribute;
+                this.typeAttState(type);  //调用属性值设置状态
+            }
+        },
+        attValBtn (val) {  //属性值后面的输入框
+            if (val==null || val== '') {
+                return this.$notify.info({title: '提示',duration: 800,message: '不能为空哦，否则将导致后续无法正常识别。'}); 
+            }
+            this.setState = null; //初始状态，可随意切换单元格设置属性状态。
+        },
+        LimitAttState (type) {   //判断限制值属性 然后设置限制属性属性值状态 
+            if(type =='null') return this.setState = null; //初始状态，可随意切换单元格设置属性状态。
+            this.setState = 'limit';
+        },
+        LimitChange (type) {  //选择属性的选择框改变事件
+            this.LimitAttState(type);  //调用限制值属性值设置状态
+        },
+        LimitValFocus (e) { //限制值属性值输入框获取焦点时触发的函数
+            if (!this.setState) {   //当属性值状态为null时,判断设定属性值设置状态
+                let type = this.row.attribute;
+                this.LimitAttState(type);  //调用属性值设置状态
+            }
+        },
+        LimitValBtn (val) {  //属性值后面的输入框
+            if (val==null || val== '') {
+                return this.$notify.info({title: '提示',duration: 800,message: '不能为空哦，否则将导致后续无法正常识别。'}); 
+            }
+            this.setState = null; //初始状态，可随意切换单元格设置属性状态。
+        },
+
+
+
+        
         formatterDate (row, column, cellValue, index) {
             return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
         },
@@ -449,6 +564,7 @@ import XEUtils from 'xe-utils';
 
 .item {
   padding: 18px 0;
+  
 }
 
 .box-card {
