@@ -36,10 +36,10 @@
                 <el-form-item label="表头名称" prop="name">
                     <el-input v-model="ruleForm.name"></el-input>
                 </el-form-item>
-                <el-form-item v-if="!dialogVisible">
+                <!-- <el-form-item v-if="!dialogVisible">
                     <el-button type="primary" @click="submitHeader">立即创建</el-button>
                     <el-button>取消</el-button>
-                </el-form-item>
+                </el-form-item> -->
             </el-form>
         </el-col>
         

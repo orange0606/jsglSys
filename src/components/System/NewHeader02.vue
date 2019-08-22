@@ -54,7 +54,7 @@
             </elx-editable>
             
 
-            <click-table :Obj="headerTypeObj" :attVal.sync="attVal"></click-table>
+            <click-table  v-if="setState == 'relation'" :Obj="headerTypeObj" :attVal.sync="attVal"></click-table>
         </el-col>
 
 
@@ -135,7 +135,8 @@ import XEUtils from 'xe-utils';
   export default {
     name: 'NewHeader02',
     components: {
-        headerForm
+        headerForm,
+        clickTable
     },
     props: {
         Form:{  //表单数据
@@ -286,9 +287,9 @@ import XEUtils from 'xe-utils';
         attVal: function(New, Old){ //点击显示关联的表的单元格，获取到的属性值和id
             console.log('关联表格单击事件的单元格的行列号和id发送过来了')
             console.log(New)
-            if (New.id && New.key ) {
+            if (New.id && New.key && this.setState) {
                 this.row.attributeValue = New.key;
-                if (attribute =="original") {  //原清单内容ID 
+                if (this.row.attribute =="original") {  //原清单内容ID 
                     this.row.tOriginalHeadRowId = New.id;
                     console.log('现在打印一下有无记录到属性')
                     console.log('this.row')

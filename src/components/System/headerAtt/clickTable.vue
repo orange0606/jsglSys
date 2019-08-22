@@ -1,7 +1,7 @@
 <template>
 <transition name="el-fade-in-linear">
     <div class="read-only_form" >
-            <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+            <input id="upload" type="file" @change="importfxx()" ref="input3" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
             <p style="margin:0 0 20px 0; text-align: left;">
                 <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
             </p>
@@ -15,8 +15,8 @@
             <!-- <el-alert title="，系统已为您自动添加合并行，请点击表格的每个单元格设置相关属性以及公式，全部设置完成方可提交。" type="info"></el-alert> -->
             <h1>&nbsp;</h1>
             <elx-editable
-                v-loading="lead.loading" 
-                ref="elxEditable"
+                v-loading="loading" 
+                ref="elxEditable2"
                 class="click-table12"
                 border
                 :span-method="arraySpanMethod"
@@ -48,8 +48,8 @@
             type: Object,
             required: false,
             default: () => ({    
-                type: null,          
-                id: null
+                // type: null,          
+                // id: null
             })
         }
      
@@ -65,38 +65,49 @@
       }
     },
      created () { //2
-    
+        if (this.Obj.type && this.Obj.id) {
+                this.getHeader(this.Obj.id, this.Obj.type);//请求表头
+            }
     },
    watch: {
         Obj:{  
             handler(New, Old) {
                 console.log('父组件发需要请求关联的表头类型和id来了');
                 console.log(New)
+                if (New.type && New.id) {
+                    this.getHeader(New.id, New.type);//请求表头
+                }
             },
             deep: true
         }
 
    },
     methods: {
-        getHeader (id, type) {  //请求原清单表头数据
-
+        getHeader (id, type) {  //请求表头数据
             this.loading = true;
             let params = {id,type}
             this.$post('/head/getone',params)
             .then((response) => {
-            this.Form = response.data.onehead;
-            let arr = this.$excel.ListAssemble(this.Form.headRowList);  //组装表头
-            // let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
-            this.list= [...arr];
-            this.hd = Object.keys(arr[0]);
+                this.Form = response.data.onehead;
+                let arr = this.$excel.ListAssemble(this.Form.headRowList);  //组装表头
+                // let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
+                this.list= [...arr];
+                this.hd = Object.keys(arr[0]);
+                this.findList();
+            }).catch(e => {
+                this.loading = false;
+                this.$message({
+                type: 'info',
+                message: '请求表头失败，请重试！'
+                })
             })
         },
         findList () {
             this.$nextTick(() => {
-                this.$refs.elxEditable.reload([]);
+                this.$refs.elxEditable2.reload([]);
                 setTimeout(() => {
                     let list = this.list;
-                    this.$refs.elxEditable.reload(list)
+                    this.$refs.elxEditable2.reload(list)
                     this.loading = false;
                     // this.$nextTick(() => {
                     //     this.$notify({title: '提示',duration: 5000,message: `渲染 ${this.list.length} 条耗时 ${Date.now() - this.startTime} ms`,type: 'success'});
@@ -106,10 +117,10 @@
             })
         },
         impt () { //button 按钮调用input文件选择事件
-            this.$refs.input.click();
+            this.$refs.input3.click();
         },
         importfxx () { //表格导入函数
-            this.btn.editAtt = true;    //当前为第一步编辑状态
+           
             this.loading = true;
             this.$notify.info({title: '提示',duration: 800,message: '正在努力导入表格噢，请稍等片刻。'});
             let _this = this;
@@ -138,26 +149,32 @@
             if (column.property) {  //做容错处理，防止点击到选择框触发此事件
                 let colum =column.property;
                 colum = colum.substr(0,colum.indexOf('.'));
-                let key = row[colum].trNum;
+                // let key = row[colum].trNum;
+                let key = `${row[colum].colNum}${row[colum].trNum}`;
                 let id = row[colum].id?row[colum].id:row[colum].id = 1;
-                            
+                let succre = new Object();
+                succre.id = id;
+                succre.key = key;
+                console.log('单击表格正在发送点击数据到父组件')
+                console.log(succre)
+                this.$emit("update:attVal", succre)    
             }
                 
        },
        cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-              // if (this.btn.edit) {
-                  if (columnIndex >0) { //带选择框的情况
-                      row = row[this.hd[columnIndex-1]]
-                      if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-                          return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
-                      }
-                  }
-              // }else{  //不带选择框的情况
-                  // row = row[this.lead.hd[columnIndex]]
-                  // if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-                  //     return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
-                  // }
-              // }
+            //   // if (this.btn.edit) {
+            //       if (columnIndex >0) { //带选择框的情况
+            //           row = row[this.hd[columnIndex-1]]
+            //           if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
+            //               return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
+            //           }
+            //       }
+            //   // }else{  //不带选择框的情况
+            //       // row = row[this.lead.hd[columnIndex]]
+            //       // if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
+            //       //     return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
+            //       // }
+            //   // }
               return {'text-align': 'center'}
         },
         arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
