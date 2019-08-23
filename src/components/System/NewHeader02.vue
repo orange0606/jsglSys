@@ -39,13 +39,10 @@
                     <template slot-scope="scope" >
                         <el-input v-if="btn.stateEdit" v-model="scope.row[val].td" ></el-input>
                         <div v-else-if="!btn.stateEdit">
-                            
                             <!-- <el-badge is-dot :class="[scope.row[val].attribute == null ? 'state':'statenull']">{{scope.row[val].td}}</el-badge> -->
                             <el-badge :style="{display:'block','text-align':scope.row[val].textAlign}" :hidden="scope.row[val].attribute !=null" is-dot class="item_red">{{scope.row[val].td ==null || scope.row[val].td == ''?'&nbsp;&nbsp;':scope.row[val].td}}</el-badge>
-                            
                             <el-badge v-show="scope.row[val].attribute !=null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>
                             <el-badge v-show="scope.row[val].tLimit !=null" type="success" :value="badge_name[scope.row[val].tLimit]" class="new"></el-badge>
-                       
                         </div>
 
                     </template>
@@ -53,8 +50,9 @@
                 </elx-editable-column>
             </elx-editable>
             
-
-            <click-table  v-if="setState == 'relation'" :Obj="headerTypeObj" :attVal.sync="attVal"></click-table>
+            <div v-show="showTable">
+                 <click-table :obj="headerTypeObj" :attVal.sync="attVal" :showTable="showTable"></click-table>
+            </div>
         </el-col>
 
 
@@ -149,8 +147,9 @@ import XEUtils from 'xe-utils';
                 num: null,    //表头编号
                 name: null,           //表名
                 type: null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-                tOriginalHeadId: null,    //原清单表头ID，建变更清单和变更后清单表头时传
-                tUpdateHeadId: null,   //变更后新清单表头ID，建计量清单表头时需要
+                tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
+                tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
+                tTotalmeterageHeadId: null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
                 refCol:null,   //多少列
                 refRow:null,   //多少行
                 headRowList:[],           //表头单元格内容
@@ -178,6 +177,7 @@ import XEUtils from 'xe-utils';
                 key: null
             },
             headerTypeObj: {}, //传给关联表格子组件获取表头的数据  （object）表头类型type  表头id
+            showTable: false,//显示关联点击表格单元格
 
             loading: false,
             headerMenus: [
@@ -268,14 +268,6 @@ import XEUtils from 'xe-utils';
             this.btn.editAtt = true;
             this.$refs.elxEditable.reload([]);
 
-            if (New != 'original' && New== 'change') {
-                this.headerTypeObj.type = 'original';
-                this.headerTypeObj.id = this.Form.tOriginalHeadId;
-            }else if (New != 'original' && New != 'change') {
-                this.headerTypeObj.type = 'update';
-                this.headerTypeObj.id = this.Form.tUpdateHeadId;
-            }
-            
             // 组装属性
             this.Attribute = inven.Attribute(New);  //该表头类型的所有可设置的属性
             this.ifInput = inven.ifInput(New);    //该表头类型要设置属性值的所有属性名
@@ -284,18 +276,50 @@ import XEUtils from 'xe-utils';
             // console.log('this.Limit')
             // console.log(this.Limit)
         },
+        'Form.tOriginalHeadId': function(New, Old){ //原清单表头ID 建变更清单表头和变更后清单表头时传
+            if ( New && this.Form.type =='change' || this.Form.type =='update'){
+                console.log('请求原清单表头')
+                this.headerTypeObj = {
+                    id: New,
+                    type: 'original'
+                }
+                this.Form.tTotalmeterageHeadId = this.Form.tUpdateHeadId = null;
+                console.log('this.headerTypeObj',this.headerTypeObj)
+
+            }
+        },
+        'Form.tUpdateHeadId': function(New, Old){   //变更后（新）清单表头ID  建计量清单表头和累计计量清单表头时传
+            if ( New && this.Form.type =='meterage' && this.Form.type =='totalmeterage' ){
+                console.log('请求变更后清单表头')
+                this.headerTypeObj = {
+                    id: New,
+                    type: 'update'
+                }
+                this.Form.tOriginalHeadId = this.Form.tTotalmeterageHeadId = null;
+                console.log('this.headerTypeObj',this.headerTypeObj)
+            }
+        },
+        'Form.tTotalmeterageHeadId': function(New, Old){   //累计计量清单表头ID 建支付清单表头和累计支付清单表头时传
+             if ( New && this.Form.type =='pay' && this.Form.type =='totalpay' ){
+                console.log('请求累计计量表头')
+                this.headerTypeObj = {
+                    id: New,
+                    type: 'totalmeterage'
+                }
+                this.Form.tOriginalHeadId = this.Form.tUpdateHeadId = null;
+                console.log('this.headerTypeObj',this.headerTypeObj)
+            }   
+        },
         attVal: function(New, Old){ //点击显示关联的表的单元格，获取到的属性值和id
-            console.log('关联表格单击事件的单元格的行列号和id发送过来了')
-            console.log(New)
+            // console.log('关联表格单击事件的单元格的行列号和id发送过来了')
+            // console.log(New)
             if (New.id && New.key && this.setState) {
-                this.row.attributeValue = New.key;
-                if (this.row.attribute =="original") {  //原清单内容ID 
-                    this.row.tOriginalHeadRowId = New.id;
-                    console.log('现在打印一下有无记录到属性')
-                    console.log('this.row')
-                    console.log(this.row)
-                }else {  //变更后清单表头内容ID
-                    this.row.tUpdateHeadRowId =  New.id;
+                if (this.setState == 'relation') {
+                    this.row.attributeValue = New.key;
+                    this.row.attributeValueId = New.id;
+                }else if (this.setState == 'limit') {
+                    this.row.limitValue = New.key;
+                    this.row.limitId = New.id;
                 }
             }
         },
@@ -338,6 +362,7 @@ import XEUtils from 'xe-utils';
             this.btn.stateEdit ? this.btn.stateEdit = false: this.btn.stateEdit = true;
         },
         findList () {
+
             this.$nextTick(() => {
                 this.$refs.elxEditable.reload([]);
                 setTimeout(() => {
@@ -356,8 +381,10 @@ import XEUtils from 'xe-utils';
             if (this.Form.type !=null) {
                 if (this.Form.type == 'change') {
                     if (this.Form.tOriginalHeadId == null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择原清单表头'});
-                }else if(this.Form.type == 'meterage'){
+                }else if(this.Form.type == 'meterage' || this.Form.type == 'totalmeterage'){
                     if (this.Form.tUpdateHeadId == null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择变更后新清单表头'}); 
+                }else if(this.Form.type == 'pay' || this.Form.type == 'totalpay'){
+                    if (this.Form.tTotalmeterageHeadId == null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择累计计量清单表头'}); 
                 }
             }else{
                 return this.$notify.info({title: '提示',duration: 3000,message: '请先选择表头类型'});
@@ -448,10 +475,6 @@ import XEUtils from 'xe-utils';
                             this.row.attributeValue += key;  
                         }else if (this.setState == 'attribute') {
                             this.row.attributeValue = key;
-                        }else if (this.setState == 'limit') {
-                            console.log('this.row')
-                            console.log(this.row)
-                            this.row.limitValue = key;
                         }
                     }
                     
@@ -465,22 +488,25 @@ import XEUtils from 'xe-utils';
         typeAttState (type) {   //判断属性 然后设置属性值状态 
             if(!type)return false;
             if (type =='sysOrder' || type == 'sysNum') {
-                return this.setState = null; //初始状态，可随意切换单元格设置属性状态
+                 this.setState = null; //初始状态，可随意切换单元格设置属性状态
             }else if (type =='original' || type == 'update'){
-                return this.setState = 'relation'; //改为外联设置属性状态
+                this.setState = 'relation'; //改为外联设置属性状态
+                return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
                 // 显示引入的表格
             }else if(type == 'formula'){ //设置公式                        
-                return this.setState = 'formula'; //改为公式状态
+                 this.setState = 'formula'; //改为公式状态
             }else if(type == 'sumText'){ //设置合计尾行文字            
-                return this.setState = null;  //改为设置合计尾行单元格文字状态
+                 this.setState = null;  //改为设置合计尾行单元格文字状态
             }else if(type == 'sumNull'){ //设置合计尾行空                       
                 this.row.td ='';    //直接把单元格内容清除为空
-                return this.setState = null;   //状态改为空
+                 this.setState = null;   //状态改为空
             }else if (this.ifInput.indexOf(type)!=-1 || type == 'sumFormula') {
-                return this.setState = 'attribute';    //改为设置属性状态
+                 this.setState = 'attribute';    //改为设置属性状态
             }else{
                 this.setState = null; //初始状态，可随意切换单元格设置属性状态。
             }
+            this.$nextTick(() => { this.showTable = false; })   //隐藏关联表格
+
         },
         attChange (type) {  //选择属性的选择框改变事件
             this.typeAttState(type);  //调用属性值设置状态
@@ -496,10 +522,12 @@ import XEUtils from 'xe-utils';
                 return this.$notify.info({title: '提示',duration: 800,message: '不能为空哦，否则将导致后续无法正常识别。'}); 
             }
             this.setState = null; //初始状态，可随意切换单元格设置属性状态。
+            return this.$nextTick(() => { this.showTable = false; })
         },
         LimitAttState (type) {   //判断限制值属性 然后设置限制属性属性值状态 
             if(type =='null') return this.setState = null; //初始状态，可随意切换单元格设置属性状态。
             this.setState = 'limit';
+            return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
         },
         LimitChange (type) {  //选择属性的选择框改变事件
             this.LimitAttState(type);  //调用限制值属性值设置状态
@@ -515,6 +543,7 @@ import XEUtils from 'xe-utils';
                 return this.$notify.info({title: '提示',duration: 800,message: '不能为空哦，否则将导致后续无法正常识别。'}); 
             }
             this.setState = null; //初始状态，可随意切换单元格设置属性状态。
+            this.$nextTick(() => { this.showTable = false; })   //隐藏关联表格
         },
 
 

@@ -4,11 +4,11 @@
     <el-row>
         <el-col :span="6" :xs="24" style="min-width:300px;">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="90px" size="small" class="demo-ruleForm">
-                <!-- <el-form-item label="表头标段" prop="region">
+                <el-form-item label="表头标段" prop="region">
                     <el-select v-model="ruleForm.region" clearable @change="tenChange" placeholder="请选择表头标段" style=" width:100%;">
                         <el-option v-for="(val,i) in regionList" :key="i" :label="val.name" :value="val.id"></el-option>
                     </el-select>
-                </el-form-item> -->
+                </el-form-item>
                 <el-form-item label="表头类型" prop="type">
                     <el-select v-model="ruleForm.type" placeholder="请选择表头类型" @change="typeChange" clearable size="small" style=" width:100%;">
                         <el-option label="原清单" value="original"></el-option>
@@ -20,16 +20,22 @@
                         <el-option label="累计支付清单" value="totalpay"></el-option>
                     </el-select>
                 </el-form-item>
-                <!-- <el-form-item v-if="ruleForm.type=='change'" label="选择表头" prop="tOriginalHeadId">
-                    <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择原清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
+                <el-form-item v-if="ruleForm.type=='change'" label="选择表头" prop="tOriginalHeadId">
+                    <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择原清单表头" clearable size="small" style=" width:100%;">
                         <el-option v-for="(val,i) in HeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item v-if="ruleForm.type!='original' && ruleForm.type!='change' " label="选择表头" prop="tOriginalHeadId">
-                    <el-select v-model="ruleForm.tOriginalHeadId" placeholder="请选择变更后新清单表头" @change="torigChang" clearable size="small" style=" width:100%;">
+                <el-form-item v-if="ruleForm.type == 'meterage' || ruleForm.type == 'totalmeterage'" label="选择表头" prop="tOriginalHeadId">
+                    <el-select v-model="ruleForm.tUpdateHeadId" placeholder="请选择变更后新清单表头" clearable size="small" style=" width:100%;">
                         <el-option v-for="(val,i) in HeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
                     </el-select>
-                </el-form-item> -->
+                </el-form-item>
+                <el-form-item v-if="ruleForm.type == 'pay' || ruleForm.type == 'totalpay'" label="选择表头" prop="tOriginalHeadId">
+                    <el-select v-model="ruleForm.tUpdateHeadId" placeholder="请选择累计计量清单清单表头"  clearable size="small" style=" width:100%;">
+                        <el-option v-for="(val,i) in HeadList" :key="i+1" :label="val.name" :value="val.id"></el-option>
+                    </el-select>
+                </el-form-item>
+
                 <el-form-item label="表头编号" prop="number">
                     <el-input v-model="ruleForm.number"></el-input>
                 </el-form-item>
@@ -73,6 +79,7 @@
           number: '',   //表头编号
           type: '',  //表头类型
           tOriginalHeadId:null, //原清单表头ID，建变更清单和变更后清单表头时传
+          tTotalmeterageHeadId: null,
           tUpdateHeadId:null,   //变更后新清单表头ID，除了建原清单与变更清单表头时不需要
         },
 
@@ -108,7 +115,7 @@
       this.ruleForm.type = this.Form.type;          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
       this.ruleForm.tOriginalHeadId = this.Form.tOriginalHeadId;    //原清单表头ID，建变更清单和变更后清单表头时传
       this.ruleForm.tUpdateHeadId = this.Form.tUpdateHeadId;   //变更后新清单表头ID，建计量清单表头时需要
-
+      this.ruleForm.tTotalmeterageHeadId = this.Form.tTotalmeterageHeadId //累计计量清单表头ID 建支付清单和累计支付清单表头时传
       this.findList();//发起请求全部表头标段
     },
    watch: {
@@ -121,9 +128,10 @@
                 this.Form.num = New.number;    //表头编号
                 this.Form.name = New.name;           //表名
                 this.Form.type = New.type;          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-                this.Form.tOriginalHeadId = New.tOriginalHeadId;    //原清单表头ID，建变更清单和变更后清单表头时传
-                this.Form.tUpdateHeadId = New.tUpdateHeadId;   //变更后新清单表头ID，建计量清单表头时需要
-            },
+                this.Form.tOriginalHeadId = New.tOriginalHeadId;    //原清单表头ID 建变更清单和变更后清单表头时传
+                this.Form.tUpdateHeadId = New.tUpdateHeadId;   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
+                this.Form.tTotalmeterageHeadId = New.tTotalmeterageHeadId; //累计计量清单表头ID 建支付清单和累计支付清单表头时传
+            },  
             deep: true
         }
 
@@ -133,23 +141,20 @@
             //发起网络请求
           this.$post('/tender/getall',{})
             .then((response) => {
-            // console.log('请求标段数据')
-            // console.log(response)
             this.regionList = response.data.tenderList;
           })
          
         },
-        saveForm() {  //保存数据传到父组件中去（引用赋值）
-            this.Form.tenderId = this.ruleForm.region;   //标段id 
-            this.Form.num = this.ruleForm.number;    //表头编号
-            this.Form.name = this.ruleForm.name;           //表名
-            this.Form.type = this.ruleForm.type;          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-            this.Form.tOriginalHeadId = this.ruleForm.tOriginalHeadId;    //原清单表头ID，建变更清单和变更后清单表头时传
-            this.Form.tUpdateHeadId = this.ruleForm.tUpdateHeadId;   //变更后新清单表头ID，建计量清单表头时需要
-        },
+        // saveForm() {  //保存数据传到父组件中去（引用赋值）
+        //     this.Form.tenderId = this.ruleForm.region;   //标段id 
+        //     this.Form.num = this.ruleForm.number;    //表头编号
+        //     this.Form.name = this.ruleForm.name;           //表名
+        //     this.Form.type = this.ruleForm.type;          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
+        //     this.Form.tOriginalHeadId = this.ruleForm.tOriginalHeadId;    //原清单表头ID，建变更清单和变更后清单表头时传
+        //     this.Form.tUpdateHeadId = this.ruleForm.tUpdateHeadId;   //变更后新清单表头ID，建计量清单表头时需要
+        //     this.Form.tTotalmeterageHeadId = this.ruleForm.tTotalmeterageHeadId;
+        // },
         alloriginal () {  //所有该标段的原清单的id和名字
-            this.ruleForm.tOriginalHeadId = null, //原清单表头ID，建变更清单和变更后清单表头时传
-            this.HeadList = [];//清空数据
              this.$post('/head/alloriginal',{tenderId:this.ruleForm.region})
             .then((response) => {
             console.log('所有原清单的id和名字')
@@ -157,9 +162,7 @@
             this.HeadList = response.data.originalHeadList;
           })
         },
-        allupdate () {
-            this.ruleForm.tUpdateHeadId = null, //原清单表头ID，建变更清单和变更后清单表头时传
-            this.HeadList = [];//清空数据
+        allupdate () {  //所有该标段的变更后新清单表头的id和名字
              this.$post('/head/allupdate',{tenderId:this.ruleForm.region})
             .then((response) => {
             console.log('所有变更后清单的id和名字')
@@ -167,29 +170,37 @@
             this.HeadList = response.data.updateHeadList;
           })
         },
-        typeChange (req) {  //选择清单的类型
-            if (req == 'change') {
+        alltotalmeterage () {  //所有该标段的累计计量清单表头的id和名字
+             this.$post('/head/alltotalmeterage',{tenderId:this.ruleForm.region})
+            .then((response) => {
+            console.log('所有变更后清单的id和名字')
+            console.log(response)
+            this.HeadList = response.data.headList;
+          })
+        },
+        typeChange (req) {  //选择表头的类型
+            this.HeadList.length = 0;//清空数据
+            this.ruleForm.tOriginalHeadId = this.ruleForm.tUpdateHeadId = this.ruleForm.tTotalmeterageHeadId = null;
+           if (req == 'change') {
                 // console.log('请求该标段的所有的原清单数据')
                 this.alloriginal();
-            }else if(req == 'meterage') {
+            }else if (req == 'meterage' || req == 'totalmeterage') {
                 this.allupdate();
+            }else if (req == 'pay' || req == 'totalpay') {
+                this.alltotalmeterage();
             }
-            //将用户选择的表头类型发回父组件
-            let succre = req;
-            this.$emit("update:type", succre);
-            console.log('sssssssssssssssssssssssssssssssssssssss')
         },
-        tenChange (req) {
-             if (this.ruleForm.type == 'change') {
+        tenChange () {
+            this.HeadList.length = 0;//清空数据
+            this.ruleForm.tOriginalHeadId = this.ruleForm.tUpdateHeadId = this.ruleForm.tTotalmeterageHeadId = null;
+            if (this.ruleForm.type == 'change') {
                 // console.log('请求该标段的所有的原清单数据')
                 this.alloriginal();
-            }else if(req == 'meterage') {
+            }else if (this.ruleForm.type == 'meterage' || this.ruleForm.type == 'totalmeterage') {
                 this.allupdate();
+            }else if (this.ruleForm.type == 'pay' || this.ruleForm.type == 'totalpay') {
+                this.alltotalmeterage();
             }
-        },
-        torigChang (req) {
-                // console.log('打印一下所要请求的原清单id')
-                // console.log(req)
         },
         queryHeader () {  //查询用户当前输入的表头名之类的是否已存在数据库
             let url = '/head/'+this.ruleForm.type;

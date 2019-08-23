@@ -6,8 +6,31 @@
     <meta name="renderer" content="webkit|ie-comp|ie-stand" />
     <meta name="renderer" content="webkit" />
     <title>roadconmansys</title>
+    <!--添加随机数，每次连接都从服务器读取时间戳，用于避免缓存-->
+    <script type="text/javascript"> 
+      document.write('<script src="./global.js?timeStemp=' +Math.random()+ '" ' + 'type="text/javascript"><' + '/script>');
+      document.write('<script src="./timeStemp.js?timeStemp=' +Math.random()+ '" ' + 'type="text/javascript"><' + '/script>');
+    </script>
   </head>
   <body>
+      <script type="text/javascript"> 
+          //用于刷新缓存
+          let timeStempParam=getQueryString("timeStemp");
+          //获取URL中参数
+          function  getQueryString(name) { 
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+            var r = window.location.search.substr(1).match(reg); 
+            if (r != null) return unescape(r[2]); 
+            return null; 
+          }
+          if(timeStemp==undefined || timeStemp==null){
+            
+          }  
+          else if(timeStempParam!=timeStemp){
+            //重新加载页面
+            window.location.href='?timeStemp='+timeStemp;      
+          }      
+      </script>
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>

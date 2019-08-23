@@ -1,31 +1,33 @@
 <template>
 <transition name="el-fade-in-linear">
     <div class="read-only_form" >
-            <input id="upload" type="file" @change="importfxx()" ref="input3" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+            <!-- <input id="upload" type="file" @change="importfxx()" ref="input3" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
             <p style="margin:0 0 20px 0; text-align: left;">
                 <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
-            </p>
-            <!-- <h3 style="margin:20px 0 20px 0;">请点击下方原清单单元格选取属性</h3>
-            <div v-if="From2.tender" class="title">标段名称：<span class="demonstration" v-text="From2.tender.name"></span></div>  
-            <div class="title">表头编号：<span class="demonstration" v-text="From2.num"></span></div>
-            <div class="title">表头名称：<span class="demonstration" v-text="From2.name"></span></div>
-            <div class="title">类别：<span class="demonstration" >原清单</span></div>
-            <div v-if="From2.saveEmployee" class="title">创建人：<span class="demonstration" v-text="From2.saveEmployee.name"></span></div>
-            <div class="title">创建时间：<span class="demonstration" v-text="From2.saveTime"></span></div> -->
-            <!-- <el-alert title="，系统已为您自动添加合并行，请点击表格的每个单元格设置相关属性以及公式，全部设置完成方可提交。" type="info"></el-alert> -->
+            </p> -->
+            <h1>&nbsp;</h1>
+            <div v-if="Form.tender" class="title">标段名称：<span class="demonstration" v-text="Form.tender.name"></span></div>  
+            <div class="title">表头编号：<span class="demonstration" v-text="Form.num"></span></div>
+            <div class="title">表头名称：<span class="demonstration" v-text="Form.name"></span></div>
+            <div class="title">类别：<span class="demonstration" v-text="typeName"></span></div>
+            <div v-if="Form.saveEmployee" class="title">创建人：<span class="demonstration" v-text="Form.saveEmployee.name"></span></div>
+            <div class="title">创建时间：<span class="demonstration" v-text="Form.saveTime"></span></div>
+            
             <h1>&nbsp;</h1>
             <elx-editable
                 v-loading="loading" 
                 ref="elxEditable2"
                 class="click-table12"
                 border
+                :data="list"
+                size="small"
                 :span-method="arraySpanMethod"
                 @cell-click ="cell_click"
                 :cell-style ="cell_select"
                 :edit-config="{ render: 'scroll'}"
                 >
-                    <elx-editable-column type="index" width="50"> </elx-editable-column>
-                    <elx-editable-column  :prop="val+'.td'" :label="hd[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i"  >
+                    <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
+                    <elx-editable-column  :prop="val+'.td'" :label="hd[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i" align="center"  >
                     </elx-editable-column>
             </elx-editable>
     </div>
@@ -36,7 +38,7 @@
   export default {
     name: 'headerForm',
     props: {
-        Obj:{  //需要请求的关联表头 id 表头类型type
+        obj:{  //需要请求的关联表头 id 表头类型type
             type: Object,
             required: false,
             default: () => ({    
@@ -51,6 +53,11 @@
                 // type: null,          
                 // id: null
             })
+        },
+        showTable:{ //显示表格
+            type: Boolean,
+            required: false,
+            default: false
         }
      
     },
@@ -60,45 +67,83 @@
           list:[],
           hd:[],
           loading:false,
-          Form:{},
+          Form: {
+              tender: { name:'', },
+              num: '',
+              name: '',
+              typeName: null,
+              saveEmployee: { name:''},
+              saveTime: ''
+          },
        
       }
     },
-     created () { //2
-        if (this.Obj.type && this.Obj.id) {
-                this.getHeader(this.Obj.id, this.Obj.type);//请求表头
-            }
+    created () { //2
+        if (this.obj.type && this.obj.id) {
+            console.log('请求表头01');
+            this.getHeader(this.obj.id, this.obj.type);//请求表头
+        }
     },
    watch: {
-        Obj:{  
-            handler(New, Old) {
-                console.log('父组件发需要请求关联的表头类型和id来了');
-                console.log(New)
-                if (New.type && New.id) {
-                    this.getHeader(New.id, New.type);//请求表头
-                }
-            },
-            deep: true
+        obj: function(New, Old){
+            console.log('父组件发需要请求关联的表头类型和id来了02');
+            console.log(New)
+            this.getHeader(New.id, New.type)
+        },
+        showTable: function(New, Old){
+            if (New) this.findList();
         }
 
    },
+      computed: {
+      // 计算属性的 getter
+
+      typeName () {
+        // `this` 指向 vm 实例
+        let obj = {
+          original: '原清单',
+          change: '变更清单',
+          update: '变更后的清单',
+          meterage: '计量清单',
+          totalmeterage: '累计计量清单',	
+          pay: '支付清单',
+          totalpay: '累计支付清单'
+        }
+        return this.Form.type ? obj[this.Form.type ] : '未知'
+      }
+    },
     methods: {
         getHeader (id, type) {  //请求表头数据
             this.loading = true;
             let params = {id,type}
+            console.log('进来请求表头了',params)
+            let key = '';
+            if (type == 'original') {
+                key = 'tOriginalHeadRows';
+            }else if (type == 'update') {
+                key = 'tUpdateHeadRows';
+            }else if (type == 'totalmeterage') {
+                key = 'tTotalmeterageHeadRows';
+            }
+            if (key == '' || !id || !type) return false;
             this.$post('/head/getone',params)
             .then((response) => {
-                this.Form = response.data.onehead;
-                let arr = this.$excel.ListAssemble(this.Form.headRowList);  //组装表头
+                this.Form = {...response.data.onehead};
+                let arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
                 // let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
                 this.list= [...arr];
                 this.hd = Object.keys(arr[0]);
+                if (this.hd[0]!='A') {
+                    this.hd.reverse();
+                }
+                this.loading = false;
                 this.findList();
             }).catch(e => {
+                console.log(e)
                 this.loading = false;
                 this.$message({
                 type: 'info',
-                message: '请求表头失败，请重试！'
+                message: '请求表头失败，请重试！'+e
                 })
             })
         },
@@ -193,5 +238,14 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.title{
+  display: inline;
+  margin-right: 10px;
+  color: cadetblue;
+}
+.demonstration {
+  /* color: #606266; */
+  color: pink;
 
+}
 </style>

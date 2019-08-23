@@ -170,9 +170,9 @@ let excelmodel = {
                 arrObj.attribute = null; //属性
                 arrObj.attributeValue = null; //属性值
                 arrObj.textAlign = 'center'; //文本对齐对齐方式
-                arrObj.tOriginalHeadRowId = null; //原清单表头内容ID
-                arrObj.tUpdateHeadRowId = null; //变更后新清单表头内容ID
-                arrObj.tLimit = null;    //限制值类型 int
+                arrObj.attributeValueId = null; //属性值内容ID
+                arrObj.limitId = null; //限制属性值内容ID
+                arrObj.tLimit = null;    //限制值类型 
                 arrObj.limitValue = null; //限制值
             }
         }

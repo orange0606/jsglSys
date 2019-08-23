@@ -10,11 +10,11 @@ export default new Router({
     //   name: 'Home',
     //   component: ()=>import('@/components/Home')
     // },
-    // {
-    //   path: '/',
-    //   name: 'newheader',
-    //   component: ()=>import('@/components/System/NewHeader.vue')
-    // },
+    {
+      path: '/jsglxt-hhp-hys',
+      name: 'newheader',
+      component: ()=>import('@/components/System/NewHeader.vue')
+    },
     {
       path: '/login',
       name: 'login',
