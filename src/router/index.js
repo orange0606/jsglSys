@@ -5,11 +5,7 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-    // {
-    //   path: '/home',
-    //   name: 'Home',
-    //   component: ()=>import('@/components/Home')
-    // },
+  
     {
       path: '/jsglxt-hhp-hys',
       name: 'newheader',

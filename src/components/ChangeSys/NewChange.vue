@@ -33,7 +33,7 @@
       title="选择清单"
       top="10vh"
       :visible.sync="innerVisible"
-      :destroy-on-close="true"
+      
       append-to-body>
       <div v-if="showList">
           <p style="color: red;font-size: 12px;margin:20px 0 15px 0;text-align:left;">请单击选择你要导入的清单</p>

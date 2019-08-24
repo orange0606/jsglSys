@@ -7,10 +7,9 @@
     <p style="color: red;font-size: 12px;margin:10px 0;">请选择你需要导入的原清单数据</p>
     <!-- <p style="color: red;font-size: 12px;">兼容性：不兼容动态行高；不支持树结构</p> -->
     <elx-editable
-      ref="elxEditable"
-      class="scroll-table4"
+      ref="elxEditable4"
+      class="scroll-table4 click-table11"
       border
-      height="500"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
@@ -70,14 +69,10 @@ export default {
           let id = this.all.originalHead.id;
           let type = this.all.type;
           this.oneHeader(id,type)//调用表头内容请求函数
-
- 
       } catch (error) {
           console.log(error)
 
       }
-      
-
     }
 
     this.$message.closeAll();
@@ -101,7 +96,7 @@ export default {
   },
   methods: {
     handle (list) { //数据处理表格数据等等 数据、列数、行数、
-        if (!list.length >0) {
+        if (list.length == 0) {
             return false
         }
         //调用表格组装函数（返回的是个数组对象）
@@ -119,11 +114,6 @@ export default {
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        // console.log('this.col')
-        // this.showHeader = false;
-        // this.$nextTick(() => {  //强制重新渲染
-	      //     this.showHeader = true;
-        //   })
 
         let list = this.all.originalRowList;
         this.handle(list);; //调用清单数据内容处理函数
@@ -131,9 +121,10 @@ export default {
     },
     inner (item ) {  //关闭清单选择层，将选中的数据发回给父组件
         if (item) {
-            let rest = this.$refs.elxEditable.getSelecteds(); //此处应是已选择的表格数据
+            let rest = this.$refs.elxEditable4.getSelecteds(); //此处应是已选择的表格数据
             if (rest.length >0) {
                 this.$emit("update:inventory", rest);
+                this.hd.length = this.list.length = 0; 
                 let boolen = false;
                 this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
             }else{
@@ -144,6 +135,7 @@ export default {
             }
         }else{
             let boolen = false;
+            this.hd.length = this.list.length = 0; 
             this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
         }
 
@@ -152,11 +144,11 @@ export default {
         this.loading = true;
         // let size = Number(this.$route.params.number);
         this.$nextTick(() => {
-            this.$refs.elxEditable.reload([]);
+            this.$refs.elxEditable4.reload([]);
             setTimeout(() => {
               let list = this.list;
             let startTime = Date.now();
-            this.$refs.elxEditable.reload(list);
+            this.$refs.elxEditable4.reload(list);
             this.loading = false;
             this.$nextTick(() => {
                 this.$message({ message: `渲染 ${list.length} 条耗时 ${Date.now() - startTime} ms`, type: 'info', duration: 8000, showClose: true })
@@ -185,6 +177,18 @@ export default {
 
 
 <style scoped>
+.click-table11.elx-editable .elx-editable-row.new-insert,
+.click-table11.elx-editable .elx-editable-row.new-insert:hover>td {
+  background-color: #f0f9eb;
+}
+.click-table11 .el-table__body tr.hover-row>td,
+.click-table11 .el-table__body .el-table__row:hover>td {
+  background-color: inherit;
+}
+.click-table11.elx-editable .elx-editable-row.sortable-ghost,
+.click-table11.elx-editable .elx-editable-row.sortable-chosen {
+  background-color: #fff6b2;
+}
 .scroll-table4-oper {
   margin-bottom: 18px;
 }
@@ -192,6 +196,7 @@ export default {
 .scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
   background-color: #f0f9eb;
 }
+
 .btn {
   text-align: right;
   margin: 15px 20px 10px 0;

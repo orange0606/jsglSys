@@ -77,14 +77,18 @@
         </elx-editable>
 
         <!-- 引入表格编辑组件 -->
-        <transition name="el-fade-in">
+        <!-- <transition name="el-fade-in">
           <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
               <edit :tableList.sync="update" :heads="head" ></edit>
           </el-dialog>
-        </transition>
+        </transition> -->
 
         <!-- 引入表格编辑组件 -->
-        <headeratt :params="update" :dialog.sync="dialogVisible" ></headeratt>
+        <!-- <headeratt :params="update" :dialog.sync="dialogVisible" ></headeratt> -->
+        <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
+            <headeratt :Form="Form" ></headeratt>
+        </el-dialog>
+
         <el-pagination
           class="manual-table4-pagination"
           @size-change="handleSizeChange"
@@ -107,7 +111,8 @@
 import XEUtils from 'xe-utils'
 //引入只读表格组件
 import edit from '@/components/System/edit'
-import headeratt from '@/components/System/header-att'
+// import headeratt from '@/components/System/header-att'
+import headeratt from './NewHeader02'
   export default {
   name: 'headers',
   components: {edit,headeratt},
@@ -119,15 +124,21 @@ import headeratt from '@/components/System/header-att'
       tenderid:null,
       tenderList:[],//全部标段
       tenderName:[],
-      head:null,//调用表格预览的数据（obj）
-      editShow:false,//显示隐藏只读表头
-      update:[],//要修改的已组装好的整个数据
-      dialogVisible:false,//显示隐藏修改表头
-      formData: {
-        name: null,
-        sex: null,
-        role: null
+      Form:{  //表单数据
+          sysOrder: null,          //系统序号 预留，暂时不用
+          sysNum: null,           //系统编号 预留，暂时不用
+          tenderId: null,   //标段id 
+          num: null,    //表头编号
+          name: null,           //表名
+          type: null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
+          tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
+          tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
+          tTotalmeterageHeadId: null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
+          refCol:null,   //多少列
+          refRow:null,   //多少行
+          headRowList:[],           //表头单元格内容   
       },
+      editShow:false,//显示隐藏只读表头
       pageVO: {
         currentPage: 1,
         pageSize: 10,
@@ -141,11 +152,6 @@ import headeratt from '@/components/System/header-att'
     this.findList()  //发起请求所有已建表头数据
   },
   watch: {
-    update: function(newVal,oldVal){
-        // console.log('打印一下预览组件传过来的表头所有数据')
-        // console.log(newVal)
-        this.dialogVisible = true;
-    }
   },
   methods: {
     queryHeader (rows) {  //查询用户当前输入的表头名之类的是否已存在数据库
@@ -216,10 +222,35 @@ import headeratt from '@/components/System/header-att'
 
     },
     seeTbale (row) {
-        this.head ={};
-        this.head.id = row.id;
-        this.head.type = row.type;
+        let id = row.id;
+        let type = row.type;
         this.editShow = true;
+        this.$post('/head/getone',{id, type})
+        .then((response) => {
+        this.Form = response.data.onehead.tOriginalHead
+        // let key = '';
+        // if (type == 'original') {
+        //   key = 'tOriginalHeadRows';
+        // }else if (type == 'change'){
+        //   key = 'tChangeHeadRows';
+        // }else if (type == 'update'){
+        //   key = 'tUpdateHeadRows';
+        // }else if (type == 'totalmeterage'){
+        //   key = 'tTotalmeterageHeadRows';
+        // }else if (type == 'meterage'){
+        //   key = 'tMeterageHeadRows';
+        // }else if (type == 'totalpay'){
+        //   key = 'tTotalpayHeadRows';
+        // }else if (type == 'pay'){
+        //   key = 'tPayHeadRows';
+        // }
+
+
+        // //调用表格组装函数（返回的是个数组对象）
+        // let arr = this.$excel.Package(data[key],data.refCol,data.refRow);
+        
+      })
+
 
     },
     searchEvent () {
@@ -447,24 +478,7 @@ import headeratt from '@/components/System/header-att'
         if (valid) {
           
            //查询修改表头的数据是否已存在
-          this.queryHeader(row)
-          // this.$refs.elxEditable.clearActive()
-          // // console.log('正在保存当前行数据')
-          // // console.log(row)
-          // //进行网路请求保存
-          // this.$post('/head/update',row)
-          //   .then((response) => {
-          //   // console.log(response)
-          //   this.loading = false
-          //   this.findList()
-          //   this.$message({ message: '保存成功', type: 'success' })
-
-          // })
-            
-            //保存不成功
-        
-           // this.loading = false
-          
+          this.queryHeader(row);
         }
       })
     },

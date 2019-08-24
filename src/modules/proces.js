@@ -217,6 +217,40 @@ let excelmodel = {
             // list[index]
         }
     },
+    filterStr (str) {  //去除空白以及特殊字符串
+        str = str.replace(/\s*/g,"");
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]");  
+        var specialStr = "";  
+        for(var i=0;i<str.length;i++){  
+            specialStr += str.substr(i, 1).replace(pattern, '');   
+        }  
+        return specialStr;  
+    },
+    Analysis (str) {  //公式解析化为可运算的字符串
+        console.log('有无进来公式解析')
+        let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
+        let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
+        let patt3 = /[0-9]/;  //判断是否有数字
+        let patt4 = /[A-Z]/;
+        str = this.filterStr(str);  //去除空格与特殊符号
+        let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+        for (let i = 0; i < arr.length; i++) {
+            let key = arr[i].match(patt2);
+            let arrlen = arr[i].length;
+            for (let a = 0; a < str.length; a++) {
+                let index = str.indexOf(arr[i],a);
+                if ((str.length - index) < arrlen) break;
+                if (index != -1) {
+                    if (index == 0 && !patt3.test(str[index+arrlen])) {
+                        str = str.slice(0, index)+key[0]+str.slice(index+arrlen);
+                    }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                        str = str.slice(0, index)+key[0]+str.slice(index+arrlen);
+                    }
+                }
+            }
+        }
+        return str;
+    },
 
     /*
     表头数据解构函数
@@ -230,8 +264,14 @@ let excelmodel = {
         for (let index = 0; index < listlen; index++) {
             const hdlen = hd.length;
             for (let i = 0; i < hdlen; i++) {
-                delete list[index][hd[i]].edit; //删除编辑状态
-                headRowList.push(list[index][hd[i]]);
+                let row = list[index][hd[i]];
+                delete row.edit; //删除编辑状态
+                if (row.attribute == 'formula' && row.attributeValue && row.attributeValue !='' ) {
+                    row.formula_col = this.Analysis(row.attributeValue);
+                    console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)
+                    console.log(row)
+                }
+                headRowList.push(row);
             }
         }
         // list = null;
