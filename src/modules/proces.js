@@ -197,6 +197,7 @@ let excelmodel = {
                 }else{ //无此下标，先创建
                     arr[row-1][coll] =list[index];
                 }
+
                 arr[row-1][coll].edit = 'N'; //加入编辑状态
             }
         };
@@ -327,7 +328,7 @@ let excelmodel = {
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
-                arr[i][ABC[j]]={trNum:i+1, colNum:ABC[j], td:null, tdColspan:1, tdRowspan:1,edit:'N'}
+                arr[i][ABC[j]]={trNum:i+1, colNum:ABC[j], td:'', tdColspan:1, tdRowspan:1,edit:'N'}
             }
         }
         // console.log('已经生成的空数据')

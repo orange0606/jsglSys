@@ -24,6 +24,7 @@
                 :span-method="arraySpanMethod"
                 @cell-click ="cell_click"
                 :cell-style ="cell_select"
+                :highlight-current-row="false"
                 :edit-config="{ render: 'scroll'}"
                 >
                     <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
@@ -75,6 +76,10 @@
               saveEmployee: { name:''},
               saveTime: ''
           },
+         cellStyle: {    //点击单元格颜色变化
+            row:null,
+            col:null
+        },
        
       }
     },
@@ -128,6 +133,8 @@
             if (key == '' || !id || !type) return false;
             this.$post('/head/getone',params)
             .then((response) => {
+                console.log('response----------params',)
+                console.log(response,params)
                 this.Form = {...response.data.onehead};
                 let arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
                 // let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
@@ -194,6 +201,11 @@
             if (column.property) {  //做容错处理，防止点击到选择框触发此事件
                 let colum =column.property;
                 colum = colum.substr(0,colum.indexOf('.'));
+                
+                //点击单元格边框颜色显示
+                this.cellStyle.row = row[colum].trNum;
+                this.cellStyle.col = column.id;
+                
                 // let key = row[colum].trNum;
                 let key = `${row[colum].colNum}${row[colum].trNum}`;
                 let id = row[colum].id?row[colum].id:row[colum].id = 1;
@@ -207,20 +219,14 @@
                 
        },
        cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-            //   // if (this.btn.edit) {
-            //       if (columnIndex >0) { //带选择框的情况
-            //           row = row[this.hd[columnIndex-1]]
-            //           if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-            //               return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
-            //           }
-            //       }
-            //   // }else{  //不带选择框的情况
-            //       // row = row[this.lead.hd[columnIndex]]
-            //       // if (rowIndex == this.lead.cell_row-1 && column.id == this.lead.cell_col) {
-            //       //     return {'border':'1px solid #409EFF','text-align': row['textAlign'],'height':row.trHigh+'px'}
-            //       // }
-            //   // }
-              return {'text-align': 'center'}
+              // if (this.btn.edit) {
+                if (columnIndex >0) { //带选择框的情况
+                    row = row[this.hd[columnIndex-1]]
+                    if (rowIndex == this.cellStyle.row-1 && column.id == this.cellStyle.col) {
+                        return {'border':'1px solid #409EFF'}
+                    }
+                }
+            return {}
         },
         arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
             if (columnIndex >0) {  //带选择框的情况

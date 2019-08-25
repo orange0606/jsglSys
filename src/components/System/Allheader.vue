@@ -6,7 +6,7 @@
     <div >
         <h3>已建表头</h3>
         <div class="manual-table2-oper">
-            <el-button type="success" size="mini" ><router-link to="/newheader">新增</router-link></el-button>
+            <el-button type="success" size="mini" @click="newHeader">新增</el-button>
             <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
             <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
         </div>
@@ -52,10 +52,10 @@
                 <!-- <el-button size="mini" type="success" @click="saveRowEvent(scope.row)">保存</el-button>
                 <el-button size="mini" type="warning" @click="cancelRowEvent(scope.row)">取消</el-button> -->
                 <el-tooltip content="保存" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-document-checked" @click="saveRowEvent(scope.row)"></el-button>
+                    <el-button :disabled="scope.row.type=='update'?true:false" size="mini" type="success" icon="el-icon-document-checked" @click="saveRowEvent(scope.row)"></el-button>
                 </el-tooltip>
                 <el-tooltip content="取消" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="info" icon="el-icon-close" @click="cancelRowEvent(scope.row)"></el-button>
+                    <el-button :disabled="scope.row.type=='update'?true:false" size="mini" type="info" icon="el-icon-close" @click="cancelRowEvent(scope.row)"></el-button>
                 </el-tooltip>
 
             </template>
@@ -63,13 +63,13 @@
                 <!-- <el-button size="mini" type="primary" @click="openActiveRowEvent(scope.row)">编辑</el-button>
                 <el-button size="mini" type="danger" @click="removeEvent(scope.row)">删除</el-button> -->
                 <el-tooltip content="修改" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
+                    <el-button :disabled="scope.row.type=='update'?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-monitor" @click="seeTbale(scope.row)"></el-button>
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
+                    <el-button :disabled="scope.row.type=='update'?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
                 </el-tooltip>
             </template>
             </template>
@@ -86,7 +86,7 @@
         <!-- 引入表格编辑组件 -->
         <!-- <headeratt :params="update" :dialog.sync="dialogVisible" ></headeratt> -->
         <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
-            <headeratt :Form="Form" ></headeratt>
+            <headeratt :Form="Form" :visible.sync="editShow" ></headeratt>
         </el-dialog>
 
         <el-pagination
@@ -109,13 +109,11 @@
 
 <script>
 import XEUtils from 'xe-utils'
-//引入只读表格组件
-import edit from '@/components/System/edit'
-// import headeratt from '@/components/System/header-att'
-import headeratt from './NewHeader02'
+//引入表头组件
+import headeratt from './NewHeader'
   export default {
   name: 'headers',
-  components: {edit,headeratt},
+  components: {headeratt},
   data () {
     return {
       loading: false,
@@ -138,7 +136,7 @@ import headeratt from './NewHeader02'
           refRow:null,   //多少行
           headRowList:[],           //表头单元格内容   
       },
-      editShow:false,//显示隐藏只读表头
+      editShow:false,//显示隐藏修改表头
       pageVO: {
         currentPage: 1,
         pageSize: 10,
@@ -152,8 +150,30 @@ import headeratt from './NewHeader02'
     this.findList()  //发起请求所有已建表头数据
   },
   watch: {
+      editShow: function(New, Old){   //变更后（新）清单表头ID  建计量清单表头和累计计量清单表头时传
+          if(!New){
+              this.findList();  //发起请求所有已建表头数据
+          }
+      },
   },
   methods: {
+    newHeader () {
+      this.Form = {  //表单数据
+          sysOrder: null,          //系统序号 预留，暂时不用
+          sysNum: null,           //系统编号 预留，暂时不用
+          tenderId: null,   //标段id 
+          num: null,    //表头编号
+          name: null,           //表名
+          type:  null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
+          tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
+          tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
+          tTotalmeterageHeadId:  null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
+          refCol:null,   //多少列
+          refRow:null,   //多少行
+          headRowList:[],           //表头单元格内容   
+      }
+      this.editShow = true; //显示表头组件
+    },
     queryHeader (rows) {  //查询用户当前输入的表头名之类的是否已存在数据库
         let url = '/head/'+rows.type;
         if (rows.type == 'update') {
@@ -227,23 +247,34 @@ import headeratt from './NewHeader02'
         this.editShow = true;
         this.$post('/head/getone',{id, type})
         .then((response) => {
-        this.Form = response.data.onehead.tOriginalHead
-        // let key = '';
-        // if (type == 'original') {
-        //   key = 'tOriginalHeadRows';
-        // }else if (type == 'change'){
-        //   key = 'tChangeHeadRows';
-        // }else if (type == 'update'){
-        //   key = 'tUpdateHeadRows';
-        // }else if (type == 'totalmeterage'){
-        //   key = 'tTotalmeterageHeadRows';
-        // }else if (type == 'meterage'){
-        //   key = 'tMeterageHeadRows';
-        // }else if (type == 'totalpay'){
-        //   key = 'tTotalpayHeadRows';
-        // }else if (type == 'pay'){
-        //   key = 'tPayHeadRows';
-        // }
+        console.log('response---------------------')
+        console.log(response)
+        let data = response.data.onehead;
+        this.Form = {...data};
+        // let form = response.data.onehead.tOriginalHead
+        let key = '';
+        if (type == 'original') {
+          key = 'tOriginalHeadRows';
+        }else if (type == 'change'){
+          key = 'tChangeHeadRows';
+        }else if (type == 'update'){
+          key = 'tUpdateHeadRows';
+        }else if (type == 'totalmeterage'){
+          key = 'tTotalmeterageHeadRows';
+        }else if (type == 'meterage'){
+          key = 'tMeterageHeadRows';
+        }else if (type == 'totalpay'){
+          key = 'tTotalpayHeadRows';
+        }else if (type == 'pay'){
+          key = 'tPayHeadRows';
+        }
+        let headRowList = new Array();
+        headRowList = [...data[key]];
+
+        delete this.Form[key];
+        this.Form.headRowList = headRowList;
+
+        
 
 
         // //调用表格组装函数（返回的是个数组对象）

@@ -5,33 +5,14 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-  
-    {
-      path: '/jsglxt-hhp-hys',
-      name: 'newheader',
-      component: ()=>import('@/components/System/NewHeader.vue')
-    },
+
     {
       path: '/login',
       name: 'login',
       component: ()=>import('@/components/Login.vue'),
     },
-    {
-      path: '/newheader',
-      name: 'newheader',
-      component: ()=>import('@/components/System/NewHeader.vue'),
-      meta:{
-        "requireAuth": true
-      }
-    },
-    {
-      path: '/newhd',
-      name: 'newhd',
-      component: ()=>import('@/components/System/NewHeader02.vue'),
-      meta:{
-        "requireAuth": true
-      }
-    },
+    
+
     {
       path: '/headers',
       name: 'headers',
