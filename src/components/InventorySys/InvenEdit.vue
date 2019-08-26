@@ -331,51 +331,48 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-          const { columns, data } = param
-          const sums = []
-          // console.log(param)
-          let list = [...this.list];
-          // console.log('data[0]')
-          if (this.PackHeader.length >0 && this.list) {
-              let sumArr = this.PackHeader.slice(-1); //截取合计尾行
-              const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
-              const listlen = this.list.length;
-              let Total = new Array();
-              for (let i = 0; i < header.length; i++) {
-                  let sum = sumArr[0][header[i]];
-                  if (sum.attribute && sum.attribute == 'sumFormula') {
-                      Total.push(sum.colNum);
-                  }
-              }
-              let TotalObj = new Object();
-              for (let a = 0; a < Total.length; a++) {
-                  let num = 0;
-                  for (let index = 0; index < listlen; index++) {
-                      num += this.list[index][Total[a]].td*1;
-                  }
-                  TotalObj[Total[a]+'.td'] = num;
-              }
-          columns.forEach((column, index) => {
-          // console.log(column.property);
-
-            if (index === 0) {
-              sums[index] = '汇总';
-              return;
-            }else if(index >2){
-              sums[index] = TotalObj[column.property];
+        const { columns, data } = param
+        const sums = []
+        // console.log(param)
+        let list = [...this.list];
+        // console.log('data[0]')
+        if (this.PackHeader.length >0 && this.list) {
+            let sumArr = this.PackHeader.slice(-1); //截取合计尾行
+            const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
+            const listlen = this.list.length;
+            let Total = new Array();
+            for (let i = 0; i < header.length; i++) {
+                let sum = sumArr[0][header[i]];
+                if (sum.attribute && sum.attribute == 'sumFormula') {
+                    Total.push(sum.colNum);
+                }
             }
-          })
-          return sums;
+            let TotalObj = new Object();
+            for (let a = 0; a < Total.length; a++) {
+                let num = 0;
+                for (let index = 0; index < listlen; index++) {
+                    num += this.list[index][Total[a]].td*1;
+                }
+                TotalObj[Total[a]+'.td'] = num;
+            }
+        columns.forEach((column, index) => {
+        // console.log(column.property);
+          if (index === 0) {
+            sums[index] = '汇总';
+            return;
+          }else if(index >2){
+            sums[index] = TotalObj[column.property];
           }
-          return sums;
+        })
+        return sums;
+        }
+        return sums;
     },
     Analysis () {  //公式解析化为可运算的字符串
         let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
         let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
         let patt3 = /[0-9]/;  //判断是否有数字
         let patt4 = /[A-Z]/;
-          // console.log('this.col')
-        //  console.log(this.col )
         let cols = [...this.col]
         function BikoFoArr (col) {
             let obj = new Object();
@@ -392,19 +389,14 @@ export default {
             return obj;
         }
         if (this.PackHeader.length <2) return false; 
-        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
 
+        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
         let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
         const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         for (let index = 0; index < header.length; index++) {
-            // console.log('进来了几次了呀 ',index)
             let sumRow = sumArr[header[index]];
-            // console.log('sumRow')
-            // console.log(sumRow.attribute,sumRow.attributeValue,sumRow.td)
             if (sumRow.attribute && sumRow.attribute == "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
                 let str = sumRow.attributeValue;
-                // console.log('str1');
-                // console.log(str);
                 str = this.filterStr(str);  //去除空格与特殊符号
                 let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
                 for (let i = 0; i < arr.length; i++) {
@@ -422,9 +414,7 @@ export default {
                         }
                     }
                 }
-                // console.log(str)
                 this.formula[sumRow.colNum] = str;
-                // console.log(this.formula)
             }      
         }
     },
@@ -453,9 +443,6 @@ export default {
                       // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
                       index == 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
                       eval(sum) || eval(sum)==0 ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td;  //字符串转代码计算
-
-                      // sum = 'parseInt(row["D"].td)*parseInt(row["E"].td)'
-                      // this.list[index][formuHd[a]].td = new Function(sum)(); 
                   }
                 }
             } catch (error) {

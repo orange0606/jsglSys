@@ -69,7 +69,7 @@
                             <el-select v-model="Form.type" placeholder="请选择表头类型" @change="typeChange" :disabled="Form.id?true:false" size="small" style=" width:100%;">
                                 <el-option label="原清单" value="original"></el-option>
                                 <el-option label="变更清单" value="change"></el-option>
-                                <!-- <el-option label="变更后的（新清单）" value="update"></el-option> -->
+                                <el-option v-if="Form.type =='update'" label="变更后的（新清单）" value="update"></el-option>
                                 <el-option label="计量清单" value="meterage"></el-option>
                                 <el-option label="累计计量清单" value="totalmeterage"></el-option>
                                 <el-option label="支付清单" value="pay"></el-option>
@@ -317,6 +317,10 @@ import XEUtils from 'xe-utils';
                 meterage:'计量清单',
                 fluctuate:'变更清单增减',
                 totalpay:'累计支付清单',
+                'totalmeterage-meterage':'累计计量对应的计量清单',
+               'totalmeterage-sum-onerow-auto': '对应累计计量的系统合计行',
+                'totalpay-pay': '累计支付对应的支付清单',
+                'all-pay-total': '全部支付清单对应列的合计',
                 max:'max', //max
                 increaseMax:'增加MAX',  //increaseMax
                 decreaseMax:'减少MAX' //decreaseMax
@@ -710,7 +714,6 @@ import XEUtils from 'xe-utils';
         cellClick (row, column, cell, event) { //单元格点击事件
 
             if (column.property && !this.btn.editAtt) {  //做容错处理，防止点击到选择框触发此事件
-
                 //显示属性设置子组件
                 this.showAtt = true;
                 //从单击单元格获取单元格的数据
@@ -720,7 +723,6 @@ import XEUtils from 'xe-utils';
                 // 点击显示单元格边框变色
                 this.cellStyle.row = row[colum].trNum;
                 this.cellStyle.col = column.id;
-
 
                     //点击单元格获取 和key（位置）
                 let key = `${row[colum].colNum}${row[colum].trNum}`;
@@ -733,7 +735,7 @@ import XEUtils from 'xe-utils';
                     this.showAtt = true;
                 }else{
                     if (this.setState == 'formula') {
-                        this.row.attributeValue == null? this.row.attributeValue ="":this.row.attributeValue ;
+                        this.row.attributeValue == null ? this.row.attributeValue ="":this.row.attributeValue ;
                         this.row.attributeValue += key;  
                     }else if (this.setState == 'attribute') {
                         this.row.attributeValue = key;
@@ -743,14 +745,13 @@ import XEUtils from 'xe-utils';
             }
         },
         cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-              // if (this.btn.edit) {
-                if (columnIndex >1) { //带选择框的情况
-                    row = row[this.hd[columnIndex-2]]
-                    if (rowIndex == this.cellStyle.row-1 && column.id == this.cellStyle.col) {
-                        return {'border':'1px solid #409EFF'}
-                    }
+            if (columnIndex >1) { //带选择框的情况
+                row = row[this.hd[columnIndex-2]]
+                if (rowIndex == this.cellStyle.row-1 && column.id == this.cellStyle.col) {
+                    return {'border':'1px solid #409EFF'}
                 }
-            return {}
+            }
+            return {};
         },
         typeAttState (type) {   //判断属性 然后设置属性值状态 
             if(!type) return false;
@@ -758,36 +759,34 @@ import XEUtils from 'xe-utils';
                 return this.$notify.info({title: '提示',duration: 800,message: '您正在设置限制值属性，请先设置完哦，并且点击确定！'}); 
             }
             if (type =='sysOrder' || type == 'sysNum') {
-                 this.setState = null; //初始状态，可随意切换单元格设置属性状态
+                this.setState = null; //初始状态，可随意切换单元格设置属性状态
             }else if (type =='original' || type == 'update'){
                 this.setState = 'relation'; //改为外联设置属性状态
                 return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
                 // 显示引入的表格
             }else if(type == 'formula'){ //设置公式                        
-                 this.setState = 'formula'; //改为公式状态
+                this.setState = 'formula'; //改为公式状态
             }else if(type == 'sumText'){ //设置合计尾行文字            
-                 this.setState = null;  //改为设置合计尾行单元格文字状态
+                this.setState = null;  //改为设置合计尾行单元格文字状态
             }else if(type == 'sumNull'){ //设置合计尾行空                       
                 this.row.td ='';    //直接把单元格内容清除为空
-                 this.setState = null;   //状态改为空
+                this.setState = null;   //状态改为空
             }else if (this.ifInput.indexOf(type)!=-1 || type == 'sumFormula') {
-                 this.setState = 'attribute';    //改为设置属性状态
+                this.setState = 'attribute';    //改为设置属性状态
             }else{
                 this.setState = null; //初始状态，可随意切换单元格设置属性状态。
             }
-            this.$nextTick(() => { this.showTable = false; })   //隐藏关联表格
-
+            this.$nextTick(() => { this.showTable = false; });   //隐藏关联表格
         },
         attChange (type) {  //选择属性的选择框改变事件
-            this.typeAttState(type);  //调用属性值设置状态
             this.row.attributeValue = null;
             this.row.attributeValueId = null;
+            this.typeAttState(type);  //调用属性值设置状态
         },
         attValueFocus (e) { //属性值输入框获取焦点时触发的函数
             // if (this.setState) {   //当属性值状态为null时,判断设定属性值设置状态
-                let type = this.row.attribute;
-                this.typeAttState(type);  //调用属性值设置状态
-            // }
+            let type = this.row.attribute;
+            this.typeAttState(type);  //调用属性值设置状态
         },
         attValBtn (val) {  //属性值后面的输入框
             if (this.setState == 'limit') {
@@ -808,15 +807,13 @@ import XEUtils from 'xe-utils';
             return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
         },
         LimitChange (type) {  //选择属性的选择框改变事件
-            this.LimitAttState(type);  //调用限制值属性值设置状态
             this.row.limitValue = null;
             this.row.limitId = null;
+            this.LimitAttState(type);  //调用限制值属性值设置状态
         },
         LimitValFocus (e) { //限制值属性值输入框获取焦点时触发的函数
-            // if (!this.setState) {   //当属性值状态为null时,判断设定属性值设置状态
-                let type = this.row.attribute;
-                this.LimitAttState(type);  //调用属性值设置状态
-            // }
+            let type = this.row.attribute;
+            this.LimitAttState(type);  //调用属性值设置状态
         },
         LimitValBtn (val) {  //属性值后面的输入框
             if (this.setState != 'limit' && this.setState != null) {

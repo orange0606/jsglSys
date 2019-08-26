@@ -120,6 +120,9 @@ body, html, #app{
     padding: 10px 2.5% 10px 2.5% ;
     overflow: auto;
 }
+.el-table{
+    overflow:visible !important;
+}
 .el-menu-item, .el-submenu__title{
     font-size: 0.8em;
     height: 40px;

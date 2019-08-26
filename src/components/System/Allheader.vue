@@ -76,16 +76,8 @@
         </elx-editable-column>
         </elx-editable>
 
-        <!-- 引入表格编辑组件 -->
-        <!-- <transition name="el-fade-in">
-          <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
-              <edit :tableList.sync="update" :heads="head" ></edit>
-          </el-dialog>
-        </transition> -->
-
-        <!-- 引入表格编辑组件 -->
-        <!-- <headeratt :params="update" :dialog.sync="dialogVisible" ></headeratt> -->
-        <el-dialog title="表头预览" width="85%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
+        <!-- 引入建立表头组件 -->
+        <el-dialog title="表头预览" width="95%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
             <headeratt :Form="Form" :visible.sync="editShow" ></headeratt>
         </el-dialog>
 
@@ -137,6 +129,7 @@ import headeratt from './NewHeader'
           headRowList:[],           //表头单元格内容   
       },
       editShow:false,//显示隐藏修改表头
+      textShow:'新建表头',
       pageVO: {
         currentPage: 1,
         pageSize: 10,
@@ -150,7 +143,7 @@ import headeratt from './NewHeader'
     this.findList()  //发起请求所有已建表头数据
   },
   watch: {
-      editShow: function(New, Old){   //变更后（新）清单表头ID  建计量清单表头和累计计量清单表头时传
+      editShow: function(New, Old){  //监听子组件传来的是否隐藏组件的布尔值
           if(!New){
               this.findList();  //发起请求所有已建表头数据
           }
@@ -173,6 +166,7 @@ import headeratt from './NewHeader'
           headRowList:[],           //表头单元格内容   
       }
       this.editShow = true; //显示表头组件
+      this.textShow = '新建表头';
     },
     queryHeader (rows) {  //查询用户当前输入的表头名之类的是否已存在数据库
         let url = '/head/'+rows.type;
@@ -247,8 +241,6 @@ import headeratt from './NewHeader'
         this.editShow = true;
         this.$post('/head/getone',{id, type})
         .then((response) => {
-        console.log('response---------------------')
-        console.log(response)
         let data = response.data.onehead;
         this.Form = {...data};
         // let form = response.data.onehead.tOriginalHead
@@ -273,12 +265,7 @@ import headeratt from './NewHeader'
 
         delete this.Form[key];
         this.Form.headRowList = headRowList;
-
-        
-
-
-        // //调用表格组装函数（返回的是个数组对象）
-        // let arr = this.$excel.Package(data[key],data.refCol,data.refRow);
+        this.textShow = '预览表头';
         
       })
 

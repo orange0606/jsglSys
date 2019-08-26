@@ -81,12 +81,20 @@ export default {
       inventory: function(newVal,oldVal){
           if (newVal!=null) {
               try {
+
+                  // let key = '';
+                  //  if(type == 'original'){
+                  //     key = this.all.originalRowList;
+                  // }else if (type == 'update') {
+                  //     key = this.all.updateRowList;
+
+                  // }else if (type== 'totalmeterage'){
+
+                  // }
                   this.all = newVal;
-                  let id = this.all.originalHead.id;
                   let type = this.all.type;
+                  let id = this.all[type+'Head'].id;
                   this.oneHeader(id,type)//调用表头内容请求函数
-                  // let list = this.all.originalRowList;
-                  // this.handle(list); //调用清单数据内容处理函数
               } catch (error) {
                   console.log(error)
               }
@@ -110,12 +118,38 @@ export default {
        this.$post('/head/getone',{id,type})
         .then((response) => {
         let data = response.data.onehead;
-        let headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
+        let key = '';
+        if (type == 'original') {
+          key = 'tOriginalHeadRows';
+        }else if (type == 'change'){
+          key = 'tChangeHeadRows';
+        }else if (type == 'update'){
+          key = 'tUpdateHeadRows';
+        }else if (type == 'totalmeterage'){
+          key = 'tTotalmeterageHeadRows';
+        }else if (type == 'meterage'){
+          key = 'tMeterageHeadRows';
+        }else if (type == 'totalpay'){
+          key = 'tTotalpayHeadRows';
+        }else if (type == 'pay'){
+          key = 'tPayHeadRows';
+        }
+        let headsArr = this.$excel.Package(data[key],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = new Array();  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+        let list = new Array();
+        if(type == 'original'){
+            list = this.all.originalRowList;
+        }else if (type == 'update') {
+            list = this.all.updateRowList;
 
-        let list = this.all.originalRowList;
+        }else if (type== 'totalmeterage'){
+
+        }
+        
+        console.log('this.all----------------------------')
+        console.log(this.all)
         this.handle(list);; //调用清单数据内容处理函数
       })
     },
@@ -123,7 +157,7 @@ export default {
         if (item) {
             let rest = this.$refs.elxEditable4.getSelecteds(); //此处应是已选择的表格数据
             if (rest.length >0) {
-                this.$emit("update:inventory", rest);
+                this.$emit("update:inventory", [...rest]);
                 this.hd.length = this.list.length = 0; 
                 let boolen = false;
                 this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
