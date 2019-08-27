@@ -127,6 +127,8 @@
                 key = 'tOriginalHeadRows';
             }else if (type == 'update') {
                 key = 'tUpdateHeadRows';
+            }else if (type == 'meterage') {
+                key = 'tMeterageHeadRows';
             }else if (type == 'totalmeterage') {
                 key = 'tTotalmeterageHeadRows';
             }

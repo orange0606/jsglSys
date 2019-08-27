@@ -174,6 +174,8 @@ let excelmodel = {
                 arrObj.limitId = null; //限制属性值内容ID
                 arrObj.tLimit = null;    //限制值类型 
                 arrObj.limitValue = null; //限制值
+                arrObj.attributeMeterageHeadId = null;                                    //id
+                arrObj.limitMeterageHeadId = null;        
             }
         }
         return arr;
@@ -220,7 +222,7 @@ let excelmodel = {
     },
     filterStr (str) {  //去除空白以及特殊字符串
         str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]");  
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘； = ”“'。，、？_]");  
         var specialStr = "";  
         for(var i=0;i<str.length;i++){  
             specialStr += str.substr(i, 1).replace(pattern, '');   
