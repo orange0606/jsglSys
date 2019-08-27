@@ -2,9 +2,9 @@
    <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum" show-overflow-tooltip :align="col.textAlign">
     <template slot-scope="scope">
       <!-- <span>{{scope.row.data[col.colNum].td}}</span> -->
-      <span v-if="scope.row.data[col.colNum].edit =='N'" :class="[col.attribute == 'update' ? 'color':'colornull']">{{scope.row.data[col.colNum].td}}</span>
-
-      <el-input v-if="scope.row.data[col.colNum].edit =='Y'" style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
+      <span v-if="scope.row.data[col.colNum].edit =='N'" :class="[col.attribute != 'meterage' ? 'color':'colornull']">{{scope.row.data[col.colNum].td}}</span>
+      <span v-if="scope.row.data[col.colNum].edit =='Y' && col.attribute!='meterage'" :class="[col.attribute != 'meterage' ? 'color':'colornull']">{{scope.row.data[col.colNum].td}}</span>
+      <el-input v-if="col.attribute=='meterage' && scope.row.data[col.colNum].edit =='Y' " style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" @focus="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
@@ -52,12 +52,14 @@ export default {
                 let sum = this.F[this.fkeys[index]];
                 console.log('公式是啥')
                 console.log(sum)
-                console.log(1212,eval(sum))
+                console.log(eval(sum))
                 // console.log(parseInt(row["D"].td)*parseInt(row["E"].td))
                 // eval(sum) ? row[this.fkeys[index]].td = eval(sum): row[this.fkeys[index]].td;  //字符串转代码计算
                 // row[fkeys[index]].td = 
                 // row[this.fkeys[index]].td = eval(sum);
-                eval(sum) || eval(sum)==0 ? row[this.fkeys[index]].td = eval(sum): row[this.fkeys[index]].td;  //字符串转代码计算
+                let Eval = eval(sum);
+                Eval || Eval==0 ? row[this.fkeys[index]].td = Eval: row[this.fkeys[index]].td;  //字符串转代码计算
+                // eval(sum) && !isNaN(eval(sum)) ? row[this.fkeys[index]].td = eval(sum): row[this.fkeys[index]].td=0;  //字符串转代码计算
                 console.log('row[this.fkeys[index]].td')
                 console.log(row[this.fkeys[index]].td)
 
@@ -82,9 +84,18 @@ export default {
 </script>
 <style scoped>
   .color  {
-      color: #67C23A;
+      /* color: #67C23A; */
+      width: 100%;
+      height: 100%;
+      background: #FFEEDD;
+
+      /* line-height: 100%; */
+
   }
   .colornull {
-      color: #409EFF;
+      /* color: #409EFF; */
+      width: 100%;
+      height: 100%;
+      background: #DFFFDF;
   }
 </style>

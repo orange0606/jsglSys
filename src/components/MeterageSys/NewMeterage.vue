@@ -99,6 +99,7 @@
           <!-- show-summary
       :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
+           <!-- :cell-style="cellStyle" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
       ref="elxEditable1"
@@ -109,6 +110,7 @@
       v-if="showHeader"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
+    
       show-summary
       size="small"
       :summary-method="getSummaries"
@@ -163,19 +165,19 @@ export default {
   data () {
     return {
       form:{  //选择表头输入清单名称与编号
-        name:'',
-        num:'',
-        headerId:'',
-        headerList:[],//表头列表
+          name:'',
+          num:'',
+          headerId:'',
+          headerList:[],//表头列表
       },
       innerVisible: false,//弹窗显示相关联原清单的两个表格
       showList: true,//显示可导入的相关清单列表表格（为fasle显示清单数据选择组件）
       update:[],//所有关联的原清单列表
       updateList: null,//原清单内容(传给子组件，然后返回回来数据)
       pageVO: { //所有关联的原清单列表数据分页
-        currentPage: 1,
-        pageSize: 10,
-        totalResult: 0
+          currentPage: 1,
+          pageSize: 10,
+          totalResult: 0
       },
       showHeader:true,  //是否显示表头以及表格强制渲染
       meterageHead:null, //保存表头信息
@@ -209,6 +211,7 @@ export default {
         if (newVal != null) {  //判断返回的是不是一个数组
           this.form.name = newVal.name;
           this.form.num = newVal.num;
+          this.form.headerId = newVal.meterageHeadId;
            //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
            let id = newVal.meterageHeadId;
            this.oneHeader(id)
@@ -235,11 +238,9 @@ export default {
     allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
         this.$post('/head/allmeterage',{tenderId})
         .then((response) => {
-          console.log('response')
-          console.log(response)
+          // console.log('response')
+          // console.log(response)
           this.form.headerList = response.data.meterageHeadList;
-          // console.log('this.form.headerList')
-          // console.log(this.form.headerList)
         }).catch(e => {
             this.$message({
               type: 'info',
@@ -360,40 +361,38 @@ export default {
               this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:index+1,upload: 1 };
             }
         }
+        if (this.PackHeader.length <2) return false; 
         //截取最后一行表头遍历进行对应处理（非合计行）（实际上是取的多级嵌套表头里的最后一层）
         let cols = [...this.col]
-        function BikoFoArr (col) {
-            let obj = new Object();
-            Biko(col);
-            function Biko (colArr) { //表头尾行 真正显示对应列的数据
-                for (let c = 0; c < colArr.length; c++) {
-                  if (colArr[c].children && colArr[c].children.length >0) {
-                      Biko(colArr[c].children);
-                  }else{
-                      obj[colArr[c].colNum] = colArr[c];
-                  }
-                }
-            }
-            return obj;
-        }
-        if (this.PackHeader.length <2) return false; 
-        let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列最后一层的表头列 object
+        let sumArr = this.BikoFoArr(cols); //截取获取表格实际对应所有列最后一层的表头列 object
 
         const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         console.log('--------------------------header')
         console.log(sumArr,header)
         for (let index = 0; index < header.length; index++) { //将对应列数据加到空数组数据那里
             let row = sumArr[header[index]];
+            let str = row.attributeValue;
             if (row.attribute && row.attribute == "update" && row.attributeValue && row.attributeValue !="") {
-                let str = row.attributeValue;
-                console.log(row.attributeValue+'有没有进来--------------------------'+index+row.attribute)
-
+                
+                // console.log(row.attributeValue+'有没有进来--------------------------'+index+row.attribute)
                 let colName = str.match(patt1)[0];
                 for (let a = 0; a < this.list.length; a++) {
                     // this.list[a][row.colNum] = new Object();
                     this.list[a][row.colNum] = {...data[a][colName]};
                     this.list[a][row.colNum].colNum = row.colNum;
+                    this.list[a][row.colNum].trNum = a;
                 }
+            }else if (row.attribute && row.attribute == "totalmeterage-meterage" && row.attributeValue && row.attributeValue !="") { 
+              //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
+
+                // console.log(row.attributeValue+'有没有进来22--------------------------'+index+row.attribute)
+                let colName = str.match(patt1)[0];
+                for (let a = 0; a < this.list.length; a++) {
+                    // this.list[a][row.colNum] = new Object();
+                    this.list[a][row.colNum].td = 0;
+
+                }
+
             }
         }
         console.log(this.list)
@@ -401,7 +400,7 @@ export default {
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             this.Formula();  //调用公式计算
-            // data.length = 0; //内存释放
+            data.length = 0; //内存释放
         } catch (e) {
             data.length = this.list.length = 0;
             this.loading =false;
@@ -410,9 +409,8 @@ export default {
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
         let str = column.property;
-        let colName = str.substr(0,str.indexOf(".td"));
-        this.editRow = row[colName];
-        console.log(row[colName].td)
+        console.log('str---------------------')
+        console.log(str)
         this.editRow != null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
@@ -454,6 +452,20 @@ export default {
         }
         return [1, 1]
     }, 
+    BikoFoArr (col) {
+        let obj = new Object();
+        Biko(col);
+        function Biko (colArr) { //表头尾行 真正显示对应列的数据
+            for (let c = 0; c < colArr.length; c++) {
+              if (colArr[c].children && colArr[c].children.length >0) {
+                  Biko(colArr[c].children);
+              }else{
+                  obj[colArr[c].colNum] = colArr[c];
+              }
+            }
+        }
+        return obj;
+     },
     findList () { //表格滚动渲染函数
       this.loading = true
       this.$nextTick(() => {
@@ -520,24 +532,10 @@ export default {
           // console.log('this.col')
         //  console.log(this.col )
         let cols = [...this.col]
-        function BikoFoArr (col) {
-            let obj = new Object();
-            Biko(col);
-            function Biko (colArr) { //表头尾行 真正显示对应列的数据
-                for (let c = 0; c < colArr.length; c++) {
-                  if (colArr[c].children && colArr[c].children.length >0) {
-                      Biko(colArr[c].children);
-                  }else{
-                      obj[colArr[c].colNum] = colArr[c];
-                  }
-                }
-            }
-            return obj;
-        }
         if (this.PackHeader.length <2) return false; 
         // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
 
-        let sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
+        let sumArr = this.BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
         const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         for (let index = 0; index < header.length; index++) {
             let sumRow = sumArr[header[index]];
@@ -585,14 +583,17 @@ export default {
                   if (row[formuHd[a]].td == "" || row[formuHd[a]].td == " " || row[formuHd[a]].td == null) {
                       // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
                       row[formuHd[a]].td = this.filterStr(row[formuHd[a]].td);
-                      row[formuHd[a]].td = parseInt(row[formuHd[a]].td);
+                      // row[formuHd[a]].td = parseInt(row[formuHd[a]].td);
+                      let Eval = eval(sum);
                       // index == 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
-                      eval(sum) || eval(sum)==0 ? row[formuHd[a]].td = eval(sum): row[formuHd[a]].td;  //字符串转代码计算
+                      Eval || Eval==0 ? row[formuHd[a]].td = Eval: row[formuHd[a]].td;  //字符串转代码计算
+                      
+
                   }
                 }
             } catch (error) {
                 console.log(error)
-                return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
+                return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！'+error, type: 'warning', duration: 3000, showClose: true });
             }
         }
     },

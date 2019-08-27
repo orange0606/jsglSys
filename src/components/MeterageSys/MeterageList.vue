@@ -23,7 +23,7 @@
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
         <!-- <elx-editable-column prop="changeHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="changeHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="meterageHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     

@@ -120,9 +120,18 @@ body, html, #app{
     padding: 10px 2.5% 10px 2.5% ;
     overflow: auto;
 }
+/* 合计尾行不显示兼容问题 */
 .el-table{
     overflow:visible !important;
 }
+/* 表头错位兼容问题 */
+.el-table th.gutter{
+    display: table-cell!important;
+}
+.el-table colgroup.gutter{
+    display: table-cell!important;
+}
+
 .el-menu-item, .el-submenu__title{
     font-size: 0.8em;
     height: 40px;
