@@ -69,7 +69,7 @@
                             <el-select v-model="Form.type" placeholder="请选择表头类型" @change="typeChange" :disabled="Form.id?true:false" size="small" style=" width:100%;">
                                 <el-option label="原清单" value="original"></el-option>
                                 <el-option label="变更清单" value="change"></el-option>
-                                <el-option v-if="Form.type =='update'" label="变更后的（新清单）" value="update"></el-option>
+                                <el-option v-if="Form.type =='update'" label="新清单" value="update"></el-option>
                                 <el-option label="计量清单" value="meterage"></el-option>
                                 <el-option label="累计计量清单" value="totalmeterage"></el-option>
                                 <el-option label="支付清单" value="pay"></el-option>

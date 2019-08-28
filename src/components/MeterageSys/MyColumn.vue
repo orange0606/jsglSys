@@ -35,7 +35,8 @@ export default {
     }
   },
   created (){
-      //   console.log( this.F)
+        console.log('看一下公式是啥')
+        console.log( this.F)
       //  console.log(this.Formula)
       //  && col.attribute == 'meterage'
   },
@@ -50,9 +51,9 @@ export default {
         try {
             for (let index = 0; index < this.fkeys.length; index++) {
                 let sum = this.F[this.fkeys[index]];
-                console.log('公式是啥')
-                console.log(sum)
-                console.log(eval(sum))
+                // console.log('公式是啥')
+                // console.log(sum)
+                // console.log(eval(sum))
                 // console.log(parseInt(row["D"].td)*parseInt(row["E"].td))
                 // eval(sum) ? row[this.fkeys[index]].td = eval(sum): row[this.fkeys[index]].td;  //字符串转代码计算
                 // row[fkeys[index]].td = 
@@ -60,8 +61,8 @@ export default {
                 let Eval = eval(sum);
                 Eval || Eval==0 ? row[this.fkeys[index]].td = Eval: row[this.fkeys[index]].td;  //字符串转代码计算
                 // eval(sum) && !isNaN(eval(sum)) ? row[this.fkeys[index]].td = eval(sum): row[this.fkeys[index]].td=0;  //字符串转代码计算
-                console.log('row[this.fkeys[index]].td')
-                console.log(row[this.fkeys[index]].td)
+                // console.log('row[this.fkeys[index]].td')
+                // console.log(row[this.fkeys[index]].td)
 
             }
         } catch (error) {

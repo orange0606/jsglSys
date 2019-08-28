@@ -26,7 +26,7 @@
     </div>
 
     <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序、右键菜单</p>
-    <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">绿色字体为原清单内容不可编辑</p>
+    <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">绿色字体为新清单内容不可编辑</p>
     <div class="click-table11-oper">
       <el-dialog
       width="85%"
@@ -50,12 +50,12 @@
             :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
             <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
-            <elx-editable-column prop="updateHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="updateHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="updateHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
-            <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="num" label="新清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
+            <elx-editable-column prop="name" label="新清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -84,7 +84,7 @@
           </el-pagination>
         </div>
 
-        <!-- 此处引入原清单数据选择组件（最终返回集合，选中的数据列表） -->
+        <!-- 此处引入新清单数据选择组件（最终返回集合，选中的数据列表） -->
         <choice-row v-else :inventory.sync="updateList" :innerVisible.sync="innerVisible" ></Choice-row>
 
     </el-dialog>
@@ -110,11 +110,10 @@
       v-if="showHeader"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
-    
       show-summary
       size="small"
       :summary-method="getSummaries"
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 100, useDefaultValidTip: true}"
       style="width: 100%">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column width="40" align="center" >
@@ -170,11 +169,11 @@ export default {
           headerId:'',
           headerList:[],//表头列表
       },
-      innerVisible: false,//弹窗显示相关联原清单的两个表格
+      innerVisible: false,//弹窗显示相对应新清单的两个表格
       showList: true,//显示可导入的相关清单列表表格（为fasle显示清单数据选择组件）
-      update:[],//所有关联的原清单列表
-      updateList: null,//原清单内容(传给子组件，然后返回回来数据)
-      pageVO: { //所有关联的原清单列表数据分页
+      update:[],//所有对应的新清单列表
+      updateList: null,//新清单内容(传给子组件，然后返回回来数据)
+      pageVO: { //所有对应的新清单列表数据分页
           currentPage: 1,
           pageSize: 10,
           totalResult: 0
@@ -187,11 +186,11 @@ export default {
       dialogVisible: true,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       formula:{}, //存储表头的公式数据
-      row:null,//公式字符串转代码的全局变量
       col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
       list: [
-      ], //表格数据
+      ], //计量清单表格数据
+      tomeRowList:null,//对应累计计量清单数据
       pendingRemoveList:[],
     }
   },
@@ -200,8 +199,8 @@ export default {
     updateList: function(newVal,oldVal){  //ChoiceRow子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         if (Array.isArray(newVal)) {  //判断返回的是不是一个数组
-           console.log('最终用户选择的需要引入的清单数据在这里返回啦沙雕');
-           console.log(newVal);
+          //  console.log('最终用户选择的需要引入的清单数据在这里返回啦沙雕');
+          //  console.log(newVal);
            this.importfxx(newVal);//这里调用表格处理函数
           //这里进行处理
         }
@@ -265,7 +264,7 @@ export default {
           this.$nextTick(() => {  //强制重新渲染
               this.showHeader = true;
               //作个防止数据错误处理表头得对应才开启修改清单的数据组装
-              if (this.uplist != null && this.uplist.meterageHeadId == data.id) {  //this.uplist变更清单列表传来需要修改的数据
+              if (this.uplist != null && this.uplist.meterageHeadId == data.id) {  //this.uplist计量清单列表传来需要修改的数据
                   //调用表格组装函数（返回的是个数组对象）
                   this.startTime = Date.now(); 
                   let list = this.uplist.meterageRowList;
@@ -276,37 +275,57 @@ export default {
               }
             })
           this.Analysis();//调用表格公式解析
-          let updateHeadId = response.data.onehead.id;
-          this.allRelationUpdate(updateHeadId)
-        
+          let meterageId = response.data.onehead.id;
+          this.allRelationUpdate(meterageId); //调用请求可导入所有对应的新清单列表
+          this.totalmeterageRow(meterageId); // 调用相对应的累计量清单数据请求函数
       })
     },
-    allRelationUpdate (id) {  //请求可导入的关联原清单列表
+    allRelationUpdate (id) {  //请求可导入的对应的新清单列表
         this.$post('/update/onetender',{ id:this.tender.id,current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
         .then((response) => {
           this.update = response.data.updateList.list;
       }).catch(e => {
           this.$message({
             type: 'info',
-            message: '发生错误！'
+            message: '请求可导入的对应的新清单列表发生错误！'
           });
       });
     },
-    oneUpatde (id) {  //请求选择可导入原清单内容
-        this.$post('/update/getone',{ id })
+    totalmeterageRow (id) {  //请求相对应的累计计量清单数据
+        this.$post('/totalmeterage/by/meterageheadid',{ id })
+        .then((response) => {
+          let data = response.data;
+          let arr = new Array();
+          if (data.totalmeterageRowList.length >0) {
+              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
+            
+          }
+          // console.log('arr-------------------------------------------这里是对应累计计量数据')
+          // console.log(arr)
+          this.tomeRowList = arr;
+          
+      }).catch(e => {
+          this.$message({
+            type: 'info',
+            message: '请求相对应的累计计量清单数据发生错误！'
+          });
+      });
+    },
+    oneUpatde (id) {  //请求选择可导入新清单内容
+        this.$post('/update/row/getone',{ id })
         .then((response) => {
           this.updateList = response.data.update;
       }).catch(e => {
           this.$message({
             type: 'info',
-            message: '发生错误！'
+            message: '请求选择可导入新清单内容发生错误！'
           });
       });
     },
-    selectOriginal (row, column, cell, event) { //原清单列表数据表格单击事件
+    selectOriginal (row, column, cell, event) { //新清单列表数据表格单击事件
         let id = row.id;
         this.oneUpatde(id); //调用请求清单
-        //关闭显示关联清单列表页面
+        //关闭显示对应清单列表页面
         this.showList = false;
     },
     handleSizeChange (pageSize) { 
@@ -322,9 +341,9 @@ export default {
     },
     formatterType (row, column, cellValue, index) {
       let obj = {
-        original: '原清单',
+        original: '新清单',
         change: '变更清单',
-        update: '变更后的清单',
+        update: '新清单',
         meterage: '计量清单',
         totalmeterage: '累计计量清单',	
         pay: '支付清单',
@@ -362,20 +381,16 @@ export default {
             }
         }
         if (this.PackHeader.length <2) return false; 
-        //截取最后一行表头遍历进行对应处理（非合计行）（实际上是取的多级嵌套表头里的最后一层）
         let cols = [...this.col]
         let sumArr = this.BikoFoArr(cols); //截取获取表格实际对应所有列最后一层的表头列 object
-
         const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
-        console.log('--------------------------header')
-        console.log(sumArr,header)
         for (let index = 0; index < header.length; index++) { //将对应列数据加到空数组数据那里
             let row = sumArr[header[index]];
             let str = row.attributeValue;
+
             if (row.attribute && row.attribute == "update" && row.attributeValue && row.attributeValue !="") {
-                
-                // console.log(row.attributeValue+'有没有进来--------------------------'+index+row.attribute)
                 let colName = str.match(patt1)[0];
+                // console.log(row.attributeValue+'有没有进来--------------------------'+index+row.attribute)
                 for (let a = 0; a < this.list.length; a++) {
                     // this.list[a][row.colNum] = new Object();
                     this.list[a][row.colNum] = {...data[a][colName]};
@@ -384,18 +399,22 @@ export default {
                 }
             }else if (row.attribute && row.attribute == "totalmeterage-meterage" && row.attributeValue && row.attributeValue !="") { 
               //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
-
-                // console.log(row.attributeValue+'有没有进来22--------------------------'+index+row.attribute)
-                let colName = str.match(patt1)[0];
-                for (let a = 0; a < this.list.length; a++) {
-                    // this.list[a][row.colNum] = new Object();
-                    this.list[a][row.colNum].td = 0;
-
+                if (this.tomeRowList.length > 0 && this.list.length == this.tomeRowList.length && Object.keys(this.list[0]).length == Object.keys(this.tomeRowList[0])) {
+                    for (let a = 0; a < this.list.length; a++) {
+                        // this.list[a][row.colNum] = new Object();
+                        this.list[a][row.colNum] = {...data[a][colName]};
+                        this.list[a][row.colNum].colNum = row.colNum;
+                        this.list[a][row.colNum].trNum = a;
+                    }
+                }else{  //当查询不到有对应累计计量清单时，进行默认为0 处理
+                    let colName = str.match(patt1)[0];
+                    for (let a = 0; a < this.list.length; a++) {
+                        this.list[a][row.colNum].td = 0;
+                    }
                 }
-
+                // console.log(row.attributeValue+'有没有进来22--------------------------'+index+row.attribute)
             }
         }
-        console.log(this.list)
         try {  //把数据载入表格
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
@@ -408,9 +427,6 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
-        let str = column.property;
-        console.log('str---------------------')
-        console.log(str)
         this.editRow != null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）

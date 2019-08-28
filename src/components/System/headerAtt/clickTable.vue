@@ -1,10 +1,6 @@
 <template>
 <transition name="el-fade-in-linear">
     <div class="read-only_form" >
-            <!-- <input id="upload" type="file" @change="importfxx()" ref="input3" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-            <p style="margin:0 0 20px 0; text-align: left;">
-                <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
-            </p> -->
             <h1>&nbsp;</h1>
             <div v-if="Form.tender" class="title">标段名称：<span class="demonstration" v-text="Form.tender.name"></span></div>  
             <div class="title">表头编号：<span class="demonstration" v-text="Form.num"></span></div>
@@ -135,11 +131,8 @@
             if (key == '' || !id || !type) return false;
             this.$post('/head/getone',params)
             .then((response) => {
-                // console.log('response----------params',)
-                // console.log(response,params)
-                this.Form = {...response.data.onehead};
+                this.Form = response.data.onehead;
                 let arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
-                // let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
                 this.list= [...arr];
                 this.hd = Object.keys(arr[0]);
                 if (this.hd[0]!='A') {
