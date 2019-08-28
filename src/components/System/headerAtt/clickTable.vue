@@ -85,14 +85,14 @@
     },
     created () { //2
         if (this.obj.type && this.obj.id) {
-            console.log('请求表头01');
+            // console.log('请求表头01');
             this.getHeader(this.obj.id, this.obj.type);//请求表头
         }
     },
    watch: {
         obj: function(New, Old){
-            console.log('父组件发需要请求关联的表头类型和id来了02');
-            console.log(New)
+            // console.log('父组件发需要请求关联的表头类型和id来了02');
+            // console.log(New)
             this.getHeader(New.id, New.type)
         },
         showTable: function(New, Old){
@@ -121,7 +121,7 @@
         getHeader (id, type) {  //请求表头数据
             this.loading = true;
             let params = {id,type}
-            console.log('进来请求表头了',params)
+            // console.log('进来请求表头了',params)
             let key = '';
             if (type == 'original') {
                 key = 'tOriginalHeadRows';
@@ -135,8 +135,8 @@
             if (key == '' || !id || !type) return false;
             this.$post('/head/getone',params)
             .then((response) => {
-                console.log('response----------params',)
-                console.log(response,params)
+                // console.log('response----------params',)
+                // console.log(response,params)
                 this.Form = {...response.data.onehead};
                 let arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
                 // let arr = this.$excel.Package(this.From2['tOriginalHeadRows'],this.From2.refCol,this.From2.refRow);
@@ -148,7 +148,7 @@
                 this.loading = false;
                 this.findList();
             }).catch(e => {
-                console.log(e)
+                // console.log(e)
                 this.loading = false;
                 this.$message({
                 type: 'info',
@@ -214,8 +214,8 @@
                 let succre = new Object();
                 succre.id = id;
                 succre.key = key;
-                console.log('单击表格正在发送点击数据到父组件')
-                console.log(succre)
+                // console.log('单击表格正在发送点击数据到父组件')
+                // console.log(succre)
                 this.$emit("update:attVal", succre)    
             }
                 

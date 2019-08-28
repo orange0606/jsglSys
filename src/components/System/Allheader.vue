@@ -242,6 +242,8 @@ import headeratt from './NewHeader'
         this.editShow = true;
         this.$post('/head/getone',{id, type})
         .then((response) => {
+            console.log('response')
+            console.log(response)
         let data = response.data.onehead;
         this.Form = {...data};
         // let form = response.data.onehead.tOriginalHead
