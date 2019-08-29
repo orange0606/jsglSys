@@ -127,6 +127,8 @@
                 key = 'tMeterageHeadRows';
             }else if (type == 'totalmeterage') {
                 key = 'tTotalmeterageHeadRows';
+            }else if (type == 'pay') {
+                key = 'tPayHeadRows';
             }
             if (key == '' || !id || !type) return false;
             this.$post('/head/getone',params)

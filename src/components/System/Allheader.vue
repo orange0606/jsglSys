@@ -125,6 +125,7 @@ import headeratt from './NewHeader'
           tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
           tTotalmeterageHeadId: null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
           tMeterageHeadId: null,         //计量清单表头id     建累计计量清单表头时传
+          payHeadId: null,    ////支付清单表头ID    建累计支付清单表头时传
           refCol:null,   //多少列
           refRow:null,   //多少行
           headRowList:[],           //表头单元格内容   
@@ -162,6 +163,7 @@ import headeratt from './NewHeader'
           tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
           tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
           tTotalmeterageHeadId:  null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
+          payHeadId: null,    ////支付清单表头ID    建累计支付清单表头时传
           refCol:null,   //多少列
           refRow:null,   //多少行
           headRowList:[],           //表头单元格内容   

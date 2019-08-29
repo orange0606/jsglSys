@@ -175,7 +175,9 @@ let excelmodel = {
                 arrObj.tLimit = null;    //限制值类型 
                 arrObj.limitValue = null; //限制值
                 arrObj.attributeMeterageHeadId = null;                                    //id
-                arrObj.limitMeterageHeadId = null;        
+                arrObj.limitMeterageHeadId = null;
+                arrObj.attributePayHeadRowId = null;    //支付表头内容的id
+                arrObj.limitPayHeadRowId = null;        //支付表头内容的id
             }
         }
         return arr;

@@ -45,18 +45,18 @@ let data = {
             { value: 'meterage-total', name: '"meterage-total"对应计量清单项的累计', input: true },
         ],   
         pay:[    //支付清单
-            { value: 'update', name: '“update”新清单', input: true },
-            { value: 'updateNull', name: '“updatenull”新清单（无对应）', input: false },
             { value: 'pay', name: '“pay”支付清单', input: false },
-            { value: 'totalmeterage-sum-onerow-auto', name: 'totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },  
-            { value: 'totalpay-pay', name: '"totalpay-pay"累计支付对应的支付清单。目的是对应累计支付清单的值，但通过支付清单做对应。', input: true }   
+            // { value: 'totalmeterage-sum-onerow-auto', name: 'totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },  
+            { value: 'totalpay-pay ', name: '"totalpay-pay"累计支付对应的支付清单。目的是对应累计支付清单的值，但通过支付清单做对应。', input: true },   
+            { value: 'totalmeterage-head-total', name: '"totalmeterage-head-total"累计计量表头合计内容', input: true }   
         ],  
         totalpay:[    //累计支付清单
-            { value: 'update', name: '“update”新清单', input: true },
-            { value: 'updateNull', name: '“updatenull”新清单（无对应）', input: false },
-            { value: 'meterage', name: '“meterage”计量清单', input: false },
-            { value: 'totalmeterage-sum-onerow-auto', name: '“totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },
-            { value: 'all-pay-total', name: '"all-pay-total"全部支付清单对应列的合计', input: true },
+            { value: 'totalpay_null', name: 'totalpay_null累计支付清单（无对应）', input: false },
+            // { value: 'totalmeterage-sum-onerow-auto', name: '“totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },
+            { value: 'pay-head-total', name: '"pay-head-total "支付表头合计内容', input: true },
+            { value: 'totalmeterage-head-total', name: '"totalmeterage-head-total"累计计量表头合计内容', input: true },
+            { value: 'pay', name: '"pay"支付清单', input: true },
+
         ] 
     }
 }
