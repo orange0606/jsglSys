@@ -10,6 +10,7 @@
       ref="elxEditable4"
       class="scroll-table4 click-table11"
       border
+      height="400"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
@@ -22,6 +23,7 @@
       <column v-for="(item,index) in col" :key="index" :col="item" ></column>
 
     </elx-editable>
+
     <div slot="footer" class="dialog-footer btn">
         <el-button size="mini" @click="inner(false)">取 消</el-button>
         <el-button size="mini" type="primary" @click="inner(true)">导 入</el-button>
@@ -179,15 +181,15 @@ export default {
         // let size = Number(this.$route.params.number);
         this.$nextTick(() => {
             this.$refs.elxEditable4.reload([]);
-            setTimeout(() => {
+            // setTimeout(() => {
               let list = this.list;
             let startTime = Date.now();
             this.$refs.elxEditable4.reload(list);
             this.loading = false;
-            this.$nextTick(() => {
+            // this.$nextTick(() => {
                 this.$message({ message: `渲染 ${list.length} 条耗时 ${Date.now() - startTime} ms`, type: 'info', duration: 8000, showClose: true })
-            })
-            }, 300)
+            // })
+            // }, 300)
         })
     },
 

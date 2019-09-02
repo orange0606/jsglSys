@@ -1,31 +1,27 @@
 import { MessageBox, Message } from 'element-ui'
 let patt1=/[A-Z+]*/g;
 let patt2=/\d+/g;
-
-
 let excelmodel = {
 
     //表格读取处理函数============
     Imports(callback){
-
-
-        let _this = this;
         // 通过DOM取文件数据
         this.file = event.currentTarget.files[0];
-        var rABS = false; //是否将文件读取为二进制字符串
-        var f = this.file;
-        var reader = new FileReader();
+        var rABS = false, //是否将文件读取为二进制字符串
+        f = this.file,
+        reader = new FileReader(),
+         _this = this;
         //if (!FileReader.prototype.readAsBinaryString) {
         FileReader.prototype.readAsBinaryString = function(f) {
-            var binary = "";
-            var rABS = false; //是否将文件读取为二进制字符串
-            // var pt = this;
-            var wb; //读取完成的数据
-            // var outdata;
-            var reader = new FileReader();
+            var binary = "",
+            rABS = false, //是否将文件读取为二进制字符串
+            // pt = this,
+            wb, //读取完成的数据
+            // outdata,
+            reader = new FileReader();
             reader.onload = function(e) {
-                var bytes = new Uint8Array(reader.result);
-                var length = bytes.byteLength;
+                var bytes = new Uint8Array(reader.result),
+                length = bytes.byteLength;
                 for(var i = 0; i < length; i++) {
                     binary += String.fromCharCode(bytes[i]);
                 }
@@ -89,7 +85,7 @@ let excelmodel = {
     */
     Package (list,colLength,rowLength){ 
         // let AZ = this.AZ();
-        let arr = [];
+        var arr = [];
         for (let i = 0; i < parseInt(rowLength); i++) { 
             arr[i]={}
             for (let j = 0; j < parseInt(colLength); j++) {
@@ -98,8 +94,8 @@ let excelmodel = {
         }
         for (let index = 0; index < list.length; index++) {
             if (list[index].trNum && list[index].colNum) {
-                let coll = list[index].colNum;
-                let row = list[index].trNum;  //行号
+                var coll = list[index].colNum,
+                row = list[index].trNum;  //行号
                 // let col = ABC.indexOf(list[index].colNum); //列号A
                 arr[row-1][coll] =list[index];
                 arr[row-1][coll].edit = 'N'; //加入编辑状态
@@ -117,10 +113,10 @@ let excelmodel = {
         let arrHd = Object.keys(arr[0]);
         // let ABC = this.$excel.AZ();
         if (arr[0]) {
-            let headers = [];
-            let arrlen = (arr.length)-2;
+            var headers = [],
+            arrlen =  arr.length -2;
             for (let index = arrlen; index >=0 ; index--) {
-                let arrHdlen = arrHd.length;
+                var arrHdlen = arrHd.length;
                 for (let i = 0; i < arrHdlen; i++) {  //添加第一层
                       if (index !=0) {
                           if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
@@ -155,13 +151,13 @@ let excelmodel = {
     */
     HeaderAtt (list) {
         list = [...list];
-        let arr = new Array();
-        let listhd = Object.keys(list[0]);
-        let listhdlen = listhd.length;
+        let arr = [],
+        listhd = Object.keys(list[0]),
+        listhdlen = listhd.length;
         for (let index = 0; index < list.length; index++) {
             arr[index] = {};
             for (let i = 0; i < listhdlen; i++) {
-                let arrObj = arr[index][listhd[i]] = list[index][listhd[i]];;
+                let arrObj = arr[index][listhd[i]] = list[index][listhd[i]];
                 arrObj.name = null; //名称
                 arrObj.col_width = 120; //列宽（注意上行与下行的列宽要相等）
                 arrObj.colWdthProportion = null;//列宽比例
@@ -191,9 +187,9 @@ let excelmodel = {
     ListAssemble (list){ 
         let arr = [];
         for (let index = list.length-1; index >= 0; index--) {
-            let coll = list[index].colNum;
-            let col = ABC.indexOf(list[index].colNum); //列号A
-            let row = list[index].trNum;  //行号
+            let coll = list[index].colNum,
+            col = ABC.indexOf(list[index].colNum), //列号A
+            row = list[index].trNum;  //行号
             if (col>=0 && coll) {
                 if (!arr[row-1]) {    //判断是否有这个下标,有的话直接添加数据
                     arr[row-1]= new Object();
@@ -224,24 +220,25 @@ let excelmodel = {
     },
     filterStr (str) {  //去除空白以及特殊字符串
         str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘； = ”“'。，、？_]");  
-        var specialStr = "";  
-        for(var i=0;i<str.length;i++){  
+        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘； = ”“'。，、？_]"), 
+        strlen = str.length,
+        specialStr = "";  
+        for(var i=0;i<strlen;i++){  
             specialStr += str.substr(i, 1).replace(pattern, '');   
         }  
         return specialStr;  
     },
     Analysis (str) {  //公式解析化为可运算的字符串
         console.log('有无进来公式解析')
-        let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g;
-        let patt2=/[A-Z+]*/g; //查找所有的大写字母，返回一个数组;
-        let patt3 = /[0-9]/;  //判断是否有数字
-        let patt4 = /[A-Z]/;
+        var patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
+        patt2=/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
+        patt3 = /[0-9]/,  //判断是否有数字
+        patt4 = /[A-Z]/;
         str = this.filterStr(str);  //去除空格与特殊符号
         let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
         for (let i = 0; i < arr.length; i++) {
-            let key = arr[i].match(patt2);
-            let arrlen = arr[i].length;
+            var key = arr[i].match(patt2),
+            arrlen = arr[i].length;
             for (let a = 0; a < str.length; a++) {
                 let index = str.indexOf(arr[i],a);
                 if ((str.length - index) < arrlen) break;
@@ -263,18 +260,18 @@ let excelmodel = {
     return : 完整表格解构数据
     */
     Unpack (list) { //表格解构
-        let headRowList = [];
-        let hd = Object.keys(list[0]);   //获取所有的列
-        let listlen = list.length;
+        var headRowList = [],
+        hd = Object.keys(list[0]),   //获取所有的列
+        listlen = list.length;
         for (let index = 0; index < listlen; index++) {
             const hdlen = hd.length;
             for (let i = 0; i < hdlen; i++) {
                 let row = list[index][hd[i]];
                 delete row.edit; //删除编辑状态
                 if (row.attribute == 'formula' && row.attributeValue && row.attributeValue !='' ) {
-                    row.formula_col = this.Analysis(row.attributeValue);
-                    console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)
-                    console.log(row)
+                    row.headFormula = this.Analysis(row.attributeValue);
+                    // console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)
+                    // console.log(row)
                 }
                 headRowList.push(row);
             }
@@ -285,8 +282,7 @@ let excelmodel = {
     },
     //封装遍历表格的所有的列 A-Z AA-AZ ...
     AZ () {
-        let arr = [];
-        let a = 0;
+        var arr = [];
         for (var i = 0; i < 26; i++) {
             arr.push(String.fromCharCode((65 + i)))
             // console.log(String.fromCharCode((65 + i)))  
@@ -306,29 +302,28 @@ let excelmodel = {
         // // 引入A-Z的所有列数组
         // index = this.AZ();
         if (!ref)return;
-        let sub = ref.indexOf(':');
-
+        var sub = ref.indexOf(':'),
         //先获取开始的列坐标
-        let start_c = ABC.indexOf(ref.substr(0,sub).match(patt1)[0])+1;
+        start_c = ABC.indexOf(ref.substr(0,sub).match(patt1)[0])+1,
         //获取开始的行坐标
-        let start_r = ref.substr(0,sub).match(patt2)[0];
+        start_r = ref.substr(0,sub).match(patt2)[0],
         //获取结束的列坐标
-        let end_c = ABC.indexOf(ref.substr(sub+1).match(patt1)[0])+1;
+        end_c = ABC.indexOf(ref.substr(sub+1).match(patt1)[0])+1,
         //获取结束的行坐标
-        let end_r = ref.substr(sub+1).match(patt2)[0];
+        end_r = ref.substr(sub+1).match(patt2)[0],
 
         // console.log('表格的的范围：  开始的列坐标是：',start_c,'  开始的行坐标是：',start_r)
         // console.log('表格的的范围：  结束的列坐标是：',end_c,'  结束的行坐标是：',end_r)
         //即将要生成多少列
-        let cos = end_c - start_c + 1;
+        cos = end_c - start_c + 1,
         //即将要生成多少行
-        let row = end_r - start_r + 1;
+        row = end_r - start_r + 1,
         // console.log('即将要生成多少列:  ',cos,'   即将要生成多少行:  ',row)
 
         //生成空数据数组
         //key 为单元格所在位置例如A1，td 是单元格的值， formula为单元格公式，tdRowspan tdColspan 为单元格合并的列数与行数
         //edit  是单元格是否后需要打开编辑，0为无需，1为需要。
-        let arr = [];
+        arr = [];
         for (let i = 0; i < row; i++) { 
             arr[i]={}
             for (let j = 0; j < cos; j++) {
@@ -342,7 +337,7 @@ let excelmodel = {
     },
 
     Table(arr,callback){    //表格完整数据生成函数
-        let sheet=[] //储存处理好的数据（二维数组）
+        var sheet=[]; //储存处理好的数据（二维数组）
         // console.log('arr')
         const arrlen = arr.length;
         for (let i = 0; i < arrlen; i++) {
@@ -352,11 +347,11 @@ let excelmodel = {
 
                 for(let key in arr[i].sheets){ //遍历sheet对象键与键值，进行数据存储
                     //做优化，直接用下标来设置值
-                    if (key!='!ref' && key!='!merges' && key!='!margins' && key!='!rows' && key!='!autofilter') {
+                    if (key !== '!ref' && key!== '!merges' && key !== '!margins' && key !=='!rows' && key != '!autofilter') {
                         try{
                             // console.log(arr[i].sheets[key])
-                            let cos = ABC.indexOf(key.match(patt1)[0]);  //选择所有的大写字母进行查询当作列下标
-                            let row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
+                            var cos = ABC.indexOf(key.match(patt1)[0]),  //选择所有的大写字母进行查询当作列下标
+                            row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
                             data[row][ABC[cos]].td = arr[i].sheets[key].v;   //给空数据加入真实的数据
                         }
                         catch (e) {
@@ -404,26 +399,22 @@ let excelmodel = {
             // console.log(arr)
             const arrlen = arr.length;
             for (let i = 0; i<arrlen;i++){
-
-                //开始位置的列key A1
-                // let start_c = ABC[parseInt(arr[i].s.c)];
-
                 //开始位置的列下标
-                let st_c = parseInt(arr[i].s.c);
+                var st_c = parseInt(arr[i].s.c),
 
                 //开始位置的行下标
-                let start_r = parseInt(arr[i].s.r)
+                start_r = parseInt(arr[i].s.r),
                 // console.log('开始的位置: ',start_c+`${start_r}`)
  
                 //结束的列 - 开始的列 + 1 = 合并了多少列
-                let cos = parseInt(arr[i].e.c) - parseInt(arr[i].s.c) + 1;
+                cos = parseInt(arr[i].e.c) - parseInt(arr[i].s.c) + 1,
                 //结束的行 - 开始的行 + 1 = 合并了多少行
-                let row = parseInt(arr[i].e.r) - parseInt(arr[i].s.r) + 1;
+                row = parseInt(arr[i].e.r) - parseInt(arr[i].s.r) + 1,
                 // console.log('合并了多少列 : ',cos,' cos.length','  合并了多少行 : ',row)
             
 
                 //储存单元格合并,进行合并处理，添加合并数量
-                let hdobj = Object.keys(data[start_r]);  //储存第几行对象的所有属性名  返回的是个数组
+                hdobj = Object.keys(data[start_r]);  //储存第几行对象的所有属性名  返回的是个数组
                 // if (data[start_r][hdobj[st_c]].key==(start_c+`${start_r+1}`)) {
                     data[start_r][hdobj[st_c]].tdColspan = cos;
                     data[start_r][hdobj[st_c]].tdRowspan = row;
@@ -472,20 +463,17 @@ let excelmodel = {
         // console.log(data)
         let Rnum = 0;
         // 删除多余的行
-        
-        // data[index][r].value.match(patt3) ==null
-        const datalen = data.length-1;
-        for (let index = datalen; index >= 0; index--) {
-            let hdobj = Object.keys(data[index]).length;
+        for (let index = data.length-1; index >= 0; index--) {
+            var hdobj = Object.keys(data[index]).length;
             for (let r = 0; r < hdobj; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
-                if (data[index][ABC[r]].td ==null && data[index][ABC[r]].tdRowspan == 1 && data[index][ABC[r]].tdColspan == 1) {
+                if (data[index][ABC[r]].td === null && data[index][ABC[r]].tdRowspan === 1 && data[index][ABC[r]].tdColspan === 1) {
                     if (r== hdobj - 1) {
                         Rnum++;
                     }
                 }else{
                     // console.log('检测到非空即停止') 
-                    return data.length=data.length -Rnum;
+                    return data.length = data.length -Rnum;
                 } 
             }  
         }
@@ -493,17 +481,17 @@ let excelmodel = {
     Delete_C (data){
         //删除多余的列
         //判断每行最少有几列是多余的,然后统一删除最少列的数量
-        let Cnum =0;
+        let Cnum = 0;
         const datalen = data.length-1;
         for (let index = datalen; index >= 0; index--) {
-            let num =0;
+            let num = 0;
             let hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index][hdobj[r]].td ==null  && data[index][hdobj[r]].tdRowspan == 1 && data[index][hdobj[r]].tdColspan == 1) {
+                if (data[index][hdobj[r]].td === null  && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
                     num++;
                 }else{
-                    if (index == datalen) {
+                    if (index === datalen) {
                         Cnum = num;
                     }else{
                         if (Cnum > num) Cnum = num;

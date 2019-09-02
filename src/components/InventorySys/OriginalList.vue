@@ -82,10 +82,11 @@
           :total="pageVO.totalResult">
         </el-pagination>
 
-         <!-- 引入新建变更清单组件 -->
+         <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
           <el-dialog title="新建原清单" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
               <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" :uplist.sync="uprow" ></inven-edit>
+              <br><br><br>
           </el-dialog>
         </transition>
     </div>

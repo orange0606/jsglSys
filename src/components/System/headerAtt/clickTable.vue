@@ -72,6 +72,7 @@
               saveEmployee: { name:''},
               saveTime: ''
           },
+          type:'',
          cellStyle: {    //点击单元格颜色变化
             row:null,
             col:null
@@ -116,25 +117,32 @@
     methods: {
         getHeader (id, type) {  //请求表头数据
             this.loading = true;
-            let params = {id,type}
+            var params = {id,type};
             // console.log('进来请求表头了',params)
-            let key = '';
-            if (type == 'original') {
-                key = 'tOriginalHeadRows';
-            }else if (type == 'update') {
-                key = 'tUpdateHeadRows';
-            }else if (type == 'meterage') {
-                key = 'tMeterageHeadRows';
-            }else if (type == 'totalmeterage') {
-                key = 'tTotalmeterageHeadRows';
-            }else if (type == 'pay') {
-                key = 'tPayHeadRows';
-            }
-            if (key == '' || !id || !type) return false;
+            this.type = type;   //保存表头类型
+            var key = '';
+            switch (type) {
+                case 'original':
+                    key = 'tOriginalHeadRows';
+                    break;
+                case 'update':
+                    key = 'tUpdateHeadRows';
+                    break;
+                case 'meterage':
+                    key = 'tMeterageHeadRows';
+                    break;
+                case 'totalmeterage':
+                    key = 'tTotalmeterageHeadRows';
+                    break;
+                case 'pay':
+                    key = 'tPayHeadRows';
+                    break;
+            } 
+            if (key === '' || !id || !type) return false;
             this.$post('/head/getone',params)
             .then((response) => {
                 this.Form = response.data.onehead;
-                let arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
+                var arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
                 this.list= [...arr];
                 this.hd = Object.keys(arr[0]);
                 if (this.hd[0]!='A') {
@@ -165,38 +173,9 @@
                 }, 300)
             })
         },
-        impt () { //button 按钮调用input文件选择事件
-            this.$refs.input3.click();
-        },
-        importfxx () { //表格导入函数
-           
-            this.loading = true;
-            this.$notify.info({title: '提示',duration: 800,message: '正在努力导入表格噢，请稍等片刻。'});
-            let _this = this;
-            this.$excel.Imports(data=>{   // excel文件导入处理函数
-                let arr = new Array();
-                try {
-                    this.hd.length = this.list.length = 0; //归为初始化状态
-                    arr = _this.$excel.HeaderAtt(data);
-                    _this.list = [...arr];
-                    _this.hd = Object.keys(_this.list[0]);
-                    arr.length = data.length = 0;
-                    _this.findList(); //渲染表格
-                } catch (error) {
-                    _this.loading = false;
-                    arr.length = data.length = 0;
-                    _this.$notify({
-                        title: '提示',
-                        duration: 5000,
-                        message: '遇到点问题了呀，请重试或者检查文件。'+error,
-                        type: 'info'
-                    });
-                }
-            })
-        },
         cell_click(row, column, cell, event){ //单元格点击事件
             if (column.property) {  //做容错处理，防止点击到选择框触发此事件
-                let colum =column.property;
+                var colum =column.property;
                 colum = colum.substr(0,colum.indexOf('.'));
                 
                 //点击单元格边框颜色显示
@@ -204,9 +183,26 @@
                 this.cellStyle.col = column.id;
                 
                 // let key = row[colum].trNum;
-                let key = `${row[colum].colNum}${row[colum].trNum}`;
-                let id = row[colum].id?row[colum].id:row[colum].id = 1;
-                let succre = new Object();
+                var key = `${row[colum].colNum}${row[colum].trNum}`,
+                id = null,
+                succre = {};
+                switch (this.type) {
+                    case 'original':
+                        id = row[colum].toId;
+                        break;
+                    case 'update':
+                        id = row[colum].tuId;
+                        break;
+                    case 'meterage':
+                        id = row[colum].tmId;
+                        break;
+                    case 'totalmeterage':
+                        id = row[colum].ttmId;
+                        break;
+                    case 'pay':
+                        id = row[colum].tmIdtpId;
+                        break;
+                } 
                 succre.id = id;
                 succre.key = key;
                 // console.log('单击表格正在发送点击数据到父组件')
@@ -216,13 +212,12 @@
                 
        },
        cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-              // if (this.btn.edit) {
-                if (columnIndex >0) { //带选择框的情况
-                    row = row[this.hd[columnIndex-1]]
-                    if (rowIndex == this.cellStyle.row-1 && column.id == this.cellStyle.col) {
-                        return {'border':'1px solid #409EFF'}
-                    }
+            if (columnIndex >0) { //带选择框的情况
+                row = row[this.hd[columnIndex-1]]
+                if (rowIndex == this.cellStyle.row-1 && column.id == this.cellStyle.col) {
+                    return {'border':'1px solid #409EFF'}
                 }
+            }
             return {}
         },
         arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理

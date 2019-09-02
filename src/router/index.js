@@ -30,14 +30,6 @@ export default new Router({
       }
     },
     {
-      path: '/newInventory',
-      name: 'newInventory',
-      component: ()=>import('@/components/InventorySys/NewInventory.vue'),
-      meta:{
-        "requireAuth": true
-      }
-    },
-    {
       path: '/Originals',
       name: 'Originals',
       component: ()=>import('@/components/InventorySys/OriginalList.vue'),

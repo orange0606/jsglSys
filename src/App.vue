@@ -128,6 +128,9 @@ body, html, #app{
 .el-table th.gutter{
     display: table-cell!important;
 }
+body .el-table th.gutter{
+    display: table-cell!important;
+}
 .el-table colgroup.gutter{
     display: table-cell!important;
 }
@@ -155,8 +158,11 @@ body, html, #app{
 .el-table--border td, .el-table--border th {
     border-right: 1px solid #CCCCCC;
 } */
-
-
+/* 
+.el-table thead.is-group th {
+  
+    background: #59AA6447;
+} */
 .el-table--border, .el-table--group {
     border: 1px solid #909399;
 }

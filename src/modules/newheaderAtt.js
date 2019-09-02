@@ -47,7 +47,7 @@ let data = {
         pay:[    //支付清单
             { value: 'pay', name: '“pay”支付清单', input: false },
             // { value: 'totalmeterage-sum-onerow-auto', name: 'totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },  
-            { value: 'totalpay-pay ', name: '"totalpay-pay"累计支付对应的支付清单。目的是对应累计支付清单的值，但通过支付清单做对应。', input: true },   
+            { value: 'totalpay-pay', name: '"totalpay-pay"累计支付对应的支付清单。目的是对应累计支付清单的值，但通过支付清单做对应。', input: true },   
             { value: 'totalmeterage-head-total', name: '"totalmeterage-head-total"累计计量表头合计内容', input: true }   
         ],  
         totalpay:[    //累计支付清单
@@ -70,7 +70,7 @@ return : 完整清单表头属性数据（Array）
 export default {
     ifInput (type) {  //获取该表头类型的要设置属性值的所有属性
         let list = data.attType[type];
-        let arr = new Array();
+        let arr = [];
         for (let index = 0; index < list.length; index++) {
             if (list[index].value != 'update' && list[index].value != 'original' && list[index].input ) {
                 arr.push(list[index].value);
@@ -79,13 +79,13 @@ export default {
         return arr;
     },
     Attribute (type){ //该表头类型的全部属性
-        console.log(data)
-        let arr = new Array();
+        // console.log(data)
+        let arr = [];
         arr = data.attType[type].concat(data.allAttribute)
         return arr;
     },
     Limit (type) {  //该表头类型的全部限制属性
-        let arr = new Array();
+        let arr = [];
         if (type == 'original') {
            return arr; 
         }
