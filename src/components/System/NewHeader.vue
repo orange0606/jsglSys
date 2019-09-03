@@ -87,7 +87,7 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'totalmeterage'" label="选择计量表头" prop="tMeterageHeadId">
-                            <el-select v-model="Form.tMeterageHeadId" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
+                            <el-select  value-key="3" v-model="Form.tMeterageHeadId" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
                                 <el-option v-for="val in MeterageHeadList" :key="val.id" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>                    

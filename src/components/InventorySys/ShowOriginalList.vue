@@ -4,10 +4,12 @@
         <h3>原清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
-            <el-button type="success" size="mini" @click="visibleNew = true" >新增</el-button>
-            <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+            <el-button type="success" size="mini" @click="see({})" >新增</el-button>
+            <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
             <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
         </div>
+         <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">审批通过后禁止修改与删除原清单！</p>
+
         <!-- 主体表格 -->
         <elx-editable
         ref="elxEditable"
@@ -15,7 +17,6 @@
         border
         size="mini"
         :data.sync="list"
-        :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
         style="width: 100%">
         <elx-editable-column type="selection" width="50" align="center" fixed="left" ></elx-editable-column>
@@ -58,34 +59,22 @@
             </template>
             <template v-else>
                 <el-tooltip content="修改" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
+                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
                 </el-tooltip>
                 <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
+                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
                 </el-tooltip>
             </template>
             </template>
         </elx-editable-column>
         </elx-editable>
-
-        <el-pagination
-          class="manual-table4-pagination"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="pageVO.currentPage"
-          :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
-          :page-size="pageVO.pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="pageVO.totalResult">
-        </el-pagination>
-
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建原清单" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" :uplist.sync="uprow" :approval="approval" ></inven-edit>
+          <el-dialog :title="EditTitle" width="85%" top="4vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
+              <show-edit :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" ></show-edit>
               <br><br><br>
           </el-dialog>
         </transition>
@@ -94,12 +83,12 @@
 </template>
 
 <script>
-import InvenEdit from './InvenEdit';
+import ShowEdit from './ShowEdit';
 import XEUtils from 'xe-utils'
   export default {
   name: 'OriginalList',
   components: {
-    InvenEdit
+    ShowEdit
   },
   props: {
     originalList:{    //原清单数据列表，这个数据用于返回给父组件
@@ -110,7 +99,7 @@ import XEUtils from 'xe-utils'
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:93, name:"清单审批单",state:0}) //state=1为已通过的审批单
+      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
@@ -120,19 +109,15 @@ import XEUtils from 'xe-utils'
   },
   data () {
     return {
-      list: this.originalList,
+      list: [],
       visibleNew:false,
       refresh:false,
       loading: false,
       list: null,
       uprow: null, //修改清单传入保存清单组组件的数据
-      tenderList:null,  //全部标段
+      tenderList: null,  //全部标段
+      EditTitle: '查看原清单', //清单子组件的标题文字内容
       dialogVisible:false,//显示隐藏
-      pageVO: {
-        currentPage: 1,
-        pageSize: 10,
-        totalResult: 0
-      },
       isClearActiveFlag: true,
       rules: {
           name: [
@@ -143,39 +128,59 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
-    // this.findList();  //发起请求所有已录入原清单
+        if (this.originalList.length === 0) {
+            this.findList();  //发起请求所有已录入原清单
+        }else{
+            this.list = this.originalList;
+        }
     // this.originalList = this.list;
   },
   watch: {
-    visibleNew: function(newVal,oldVal){
-        if (!newVal && this.list.length >0) {
-          this.originalList.length = 0;
-          for (let index = 0; index < this.list.length; index++) {
-              this.originalList.push(this.list[index]); 
-          }
-          this.visibleNew = false; //关闭显示
+    originalList: function ( newVal,oldVal ) {
+        if (newVal.length === 0) {
+            this.findList();  //发起请求所有已录入原清单
+        }else{
+            this.list = newVal;
         }
-    }
+    },
+    visibleNew: function ( newVal,oldVal ) {
+        if (!newVal) {
+            this.findList();  //发起请求所有已录入原清单
+            this.visibleNew = false; //关闭显示
+        }
+    },
   },
   computed: {
     // enter: function () {
     // }
   },
   methods: {
+    findList () {
+            // 发起网络请求
+        this.$post('/original/getall',{id: this.approval.id})
+            .then((response) => {
+            this.list = response.data.originalList;
+            this.loading = false;
+        }).catch(e => {
+            this.loading = false;
+            this.$message({
+                type: 'info',
+                message: '发生错误！'
+            });
+        })
+    },
     see (row) { //预览和修改清单
+        if (row.id) {
+            this.EditTitle = '查看原清单';
+        }else{
+            this.EditTitle = '新建原清单';
+        }
         this.uprow = row;
+        console.log(this.uprow,' this.uprow')
         this.visibleNew = true; //显示建立清单组件
     },
-    handleSizeChange (pageSize) {
-      this.pageVO.pageSize = pageSize
-      this.findList()
-    },
-    handleCurrentChange (currentPage) {
-      this.pageVO.currentPage = currentPage
-      this.findList()
-    },
     formatterType (row, column, cellValue, index) {
-      var obj = {
+      let obj = {
         original: '原清单',
         change: '变更清单',
         update: '新清单',
@@ -378,6 +383,9 @@ import XEUtils from 'xe-utils'
 </script>
 
 <style scoped>
+.dialogs {
+    height: 90%;
+}
 .manual-table2-oper {
   margin-bottom: 18px;
   text-align: left;

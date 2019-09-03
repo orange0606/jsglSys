@@ -11,8 +11,6 @@ export default new Router({
       name: 'login',
       component: ()=>import('@/components/Login.vue'),
     },
-    
-
     {
       path: '/headers',
       name: 'headers',
@@ -36,7 +34,15 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
-    },    
+    }, 
+    {
+      path: '/ShowOriginalList',
+      name: 'ShowOriginalList',
+      component: ()=>import('@/components/InventorySys/ShowOriginalList.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    },     
     {
       path: '/ChangeList',
       name: 'ChangeList',

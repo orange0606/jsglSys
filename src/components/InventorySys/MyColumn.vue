@@ -35,6 +35,7 @@ export default {
   created (){
         // console.log(row, this.F)
       //  console.log(this.Formula)
+      console.log(this.approval)
   },
   methods:{
     Calculation (row,col) { //单元格值发生改变后进行行公式计算

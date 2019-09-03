@@ -22,9 +22,8 @@
             <span>清单管理</span>
             </template>
             <!-- <template slot="title">分组一</template> -->
-
-            <el-menu-item index="2-2"><router-link to="/Originals" >原清单</router-link></el-menu-item>
-
+            <el-menu-item index="2-1"><router-link to="/Originals" >原清单</router-link></el-menu-item>
+            <el-menu-item index="2-2"><router-link to="/ShowOriginalList" >原清单列表</router-link></el-menu-item>
         </el-submenu>
         <el-submenu index="3">
             <template slot="title">
