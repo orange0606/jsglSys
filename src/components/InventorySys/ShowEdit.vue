@@ -566,12 +566,12 @@ export default {
                     .then((response) => {   //
                         console.log('二次请求')
                         obj.originalRowList = originalRowList;
-                        console.log('obj.originalRowList-----------')
-                        console.log(obj)
+                        // console.log('obj.originalRowList-----------')
+                        // console.log(obj)
                         originalList.push(obj);
                         this.$post(url,{ originalList })
                             .then((response) => {
-                                console.log('修改成功')
+                                // console.log('修改成功')
                                 let succre = false;
                                 this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
                                 this.loading = false;
