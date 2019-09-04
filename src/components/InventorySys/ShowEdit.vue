@@ -230,7 +230,7 @@ export default {
             this.loading = false;
             this.$message({
                 type: 'info',
-                message: '发生错误！'
+                message: '233发生错误！'+e
             });
         })
     },
