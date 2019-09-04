@@ -205,7 +205,8 @@ export default {
                   this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               }
           })
-        this.Analysis();//调用表格公式解析
+          //调用表格公式解析 存储
+          this.formula = this.$excel.FormulaAnaly([...this.col]);
       })
     },
     consoles () {
@@ -223,7 +224,7 @@ export default {
         this.$excel.Imports(data=>{ //数据导入组装函数
             this.hd.length = this.list.length = 0; //归为初始化状态
             try { //先判断表头是否一致
-                console.log(data);
+                // console.log(data);
                 var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
                 datahd = Object.keys(data[0]);
                 if ( datahd.length < hd.length ) {
@@ -256,13 +257,9 @@ export default {
             try {  //把数据载入表格
                 this.list = [...data];
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-                // this.showHeader = false;
-                // this.$nextTick(() => {  //强制重新渲染
-                    this.showHeader = true;
-                    this.findList(); //调用滚动渲染数据
-                  // })
-                this.Formula();  //调用公式计算
-                
+                this.showHeader = true;
+                this.$excel.Formula(this.list, this.formula);  //调用公式计算
+                this.findList(); //调用滚动渲染数据
                 data.length = 0; //内存释放
             } catch (e) {
                 data.length = this.list.length = 0;
@@ -341,56 +338,6 @@ export default {
         }
         return sums;
     },
-    Analysis () {  //公式解析化为可运算的字符串
-        var patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
-        patt2 =/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
-        patt3 = /[0-9]/,  //判断是否有数字
-        patt4 = /[A-Z]/,
-        cols = [...this.col];
-        function BikoFoArr (col) {
-            let obj = new Object();
-            Biko(col);
-            function Biko (colArr) { //表头尾行 真正显示对应列的数据
-                for (let c = 0; c < colArr.length; c++) {
-                  if (colArr[c].children && colArr[c].children.length >0) {
-                      Biko(colArr[c].children);
-                  }else{
-                      obj[colArr[c].colNum] = colArr[c];
-                  }
-                }
-            }
-            return obj;
-        }
-        if (this.PackHeader.length <2) return false; 
-
-        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
-        var sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
-        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
-        for (let index = 0; index < header.length; index++) {
-            var sumRow = sumArr[header[index]];
-            if (sumRow.attribute && sumRow.attribute === "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
-                var str = sumRow.attributeValue;
-                str = this.filterStr(str);  //去除空格与特殊符号
-                var arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
-                for (let i = 0; i < arr.length; i++) {
-                    var key = arr[i].match(patt2),
-                    arrlen = arr[i].length;
-                    for (let a = 0; a < str.length; a++) {
-                        let index = str.indexOf(arr[i],a);
-                        if ((str.length - index) < arrlen) break;
-                        if (index !== -1) {
-                            if (index === 0 && !patt3.test(str[index+arrlen])) {
-                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
-                            }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
-                            }
-                        }
-                    }
-                }
-                this.formula[sumRow.colNum] = str;
-            }      
-        }
-    },
     filterStr (str) {  //去除空白以及特殊字符串
         if (str==null)return '';
         str = str.replace(/\s*/g,"");
@@ -401,30 +348,7 @@ export default {
         }  
         return specialStr;  
     },
-    Formula () { //表格载入时进行处理公式计算
-        var formuHd = Object.keys(this.formula), //用来所需要的所有有公式的列(obj)（属性）名
-        row = null,
-        sum = null,
-        evalSum = null;
-        try {
-            for (var index = this.list.length - 1; index >= 0; index--) {  
-                row = this.list[index];
-                for (var a = formuHd.length -1; a >= 0; a--) {
-                  sum = this.formula[formuHd[a]];
-                  var RowaTd = row[formuHd[a]].td;
-                  if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
-                      // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
-                      index === 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
-                      evalSum = eval(sum);
-                      evalSum ||evalSum==0 ? RowaTd = evalSum: RowaTd;  //字符串转代码计算
-                  }
-                }
-            }
-        } catch (error) {
-            console.log(error)
-            return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
-        }
-    },
+
     insertEvent () {
       // console.log('进来了吗')
       this.$refs.elxEditable.insert({

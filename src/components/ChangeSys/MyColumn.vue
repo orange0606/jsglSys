@@ -1,8 +1,8 @@
 <template>
   <el-table-column :prop="col.colNum+'.td'" :label="col.td" show-overflow-tooltip :align="col.textAlign">
     <template slot-scope="scope">
-      <span v-if="col.attribute == 'original' || scope.row.data[col.colNum].edit ==='N'" :class="[col.attribute === 'original' ? 'color':'colornull']">{{scope.row.data[col.colNum].td}}</span>
-      <el-input v-else style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
+      <span v-if="scope.row.data[col.colNum].edit === 'N'" >{{scope.row.data[col.colNum].td}}</span>
+      <el-input v-if="col.attribute === 'fluctuate' && scope.row.data[col.colNum].edit ==='Y'" style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
@@ -28,7 +28,7 @@ export default {
   },
   data() {
     return {
-      F:this.Formula,
+      F: this.Formula,
       fkeys : Object.keys(this.Formula)
     }
   },
@@ -47,9 +47,9 @@ export default {
         try {
             for (let index = 0; index < this.fkeys.length; index++) {
                 setTimeout(()=>{
-                    let sum = this.F[this.fkeys[index]];
-                    let Eval = eval(sum);
-                    Eval || Eval==0 ? row[this.fkeys[index]].td = Eval: row[this.fkeys[index]].td;  //字符串转代码计算
+                    var sum = this.F[this.fkeys[index]],
+                    Eval = eval(sum);
+                    Eval? row[this.fkeys[index]].td = Eval: row[this.fkeys[index]].td;  //字符串转代码计算
                 },100)
             }
         } catch (error) {

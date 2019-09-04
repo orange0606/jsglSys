@@ -228,8 +228,12 @@ let excelmodel = {
         }  
         return specialStr;  
     },
-    Analysis (str) {  //公式解析化为可运算的字符串
-        console.log('有无进来公式解析')
+    /*
+    公式解析化为可运算的字符串(新建表头时用)
+    param str: 需要解析的字符串
+    return : 完整表格解析完成的字符串
+    */
+    Analysis (str) {  //
         var patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
         patt2=/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
         patt3 = /[0-9]/,  //判断是否有数字
@@ -510,7 +514,93 @@ let excelmodel = {
             }
             hdobj = null;
         }
-    }
+    },
+    BikoFoArr (col) {   //截取最后一层相对应的表头
+        let obj = {};
+        Biko(col);
+        function Biko (colArr) { //表头尾行 真正显示对应列的数据
+            for (let c = 0; c < colArr.length; c++) {
+              if (colArr[c].children && colArr[c].children.length >0) {
+                  Biko(colArr[c].children);
+              }else{
+                  obj[colArr[c].colNum] = colArr[c];
+              }
+            }
+        }
+        return obj;
+    },
+    /*
+    公式解析(新建清单和预览清单时用)
+    param col: 多级嵌套表头的数据   Array[ object ]
+    return : 真正显示对应列的数据(object)
+    */
+    FormulaAnaly ( col ) {    //
+        var patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
+        patt2 =/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
+        patt3 = /[0-9]/,  //判断是否有数字
+        patt4 = /[A-Z]/,
+        Fobj = {},
+        sumArr = this.BikoFoArr(col); //截取获取表格实际对应所有列的表头列 object
+        var header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        for (let index = 0; index < header.length; index++) {
+            var sumRow = sumArr[header[index]];
+            if (sumRow.attribute && sumRow.attribute === "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
+                var str = sumRow.attributeValue;
+                str = this.filterStr(str);  //去除空格与特殊符号
+                var arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+                for (let i = 0; i < arr.length; i++) {
+                    var key = arr[i].match(patt2),
+                    arrlen = arr[i].length;
+                    for (let a = 0; a < str.length; a++) {
+                        let index = str.indexOf(arr[i],a);
+                        if ((str.length - index) < arrlen) break;
+                        if (index !== -1) {
+                            if (index === 0 && !patt3.test(str[index+arrlen])) {
+                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
+                            }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
+                            }
+                        }
+                    }
+                }
+                Fobj[sumRow.colNum] = str;
+            }      
+        }
+        console.log('Fobj')
+        console.log(Fobj)
+        return Fobj;
+    },
+    /*
+    对数据进行公式计算(导入表格（与清单）时使用)
+    param list: 清单数据   Array[ object ]
+    param formula: 存储相应列的eval 的字符串公式  object
+    使用引用赋值
+    */
+    Formula (list, formula) { //表格载入时进行处理公式计算
+        var formuHd = Object.keys(formula), //用来所需要的所有有公式的列(obj)（属性）名
+        row = null,
+        sum = null,
+        evalSum = null;
+        try {
+            for (var index = list.length - 1; index >= 0; index--) {  
+                row = list[index];
+                for (var a = formuHd.length -1; a >= 0; a--) {
+                    sum = formula[formuHd[a]];
+                    var RowaTd = row[formuHd[a]].td;
+                    if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
+                        // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
+                        index === 0 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
+                        evalSum = eval(sum);
+                        evalSum ? RowaTd = evalSum: RowaTd;  //字符串转代码计算
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error)
+            return Message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
+        }
+    },
+
 
 }
 let ABC =excelmodel.AZ();

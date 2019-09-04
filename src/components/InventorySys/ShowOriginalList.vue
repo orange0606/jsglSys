@@ -99,7 +99,7 @@ import XEUtils from 'xe-utils'
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:93, name:"清单审批单",state: 1}) //state=1为已通过的审批单
+      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,

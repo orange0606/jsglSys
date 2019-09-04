@@ -253,7 +253,7 @@ export default {
           let data = response.data.onehead;
           let headsArr = this.$excel.Package(data['tMeterageHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-          this.col = new Array();  //新建一个数组存储多级表头嵌套
+          this.col = [];  //新建一个数组存储多级表头嵌套
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
           this.meterageHead = { //保存表头信息
             name:data.name,
@@ -274,7 +274,10 @@ export default {
                   this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               }
             })
-          this.Analysis();//调用表格公式解析
+          
+          //调用表格公式解析 存储
+          this.formula = this.$excel.FormulaAnaly([...this.col]);
+          
           let meterageId = response.data.onehead.id;
           this.allRelationUpdate(meterageId); //调用请求可导入所有对应的新清单列表
           this.totalmeterageRow(meterageId); // 调用相对应的累计量清单数据请求函数
@@ -416,9 +419,9 @@ export default {
             }
         }
         try {  //把数据载入表格
+            this.$excel.Formula(this.list, this.formula);  //调用公式计算
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-            this.Formula();  //调用公式计算
             data.length = 0; //内存释放
         } catch (e) {
             data.length = this.list.length = 0;
@@ -469,7 +472,7 @@ export default {
         return [1, 1]
     }, 
     BikoFoArr (col) {
-        let obj = new Object();
+        let obj = {};
         Biko(col);
         function Biko (colArr) { //表头尾行 真正显示对应列的数据
             for (let c = 0; c < colArr.length; c++) {
@@ -530,56 +533,6 @@ export default {
         return sums;
         }
         return sums;
-    },
-    Analysis () {  //公式解析化为可运算的字符串
-        var patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
-        patt2 =/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
-        patt3 = /[0-9]/,  //判断是否有数字
-        patt4 = /[A-Z]/,
-        cols = [...this.col];
-        function BikoFoArr (col) {
-            let obj = new Object();
-            Biko(col);
-            function Biko (colArr) { //表头尾行 真正显示对应列的数据
-                for (let c = 0; c < colArr.length; c++) {
-                  if (colArr[c].children && colArr[c].children.length >0) {
-                      Biko(colArr[c].children);
-                  }else{
-                      obj[colArr[c].colNum] = colArr[c];
-                  }
-                }
-            }
-            return obj;
-        }
-        if (this.PackHeader.length <2) return false; 
-
-        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
-        var sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
-        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
-        for (let index = 0; index < header.length; index++) {
-            var sumRow = sumArr[header[index]];
-            if (sumRow.attribute && sumRow.attribute === "formula" && sumRow.attributeValue && sumRow.attributeValue !== "") {
-                var str = sumRow.attributeValue;
-                str = this.filterStr(str);  //去除空格与特殊符号
-                var arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
-                for (let i = 0; i < arr.length; i++) {
-                    var key = arr[i].match(patt2),
-                    arrlen = arr[i].length;
-                    for (let a = 0; a < str.length; a++) {
-                        let index = str.indexOf(arr[i],a);
-                        if ((str.length - index) < arrlen) break;
-                        if (index !== -1) {
-                            if (index === 0 && !patt3.test(str[index+arrlen])) {
-                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
-                            }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
-                            }
-                        }
-                    }
-                }
-                this.formula[sumRow.colNum] = str;
-            }      
-        }
     },
     filterStr (str) {  //去除空白以及特殊字符串
         if (str==null)return '';

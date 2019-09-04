@@ -146,11 +146,11 @@ export default {
       
   },
   created () {
-    let tenderId = this.tender.id; 
-    this.allHeader( tenderId);//调用请求一个标段的所有原清单表头 
-    this.rowDrop();//调用表格行拖拽函数
+    this.allHeader( this.tender.id );//调用请求一个标段的所有原清单表头 
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
+    this.rowDrop();//调用表格行拖拽函数
   },
+
   mounted () {
  
   },
@@ -214,7 +214,8 @@ export default {
                   
               }
           })
-        this.Analysis();//调用表格公式解析
+        //调用表格公式解析 存储
+        this.formula = this.$excel.FormulaAnaly([...this.col]);
       })
     },
     OneOriginal (id) { //原清单id
@@ -252,7 +253,7 @@ export default {
         this.$excel.Imports(data=>{ //数据导入组装函数
             this.hd.length = this.list.length = 0; //归为初始化状态
             try { //先判断表头是否一致
-                console.log(data);
+                // console.log(data);
                 var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
                 datahd = Object.keys(data[0]);
                 if ( datahd.length < hd.length ) {
