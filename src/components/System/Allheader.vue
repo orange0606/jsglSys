@@ -461,14 +461,13 @@ import headeratt from './NewHeader'
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.loading = true
+            this.loading = true
             // 进行发起请求删除
             let data= {}
             data.headList=[];
             for (let index = 0; index < removeRecords.length; index++) {
                 data.headList.push({id:removeRecords[index].id,type:removeRecords[index].type})
             }
-            this.loading = true
             // 进行发起请求删除
             this.$post('/head/delarray',data)
               .then((response) => {

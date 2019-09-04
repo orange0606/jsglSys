@@ -155,14 +155,14 @@ export default {
  
   },
   beforeDestroy () {
-    this.rest.length = this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
+    this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
     this.$refs.input = null;
   },
   methods: {
     upif ( newVal ) {   //处理父组件传来的值
         if (newVal && newVal.id) {  //判断返回的是不是一个数组
             this.loading = true;
-            console.log('此时为预览修改')
+            // console.log('此时为预览修改')
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             var id = newVal.originalHead.id;
@@ -170,7 +170,7 @@ export default {
             //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
             return this.oneHeader(id);
         }else if (newVal) {
-            console.log('此时为新建原清单')
+            // console.log('此时为新建原清单')
             this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
             this.form.name = this.form.num = this.form.headerId = this.headerList =null;
             this.$nextTick(() => {
@@ -209,6 +209,7 @@ export default {
               if (this.uplist !== null && this.uplist.originalHead && this.uplist.originalHead.id === data.id) {  //this.uplist变更清单列表传来需要修改的数据
                   //调用表格组装函数（返回的是个数组对象）
                   this.startTime = Date.now(); 
+                  this.loading = true;
                   this.OneOriginal(this.uplist.id);
                   
               }
@@ -221,6 +222,7 @@ export default {
         this.$post('/original/row/getone',{ id })
             .then((response) => {
             // this.list = response.data.originalList.list;
+            if (!response.data.original.originalRowList) return this.loading = false;;
             var arr = this.$excel.ListAssemble(response.data.original.originalRowList); //组装清单表格数据
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据
@@ -228,6 +230,7 @@ export default {
             this.loading = false;
         }).catch(e => {
             this.loading = false;
+            console.log(e)
             this.$message({
                 type: 'info',
                 message: '233发生错误！'+e
@@ -375,7 +378,7 @@ export default {
         patt4 = /[A-Z]/,
         cols = [...this.col];
         function BikoFoArr (col) {
-            let obj = new Object();
+            let obj = {};
             Biko(col);
             function Biko (colArr) { //表头尾行 真正显示对应列的数据
                 for (let c = 0; c < colArr.length; c++) {
@@ -503,7 +506,7 @@ export default {
     submitEvent () {
       this.$refs.elxEditablecom.validate(valid => {
         if (valid) {
-            let list = this.list;
+            let list = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据;
             list.forEach((item, index) => {
                 if (XEUtils.isDate(item.date)) {
                 item.date = item.date.getTime();
@@ -518,10 +521,9 @@ export default {
                 })
                 return false;
             }
-
             //解构数据进行提交
             this.loading = true;
-            let header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+            var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
             refCol = header.length,
             refRow = list.length,
             originalRowList = [];
@@ -539,7 +541,6 @@ export default {
 
                 }
             }
-            var originalList = [];
             //此处做个判断，判断是新建还是修改。
             var obj = {
                 // id:                                    //原清单id
@@ -549,75 +550,37 @@ export default {
                 sysNum: '',                    //系统编号  预留，暂不使用
                 name: this.form.name,                     //原清单名称
                 num: this.form.num,                    //原清单编号
-                tender_id: this.tender.id,                     //标段id
+                tenderId: this.tender.id,                     //标段id
                 type: 'original',                 //原清单类别为”original”
-                originalRowList:[]                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
-            }
-            console.log('obj-----------')
-            console.log(obj)
-            var url = '';
-            if (this.uplist && this.uplist.id ) { //此处是修改,先删除，再保存。二次请求
-                url = '/original/update';
-                obj.id = this.uplist.id;
-                console.log('obj----id-------')
-                console.log(obj)
-                originalList.push(obj);
-                return this.$post(url,{ originalList })
-                    .then((response) => {   //
-                        console.log('二次请求')
-                        obj.originalRowList = originalRowList;
-                        // console.log('obj.originalRowList-----------')
-                        // console.log(obj)
-                        originalList.push(obj);
-                        this.$post(url,{ originalList })
-                            .then((response) => {
-                                // console.log('修改成功')
-                                let succre = false;
-                                this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
-                                this.loading = false;
-                                this.list.length = this.hd.length = 0;
-                                this.showHeader = false;
-                                this.$nextTick(() => {  //强制重新渲染
-                                    this.showHeader = true;
-                                })
-                            }).catch(e => {
-                                this.loading = false;
-                                this.$message({
-                                    type: 'info',
-                                    message: '发生错误！'+e
-                                });
-                            })
-                }).catch(e => {
-                    this.loading = false;
-                    this.$message({
-                        type: 'info',
-                        message: '发生错误！'+e
-                    });
-                })
-            }else if (this.uplist ) {    //此处是新建清单
+                originalRowList                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
+            },
+            originalList = [],
+            url = '';
+            if (this.uplist && !this.uplist.id ) { //此处是新建清单
                 url = '/original/save';
-                obj.originalRowList = originalRowList;
-                console.log('obj/original/save-------------')
-                console.log(obj)
+            }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
+                obj.id = this.uplist.id;
+                url = '/original/update';
             }
             if (url === '') return false;
             originalList.push(obj);
             this.$post(url,{ originalList })
                 .then((response) => {   
-                console.log('新建成功')
+                this.$message({ message: `已为你保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                 let succre = false;
                 this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
                 this.loading = false;
-                this.list.length = this.hd.length = 0;
+                originalRowList.length = this.list.length = this.hd.length = 0;
                 this.showHeader = false;
                 this.$nextTick(() => {  //强制重新渲染
                     this.showHeader = true;
                 })
             }).catch(e => {
                 this.loading = false;
+                originalRowList.length = 0;
                 this.$message({
                     type: 'info',
-                    message: '发生错误！'+e
+                    message: '585发生错误！'+e
                 });
             })
 

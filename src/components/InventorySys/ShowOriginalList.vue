@@ -4,7 +4,7 @@
         <h3>原清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
-            <el-button type="success" size="mini" @click="see({})" >新增</el-button>
+            <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
             <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
             <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
         </div>
@@ -99,7 +99,7 @@ import XEUtils from 'xe-utils'
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:93, name:"清单审批单",state: 1}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
@@ -176,7 +176,7 @@ import XEUtils from 'xe-utils'
             this.EditTitle = '新建原清单';
         }
         this.uprow = row;
-        console.log(this.uprow,' this.uprow')
+        // console.log(this.uprow,' this.uprow')
         this.visibleNew = true; //显示建立清单组件
     },
     formatterType (row, column, cellValue, index) {
@@ -308,28 +308,39 @@ import XEUtils from 'xe-utils'
         this.$refs.elxEditable.clearActive()
       }
     },
-    removeEvent (row) {     //删除单个清单
-      if (row.id) {
-        this.isClearActiveFlag = false
-       this.$confirm('确定永久删除该数据?', '温馨提示', {
-          distinguishCancelAndClose: true,
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          // this.loading = true
-          this.$refs.elxEditable.remove(row);
-        }).catch(action => action).then(() => {
-          this.isClearActiveFlag = true;
-        })
-      } else {
-        this.$refs.elxEditable.remove(row);
-        let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-        this.originalList.length = 0;
-        for (let index = 0; index < rest.length; index++) {
-          this.originalList.push(rest[index]); 
+
+    removeEvent (row) {
+        if (row.id) {
+          this.isClearActiveFlag = false
+          this.$confirm('确定永久删除该数据?', '温馨提示', {
+            distinguishCancelAndClose: true,
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+              this.loading = true
+              // 进行发起请求删除
+              this.$post('/original/del',{ id: row.id })
+                .then((response) => {
+                //删除成功
+                this.loading = false
+                this.findList()
+                this.$message({
+                  type: 'success',
+                  message: '删除所选选项成功!1'
+                })
+              }).catch(e => {
+                  this.$message({
+                      type: 'info',
+                      message: '删除失败！'+e
+                  });
+              })
+          }).catch(action => action).then(() => {
+            this.isClearActiveFlag = true
+          })
+        } else {
+          this.$refs.elxEditable.remove(row)
         }
-      }
     },
     deleteSelectedEvent () {    //删除选中
       let removeRecords = this.$refs.elxEditable.getSelecteds()
@@ -341,12 +352,28 @@ import XEUtils from 'xe-utils'
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$refs.elxEditable.remove(removeRecords);
-          let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-          this.originalList.length = 0;
-          for (let index = 0; index < rest.length; index++) {
-            this.originalList.push(rest[index]); 
-          }
+            this.loading = true
+            // 进行发起请求删除
+            var originalIdList = [];
+            for (let index = 0; index < removeRecords.length; index++) {
+                originalIdList.push(removeRecords[index].id)
+            }
+            // 进行发起请求删除
+            this.$post('/original/delarray',{ originalIdList })
+              .then((response) => {
+              //删除成功
+              this.loading = false
+              this.findList()
+              this.$message({
+                type: 'success',
+                message: '删除所选选项成功!'
+              })
+            }).catch(e => {
+                this.$message({
+                    type: 'info',
+                    message: '删除失败！'+e
+                });
+            })
         })
           // this.isClearActiveFlag = true;
       } else {
@@ -359,12 +386,27 @@ import XEUtils from 'xe-utils'
     saveRowEvent (row) {  //保存
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-            let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-            this.originalList.length = 0;
-            for (let index = 0; index < rest.length; index++) {
-              this.originalList.push(rest[index]); 
-            }
-            this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
+            var obj = {
+                id: row.id,                                    //原清单id
+                name: row.name,                     //原清单名称
+                num: row.num,                    //原清单编号
+                originalRowList: null                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
+            },
+            originalList = [],
+            url = '/original/update';
+            originalList.push(obj);
+            this.$post(url,{ originalList })
+                .then((response) => {   
+                this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
+                this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })
+            }).catch(e => {
+                this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
+                this.$message({
+                    type: 'info',
+                    message: '修改失败！'+e
+                });
+            })
+            
       
         }
       })
