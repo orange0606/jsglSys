@@ -37,7 +37,7 @@ export default {
       //  console.log(this.Formula)
   },
   methods:{
-    Calculation (row,col) { //单元格值发生改变后进行行公式计算
+   Calculation (row,col) { //单元格值发生改变后进行行公式计算
         var patt1 = /[\u4e00-\u9fa5]/g,
         strArr = col['td'].match(patt1);
         if (strArr !=null) {  //检测有中文的话，就不进行公式计算
@@ -47,9 +47,9 @@ export default {
         try {
             for (let index = 0; index < this.fkeys.length; index++) {
                 setTimeout(()=>{
-                    var sum = this.F[this.fkeys[index]],
-                    Eval = eval(sum);
-                    Eval? row[this.fkeys[index]].td = Eval: row[this.fkeys[index]].td;  //字符串转代码计算
+                    let sum = this.F[this.fkeys[index]];
+                    let Eval = eval(sum);
+                    Eval || Eval==0 ? row[this.fkeys[index]].td = Eval: row[this.fkeys[index]].td;  //字符串转代码计算
                 },100)
             }
         } catch (error) {

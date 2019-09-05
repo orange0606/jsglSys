@@ -326,13 +326,12 @@ import XEUtils from 'xe-utils';
     },
     watch: {
         'Form.headRowList': function(New, Old){
-
             if(New ==null || !this.Form.id || New.length === 0) return false;
             // console.log('父组件传表头类型值过来了')
             // console.log(this.Form)
             // console.log(New);
             this.loading = true;
-            this.list = new Array;
+            this.list = [];
             let arr = this.$excel.ListAssemble([...New]);  //组装表头
             this.list = arr;
             this.hd = Object.keys(this.list[0]);
@@ -775,7 +774,7 @@ import XEUtils from 'xe-utils';
                         type: 'pay'
                 }
                 return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
-            }else if (type =='original' || type === 'update' || type === 'fluctuate' || type === 'totalmeterage-head-total' ){
+            }else if (type =='original' || type === 'update' || type === 'totalmeterage-head-total' ){
                 this.setState = 'relation'; //改为关联设置属性状态
                 if (this.Form.type =='totalmeterage' && this.headerTypeObj.type === 'meterage'){
                     // console.log('当前是正在建累计计量表头，上一个表头是'+this.headerTypeObj.type+',所以现在请求新清单表头')

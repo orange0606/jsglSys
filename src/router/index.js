@@ -66,6 +66,14 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
+    },
+    {
+      path: '/ShowMeterageList',
+      name: 'ShowMeterageList',
+      component: ()=>import('@/components/MeterageSys/ShowMeterageList.vue'),
+      meta:{
+        "requireAuth": true
+      }
     }
   ]
 })

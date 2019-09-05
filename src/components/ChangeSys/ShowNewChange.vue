@@ -277,7 +277,6 @@ export default {
               this.showHeader = true;
               //作个防止数据错误处理表头得对应才开启修改清单的数据组装
               if (this.uplist !== null && this.uplist.changeHead && this.uplist.changeHead.id === data.id) {  //this.uplist变更清单列表传来需要修改的数据
-                  //调用表格组装函数（返回的是个数组对象）
                   this.startTime = Date.now(); 
                   this.loading = true;
                   this.OneChange( this.uplist.id ); //调用请求变更清单函数
@@ -390,15 +389,16 @@ export default {
         var cols = [...this.col],
         sumArr = this.$excel.BikoFoArr(cols), //截取获取表格实际对应所有列最后一层的表头列 object
         header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+
         for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
-            var sumRow = sumArr[header[index]];
-            if (sumRow.attribute && sumRow.attribute === "original" && sumRow.attributeValue && sumRow.attributeValue !="") {
-                var str = sumRow.attributeValue,
-                colName = str.match(patt1)[0];
+            var row = sumArr[header[index]],
+            str = row.attributeValue;
+            if (row.attribute && row.attribute === "original" && row.attributeValue && row.attributeValue !="") {
+                let colName = str.match(patt1)[0];
                 for (let a = this.list.length -1; a >= 0 ; a--) {
-                    this.list[a][sumRow.colNum] = {};
-                    this.list[a][sumRow.colNum] = data[a][colName];
-                    this.list[a][sumRow.colNum].colNum = sumRow.colNum;
+                    this.list[a][row.colNum] = {...data[a][colName]};
+                    this.list[a][row.colNum].colNum = row.colNum;
+                    this.list[a][row.colNum].trNum = a;
                 }
             }
         }
@@ -440,29 +440,6 @@ export default {
             return {'background':'#FFFACD'}
         }  
         return {};
-    },
-    deleteSelectedEvent () {
-      let removeRecords = this.$refs.elxEditable1.getSelecteds() //获取被选中的数据
-      if (removeRecords.length) {
-          this.$msgbox.confirm('确定删除所选数据?', '温馨提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          // console.log('打印选中的数据')
-          // console.log(removeRecords)
-          this.loading = true
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-        }).catch(e => e)
-      } else {
-        this.$message({
-          type: 'info',
-          message: '请至少选择一条数据！'
-        })
-      }
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >2) {  //带选择框的情况
@@ -521,41 +498,6 @@ export default {
         return sums;
         }
         return sums;
-    },
-    filterStr (str) {  //去除空白以及特殊字符串
-        if (str==null)return '';
-        str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]"),
-        specialStr = "";  
-        
-        for(var i=0;i<str.length;i++){  
-            specialStr += str.substr(i, 1).replace(pattern, '');   
-        }  
-        return specialStr;  
-    },
-    Formula () { //表格载入时进行处理公式计算
-        var formuHd = Object.keys(this.formula), //用来所需要的所有有公式的列(obj)（属性）名
-        row = null,
-        sum = null,
-        evalSum = null;
-        try {
-            for (var index = this.list.length - 1; index >= 0; index--) {  
-                row = this.list[index];
-                for (var a = formuHd.length -1; a >= 0; a--) {
-                  sum = this.formula[formuHd[a]];
-                  var RowaTd = row[formuHd[a]].td;
-                  if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
-                      // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
-                      index === 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
-                      evalSum = eval(sum);
-                      evalSum ||evalSum === 0 ? RowaTd = evalSum: RowaTd;  //字符串转代码计算
-                  }
-                }
-            }
-        } catch (error) {
-            console.log(error)
-            return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
-        }
     },
     insertEvent () {
       // console.log('进来了吗')

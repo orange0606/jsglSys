@@ -256,10 +256,11 @@ export default {
             }
             try {  //把数据载入表格
                 this.list = [...data];
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
                 this.showHeader = true;
-                this.$excel.Formula(this.list, this.formula);  //调用公式计算
                 this.findList(); //调用滚动渲染数据
+                this.$excel.Formula(this.list, this.formula);  //调用公式计算
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+
                 data.length = 0; //内存释放
             } catch (e) {
                 data.length = this.list.length = 0;
@@ -400,34 +401,27 @@ export default {
     submitEvent () {
       this.$refs.elxEditable.validate(valid => {
         if (valid) {
-          let list = this.list;
+          let list = this.$refs.elxEditable.getRecords();//获取表格的全部数据;
           list.forEach((item, index) => {
-            if (XEUtils.isDate(item.date)) {
+              if (XEUtils.isDate(item.date)) {
               item.date = item.date.getTime();
-            }
-            // 重新生成排序后的序号
-            item.seq = index;
+              }
+              // 重新生成排序后的序号
+              item.seq = index;
           })
-          // this.loading = true;
-          // console.log('list')
-          // console.log(list)
           if (list.length === 0) {
               this.$message({
-                type: 'success',
-                message: '请先导入数据!'
+                  type: 'success',
+                  message: '请先导入数据!'
               })
               return false;
           }
           //解构数据进行提交
-          // this.loading = true;
-
-
-        //解构数据进行提交
           this.loading = true;
-          let header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+          var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
           refCol = header.length,
           refRow = list.length,
-          originalRowList = new Array();
+          originalRowList = [];
 
           for (let index = 0; index < refRow; index++) {
               for (let i = 0; i < refCol; i++) {
@@ -442,7 +436,6 @@ export default {
 
               }
           }
-
           //此处做个判断，判断是新建还是修改。
           if (this.uplist !== null) {
               let time = this.uplist.saveTime;
@@ -484,21 +477,6 @@ export default {
 
               }
               this.originalList.push(obj)
-              // originalList.push(obj)
-              //  //进行网路请求保存
-              // this.$post('/original/save',{ originalList })
-              //   .then((response) => {
-              //   // console.log(response)
-              //   this.loading = false;
-              //   // this.findList();
-              //   this.$message({ message: '保存成功', type: 'success' })
-              // }).catch(e => {
-              //       this.loading = false;
-              //       this.$message({
-              //       type: 'info',
-              //       message: '保存失败，请重试！'
-              //       })
-              // })
           }   
           let succre = false;
           this.$emit("update:refresh", succre)  //关闭新建变更清单子组件

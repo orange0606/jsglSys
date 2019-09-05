@@ -39,11 +39,9 @@
             <template slot="title">
             <span>计量管理</span>
             </template>
-            <el-menu-item index="4-1"><router-link to="/MeterageList" >新建计量</router-link></el-menu-item>
-            <el-menu-item index="4-2"><router-link to="/MeterageList" >待审计量</router-link></el-menu-item>
-            <el-menu-item index="4-3"><router-link to="/MeterageList" >正审计量</router-link></el-menu-item>
-            <el-menu-item index="4-4"><router-link to="/MeterageList" >已审计量</router-link></el-menu-item>
-            <el-menu-item index="4-3"><router-link to="/MeterageList" >全部计量</router-link></el-menu-item>
+            <el-menu-item index="4-1"><router-link to="/MeterageList" >计量清单</router-link></el-menu-item>
+            <el-menu-item index="4-2"><router-link to="/ShowMeterageList" >计量清单列表</router-link></el-menu-item>
+
         </el-submenu>
         <el-submenu index="5">
             <template slot="title">
@@ -59,9 +57,8 @@
             <span>系统管理</span>
             </template>
             <!-- <template slot="title">分组一</template> -->
-            <el-menu-item index="6-2"><router-link to="/headers">全部表头</router-link></el-menu-item>
-            <el-menu-item index="6-3"><router-link to="/marks">标段管理</router-link></el-menu-item>
-
+            <el-menu-item index="6-1"><router-link to="/headers">全部表头</router-link></el-menu-item>
+            <el-menu-item index="6-2"><router-link to="/marks">标段管理</router-link></el-menu-item>
 
         </el-submenu>
 

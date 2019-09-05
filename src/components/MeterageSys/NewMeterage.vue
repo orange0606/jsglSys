@@ -110,6 +110,7 @@
       v-if="showHeader"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
+      :cell-style ="cell_select"
       show-summary
       size="small"
       :summary-method="getSummaries"
@@ -154,6 +155,9 @@ export default {
     uplist:{  //查看和修改清单数据
       type: Object,
     },
+    approval:{
+      type: Object,
+    },
     meterageList: { //所有变更清单列表
       type: Array,
     },
@@ -185,6 +189,7 @@ export default {
       loading: false,
       dialogVisible: true,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
+      lastHeader: [], //最后一层表头数据（用来单元格点击编辑判断）
       formula:{}, //存储表头的公式数据
       col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
@@ -255,6 +260,10 @@ export default {
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
           this.col = [];  //新建一个数组存储多级表头嵌套
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+
+          //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+          this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+
           this.meterageHead = { //保存表头信息
             name:data.name,
             num: data.num
@@ -278,9 +287,8 @@ export default {
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
           
-          let meterageId = response.data.onehead.id;
-          this.allRelationUpdate(meterageId); //调用请求可导入所有对应的新清单列表
-          this.totalmeterageRow(meterageId); // 调用相对应的累计量清单数据请求函数
+          this.allRelationUpdate(data.id); //调用请求可导入所有对应的新清单列表
+          this.totalmeterageRow(data.id); // 调用相对应的累计量清单数据请求函数
       })
     },
     allRelationUpdate (id) {  //请求可导入的对应的新清单列表
@@ -368,33 +376,31 @@ export default {
     },
 
     importfxx(data) { //表头导入函数
-        let patt1=/[A-Z+]*/g;
         this.loading = true;
         this.hd.length = this.list.length = 0; //归为初始化状态
         this.startTime = Date.now(); 
         // 先生成一个完整表格数据
-        this.list = new Array();
-        let hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
-        let hdlen = hd.length;
-        let datalen = data.length;
-        for (let index = 0; index < datalen; index++) {
-            this.list[index] = new Object();
-            for (let i = 0; i < hdlen; i++) {
+        this.list = [];
+        var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+        patt1=/[A-Z+]*/g;
+        for (let index = data.length -1; index >= 0; index--) {
+            this.list[index] = {};
+            for (let i = hd.length -1; i >= 0; i--) {
               this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:index+1,upload: 1 };
             }
         }
-        if (this.PackHeader.length <2) return false; 
-        let cols = [...this.col]
-        let sumArr = this.BikoFoArr(cols); //截取获取表格实际对应所有列最后一层的表头列 object
-        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
-        for (let index = 0; index < header.length; index++) { //将对应列数据加到空数组数据那里
-            let row = sumArr[header[index]];
-            let str = row.attributeValue;
+        var cols = [...this.col],
+        sumArr = this.$excel.BikoFoArr(cols), //截取获取表格实际对应所有列最后一层的表头列 object
+        header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+
+        for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
+            var row = sumArr[header[index]],
+            str = row.attributeValue;
 
             if (row.attribute && row.attribute === "update" && row.attributeValue && row.attributeValue !=="") {
                 let colName = str.match(patt1)[0];
                 // console.log(row.attributeValue+'有没有进来--------------------------'+index+row.attribute)
-                for (let a = 0; a < this.list.length; a++) {
+                for (let a = this.list.length -1; a >= 0 ; a--) {
                     // this.list[a][row.colNum] = new Object();
                     this.list[a][row.colNum] = {...data[a][colName]};
                     this.list[a][row.colNum].colNum = row.colNum;
@@ -403,7 +409,7 @@ export default {
             }else if (row.attribute && row.attribute === "totalmeterage-meterage" && row.attributeValue && row.attributeValue !=="") { 
               //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                 if (this.tomeRowList.length > 0 && this.list.length === this.tomeRowList.length && Object.keys(this.list[0]).length === Object.keys(this.tomeRowList[0])) {
-                    for (let a = 0; a < this.list.length; a++) {
+                    for (let a = this.list.length -1; a >= 0 ; a--) {
                         // this.list[a][row.colNum] = new Object();
                         this.list[a][row.colNum] = {...data[a][colName]};
                         this.list[a][row.colNum].colNum = row.colNum;
@@ -411,7 +417,7 @@ export default {
                     }
                 }else{  //当查询不到有对应累计计量清单时，进行默认为0 处理
                     let colName = str.match(patt1)[0];
-                    for (let a = 0; a < this.list.length; a++) {
+                    for (let a = this.list.length -1; a >= 0 ; a--) {
                         this.list[a][row.colNum].td = 0;
                     }
                 }
@@ -430,14 +436,30 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
+        if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
-            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            let str = column.property;
-            let colName = str.substr(0,str.indexOf(".td"));
+        // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            var str = column.property,
+            colName = str.substr(0,str.indexOf(".td"));
+
+            //判断是否哪种属性类型允许单元格编辑
+            if (this.lastHeader[colName].attribute !== 'meterage') return false;
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
+    },
+    cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+        if (column.property) {
+            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            var str = column.property,
+            colName = str.substr(0,str.indexOf(".td"));
+
+            //判断是否哪种属性类型允许单元格编辑
+            if (this.lastHeader[colName].attribute !== 'meterage') return false;
+            return {'background':'#FFFACD'}
+        }  
+        return {};
     },
     deleteSelectedEvent () {
       let removeRecords = this.$refs.elxEditable1.getSelecteds() //获取被选中的数据
@@ -471,20 +493,6 @@ export default {
         }
         return [1, 1]
     }, 
-    BikoFoArr (col) {
-        let obj = {};
-        Biko(col);
-        function Biko (colArr) { //表头尾行 真正显示对应列的数据
-            for (let c = 0; c < colArr.length; c++) {
-              if (colArr[c].children && colArr[c].children.length >0) {
-                  Biko(colArr[c].children);
-              }else{
-                  obj[colArr[c].colNum] = colArr[c];
-              }
-            }
-        }
-        return obj;
-     },
     findList () { //表格滚动渲染函数
       this.loading = true
       this.$nextTick(() => {
@@ -545,30 +553,6 @@ export default {
         }  
         return specialStr;  
     },
-    Formula () { //表格载入时进行处理公式计算
-        var formuHd = Object.keys(this.formula), //用来所需要的所有有公式的列(obj)（属性）名
-        row = null,
-        sum = null,
-        evalSum = null;
-        try {
-            for (var index = this.list.length - 1; index >= 0; index--) {  
-                row = this.list[index];
-                for (var a = formuHd.length -1; a >= 0; a--) {
-                  sum = this.formula[formuHd[a]];
-                  var RowaTd = row[formuHd[a]].td;
-                  if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
-                      // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
-                      index === 0 ?this.$message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
-                      evalSum = eval(sum);
-                      evalSum ||evalSum==0 ? RowaTd = evalSum: RowaTd;  //字符串转代码计算
-                  }
-                }
-            }
-        } catch (error) {
-            console.log(error)
-            return this.$message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
-        }
-    },
     insertEvent () {
       // console.log('进来了吗')
       this.$refs.elxEditable1.insert({
@@ -618,42 +602,41 @@ export default {
 
     },
     submitEvent () {
-      this.$refs.elxEditable1.validate(valid => {
-        if (valid) {
-          let list = this.list;
-          list.forEach((item, index) => {
-            if (XEUtils.isDate(item.date)) {
-              item.date = item.date.getTime();
-            }
-            // 重新生成排序后的序号
-            item.seq = index;
-          })
-          if (list.length === 0) {
-              this.$message({
-                type: 'success',
-                message: '请先导入数据!'
-              })
-              return false;
-          }
-          //解构数据进行提交
-          this.loading = true;
-          const header = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名
-          const refCol = header.length;
-          const refRow = list.length;
-          let meterageRowList = new Array();
-          for (let index = 0; index < refRow; index++) {
-              for (let i = 0; i < refCol; i++) {
-                  if (list[index][header[i]] && list[index][header[i]].colNum) {
-                      // delete list[index][header[i]].edit;
-                      list[index][header[i]].formula = '';
-                      list[index][header[i]].trNum = index+1;                  
-                      list[index][header[i]].attribute = '';                  
-                      list[index][header[i]].upload = 1;    
-                      meterageRowList.push(list[index][header[i]]);
+        this.$refs.elxEditable1.validate(valid => {
+          if (valid) {
+              let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+              list.forEach((item, index) => {
+                  if (XEUtils.isDate(item.date)) {
+                  item.date = item.date.getTime();
                   }
+                  // 重新生成排序后的序号
+                  item.seq = index;
+              })
+              if (list.length === 0) {
+                  this.$message({
+                      type: 'success',
+                      message: '请先导入数据!'
+                  })
+                  return false;
               }
-          }
-
+              //解构数据进行提交
+            this.loading = true;
+            var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+            refCol = header.length,
+            refRow = list.length,
+            meterageRowList = [];
+            for (let index = 0; index < refRow; index++) {
+                for (let i = 0; i < refCol; i++) {
+                    if (list[index][header[i]] && list[index][header[i]].colNum) {
+                        // delete list[index][header[i]].edit;
+                        list[index][header[i]].formula = '';
+                        list[index][header[i]].trNum = index+1;                  
+                        list[index][header[i]].attribute = '';                  
+                        list[index][header[i]].upload = 1;    
+                        meterageRowList.push(list[index][header[i]]);
+                    }
+                }
+            }
           //此处做个判断，判断是新建还是修改。
           if (this.uplist !== null) {
               let time = this.uplist.saveTime;
@@ -680,7 +663,7 @@ export default {
               let meterageHead = this.meterageHead;
               obj = {
                   meterageHeadId:this.form.headerId,
-                  processId:6,
+                  processId: this.approval.id,
                   sysOrder:'',
                   sysNum:'',
                   name:this.form.name,

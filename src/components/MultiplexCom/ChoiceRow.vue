@@ -150,8 +150,8 @@ export default {
 
         }
         
-        console.log('this.all----------------------------')
-        console.log(this.all)
+        // console.log('this.all----------------------------')
+        // console.log(this.all)
         this.handle(list);; //调用清单数据内容处理函数
       })
     },

@@ -2,8 +2,7 @@
    <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum" show-overflow-tooltip :align="col.textAlign">
     <template slot-scope="scope">
       <!-- <span>{{scope.row.data[col.colNum].td}}</span> -->
-      <span v-if="scope.row.data[col.colNum].edit ==='N'" :class="[col.attribute !== 'meterage' ? 'color':'colornull']">{{scope.row.data[col.colNum].td}}</span>
-      <span v-if="scope.row.data[col.colNum].edit ==='Y' && col.attribute!='meterage'" :class="[col.attribute !== 'meterage' ? 'color':'colornull']">{{scope.row.data[col.colNum].td}}</span>
+      <span v-if="scope.row.data[col.colNum].edit ==='N'">{{scope.row.data[col.colNum].td}}</span>
       <el-input v-if="col.attribute ==='meterage' && scope.row.data[col.colNum].edit ==='Y' " style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
     <template v-if="col.children">
@@ -35,8 +34,8 @@ export default {
     }
   },
   created (){
-        console.log('看一下公式是啥')
-        console.log( this.F)
+        // console.log('看一下公式是啥')
+        // console.log( this.F)
       //  console.log(this.Formula)
       //  && col.attribute == 'meterage'
   },

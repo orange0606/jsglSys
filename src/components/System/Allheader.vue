@@ -77,7 +77,7 @@
         </elx-editable>
 
         <!-- 引入建立表头组件 -->
-        <el-dialog title="表头预览" width="95%" top="10vh" :center="false" :destroy-on-close="true" :visible.sync="editShow">
+        <el-dialog title="表头预览" width="95%" top="10vh" :center="false" :destroy-on-close="false" :visible.sync="editShow">
             <headeratt :Form="Form" :visible.sync="editShow" ></headeratt>
         </el-dialog>
 
