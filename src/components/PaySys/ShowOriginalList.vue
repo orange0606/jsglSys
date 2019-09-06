@@ -1,7 +1,7 @@
 <template>
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
-        <h3>计量清单列表</h3>
+        <h3>原清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
             <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
@@ -23,11 +23,12 @@
         <elx-editable-column type="index" width="50" align="center" fixed="left" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <elx-editable-column prop="meterageHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+        <!-- <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
+        <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="计量清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="计量清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -70,10 +71,11 @@
             </template>
         </elx-editable-column>
         </elx-editable>
-        <!-- 引入计量清单组件 -->
+         <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建计量清单" width="100%" top="0vh" height="100%" :fullscreen="true" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
-              <show-new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist.sync="uprow" :approval="approval" ></show-new-meterage>
+          <el-dialog :title="EditTitle" width="85%" top="4vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
+              <show-edit :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" ></show-edit>
+              <br><br><br>
           </el-dialog>
         </transition>
     </div>
@@ -81,15 +83,15 @@
 </template>
 
 <script>
-import ShowNewMeterage from './ShowNewMeterage';
-import XEUtils from 'xe-utils';
+import ShowEdit from './ShowEdit';
+import XEUtils from 'xe-utils'
   export default {
-  name: 'ShowMeterageList',
+  name: 'OriginalList',
   components: {
-    ShowNewMeterage
+    ShowEdit
   },
   props: {
-    meterageList:{    //变更清单数据列表，这个数据用于返回给父组件
+    originalList:{    //原清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
@@ -97,7 +99,7 @@ import XEUtils from 'xe-utils';
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:210, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
@@ -114,7 +116,7 @@ import XEUtils from 'xe-utils';
       list: null,
       uprow: null, //修改清单传入保存清单组组件的数据
       tenderList: null,  //全部标段
-      EditTitle: '查看计量清单', //清单子组件的标题文字内容
+      EditTitle: '查看原清单', //清单子组件的标题文字内容
       dialogVisible:false,//显示隐藏
       isClearActiveFlag: true,
       rules: {
@@ -126,15 +128,15 @@ import XEUtils from 'xe-utils';
     }
   },
   created () {
-        if (this.meterageList.length === 0) {
+        if (this.originalList.length === 0) {
             this.findList();  //发起请求所有已录入原清单
         }else{
-            this.list = this.meterageList;
+            this.list = this.originalList;
         }
-    // this.meterageList = this.list;
+    // this.originalList = this.list;
   },
   watch: {
-    meterageList: function ( newVal,oldVal ) {
+    originalList: function ( newVal,oldVal ) {
         if (newVal.length === 0) {
             this.findList();  //发起请求所有已录入原清单
         }else{
@@ -155,9 +157,9 @@ import XEUtils from 'xe-utils';
   methods: {
     findList () {
             // 发起网络请求
-        this.$post('/meterage/getall',{id: this.approval.id})
+        this.$post('/original/getall',{id: this.approval.id})
             .then((response) => {
-            this.list = response.data.meterageList;
+            this.list = response.data.originalList;
             this.loading = false;
         }).catch(e => {
             this.loading = false;
@@ -169,9 +171,9 @@ import XEUtils from 'xe-utils';
     },
     see (row) { //预览和修改清单
         if (row.id) {
-            this.EditTitle = '查看计量清单';
+            this.EditTitle = '查看原清单';
         }else{
-            this.EditTitle = '新建计量清单';
+            this.EditTitle = '新建原清单';
         }
         this.uprow = row;
         // console.log(this.uprow,' this.uprow')
@@ -318,8 +320,7 @@ import XEUtils from 'xe-utils';
           }).then(() => {
               this.loading = true
               // 进行发起请求删除
-              var meterageIdList = [row.id];
-              this.$post('/meterage/delarray',{ meterageIdList })
+              this.$post('/original/del',{ id: row.id })
                 .then((response) => {
                 //删除成功
                 this.loading = false
@@ -353,12 +354,12 @@ import XEUtils from 'xe-utils';
         }).then(() => {
             this.loading = true
             // 进行发起请求删除
-            var meterageIdList = [];
+            var originalIdList = [];
             for (let index = 0; index < removeRecords.length; index++) {
-                meterageIdList.push(removeRecords[index].id)
+                originalIdList.push(removeRecords[index].id)
             }
             // 进行发起请求删除
-            this.$post('/meterage/delarray',{ meterageIdList })
+            this.$post('/original/delarray',{ originalIdList })
               .then((response) => {
               //删除成功
               this.loading = false
@@ -389,12 +390,12 @@ import XEUtils from 'xe-utils';
                 id: row.id,                                    //原清单id
                 name: row.name,                     //原清单名称
                 num: row.num,                    //原清单编号
-                meterageRowList: null                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
+                originalRowList: null                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
             },
-            meterageList = [],
-            url = '/meterage/update';
-            meterageList.push(obj);
-            this.$post(url,{ meterageList })
+            originalList = [],
+            url = '/original/update';
+            originalList.push(obj);
+            this.$post(url,{ originalList })
                 .then((response) => {   
                 this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
                 this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })

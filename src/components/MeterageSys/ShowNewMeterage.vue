@@ -294,10 +294,10 @@ export default {
     },
     OneMeterage (id) { //变更清单id
         //此处请求一个审批单的一个变更清单
-        this.$post('/meterage/row/getone',{ id })
+        this.$post('/meterage/getonerow',{ id })
             .then((response) => {
-            if (!response.data.meterage.meterageRowList) return this.loading = false;
-            var arr = this.$excel.ListAssemble(response.data.meterage.meterageRowList); //组装清单表格数据
+            if (!response.data.meteragerow.meterageRowList) return this.loading = false;
+            var arr = this.$excel.ListAssemble(response.data.meteragerow.meterageRowList); //组装清单表格数据
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
@@ -640,6 +640,7 @@ export default {
           }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
               obj.id = this.uplist.id;
               url = '/meterage/update';
+              console.log('这里保存')
           }
           if (url === '') return false;
           meterageList.push(obj);
