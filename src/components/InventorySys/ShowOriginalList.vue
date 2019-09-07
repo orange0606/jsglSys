@@ -156,7 +156,7 @@ import XEUtils from 'xe-utils'
   },
   methods: {
     findList () {
-            // 发起网络请求
+        // 发起网络请求
         this.$post('/original/getall',{id: this.approval.id})
             .then((response) => {
             this.list = response.data.originalList;

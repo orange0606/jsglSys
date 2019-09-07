@@ -15,12 +15,12 @@
         </el-form-item>
         <el-form-item label="表头">
           <el-select :disabled="approval.state === 1 && uplist.id?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
-                  <el-option
-                    v-for="item in form.headerList"
-                    :key="item.id"
-                    :label="item.name"
-                    :value="item.id">
-                  </el-option>
+              <el-option
+                  v-for="item in form.headerList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id">
+              </el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -100,8 +100,11 @@ export default {
     tender:{  //标段数据
       type: Object,
     },
-    originalList:{  //父组件的清单列表
+    payList:{  //父组件的清单列表
       type: Array,
+    },
+    mode:{  //子组件的展示模式
+      type: String,   
     },
     refresh:{ //显示此组件的变量
     }
@@ -188,35 +191,6 @@ export default {
               message: 'id发生错误！'+e
             });
         });
-    },
-    oneHeader (id) {  //请求单个表头 表头id  表头类型
-       this.$post('/head/getone',{id,type:'original'})
-        .then((response) => {
-        var data = response.data.onehead,
-        headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
-        this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-        this.col = [];  //新建一个数组存储多级表头嵌套
-        this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        this.originalHead = { //保存表头编号与名称
-          name: data.name,
-          num: data.num
-        }
-        this.showHeader = false;
-        this.list.length = this.hd.length = 0;
-        this.$nextTick(() => {  //强制重新渲染
-            this.showHeader = true;
-              //作个防止数据错误处理表头得对应才开启修改清单的数据组装
-              if (this.uplist !== null && this.uplist.originalHead && this.uplist.originalHead.id === data.id) {  //this.uplist变更清单列表传来需要修改的数据
-                  //调用表格组装函数（返回的是个数组对象）
-                  this.startTime = Date.now(); 
-                  this.loading = true;
-                  this.OneOriginal(this.uplist.id);
-                  
-              }
-          })
-        //调用表格公式解析 存储
-        this.formula = this.$excel.FormulaAnaly([...this.col]);
-      })
     },
     OneOriginal (id) { //原清单id
         //此处请求一个审批单的一个原清单

@@ -104,7 +104,7 @@ export default {
                 url = '/totalpay/by/totalpayid';
                 headkey = 'tTotalpayHeadRows';
                 break;
-        } 
+        };
         rowlistkey = this.type+'RowList';
 
         if( url === '' ) return false;
@@ -114,15 +114,12 @@ export default {
             // console.log('response');
  
             // console.log(response);
-          
-
             var list = this.$excel.ListAssemble( data[rowlistkey] ), //组装清单表格数据
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
             this.list = XEUtils.clone(list, true); //深拷贝
             this.PackHeader = XEUtils.clone(header, true); //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
 
-            
             if (this.list.length >0) {
                 this.findList(); //调用滚动渲染数据
                  this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）

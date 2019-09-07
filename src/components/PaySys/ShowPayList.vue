@@ -1,7 +1,7 @@
 <template>
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
-        <h3>原清单列表</h3>
+        <h3>支付清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
             <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
@@ -24,11 +24,11 @@
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
         <!-- <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="payHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="num" label="支付清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="支付清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -91,7 +91,7 @@ import XEUtils from 'xe-utils'
     ShowEdit
   },
   props: {
-    originalList:{    //原清单数据列表，这个数据用于返回给父组件
+    payList:{    //原清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
@@ -100,6 +100,11 @@ import XEUtils from 'xe-utils'
       type: Object,
       required: false,
       default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
+    },
+    mode:{  //子组件的展示模式
+      type: String,
+      required: false,
+      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     tender:{
       type: Object,
