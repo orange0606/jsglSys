@@ -87,13 +87,13 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'totalmeterage'" label="选择计量表头" prop="tMeterageHeadId">
-                            <el-select  value-key="3" v-model="Form.tMeterageHeadId" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
+                            <el-select  value-key="3a" v-model="Form.tMeterageHeadId" @change="$forceUpdate()" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
                                 <el-option v-for="val in MeterageHeadList" :key="val.id" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>                    
-                        <el-form-item v-if="Form.type === 'pay' || Form.type === 'totalpay'" label="选择累计计量表头" prop="tTotalmeterageHeadId">
+                        <el-form-item v-if="Form.type === 'pay' || Form.type === 'totalpay' " label="选择累计计量表头" prop="tTotalmeterageHeadId">
                             <el-select v-model="Form.tTotalmeterageHeadId" placeholder="请选择累计计量清单清单表头"  clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in HeadList" :key="i+'d'" :label="val.name" :value="val.id"></el-option>
+                                <el-option v-for="(val,i) in ToMeterageHeadList" :key="i+'d'" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                        <el-form-item v-if="Form.type === 'totalpay'" label="选择支付表头" prop="tTotalmeterageHeadId">
@@ -223,6 +223,7 @@ import XEUtils from 'xe-utils';
             tenderList: [],//全部标段
             HeadList: [], //该标段所有清单(原清单与新清单)
             MeterageHeadList: [],//该标段所有计量清单表头列表
+            ToMeterageHeadList: [], //该标段所有累计计量表头
             payHeadList: [], //该标段所有支付清单表头列表
 
             //有关属性的变量
@@ -433,9 +434,9 @@ import XEUtils from 'xe-utils';
                     this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tTotalmeterageHeadId = null;
                     return this.allmeterage();
                 }
-                this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tMeterageHeadId = this.Form.tTotalmeterageHeadId = null;
+                this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tMeterageHeadId = null;
 
-            }else if (req === 'pay' || req === 'totalpay') {
+            }else if (req === 'pay' || req === 'totalpay' ) {
             
                 this.alltotalmeterage();
                 if (req === 'totalpay') {
@@ -455,7 +456,7 @@ import XEUtils from 'xe-utils';
             this.$notify.info({title: '提示',duration: 800,message: '正在努力导入表格噢，请稍等片刻。'});
             let _this = this;
             this.$excel.Imports(data=>{   // excel文件导入处理函数
-                let arr = new Array();
+                let arr = [];
                 try {
                     this.hd.length = this.list.length = 0; //归为初始化状态
                     arr = _this.$excel.HeaderAtt(data);
@@ -528,10 +529,10 @@ import XEUtils from 'xe-utils';
                     tb.tdColspan >= 0 ? tb.tdColspan =1 : tb.tdColspan=1;
                     }
                     this.list = rest;   
-                    let lastTwo = this.list.slice(-2)[0];
-                    let arr = Object.keys(lastTwo);
-                    let one = lastTwo[arr[0]].tdRowspan;
-                    let tru = arr.every( function( item, index, array ){ 
+                    var lastTwo = this.list.slice(-2)[0],
+                    arr = Object.keys(lastTwo),
+                    one = lastTwo[arr[0]].tdRowspan,
+                    tru = arr.every( function( item, index, array ){ 
                         let arrindex = lastTwo[arr[index]].tdRowspan;
                         return one === arrindex; 
                     });
@@ -679,7 +680,7 @@ import XEUtils from 'xe-utils';
             .then((response) => {
             // console.log('所有累计计量清单表头的id和名字')
             // console.log(response)
-            this.HeadList = response.data.headList;
+            this.ToMeterageHeadList = response.data.headList;
           })
         },
         allpay () {  //所有该标段的支付表头的id和名字
@@ -748,14 +749,13 @@ import XEUtils from 'xe-utils';
                         this.row.attributeValue = key;
                     }
                 }
-            
             }
         },
         cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
             if (columnIndex >1) { //带选择框的情况
-                row = row[this.hd[columnIndex-2]]
+                row = row[this.hd[columnIndex-2]];
                 if (rowIndex === this.cellStyle.row-1 && column.id === this.cellStyle.col) {
-                    return {'border':'1px solid #409EFF'}
+                    return { 'border':'1px solid #409EFF' };
                 }
             }
             return {};
@@ -772,9 +772,9 @@ import XEUtils from 'xe-utils';
                 this.headerTypeObj = {
                         id: this.Form.payHeadId,
                         type: 'pay'
-                }
-                return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
-            }else if (type =='original' || type === 'update' || type === 'totalmeterage-head-total' ){
+                };
+                return this.$nextTick(() => { this.showTable = true; }); //显示关联表格
+            }else if (type =='original' || type === 'update' || type === 'totalmeterage-head-total' || type === 'totalmeterage-meterage'){
                 this.setState = 'relation'; //改为关联设置属性状态
                 if (this.Form.type =='totalmeterage' && this.headerTypeObj.type === 'meterage'){
                     // console.log('当前是正在建累计计量表头，上一个表头是'+this.headerTypeObj.type+',所以现在请求新清单表头')
@@ -783,7 +783,7 @@ import XEUtils from 'xe-utils';
                         type: 'update'
                     }
                 }
-                if ((this.Form.type === 'totalpay' || this.Form.type === 'pay') && type === 'totalmeterage-head-total') {
+                if ((this.Form.type === 'totalpay' || this.Form.type === 'pay') && type === 'totalmeterage-head-total' ) {
                     this.headerTypeObj = {
                         id: this.Form.tTotalmeterageHeadId,
                         type: 'totalmeterage'

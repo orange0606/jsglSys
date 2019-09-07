@@ -1,12 +1,13 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td" show-overflow-tooltip :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum" show-overflow-tooltip :align="col.textAlign">
     <template slot-scope="scope">
-      <span >{{scope.row.data[col.colNum].td}}</span>
+      <span>{{scope.row.data[col.colNum].td}}</span>
+      <!-- <span>{{scope.row.data}}</span> -->
     </template>
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
         :key="index"
-        :col="item" :Formula="Formula">
+        :col="item">
       </my-column> 
     </template>
   </el-table-column> 
@@ -21,14 +22,11 @@ export default {
     col: {
       type: Object
     },
-    Formula: {
-      type: Object
-    }
+
   },
   data() {
     return {
-      F:this.Formula,
-      fkeys : Object.keys(this.Formula)
+
     }
   },
   created (){

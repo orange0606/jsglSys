@@ -57,7 +57,7 @@
             <span>新清单、累计计量、累计支付</span>
             </template>
             <!-- <template slot="title">分组一</template> -->
-            <el-menu-item index="6-1"><router-link to="/headers">预览清单</router-link></el-menu-item>
+            <el-menu-item index="6-1"><router-link to="/ReadOnlyList">预览清单</router-link></el-menu-item>
 
         </el-submenu>
         <el-submenu index="7">

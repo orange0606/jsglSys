@@ -195,7 +195,6 @@ export default {
         var data = response.data.onehead,
         headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-        this.col = [];  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
         this.originalHead = { //保存表头编号与名称
           name: data.name,
@@ -327,6 +326,7 @@ export default {
         setTimeout(() => {
           // let startTime = Date.now()
           this.$refs.elxEditablecom.reload(this.list);
+          this.$forceUpdate();
           this.loading = false;
           
         //  this.$nextTick(() => {

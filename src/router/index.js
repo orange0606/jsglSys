@@ -74,6 +74,14 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
+    },
+    {
+      path: '/ReadOnlyList',
+      name: 'ReadOnlyList',
+      component: ()=>import('@/components/AllList/ReadOnlyList.vue'),
+      meta:{
+        "requireAuth": true
+      }
     }
   ]
 })
