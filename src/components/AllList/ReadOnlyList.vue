@@ -79,12 +79,12 @@ import XEUtils from 'xe-utils';
       required:false,
       default: () => []
     },
-    totalmeterageList:{  //新清单列表
+    totalmeterageList:{  //累计计量清单列表
       type:Array,
       required:false,
       default: () => []
     },
-    totalpayList:{  //新清单列表
+    totalpayList:{  //累计支付清单列表
       type:Array,
       required:false,
       default: () => []   

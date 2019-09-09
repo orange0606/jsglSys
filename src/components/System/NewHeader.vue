@@ -298,6 +298,7 @@ import XEUtils from 'xe-utils';
                 totalpay:'累计支付清单',
                 totalpay_null:'累计支付清单（无）',
                 pay: '支付清单',
+                'meterageNull': '计量清单无对应',
                 'totalmeterage-meterage':'累计计量对应的计量清单',
                 'totalmeterage-sum-onerow-auto': '对应累计计量的系统合计行',
                 'totalpay-pay': '累计支付对应的支付清单',
@@ -333,6 +334,7 @@ import XEUtils from 'xe-utils';
             // console.log(New);
             this.loading = true;
             this.list = [];
+            this.row = {};
             let arr = this.$excel.ListAssemble([...New]);  //组装表头
             this.list = arr;
             this.hd = Object.keys(this.list[0]);
@@ -391,8 +393,8 @@ import XEUtils from 'xe-utils';
             }   
         },
         attVal: function(New, Old){ //点击显示关联的表的单元格，获取到的属性值和id
-            console.log('关联表格单击事件的单元格的行列号和id发送过来了')
-            console.log(New)
+            // console.log('关联表格单击事件的单元格的行列号和id发送过来了')
+            // console.log(New)
             if (New && New.id && New.key && this.setState) {
                 if (this.setState === 'relation') {
                     this.row.attributeValue = New.key;
@@ -421,7 +423,7 @@ import XEUtils from 'xe-utils';
         typeChange (req) {  //选择表头的类型
             if(!this.Form.tenderId) return false;
             // 是否调用了
-            
+            this.row = {};
             this.HeadList.length = this.MeterageHeadList.length = this.payHeadList.length = 0;//清空数据
            if (req === 'change') {
                 this.alloriginal();
@@ -736,9 +738,11 @@ import XEUtils from 'xe-utils';
                 var key = `${row[colum].colNum}${row[colum].trNum}`;
                 // console.log('key.......................................')
                 // console.log(key)
+                this.$forceUpdate(); // 强制刷新
                 if (this.setState === null) {
                     //赋值传到属性设置子组件中
                     this.row = row[colum];
+                   
                     //显示属性设置组件
                     this.showAtt = true;
                 }else{
@@ -774,7 +778,7 @@ import XEUtils from 'xe-utils';
                         type: 'pay'
                 };
                 return this.$nextTick(() => { this.showTable = true; }); //显示关联表格
-            }else if (type =='original' || type === 'update' || type === 'totalmeterage-head-total' || type === 'totalmeterage-meterage'){
+            }else if (type =='original' || type === 'update' || type === 'totalmeterage-head-total'){
                 this.setState = 'relation'; //改为关联设置属性状态
                 if (this.Form.type =='totalmeterage' && this.headerTypeObj.type === 'meterage'){
                     // console.log('当前是正在建累计计量表头，上一个表头是'+this.headerTypeObj.type+',所以现在请求新清单表头')
@@ -853,8 +857,7 @@ import XEUtils from 'xe-utils';
             return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
         },
         LimitChange (type) {  //选择属性的选择框改变事件
-            this.row.limitValue = null;
-            this.row.limitId = null;
+            this.row.limitId = this.row.limitValue = null;
             this.LimitAttState(type);  //调用限制值属性值设置状态
         },
         LimitValFocus (e) { //限制值属性值输入框获取焦点时触发的函数

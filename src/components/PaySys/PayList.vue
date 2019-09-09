@@ -74,7 +74,7 @@
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="85%" top="4vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
-              <show-edit :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" ></show-edit>
+              <new-pay :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" ></new-pay>
               <br><br><br>
           </el-dialog>
         </transition>
@@ -83,12 +83,12 @@
 </template>
 
 <script>
-import ShowEdit from './ShowEdit';
+import NewPay from './NewPay';
 import XEUtils from 'xe-utils'
   export default {
-  name: 'OriginalList',
+  name: 'PayList',
   components: {
-    ShowEdit
+    NewPay
   },
   props: {
     payList:{    //原清单数据列表，这个数据用于返回给父组件
@@ -99,7 +99,7 @@ import XEUtils from 'xe-utils'
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:111, name:"支付审批单-支付审批单2",state: 0}) //state=1为已通过的审批单
     },
     mode:{  //子组件的展示模式
       type: String,
@@ -121,7 +121,7 @@ import XEUtils from 'xe-utils'
       list: null,
       uprow: null, //修改清单传入保存清单组组件的数据
       tenderList: null,  //全部标段
-      EditTitle: '查看原清单', //清单子组件的标题文字内容
+      EditTitle: '查看支付清单', //清单子组件的标题文字内容
       dialogVisible:false,//显示隐藏
       isClearActiveFlag: true,
       rules: {
@@ -133,15 +133,10 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
-        if (this.originalList.length === 0) {
-            this.findList();  //发起请求所有已录入原清单
-        }else{
-            this.list = this.originalList;
-        }
-    // this.originalList = this.list;
+
   },
   watch: {
-    originalList: function ( newVal,oldVal ) {
+    payList: function ( newVal,oldVal ) {  //此处监听子组件展示模式
         if (newVal.length === 0) {
             this.findList();  //发起请求所有已录入原清单
         }else{
@@ -160,25 +155,38 @@ import XEUtils from 'xe-utils'
     // }
   },
   methods: {
+    modeType ( type ) {
+        switch(type) {
+            case 'new': //此处为新建模式处理
+                代码块
+                break;
+            case 'show':
+                代码块
+                break;
+            case 'alter':
+                代码块
+                break;
+        } 
+    },
     findList () {
             // 发起网络请求
-        this.$post('/original/getall',{id: this.approval.id})
+        this.$post('/pay/getall',{id: this.approval.id})
             .then((response) => {
-            this.list = response.data.originalList;
+            this.list = response.data.payList;
             this.loading = false;
         }).catch(e => {
             this.loading = false;
             this.$message({
                 type: 'info',
-                message: '发生错误！'
+                message: '发生错误！'+e
             });
         })
     },
     see (row) { //预览和修改清单
         if (row.id) {
-            this.EditTitle = '查看原清单';
+            this.EditTitle = '查看支付清单';
         }else{
-            this.EditTitle = '新建原清单';
+            this.EditTitle = '新建支付清单';
         }
         this.uprow = row;
         // console.log(this.uprow,' this.uprow')

@@ -137,7 +137,7 @@ export default {
           // console.log(newVal)
       },
       uplist: function(newVal,oldVal){  //子组件返回来的数据
-        console.log('这里进入了吗')
+        // console.log('这里进入了吗')
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
     }

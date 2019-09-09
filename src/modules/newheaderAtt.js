@@ -34,8 +34,8 @@ let data = {
         // },
         meterage:[    //计量清单
             { value: 'update', name: '“update”新清单', input: true },
-            { value: 'updateNull', name: '“updatenull”新清单（无对应）', input: false },
-            { value: 'meterage', name: '“meterage”计量清单', input: false },
+            { value: 'meterageNull', name: '“meteragenull”计量清单（无对应）', input: false },
+            { value: 'meterage', name: '“meterage”计量清单', input: true },
             { value: 'totalmeterage-meterage', name: 'totalmeterage-meterage"累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。', input: true },
         ],
         totalmeterage:[    //累计计量清单

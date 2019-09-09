@@ -399,6 +399,8 @@ export default {
                     this.list[a][row.colNum] = {...data[a][colName]};
                     this.list[a][row.colNum].colNum = row.colNum;
                     this.list[a][row.colNum].trNum = a;
+                    this.list[a][row.colNum].originalRowId = this.list[a][row.colNum].id;
+                    delete this.list[a][row.colNum].id;
                 }
             }
         }

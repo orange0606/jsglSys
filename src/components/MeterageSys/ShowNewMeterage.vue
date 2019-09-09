@@ -326,9 +326,8 @@ export default {
         .then((response) => {
           let data = response.data;
           let arr = new Array();
-          if (data.totalmeterageRowList.length >0) {
-              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
-            
+          if (data.totalmeterage && data.totalmeterage.tTotalmeterageHeadRows.length >0) {
+              arr = this.$excel.ListAssemble(data.totalmeterage.tTotalmeterageHeadRows);  //组装清单
           }
           // console.log('arr-------------------------------------------这里是对应累计计量数据')
           // console.log(arr)
@@ -337,7 +336,7 @@ export default {
       }).catch(e => {
           this.$message({
             type: 'info',
-            message: '请求相对应的累计计量清单数据发生错误！'
+            message: '请求相对应的累计计量清单数据发生错误！'+e
           });
       });
     },

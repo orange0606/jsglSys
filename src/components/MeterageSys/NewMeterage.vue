@@ -307,9 +307,10 @@ export default {
         .then((response) => {
           let data = response.data;
           let arr = new Array();
-          if (data.totalmeterageRowList.length >0) {
-              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
-            
+          console.log('data--------------------------------------------')
+          console.log(data)
+          if (data.totalmeterage && data.totalmeterage.tTotalmeterageHeadRows.length >0) {
+              arr = this.$excel.ListAssemble(data.totalmeterage.tTotalmeterageHeadRows);  //组装清单
           }
           // console.log('arr-------------------------------------------这里是对应累计计量数据')
           // console.log(arr)
@@ -408,7 +409,7 @@ export default {
                 }
             }else if (row.attribute && row.attribute === "totalmeterage-meterage" && row.attributeValue && row.attributeValue !=="") { 
               //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
-                if (this.tomeRowList.length > 0 && this.list.length === this.tomeRowList.length && Object.keys(this.list[0]).length === Object.keys(this.tomeRowList[0])) {
+                if (this.tomeRowList && this.tomeRowList.length > 0 && this.list.length === this.tomeRowList.length && Object.keys(this.list[0]).length === Object.keys(this.tomeRowList[0])) {
                     for (let a = this.list.length -1; a >= 0 ; a--) {
                         // this.list[a][row.colNum] = new Object();
                         this.list[a][row.colNum] = {...data[a][colName]};

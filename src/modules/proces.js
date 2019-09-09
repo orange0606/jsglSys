@@ -185,9 +185,12 @@ let excelmodel = {
     return : 完整表格数据
     */
     ListAssemble (list){ 
+        if (list == null || list.length ==0) {
+            return [];
+        }
         let arr = [];
         for (let index = list.length-1; index >= 0; index--) {
-            let coll = list[index].colNum,
+            var coll = list[index].colNum,
             col = ABC.indexOf(list[index].colNum), //列号A
             row = list[index].trNum;  //行号
             if (col>=0 && coll) {
@@ -361,8 +364,6 @@ let excelmodel = {
                         catch (e) {
                             Message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
                         }
-
-                       
                         // data[row][cos].value = arr[i].sheets[key].w;    
 
                         // //若单元格有公式的话，对公式进行保存
@@ -373,8 +374,6 @@ let excelmodel = {
                 }
                 // console.log('已注入数据')
                 // console.log(data)
-
-                
 
                 //调用表格去除多余无值的行列
                 this.Delete_R(data);
@@ -486,8 +485,7 @@ let excelmodel = {
         //删除多余的列
         //判断每行最少有几列是多余的,然后统一删除最少列的数量
         let Cnum = 0;
-        const datalen = data.length-1;
-        for (let index = datalen; index >= 0; index--) {
+        for (let index = data.length-1; index >= 0; index--) {
             let num = 0;
             let hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
@@ -495,7 +493,7 @@ let excelmodel = {
                 if (data[index][hdobj[r]].td === null  && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
                     num++;
                 }else{
-                    if (index === datalen) {
+                    if (index === data.length-1) {
                         Cnum = num;
                     }else{
                         if (Cnum > num) Cnum = num;
@@ -566,8 +564,6 @@ let excelmodel = {
                 Fobj[sumRow.colNum] = str;
             }      
         }
-        console.log('Fobj')
-        console.log(Fobj)
         return Fobj;
     },
     /*

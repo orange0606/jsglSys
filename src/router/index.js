@@ -82,6 +82,14 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
+    },
+    {
+      path: '/PayList',
+      name: 'PayList',
+      component: ()=>import('@/components/PaySys/PayList.vue'),
+      meta:{
+        "requireAuth": true
+      }
     }
   ]
 })

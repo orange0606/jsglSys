@@ -72,7 +72,7 @@
         </elx-editable>
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建计量清单" width="100%" top="0vh" height="100%" :fullscreen="true" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog title="新建计量清单" width="95%" top="4vh" height="100%" :fullscreen="false" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
               <show-new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist.sync="uprow" :approval="approval" ></show-new-meterage>
           </el-dialog>
         </transition>
