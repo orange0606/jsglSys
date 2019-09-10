@@ -7,13 +7,13 @@
     <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
         <el-form-item label="清单编号">
-          <el-input v-model="form.num" placeholder="请输入清单编号"></el-input>
+          <el-input :disabled="approval.state === 1?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
         </el-form-item>
         <el-form-item label="清单名称">
-          <el-input v-model="form.name" placeholder="请输入清单名称"></el-input>
+          <el-input :disabled="approval.state === 1?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
         </el-form-item>
         <el-form-item label="表头">
-          <el-select v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+          <el-select :disabled="approval.state === 1?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
               <el-option
                 v-for="item in form.headerList"
                 :key="item.id"
@@ -24,14 +24,12 @@
         </el-form-item>
       </el-form>
     </div>
-
-    <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序、右键菜单</p>
-    <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">绿色字体为新清单内容不可编辑</p>
+      <p style="color: red;font-size: 12px;margin:0px 0 15px 0;text-align:left;">淡黄色区为可编辑区域</p>
     <div class="click-table11-oper">
       <el-dialog
       width="85%"
       title="选择清单"
-      top="10vh"
+      top="8vh"
       :visible.sync="innerVisible"
       
       append-to-body>
@@ -45,7 +43,7 @@
             size="small"
             :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="update"
-            @cell-click ="selectOriginal"
+            @cell-click ="selectupdate"
             :row-class-name="tableRowClassName"
             :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
@@ -88,13 +86,13 @@
         <choice-row v-else :inventory.sync="updateList" :innerVisible.sync="innerVisible" ></Choice-row>
 
     </el-dialog>
-      <el-button type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
-      <el-button type="warning" size="mini" @click="submitEvent">完成</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -146,7 +144,7 @@ import XEUtils from 'xe-utils';
 import Sortable from 'sortablejs';
 
 export default {
-  name: 'NewChange',
+  name: 'ShowNewMeterage',
   components: {
     MyColumn,
     ChoiceRow
@@ -155,13 +153,16 @@ export default {
     uplist:{  //查看和修改清单数据
       type: Object,
     },
-    approval:{
-      type: Object,
-    },
     meterageList: { //所有变更清单列表
       type: Array,
     },
-    tender:{  //标段信息
+    mode:{  //子组件的展示模式
+      type: String, 
+    },
+    approval:{
+      type: Object,
+    },
+    tender:{
       type: Object,
     }
   },
@@ -211,24 +212,17 @@ export default {
         }
     },
     uplist: function(newVal,oldVal){  //子组件返回来的数据
+        console.log('这里进入了吗')
         //此处可进行判断，然后进行清单导入
-        if (newVal !== null) {  //判断返回的是不是一个数组
-          this.form.name = newVal.name;
-          this.form.num = newVal.num;
-          this.form.headerId = newVal.meterageHeadId;
-           //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
-           let id = newVal.meterageHeadId;
-           this.oneHeader(id)
-
-        }
+        this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
     }
   },
   computed: {
       
   },
   created () {
-    let tenderId = this.tender.id; 
-    this.allHeader( tenderId);//调用请求一个标段的所有变更表头
+    this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
+    this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
     this.rowDrop();//调用表格行拖拽函数
 
   },
@@ -239,6 +233,32 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+     upif ( newVal ) {   //处理父组件传来的值
+        if (newVal && newVal.id) {  
+            this.loading = true;
+            console.log('此时为预览修改')
+            this.form.name = newVal.name;
+            this.form.num = newVal.num;
+            this.form.headerId = newVal.meterageHead.id;
+            //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
+
+            //此处判断子组件的展示模式（show  需要请求一个清单， new与alert 不需要请求清单直接使用引用赋值里的内容）
+            if (this.mode === 'show') {
+                //此处直接请求一个清单
+            }else{
+                //此处不需要请求，直接把数据导入
+            }
+
+            // return this.oneHeader(newVal.meterageHead.id);
+        }else if (newVal) {
+            console.log('此时为新建计量清单')
+            this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
+            this.form.name = this.form.num = this.form.headerId = this.headerList =null;
+            this.$nextTick(() => {
+                this.$refs.elxEditable1.reload([]);
+            })
+        }
+    },
     allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
         this.$post('/head/allmeterage',{tenderId})
         .then((response) => {
@@ -255,10 +275,9 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'meterage'})
         .then((response) => {
-          let data = response.data.onehead;
-          let headsArr = this.$excel.Package(data['tMeterageHeadRows'],data.refCol,data.refRow);
+          var data = response.data.onehead,
+          headsArr = this.$excel.Package(data['tMeterageHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-          this.col = [];  //新建一个数组存储多级表头嵌套
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
 
           //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -268,28 +287,59 @@ export default {
             name:data.name,
             num: data.num
           }
-          this.showHeader = false;
+          this.showHeader = this.loading = false;
           this.list.length = this.hd.length = 0;
           this.$nextTick(() => {  //强制重新渲染
               this.showHeader = true;
               //作个防止数据错误处理表头得对应才开启修改清单的数据组装
-              if (this.uplist !== null && this.uplist.meterageHeadId === data.id) {  //this.uplist计量清单列表传来需要修改的数据
-                  //调用表格组装函数（返回的是个数组对象）
+              if (this.uplist !== null && this.uplist.meterageHead && this.uplist.meterageHead.id === data.id) {  //this.uplist计量清单列表传来需要修改的数据
                   this.startTime = Date.now(); 
-                  let list = this.uplist.meterageRowList;
-                  let arr = this.$excel.ListAssemble(list);
-                  this.list = [...arr];
-                  this.findList(); //调用滚动渲染数据
-                  this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                  this.loading = true;
+                  this.OneMeterage( this.uplist.id ); //调用计量清单函数
               }
             })
           
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
-          
-          this.allRelationUpdate(data.id); //调用请求可导入所有对应的新清单列表
-          this.totalmeterageRow(data.id); // 调用相对应的累计量清单数据请求函数
+
+          this.allRelationUpdate( data.id ); //调用请求可导入所有对应的新清单列表
+          this.totalmeterageRow( data.id ); // 调用相对应的累计量清单数据请求函数
       })
+    },
+    OneMeterage (id) { //计量清单id
+        //此处请求一个审批单的一个计量清单
+        this.$post('/meterage/getonerow',{ id })
+            .then((response) => {
+            console.log('-----------------------------')
+            console.log(response)
+            var data = response.data.meteragerow;
+            if (!dat.meterageRowList) return this.loading = false;
+            var headsArr = this.$excel.Package(data['meterageHeadRowList'],data.refCol,data.refRow);
+            this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+            this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+
+            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+            this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+
+            this.meterageHead = { //保存表头信息
+                name:data.name,
+                num: data.num
+            }
+            this.loading = false;
+            this.list.length = this.hd.length = 0;
+
+            var arr = this.$excel.ListAssemble(dat.meterageRowList); //组装清单表格数据
+            this.list = [...arr];
+            this.findList(); //调用滚动渲染数据
+            this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+        }).catch(e => {
+            this.loading = false;
+            console.log(e)
+            this.$message({
+                type: 'info',
+                message: '发生错误！'+e
+            });
+        })
     },
     allRelationUpdate (id) {  //请求可导入的对应的新清单列表
         this.$post('/update/onetender',{ id:this.tender.id,current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
@@ -307,8 +357,6 @@ export default {
         .then((response) => {
           let data = response.data;
           let arr = new Array();
-          console.log('data--------------------------------------------')
-          console.log(data)
           if (data.totalmeterage && data.totalmeterage.tTotalmeterageHeadRows.length >0) {
               arr = this.$excel.ListAssemble(data.totalmeterage.tTotalmeterageHeadRows);  //组装清单
           }
@@ -319,7 +367,7 @@ export default {
       }).catch(e => {
           this.$message({
             type: 'info',
-            message: '请求相对应的累计计量清单数据发生错误！'
+            message: '请求相对应的累计计量清单数据发生错误！'+e
           });
       });
     },
@@ -334,9 +382,8 @@ export default {
           });
       });
     },
-    selectOriginal (row, column, cell, event) { //新清单列表数据表格单击事件
-        let id = row.id;
-        this.oneUpatde(id); //调用请求清单
+    selectupdate (row, column, cell, event) { //新清单列表数据表格单击事件
+        this.oneUpatde(row.id); //调用请求清单
         //关闭显示对应清单列表页面
         this.showList = false;
     },
@@ -409,7 +456,7 @@ export default {
                 }
             }else if (row.attribute && row.attribute === "totalmeterage-meterage" && row.attributeValue && row.attributeValue !=="") { 
               //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
-                if (this.tomeRowList && this.tomeRowList.length > 0 && this.list.length === this.tomeRowList.length && Object.keys(this.list[0]).length === Object.keys(this.tomeRowList[0])) {
+                if (this.tomeRowList.length > 0 && this.list.length === this.tomeRowList.length && Object.keys(this.list[0]).length === Object.keys(this.tomeRowList[0])) {
                     for (let a = this.list.length -1; a >= 0 ; a--) {
                         // this.list[a][row.colNum] = new Object();
                         this.list[a][row.colNum] = {...data[a][colName]};
@@ -426,7 +473,7 @@ export default {
             }
         }
         try {  //把数据载入表格
-            this.$excel.Formula(this.list, this.formula);  //调用公式计算
+             this.$excel.Formula(this.list, this.formula);  //调用公式计算
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             data.length = 0; //内存释放
@@ -462,30 +509,6 @@ export default {
         }  
         return {};
     },
-    deleteSelectedEvent () {
-      let removeRecords = this.$refs.elxEditable1.getSelecteds() //获取被选中的数据
-      if (removeRecords.length) {
-          this.$msgbox.confirm('确定删除所选数据?', '温馨提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          console.log('打印选中的数据')
-          console.log(removeRecords)
-          this.loading = true
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-
-        }).catch(e => e)
-      } else {
-        this.$message({
-          type: 'info',
-          message: '请至少选择一条数据！'
-        })
-      }
-    },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >2) {  //带选择框的情况
             if (row[this.hd[columnIndex-3]]) {
@@ -495,17 +518,15 @@ export default {
         return [1, 1]
     }, 
     findList () { //表格滚动渲染函数
-      this.loading = true
+      this.loading = true;
+
       this.$nextTick(() => {
+
         this.$refs.elxEditable1.reload([])
-        setTimeout(() => {
-          // let startTime = Date.now()
-          this.$refs.elxEditable1.reload(this.list);
-          this.loading = false;
-         this.$nextTick(() => {
-              this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-            })
-        }, 300)
+        this.$refs.elxEditable1.reload(this.list);
+        this.loading = false;
+         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+
       })
     },
     getSummaries (param) {  //合计
@@ -542,17 +563,6 @@ export default {
         return sums;
         }
         return sums;
-    },
-    filterStr (str) {  //去除空白以及特殊字符串
-        if (str==null)return '';
-        str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]"),
-        specialStr = "";  
-        
-        for(var i=0;i<str.length;i++){  
-            specialStr += str.substr(i, 1).replace(pattern, '');   
-        }  
-        return specialStr;  
     },
     insertEvent () {
       // console.log('进来了吗')
@@ -603,94 +613,85 @@ export default {
 
     },
     submitEvent () {
-        this.$refs.elxEditable1.validate(valid => {
-          if (valid) {
-              let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-              list.forEach((item, index) => {
-                  if (XEUtils.isDate(item.date)) {
-                  item.date = item.date.getTime();
-                  }
-                  // 重新生成排序后的序号
-                  item.seq = index;
-              })
-              if (list.length === 0) {
-                  this.$message({
-                      type: 'success',
-                      message: '请先导入数据!'
-                  })
-                  return false;
-              }
-              //解构数据进行提交
-            this.loading = true;
-            var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            refCol = header.length,
-            refRow = list.length,
-            meterageRowList = [];
-            for (let index = 0; index < refRow; index++) {
-                for (let i = 0; i < refCol; i++) {
-                    if (list[index][header[i]] && list[index][header[i]].colNum) {
-                        // delete list[index][header[i]].edit;
-                        list[index][header[i]].formula = '';
-                        list[index][header[i]].trNum = index+1;                  
-                        list[index][header[i]].attribute = '';                  
-                        list[index][header[i]].upload = 1;    
-                        meterageRowList.push(list[index][header[i]]);
-                    }
+      this.$refs.elxEditable1.validate(valid => {
+        if (valid) {
+            let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+            list.forEach((item, index) => {
+                if (XEUtils.isDate(item.date)) {
+                item.date = item.date.getTime();
                 }
+                // 重新生成排序后的序号
+                item.seq = index;
+            })
+            if (list.length === 0) {
+                this.$message({
+                    type: 'success',
+                    message: '请先导入数据!'
+                })
+                return false;
             }
-          //此处做个判断，判断是新建还是修改。
-          if (this.uplist !== null) {
-              let time = this.uplist.saveTime;
-              for (let index = 0; index < this.meterageList.length; index++) {
-                  if (this.meterageList[index].saveTime === time) {
-                    // delete this.meterageList[index];
-                    this.meterageList.splice(index,1);
-                    this.uplist.meterageHeadId = this.form.headerId;
-                    this.uplist.name = this.form.name;
-                    this.uplist.num = this.form.num;
-                    this.uplist.meterageHead = this.meterageHead;
-                    this.uplist.meterageRowList = meterageRowList; //表格数据
-                    this.uplist.updateTime = new Date();//更改时间
-                    this.uplist.updateEmployee = {name:this.$store.state.username};//更改人
-                    this.meterageList.push(this.uplist);//保存修改信息
-                    let succre = null;
-                    this.$emit("update:uplist", succre)  //清空uplist
-                    break;
+            //解构数据进行提交
+          this.loading = true;
+          var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+          refCol = header.length,
+          refRow = list.length,
+          meterageRowList = [];
+          for (let index = 0; index < refRow; index++) {
+              for (let i = 0; i < refCol; i++) {
+                  if (list[index][header[i]] && list[index][header[i]].colNum) {
+                      // delete list[index][header[i]].edit;
+                      list[index][header[i]].formula = '';
+                      list[index][header[i]].trNum = index+1;                  
+                      list[index][header[i]].attribute = '';                  
+                      list[index][header[i]].upload = 1;    
+                      meterageRowList.push(list[index][header[i]]);
                   }
-                
               }
-          }else{  //此处为新建
-              let obj = new Object();
-              let meterageHead = this.meterageHead;
-              obj = {
-                  meterageHeadId:this.form.headerId,
-                  processId: this.approval.id,
-                  sysOrder:'',
-                  sysNum:'',
-                  name:this.form.name,
-                  num:this.form.num,
-                  tenderId:this.tender.id,
-                  type:'meterage',
-                  meterageRowList,
-                  meterageHead,//表头数据
-                  enter:this.list.length>0?1:0,
-                  tender:this.tender,
-                  saveTime:new Date(),
-                  saveEmployee:{name:this.$store.state.username}
-              }
-              this.meterageList.push(obj);
           }
-
-          
-          let succre = false;
-          this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
-          this.loading = false;
-          this.list.length = this.hd.length = 0;
-
-          this.showHeader = false;
-          this.$nextTick(() => {  //强制重新渲染
-              this.showHeader = true;
+          //此处做个判断，判断是新建还是修改。
+          var obj = {
+              // id:                                    //计量清单id
+              meterageHeadId: this.form.headerId,    //计量清单表头id
+              processId: this.approval.id,         //审批单流程id
+              sysOrder: '',                   //系统序号  预留，暂不使用
+              sysNum: '',                    //系统编号  预留，暂不使用
+              name: this.form.name,                     //计量清单名称
+              num: this.form.num,                    //计量清单编号
+              tenderId: this.tender.id,                     //标段id
+              type: 'meterage',                 //计量清单类别为”meterage”
+              meterageRowList                 //计量清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
+          },
+          meterageList = [],
+          url = '';
+          if (this.uplist && !this.uplist.id ) { //此处是新建清单
+              url = '/meterage/save';
+          }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
+              obj.id = this.uplist.id;
+              url = '/meterage/update';
+              console.log('这里保存')
+          }
+          if (url === '') return false;
+          meterageList.push(obj);
+          this.$post(url,{ meterageList })
+              .then((response) => {   
+              this.$message({ message: `已为你保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+              let succre = false;
+              this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
+              this.loading = false;
+              meterageRowList.length = this.list.length = this.hd.length = 0;
+              this.showHeader = false;
+              this.$nextTick(() => {  //强制重新渲染
+                  this.showHeader = true;
+              })
+          }).catch(e => {
+              this.loading = false;
+              meterageRowList.length = 0;
+              this.$message({
+                  type: 'info',
+                  message: '649发生错误！'+e
+              });
           })
+
          
         }
       })

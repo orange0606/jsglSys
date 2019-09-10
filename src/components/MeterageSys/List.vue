@@ -4,18 +4,12 @@
         <h3>计量清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
-            <span v-if="edit">
-                <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
-                <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-                <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-            </span>
-            <span style="position: absolute; right:0;top:10px;">
-                <el-switch
-                v-model="edit"
-                active-text="开启操作"> 
-                </el-switch>   
-            </span>
+            <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
+            <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+            <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
         </div>
+         <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">审批通过后禁止修改与删除原清单！</p>
+
         <!-- 主体表格 -->
         <elx-editable
         ref="elxEditable"
@@ -51,24 +45,25 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" fixed="right" :width="edit?'150':'70'" align="center" >
+        <elx-editable-column label="操作" fixed="right" width="185" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
-                <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
+                <el-tooltip content="保存" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-document-checked" @click="saveRowEvent(scope.row)"></el-button>
                 </el-tooltip>
-                <el-tooltip v-if="edit" content="取消" placement="top" :enterable="false" effect="light">
+                <el-tooltip content="取消" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="info" icon="el-icon-close" @click="cancelRowEvent(scope.row)"></el-button>
                 </el-tooltip>
+
             </template>
             <template v-else>
-                <el-tooltip v-if="edit" content="修改" placement="top" :enterable="false" effect="light">
+                <el-tooltip content="修改" placement="top" :enterable="false" effect="light">
                     <el-button :disabled="approval.state === 1?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
                 </el-tooltip>
-                <el-tooltip v-if="edit" content="删除" placement="top" :enterable="false" effect="light">
+                <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
                     <el-button :disabled="approval.state === 1?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
                 </el-tooltip>
             </template>
@@ -78,7 +73,7 @@
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
           <el-dialog title="新建计量清单" width="95%" top="4vh" height="100%" :fullscreen="false" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
-              <show-new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist.sync="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" ></show-new-meterage>
+              <show-new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist.sync="uprow" :approval="approval" ></show-new-meterage>
           </el-dialog>
         </transition>
     </div>
@@ -102,7 +97,7 @@ import XEUtils from 'xe-utils';
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     approval:{
       type: Object,
@@ -121,7 +116,7 @@ import XEUtils from 'xe-utils';
       visibleNew:false,
       refresh:false,
       loading: false,
-      edit: false, // 是否开启编辑
+      list: null,
       uprow: null, //修改清单传入保存清单组组件的数据
       tenderList: null,  //全部标段
       EditTitle: '查看计量清单', //清单子组件的标题文字内容
@@ -165,8 +160,11 @@ import XEUtils from 'xe-utils';
         }
 
         //此处设置需要分页
+
+
         switch(type) {
             case 'new': //此处为新建模式处理
+                
                 break;
             case 'show': //此处为显示模式处理
                 this.findList(); //请求该审批id的所有清单
@@ -479,10 +477,7 @@ import XEUtils from 'xe-utils';
     height: 90%;
 }
 .manual-table2-oper {
-  width: 100%;
-  height: 25px;
-  position: relative;
-  margin: 4px 0 15px 0;
+  margin-bottom: 18px;
   text-align: left;
 }
 .manual-table2-oper a{

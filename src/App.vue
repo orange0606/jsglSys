@@ -128,12 +128,19 @@ body, html, #app{
 .el-table th.gutter{
     display: table-cell!important;
 }
-body .el-table th.gutter{
+
+.el-table th.gutter
+{
     display: table-cell!important;
 }
-.el-table colgroup.gutter{
+body .el-table th.gutter
+{
     display: table-cell!important;
 }
+body .el-table colgroup.gutter
+{
+    display: table-cell!important;
+} 
 
 .el-menu-item, .el-submenu__title{
     font-size: 0.8em;

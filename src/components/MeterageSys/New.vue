@@ -153,6 +153,12 @@ export default {
     uplist:{  //查看和修改清单数据
       type: Object,
     },
+    meterageList: { //所有变更清单列表
+      type: Array,
+    },
+    mode:{  //子组件的展示模式
+      type: String, 
+    },
     approval:{
       type: Object,
     },
@@ -235,7 +241,15 @@ export default {
             this.form.num = newVal.num;
             this.form.headerId = newVal.meterageHead.id;
             //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
-            return this.oneHeader(newVal.meterageHead.id);
+
+            //此处判断子组件的展示模式（show  需要请求一个清单， new与alert 不需要请求清单直接使用引用赋值里的内容）
+            if (this.mode === 'show') {
+                //此处直接请求一个清单
+            }else{
+                //此处不需要请求，直接把数据导入
+            }
+
+            // return this.oneHeader(newVal.meterageHead.id);
         }else if (newVal) {
             console.log('此时为新建计量清单')
             this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
@@ -292,12 +306,29 @@ export default {
           this.totalmeterageRow( data.id ); // 调用相对应的累计量清单数据请求函数
       })
     },
-    OneMeterage (id) { //变更清单id
-        //此处请求一个审批单的一个变更清单
+    OneMeterage (id) { //计量清单id
+        //此处请求一个审批单的一个计量清单
         this.$post('/meterage/getonerow',{ id })
             .then((response) => {
-            if (!response.data.meteragerow.meterageRowList) return this.loading = false;
-            var arr = this.$excel.ListAssemble(response.data.meteragerow.meterageRowList); //组装清单表格数据
+            console.log('-----------------------------')
+            console.log(response)
+            var data = response.data.meteragerow;
+            if (!dat.meterageRowList) return this.loading = false;
+            var headsArr = this.$excel.Package(data['meterageHeadRowList'],data.refCol,data.refRow);
+            this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+            this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+
+            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+            this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+
+            this.meterageHead = { //保存表头信息
+                name:data.name,
+                num: data.num
+            }
+            this.loading = false;
+            this.list.length = this.hd.length = 0;
+
+            var arr = this.$excel.ListAssemble(dat.meterageRowList); //组装清单表格数据
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
