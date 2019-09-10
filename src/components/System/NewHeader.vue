@@ -119,7 +119,7 @@
                                 <el-option v-for="(val,i) in Attribute" :key="i+'a'" :label="val.name" :value="val.value"></el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item v-for="(val,i) in Attribute" :key="i+'b'" v-show="row.attribute!==null && val.value === row.attribute && val.input && row.attribute !=='sumText'" label="属性值(点击左边表格的单元格选择值)" >
+                        <el-form-item v-for="(val,i) in Attribute" :key="i+'b'" v-show="row.attribute && row.attribute!==null && val.value === row.attribute && val.input && row.attribute !=='sumText'" label="属性值(点击左边表格的单元格选择值)" >
                             <el-input ref="attValue" v-model="row.attributeValue" :disabled="setState && setState === 'limit'" @focus="attValueFocus">
                                 <el-button slot="append" :style="setState !==null && setState !== 'limit' && row.attributeValue ?[c]:[]" type="primary" @click="attValBtn(row.attributeValue)" >确定</el-button>
                                 <!-- <button slot="append" @click="attValBtn(row.attributeValue)" >确定</button> -->
@@ -135,7 +135,7 @@
 
                             </el-select>
                         </el-form-item>
-                        <el-form-item v-show ="row.tLimit!==null && row.tLimit!=='null'" label="限制值" >
+                        <el-form-item v-show ="row.tLimit && row.tLimit!==null && row.tLimit!=='null'" label="限制值" >
                             <el-input v-model="row.limitValue" @focus="LimitValFocus" :disabled="setState && setState !== 'limit'">
                                 <el-button slot="append" :style="setState !==null && setState === 'limit' && row.limitValue ?[c]:[]" type="primary" size="mini" @click="LimitValBtn(row.limitValue)" >确定</el-button>
                             </el-input>
@@ -166,7 +166,7 @@
         </el-row>
         <div class="footer">
             <el-button @click="back">{{ cancelBtnName }}</el-button>
-            <el-button :disabled="this.Form.type=='update'?true:false" type="primary" @click="next">{{ nextBtnName }}</el-button>
+            <el-button :disabled="Form.type === 'update' || (Form.id && !btn.editAtt) ?true:false" type="primary" @click="next">{{ nextBtnName }}</el-button>
         </div>
         <br>
     </div>
@@ -289,23 +289,24 @@ import XEUtils from 'xe-utils';
                 sumNull:'合计（空）',
                 sumFormula:'合计（公式）',
                 original:'原清单',
-                originalNull:'新清单（无）',
+                originalnull:'新清单（无）',
                 change:'变更清单',
                 update:'新清单',
-                updateNull:'新清单（无）',
+                updatenull:'新清单（无）',
                 meterage:'计量清单',
                 fluctuate:'变更清单增减',
                 totalpay:'累计支付清单',
                 totalpay_null:'累计支付清单（无）',
+                paynull: '支付清单无对应',
                 pay: '支付清单',
-                'meterageNull': '计量清单无对应',
+                'meteragenull': '计量清单（无）',
                 'totalmeterage-meterage':'累计计量对应的计量清单',
                 'totalmeterage-sum-onerow-auto': '对应累计计量的系统合计行',
                 'totalpay-pay': '累计支付对应的支付清单',
-                'pay-head-total': '支付表头合计内容',
+                'pay-total': 'pay-total"对应支付清单项的累计相加',
                 'meterage-total': '对应计量清单项的累计',
                 'totalmeterage-head-total': '累计计量表头合计内容',
-                totalmeteragenull:'累计计量清单',
+                totalmeteragenull:'累计计量清单(无)',
                 max:'max', //max
                 increaseMax:'增加MAX',  //increaseMax
                 decreaseMax:'减少MAX' //decreaseMax
@@ -319,7 +320,7 @@ import XEUtils from 'xe-utils';
     },
     computed: {
       nextBtnName () {
-        return this.btn.editAtt ? '下一步' : '提交'
+        return this.btn.editAtt ? '下一步' : '提交(为保证数据正确，表头保存后一律不许修改)'
       },
       cancelBtnName () {
         return this.btn.editAtt ? '取消' : '上一步'
@@ -334,7 +335,7 @@ import XEUtils from 'xe-utils';
             // console.log(New);
             this.loading = true;
             this.list = [];
-            this.row = {};
+            // this.row = {};
             let arr = this.$excel.ListAssemble([...New]);  //组装表头
             this.list = arr;
             this.hd = Object.keys(this.list[0]);
@@ -393,8 +394,8 @@ import XEUtils from 'xe-utils';
             }   
         },
         attVal: function(New, Old){ //点击显示关联的表的单元格，获取到的属性值和id
-            // console.log('关联表格单击事件的单元格的行列号和id发送过来了')
-            // console.log(New)
+            console.log('关联表格单击事件的单元格的行列号和id发送过来了')
+            console.log(New)
             if (New && New.id && New.key && this.setState) {
                 if (this.setState === 'relation') {
                     this.row.attributeValue = New.key;
@@ -406,6 +407,8 @@ import XEUtils from 'xe-utils';
                     this.row.attributeValue = New.key;
                     this.row.attributeMeterageHeadId = New.id;
                 }else if (this.setState === 'pay' && this.Form.type === 'totalpay') {
+                    console.log('进来了嘛')
+                    console.log(this.row)
                     this.row.attributeValue = New.key;
                     this.row.attributePayHeadRowId = New.id;
                 }
@@ -742,6 +745,15 @@ import XEUtils from 'xe-utils';
                 if (this.setState === null) {
                     //赋值传到属性设置子组件中
                     this.row = row[colum];
+                    if ( !this.row.tLimit ) {
+                        this.row['tLimit']='';
+                    }else if (!this.row.limitValue) {
+                        this.row['limitValue'] = '';
+                    }else if (!this.row.attribute) {
+                        this.row['attribute'] = '';
+                    }else if (!this.row.attributeValue) {
+                        this.row['attributeValue'] = '';
+                    }
                    
                     //显示属性设置组件
                     this.showAtt = true;
@@ -771,7 +783,7 @@ import XEUtils from 'xe-utils';
             }
             if (type =='sysOrder' || type === 'sysNum' ) {
                 this.setState = null; //初始状态，可随意切换单元格设置属性状态
-            } else if ((type =='pay' || type === 'pay-head-total') && this.Form.type === 'totalpay') {
+            } else if ((type =='pay' || type === 'pay-total') && this.Form.type === 'totalpay') {
                 this.setState = 'pay'; //改为关联支付清单设置属性状态
                 this.headerTypeObj = {
                         id: this.Form.payHeadId,

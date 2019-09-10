@@ -20,11 +20,11 @@ let data = {
     ],
     attType: {
         original:[  // 原清单
-            { value: 'originalNull', name: '“originalnull”原清单（无对应）', input: false },
+            { value: 'originalnull', name: '“originalnull”原清单（无对应）', input: false },
         ],
         change:[    //变更清单
             { value: 'original', name: '“original”原清单', input: true },
-            { value: 'originalNull', name: '“originalnull”新清单（无对应）', input: false },
+            { value: 'originalnull', name: '“originalnull”新清单（无对应）', input: false },
             { value: 'change', name: '“change”变更清单', input: false },
             { value: 'fluctuate', name: '“fluctuate”变更清单增减', input: true }
         ],
@@ -34,28 +34,27 @@ let data = {
         // },
         meterage:[    //计量清单
             { value: 'update', name: '“update”新清单', input: true },
-            { value: 'meterageNull', name: '“meteragenull”计量清单（无对应）', input: false },
+            { value: 'meteragenull', name: '“meteragenull”计量清单（无对应）', input: false },
             { value: 'meterage', name: '“meterage”计量清单', input: true },
             { value: 'totalmeterage-meterage', name: 'totalmeterage-meterage"累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。', input: true },
         ],
         totalmeterage:[    //累计计量清单
             { value: 'update', name: '“update”新清单', input: true },
-            { value: 'updateNull', name: '“updatenull”新清单（无对应）', input: false },
-            { value: 'totalmeteragenull', name: '“totalmeteragenull”累计计量清单', input: false },
+            { value: 'totalmeteragenull', name: '“totalmeteragenull”累计计量清单（无对应）', input: false },
             { value: 'meterage-total', name: '"meterage-total"对应计量清单项的累计', input: true },
         ],   
         pay:[    //支付清单
-            { value: 'pay', name: '“pay”支付清单', input: false },
-            // { value: 'totalmeterage-sum-onerow-auto', name: 'totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },  
+            { value: 'pay', name: '“pay”支付清单', input: true },   //支付清单的数量（编辑区域）
+            { value: 'paynull', name: '“paynull”支付清单（无对应）', input: false },  
             { value: 'totalpay-pay', name: '"totalpay-pay"累计支付对应的支付清单。目的是对应累计支付清单的值，但通过支付清单做对应。', input: true },   
             { value: 'totalmeterage-head-total', name: '"totalmeterage-head-total"累计计量表头合计内容', input: true }   
         ],  
         totalpay:[    //累计支付清单
             { value: 'totalpay_null', name: 'totalpay_null累计支付清单（无对应）', input: false },
-            // { value: 'totalmeterage-sum-onerow-auto', name: '“totalmeterage-sum-onerow-auto”对应累计计量的系统合计行，只有一行内容，系统自动添加', input: true },
-            { value: 'pay-head-total', name: '"pay-head-total "支付表头合计内容', input: true },
+            // { value: 'pay-head-total', name: '"pay-head-total "支付表头合计内容', input: true },
             { value: 'totalmeterage-head-total', name: '"totalmeterage-head-total"累计计量表头合计内容', input: true },
             { value: 'pay', name: '"pay"支付清单', input: true },
+            { value: 'pay-total', name: '"pay-total"对应支付清单项的累计相加', input: true }, //对应支付清单的本期
 
         ] 
     }

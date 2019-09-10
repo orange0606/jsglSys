@@ -7,8 +7,8 @@ import axios from 'axios';
 const global = window.global;
 axios.defaults.withCredentials = true;  //axios  请求带上cookie
 axios.defaults.timeout = 5000;
-// axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.226:8080';
-axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.196:8080';
+axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.226:8080';
+// axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.196:8080';
 // axios.defaults.baseURL ='http://192.168.0.226:8080';
 // axios.defaults.baseURL ='http://192.168.0.196:8080';
 
@@ -34,21 +34,21 @@ axios.interceptors.request.use(
 );
 
 
-//http response 拦截器
-// axios.interceptors.response.use(
-//   response => {
-//     if(response.data.errCode ==2){
-//       router.push({
-//         path:"/login",
-//         querry:{redirect:router.currentRoute.fullPath}//从哪个页面跳转
-//       })
-//     }
-//     return response;
-//   },
-//   error => {
-//     return Promise.reject(error)
-//   }
-// )
+// http response 拦截器
+axios.interceptors.response.use(
+  response => {
+    if(response.data.errCode ==2){
+      router.push({
+        path:"/login",
+        querry:{redirect:router.currentRoute.fullPath}//从哪个页面跳转
+      })
+    }
+    return response;
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
 
 
 /**

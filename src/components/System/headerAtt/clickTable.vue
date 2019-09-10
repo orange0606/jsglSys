@@ -200,9 +200,11 @@
                         id = row[colum].ttmId;
                         break;
                     case 'pay':
-                        id = row[colum].tmIdtpId;
+                        id = row[colum].tpId;
                         break;
                 } 
+                console.log('查看id是什么tmIdtpId')
+                console.log(row[colum])
                 succre.id = id;
                 succre.key = key;
                 // console.log('单击表格正在发送点击数据到父组件')
