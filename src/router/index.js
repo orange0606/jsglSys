@@ -68,14 +68,6 @@ export default new Router({
       }
     },
     {
-      path: '/ShowMeterageList',
-      name: 'ShowMeterageList',
-      component: ()=>import('@/components/MeterageSys/ShowMeterageList.vue'),
-      meta:{
-        "requireAuth": true
-      }
-    },
-    {
       path: '/ReadOnlyList',
       name: 'ReadOnlyList',
       component: ()=>import('@/components/AllList/ReadOnlyList.vue'),

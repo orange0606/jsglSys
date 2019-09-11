@@ -268,13 +268,13 @@ let excelmodel = {
     */
     Unpack (list) { //表格解构
         var headRowList = [],
-        hd = Object.keys(list[0]),   //获取所有的列
-        listlen = list.length;
-        for (let index = 0; index < listlen; index++) {
+        hd = Object.keys(list[0]);   //获取所有的列
+        for (let index = list.length -1; index >=0; index--) {
             const hdlen = hd.length;
-            for (let i = 0; i < hdlen; i++) {
+            for (let i = hd.length -1; i >= 0; i--) {
                 let row = list[index][hd[i]];
                 delete row.edit; //删除编辑状态
+                row.trNum = index;
                 if (row.attribute == 'formula' && row.attributeValue && row.attributeValue !='' ) {
                     row.headFormula = this.Analysis(row.attributeValue);
                     // console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)

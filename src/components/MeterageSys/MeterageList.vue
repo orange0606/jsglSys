@@ -25,15 +25,15 @@
         :data.sync="list"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
         style="width: 100%">
-        <elx-editable-column type="selection" width="50" align="center" fixed="left" ></elx-editable-column>
-        <elx-editable-column type="index" width="50" align="center" fixed="left" > </elx-editable-column>
+        <elx-editable-column type="selection" width="50" align="center" ></elx-editable-column>
+        <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <elx-editable-column prop="meterageHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="meterageHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="计量清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="计量清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="num" label="计量清单编号" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="计量清单名称" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -51,7 +51,7 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" fixed="right" :width="edit?'150':'70'" align="center" >
+        <elx-editable-column label="操作" :width="edit?'180':'70'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
@@ -77,8 +77,9 @@
         </elx-editable>
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建计量清单" width="95%" top="4vh" height="100%" :fullscreen="false" destroy-on-close :lock-scroll="false" :visible.sync="visibleNew">
-              <show-new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist.sync="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" ></show-new-meterage>
+          <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
+              <new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist.sync="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" ></new-meterage>
+              <br>
           </el-dialog>
         </transition>
     </div>
@@ -86,12 +87,12 @@
 </template>
 
 <script>
-import ShowNewMeterage from './ShowNewMeterage';
+import NewMeterage from './NewMeterage';
 import XEUtils from 'xe-utils';
   export default {
-  name: 'ShowMeterageList',
+  name: 'MeterageList',
   components: {
-    ShowNewMeterage
+    NewMeterage
   },
   props: {
     meterageList:{    //变更清单数据列表，这个数据用于返回给父组件
@@ -102,12 +103,12 @@ import XEUtils from 'xe-utils';
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:210, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:188, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
@@ -140,13 +141,20 @@ import XEUtils from 'xe-utils';
       this.modeType ( this.mode );
   },
   watch: {
-    mode: function ( newVal,oldVal ) {
+    meterageList: function ( newVal,oldVal ) {
         //此处判断父组件传来的展示模式类型
-        this.modeType ( newVal );
+        this.modeType ( this.mode );
+        
     },
     visibleNew: function ( newVal,oldVal ) {
         if (!newVal) {
-            this.findList();  //发起请求所有已录入原清单
+            if (this.mode === 'show') {
+                this.findList();  //发起请求所有已录入计量清单
+            }else{
+                this.$nextTick(() => {
+                    this.list = this.meterageList;
+                }); // 强制刷新
+            }
             this.visibleNew = false; //关闭显示
         }
     },
@@ -159,11 +167,8 @@ import XEUtils from 'xe-utils';
     modeType ( type ) {
         if (this.meterageList && this.meterageList.length >0) { //判断父组件是否传来数据
             //此处设置不需要分页
-
             return this.list = this.meterageList;
-
         }
-
         //此处设置需要分页
         switch(type) {
             case 'new': //此处为新建模式处理
@@ -172,7 +177,6 @@ import XEUtils from 'xe-utils';
                 this.findList(); //请求该审批id的所有清单
                 break;
             case 'alter': //此处为修改模式处理
-                this.findList(); //请求该审批id的所有清单
                 break;
         } 
     },
@@ -191,13 +195,15 @@ import XEUtils from 'xe-utils';
         })
     },
     see (row) { //预览和修改清单
-        if (row.id) {
+        if (row.id || row.saveTime) {
             this.EditTitle = '查看计量清单';
         }else{
             this.EditTitle = '新建计量清单';
         }
+        this.uprow = null;
         this.uprow = row;
-        // console.log(this.uprow,' this.uprow')
+        console.log(this.uprow,' this.uprow')
+        console.log(this.meterageList,' meterageList')
         this.visibleNew = true; //显示建立清单组件
     },
     formatterType (row, column, cellValue, index) {
@@ -408,6 +414,7 @@ import XEUtils from 'xe-utils';
                 for (let index = 0; index < rest.length; index++) {
                     this. meterageList.push(rest[index]); 
                 }
+                this.loading = false;
                 this.$message({
                     type: 'success',
                     message: '删除所选选项成功!'
@@ -426,7 +433,7 @@ import XEUtils from 'xe-utils';
     saveRowEvent (row) {  //保存
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-            if (this.mode === 'new') {
+            if (this.mode === 'show') {
                 var obj = {
                 id: row.id,                                    //原清单id
                 name: row.name,                     //原清单名称
@@ -454,10 +461,8 @@ import XEUtils from 'xe-utils';
                 this. meterageList.push(rest[index]); 
                 }
                 this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true });
+                this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
             }
-            
-            
-      
         }
       })
     },

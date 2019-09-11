@@ -166,6 +166,8 @@
         </el-row>
         <div class="footer">
             <el-button @click="back">{{ cancelBtnName }}</el-button>
+
+            <!-- || (Form.id && !btn.editAtt) -->
             <el-button :disabled="Form.type === 'update' || (Form.id && !btn.editAtt) ?true:false" type="primary" @click="next">{{ nextBtnName }}</el-button>
         </div>
         <br>
@@ -528,7 +530,7 @@ import XEUtils from 'xe-utils';
                     for (let i = 0; i < hd.length; i++) {
                     let tb = rest[rest.length-1][hd[i]];
                     // let tb2 = rest[rest.length-2][hd[i]];
-                    tb.td = '合计';
+                    tb.td = '合计'+i;
                     tb.trNum +=1;
                     tb.tdRowspan >= 0 ? tb.tdRowspan =1 : tb.tdRowspan=1;
                     tb.tdColspan >= 0 ? tb.tdColspan =1 : tb.tdColspan=1;
