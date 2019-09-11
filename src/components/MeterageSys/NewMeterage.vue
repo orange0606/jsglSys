@@ -165,6 +165,8 @@ export default {
     },
     tender:{
       type: Object,
+    },
+    refresh:{ //显示此组件的变量
     }
   },
   data () {

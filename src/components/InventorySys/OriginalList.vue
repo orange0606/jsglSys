@@ -4,13 +4,21 @@
         <h3>原清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
-            <el-button type="success" size="mini" @click="visibleNew = true" >新增</el-button>
-            <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-            <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+            <span v-if="edit">
+                <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
+                <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+                <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+            </span>
+            <span style="position: absolute; right:0;top:10px;">
+                <el-switch
+                v-model="edit"
+                active-text="开启操作"> 
+                </el-switch>   
+            </span>
         </div>
         <!-- 主体表格 -->
         <elx-editable
-        ref="elxEditable"
+        ref="elxEditable" 
         class="manual-table2"
         border
         size="mini"
@@ -45,47 +53,34 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" fixed="right" width="185" align="center" >
+        <elx-editable-column label="操作" :width="edit?'180':'70'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
-                <el-tooltip content="保存" placement="top" :enterable="false" effect="light">
+                <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-document-checked" @click="saveRowEvent(scope.row)"></el-button>
                 </el-tooltip>
-                <el-tooltip content="取消" placement="top" :enterable="false" effect="light">
+                <el-tooltip v-if="edit" content="取消" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="info" icon="el-icon-close" @click="cancelRowEvent(scope.row)"></el-button>
                 </el-tooltip>
-
             </template>
             <template v-else>
-                <el-tooltip content="修改" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
+                <el-tooltip v-if="edit" content="修改" placement="top" :enterable="false" effect="light">
+                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
                 </el-tooltip>
-                <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
+                <el-tooltip v-if="edit" content="删除" placement="top" :enterable="false" effect="light">
+                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
                 </el-tooltip>
             </template>
             </template>
         </elx-editable-column>
         </elx-editable>
-
-        <el-pagination
-          class="manual-table4-pagination"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="pageVO.currentPage"
-          :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
-          :page-size="pageVO.pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="pageVO.totalResult">
-        </el-pagination>
-
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog title="新建原清单" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" :uplist.sync="uprow" :approval="approval" ></inven-edit>
+          <el-dialog :title="EditTitle" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
+              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" :uplist="uprow" :approval="approval" :mode="mode" ></inven-edit>
               <br><br><br>
           </el-dialog>
         </transition>
@@ -107,6 +102,11 @@ import XEUtils from 'xe-utils'
       required: false,
       default: () => []
     },
+    mode:{  //子组件的展示模式
+      type: String,
+      required: false,
+      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+    },
     approval:{
       type: Object,
       required: false,
@@ -120,19 +120,16 @@ import XEUtils from 'xe-utils'
   },
   data () {
     return {
-      list: this.originalList,
+      list: [],
       visibleNew:false,
+      edit: false, // 是否开启编辑
+      EditTitle: '新建原清单', //新建原清单
       refresh:false,
       loading: false,
       list: null,
       uprow: null, //修改清单传入保存清单组组件的数据
       tenderList:null,  //全部标段
       dialogVisible:false,//显示隐藏
-      pageVO: {
-        currentPage: 1,
-        pageSize: 10,
-        totalResult: 0
-      },
       isClearActiveFlag: true,
       rules: {
           name: [
@@ -143,17 +140,24 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
-    // this.findList();  //发起请求所有已录入原清单
-    // this.originalList = this.list;
+      //此处判断父组件传来的展示模式类型
+      this.modeType ( this.mode );
   },
   watch: {
+    originalList: function(newVal,oldVal){
+        //此处判断父组件传来的展示模式类型
+        this.modeType ( this.mode );
+    },
     visibleNew: function(newVal,oldVal){
-        if (!newVal && this.list.length >0) {
-          this.originalList.length = 0;
-          for (let index = 0; index < this.list.length; index++) {
-              this.originalList.push(this.list[index]); 
-          }
-          this.visibleNew = false; //关闭显示
+        if (!newVal) {
+            if (this.mode === 'show') {
+                this.findList();  //发起请求所有已录入计量清单
+            }else{
+                this.$nextTick(() => {
+                    this.list = this.originalList;
+                }); // 强制刷新
+            }
+            this.visibleNew = false; //关闭显示
         }
     }
   },
@@ -162,18 +166,49 @@ import XEUtils from 'xe-utils'
     // }
   },
   methods: {
+    modeType ( type ) {
+        if (this.originalList && this.originalList.length >0) { //判断父组件是否传来数据
+            //此处设置不需要分页
+            return this.list = this.originalList;
+        }
+        //此处设置需要分页
+        switch(type) {
+            case 'new': //此处为新建模式处理
+                break;
+            case 'show': //此处为显示模式处理
+                this.findList(); //请求该审批id的所有清单
+                break;
+            case 'alter': //此处为修改模式处理
+                break;
+        } 
+    },
+    findList () {
+        // 发起网络请求
+        this.$post('/original/getall',{id: this.approval.id})
+            .then((response) => {
+            this.list = response.data.originalList;
+            this.loading = false;
+        }).catch(e => {
+            this.loading = false;
+            this.$message({
+                type: 'info',
+                message: '发生错误！'
+            });
+        })
+    },
     see (row) { //预览和修改清单
+        if (row.id || row.saveTime) {
+            this.EditTitle = '查看原清单';
+        }else{
+            this.EditTitle = '新建原清单';
+        }
+        this.uprow = null;
         this.uprow = row;
+        // console.log(this.uprow,' this.uprow')
+        // console.log(this.originalList,' originalList')
         this.visibleNew = true; //显示建立清单组件
     },
-    handleSizeChange (pageSize) {
-      this.pageVO.pageSize = pageSize
-      this.findList()
-    },
-    handleCurrentChange (currentPage) {
-      this.pageVO.currentPage = currentPage
-      this.findList()
-    },
+    
     formatterType (row, column, cellValue, index) {
       var obj = {
         original: '原清单',
@@ -304,44 +339,90 @@ import XEUtils from 'xe-utils'
       }
     },
     removeEvent (row) {     //删除单个清单
-      if (row.id) {
-        this.isClearActiveFlag = false
-       this.$confirm('确定永久删除该数据?', '温馨提示', {
-          distinguishCancelAndClose: true,
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          // this.loading = true
-          this.$refs.elxEditable.remove(row);
-        }).catch(action => action).then(() => {
-          this.isClearActiveFlag = true;
-        })
-      } else {
-        this.$refs.elxEditable.remove(row);
-        let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-        this.originalList.length = 0;
-        for (let index = 0; index < rest.length; index++) {
-          this.originalList.push(rest[index]); 
+      if (row.id && this.mode === 'show') {   //展示模式才能进行网路保存
+          this.isClearActiveFlag = false
+          this.$confirm('确定永久删除该数据?', '温馨提示', {
+            distinguishCancelAndClose: true,
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+              this.loading = true
+              // 进行发起请求删除
+              var originalIdList = [row.id];
+              this.$post('/original/delarray',{ originalIdList })
+                .then((response) => {
+                //删除成功
+                this.loading = false
+                this.findList();
+                this.$message({type: 'success', message: '删除所选选项成功!'})
+              }).catch(e => {
+                  this.$message({
+                      type: 'info',
+                      message: '删除失败！'+e
+                  });
+              })
+          }).catch(action => action).then(() => {
+            this.isClearActiveFlag = true
+          })
+        } else {    //新建模式与修改模式，仅进行数组的引用赋值修改
+            //存储该条数据的创建时间，然后原数据进行删除
+            this.$refs.elxEditable.remove(row);
+            let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+            this.originalList.length = 0;
+            for (let index = 0; index < rest.length; index++) {
+            this.originalList.push(rest[index]); 
+            }
+            this.$message({type: 'success', message: '删除所选选项成功!'})
         }
-      }
     },
     deleteSelectedEvent () {    //删除选中
       let removeRecords = this.$refs.elxEditable.getSelecteds()
       if (removeRecords.length) {
-        this.isClearActiveFlag = false
+        this.isClearActiveFlag = false;
        this.$confirm('确定删除所选数据?', '温馨提示', {
           distinguishCancelAndClose: true,
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$refs.elxEditable.remove(removeRecords);
-          let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-          this.originalList.length = 0;
-          for (let index = 0; index < rest.length; index++) {
-            this.originalList.push(rest[index]); 
-          }
+            this.loading = true
+            // 进行发起请求删除
+            if ( this.mode === 'show') {    //展示模式执行的网络请求批量删除
+                var originalIdList = [];
+                for (let index = 0; index < removeRecords.length; index++) {
+                    originalIdList.push(removeRecords[index].id)
+                }
+                // 进行发起请求删除
+                this.$post('/original/delarray',{ originalIdList })
+                  .then((response) => {
+                  //删除成功
+                  this.loading = false
+                  this.findList()
+                  this.$message({
+                    type: 'success',
+                    message: '删除所选选项成功!'
+                  })
+                }).catch(e => {
+                    this.$message({
+                        type: 'info',
+                        message: '删除失败！'+e
+                    });
+                })
+            }else {   //此处为新建模式与修改模式所需要的引用赋值操作
+                this.$refs.elxEditable.remove(removeRecords);
+                let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+                this.originalList.length = 0;
+                for (let index = 0; index < rest.length; index++) {
+                    this.originalList.push(rest[index]); 
+                }
+                this.loading = false;
+                this.$message({
+                    type: 'success',
+                    message: '删除所选选项成功!'
+                })
+            }
+            
         })
           // this.isClearActiveFlag = true;
       } else {
@@ -354,13 +435,36 @@ import XEUtils from 'xe-utils'
     saveRowEvent (row) {  //保存
       this.$refs.elxEditable.validateRow(row, valid => {
         if (valid) {
-            let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-            this.originalList.length = 0;
-            for (let index = 0; index < rest.length; index++) {
-              this.originalList.push(rest[index]); 
+            if (this.mode === 'show') {
+                var obj = {
+                id: row.id,                                    //原清单id
+                name: row.name,                     //原清单名称
+                num: row.num,                    //原清单编号
+                originalRowList: null                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
+                },
+                originalList = [],
+                url = '/original/update';
+                originalList.push(obj);
+                this.$post(url,{ originalList })
+                    .then((response) => {   
+                    this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
+                    this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })
+                }).catch(e => {
+                    this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
+                    this.$message({
+                        type: 'info',
+                        message: '修改失败！'+e
+                    });
+                })
+            }else { //此处为新建模式与修改模式所需要的引用赋值操作
+                let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+                this.originalList.length = 0;
+                for (let index = 0; index < rest.length; index++) {
+                this.originalList.push(rest[index]); 
+                }
+                this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true });
+                this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
             }
-            this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
-      
         }
       })
     },
@@ -379,7 +483,10 @@ import XEUtils from 'xe-utils'
 
 <style scoped>
 .manual-table2-oper {
-  margin-bottom: 18px;
+  width: 100%;
+  height: 25px;
+  position: relative;
+  margin: 4px 0 15px 0;
   text-align: left;
 }
 .manual-table2-oper a{
