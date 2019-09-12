@@ -1,8 +1,9 @@
 <template>
   <el-table-column :prop="col.colNum+'.td'" :label="col.td" show-overflow-tooltip :align="col.textAlign">
     <template slot-scope="scope">
-      <span v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='N'">{{scope.row.data[col.colNum].td}}</span>
-      <el-input v-else style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
+      <!-- <span>{{scope.row.data[col.colNum].td}}</span> -->
+      <span v-if="scope.row.data[col.colNum].edit ==='N'">{{scope.row.data[col.colNum].td}}</span>
+      <el-input v-if="col.attribute ==='pay' && scope.row.data[col.colNum].edit ==='Y' " style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Calculation(scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
@@ -14,7 +15,7 @@
 
 </template>
 
-<script>
+<script> 
 export default {
   name: 'MyColumn',
   // props:['col'],

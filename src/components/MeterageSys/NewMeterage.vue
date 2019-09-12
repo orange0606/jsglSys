@@ -215,7 +215,6 @@ export default {
         }
     },
     uplist: function(newVal,oldVal){  //子组件返回来的数据
-        console.log('有没有进来监听这里呀呀呀')
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
     }
@@ -404,7 +403,7 @@ export default {
           var data = response.data.totalmeterage,
           arr = []; 
           if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
-              arr = this.$excel.ListAssemble(data.tTotalmeterageHeadRows);  //组装清单
+              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
           }
           this.tomeRowList = arr;
           
@@ -496,14 +495,15 @@ export default {
                           //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                           if (this.tomeRowList && this.tomeRowList.length  && this.list.length === this.tomeRowList.length ) {
                               this.list[a][row.colNum] = {...this.tomeRowList[a][colName]};
-                              console.log('this.tomeRowList[a][colName].td')
-                              console.log(this.tomeRowList[a][colName].td)
+                              // console.log('this.tomeRowList[a][colName].td')
+                              // console.log(this.tomeRowList[a][colName].td)
                           }else{  //当查询不到有对应累计计量清单时，进行默认为0 处理
                               this.list[a][row.colNum].td = 0;
                           }
                       }
                       this.list[a][row.colNum].colNum = row.colNum;
                       this.list[a][row.colNum].trNum = a;
+                      this.list[a][row.colNum].tdColspan = this.list[a][row.colNum].tdRowspan = 1;
                 }
             }
         }
@@ -527,7 +527,7 @@ export default {
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'meterage') return false;
+            if (this.lastHeader[colName].attribute !== 'pay') return false;
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
@@ -539,7 +539,7 @@ export default {
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'meterage') return false;
+            if (this.lastHeader[colName].attribute !== 'pay') return false;
             return {'background':'#FFFACD'}
         }  
         return {};

@@ -200,7 +200,6 @@ import XEUtils from 'xe-utils';
         }else{
             this.EditTitle = '新建计量清单';
         }
-        this.uprow = null;
         this.uprow = row;
         // console.log(this.uprow,' this.uprow')
         // console.log(this.meterageList,' meterageList')

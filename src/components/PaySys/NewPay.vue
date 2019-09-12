@@ -1,62 +1,55 @@
-
 <template>
   <div
     v-loading="loading"
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
-  <div class="click-table11-oper">
+    <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
         <el-form-item label="清单编号">
-          <el-input :disabled="approval.state === 1 && uplist.id?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
+          <el-input :disabled="approval.state === 1?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
         </el-form-item>
         <el-form-item label="清单名称">
-          <el-input :disabled="approval.state === 1 && uplist.id?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
+          <el-input :disabled="approval.state === 1?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
         </el-form-item>
         <el-form-item label="表头">
-          <el-select :disabled="approval.state === 1 && uplist.id?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+          <el-select :disabled="approval.state === 1?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
               <el-option
-                  v-for="item in form.headerList"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id">
+                v-for="item in form.headerList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
               </el-option>
           </el-select>
         </el-form-item>
       </el-form>
     </div>
-    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
     <div class="click-table11-oper">
-      <el-button :disabled="approval.state === 1 && uplist.id?true:false" type="primary" size="mini" @click="impt">导入表格</el-button>
-      <el-button :disabled="approval.state === 1 && uplist.id?true:false" type="warning" size="mini" @click="submitEvent">保存</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <el-button :disabled="approval.state === 1 && uplist.id?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button :disabled="approval.state === 1 && uplist.id?true:false" type="danger" size="mini" @click="$refs.elxEditablecom.removeSelecteds()">删除选中</el-button>
-      <el-button :disabled="approval.state === 1 && uplist.id?true:false" type="info" size="mini" @click="$refs.elxEditablecom.revert()">放弃更改</el-button>
-      <el-button :disabled="approval.state === 1 && uplist.id?true:false" type="info" size="mini" @click="$refs.elxEditablecom.clear()">清空表格</el-button>
-      <el-button type="success" size="mini" @click="consoles">控制台打印所有数据</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
     </div>
-    <br>
           <!-- show-summary
       :summary-method="getSummaries" -->
-      <!-- :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
+           <!-- :cell-style="cellStyle" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
-      ref="elxEditablecom"
+      ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
       height="500"
-      size="mini"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
-      :summary-method="getSummaries"
       @cell-click ="cell_click"
-      show-summary
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
+      :cell-style ="cell_select"
+      size="small"
+      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 100, useDefaultValidTip: true}"
       style="width: 100%">
-      
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column width="40" align="center" >
         <template v-slot:header="scope">
@@ -77,6 +70,8 @@
       <!-- 此处使用多级表头嵌套组件 -->
       <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" ></my-column>
     </elx-editable>
+      <p style="color: red;font-size: 12px;margin:5px 0 15px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
+
   </div>
 </template>
 
@@ -86,7 +81,7 @@ import XEUtils from 'xe-utils';
 import Sortable from 'sortablejs';
 
 export default {
-  name: 'ShowEdit',
+  name: 'NewPay',
   components: {
     MyColumn
   },
@@ -94,197 +89,394 @@ export default {
     uplist:{  //查看和修改清单数据
       type: Object,
     },
-    approval:{
-      type: Object,
-    },
-    tender:{  //标段数据
-      type: Object,
-    },
-    payList:{  //父组件的清单列表
+    payList: { //所有计量清单列表
       type: Array,
     },
     mode:{  //子组件的展示模式
-      type: String,   
+      type: String, 
+    },
+    approval:{
+      type: Object,
+    },
+    tender:{
+      type: Object,
     },
     refresh:{ //显示此组件的变量
     }
   },
   data () {
     return {
-      form:{
-        name:'',
-        num:'',
-        headerId:'',
-        headerList:[],//表头列表
+      form:{  //选择表头输入清单名称与编号
+          name:'',
+          num:'',
+          headerId:'',
+          headerList:[],//表头列表
       },
-      showHeader:true,
-      hd:[],
-      originalHead:null, //用来存储表头信息
+      showHeader:true,  //是否显示表头以及表格强制渲染
+      payHead:null, //保存表头信息
+      hd:[],  //表格单元格用来合并的所有列数数据（列名，对象的属性名集合）
       startTime:null,
       loading: false,
       dialogVisible: true,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
+      lastHeader: [], //最后一层表头数据（用来单元格点击编辑判断）
       formula:{}, //存储表头的公式数据
-      row:null,//公式字符串转代码的全局变量
-      // col:[],//表头数据.
-      col: [
-      ],//已对PackHeader再次组装的多级表头数据.
+      col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
-      list: [
-      ], //表格数据
+      list: [], //支付清单表格数据
+      tometerageRowList: [], //累计计量清单内容
+      totalpayRowList: [], //累计支付清单内容已组装好的数据
+      totalpayCol:'', //累计支付表头内关联支付表头的属性值
+      pendingRemoveList:[],
     }
   },
+
  watch: {
-      list: function(newVal,oldVal){
-          // console.log('数据有发生改变吗')
-          // console.log(newVal)
-      },
-      uplist: function(newVal,oldVal){  //子组件返回来的数据
-        console.log('这里进入了吗')
+    uplist: function(newVal,oldVal){  //子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
     }
   },
   computed: {
-      
   },
   created () {
-    this.allHeader( this.tender.id );//调用请求一个标段的所有原清单表头 
+    this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
     this.rowDrop();//调用表格行拖拽函数
-  },
 
+  },
   mounted () {
- 
+
   },
   beforeDestroy () {
-    this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
-    this.$refs.input = null;
+      this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    upif ( newVal ) {   //处理父组件传来的值
-        if (newVal && newVal.id) {  //判断返回的是不是一个数组
+     upif ( newVal ) {   //处理父组件传来的值
+        this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
+        if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
             this.loading = true;
-            // console.log('此时为预览修改')
+            this.startTime = Date.now(); 
             this.form.name = newVal.name;
             this.form.num = newVal.num;
-            var id = newVal.originalHead.id;
-            this.form.headerId = id;
-            //请求表头 (为避免异步问题，表格数据组装已在请求到表头内容后执行)
-            return this.oneHeader(id);
-        }else if (newVal) {
-            // console.log('此时为新建原清单')
+            this.form.headerId = newVal.payHead.id;
+            switch(this.mode) {
+                case 'new': //此处为新建模式处理
+                    return this.updates(newVal);
+                    break;
+                case 'show': //此处为显示模式处理
+                    return this.OnePay(newVal.id);
+                    break;
+                case 'alter': //此处为修改模式处理
+                    return this.updates(newVal);
+                    break;
+            } 
+        }else if(newVal && (!newVal.id && !newVal.saveTime)){ //此处为新建
             this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
             this.form.name = this.form.num = this.form.headerId = this.headerList =null;
             this.$nextTick(() => {
-                this.$refs.elxEditablecom.reload([]);
-            })
+                this.$refs.elxEditable1.reload([]);
+            });
         }
     },
-    allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
-        this.$post('/head/alloriginal',{tenderId})
+    updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
+          this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
+
+          try {
+              var headsArr = this.$excel.Package(row.payHead.tPayHeadRows,row.payHead.refCol,row.payHead.refRow);
+              this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+              this.$nextTick(() => {
+                    this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+                    //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+                    this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+                }); // 强制刷新
+          } catch (error) {
+              this.$message({
+                type: 'info',
+                message: '发生错误！ 当前为子组件 '+this.mode+' 模式  应该是表头内容出错'+error
+            });
+              this.loading = false;
+          }
+
+          this.payHead = { //保存表头信息
+              id: row.id,
+              name:row.name,
+              num: row.num
+          }
+
+          if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
+              this.payHead.refCol = row.refCol;
+              this.payHead.refRow = row.refRow;
+              this.payHead.tPayHeadRows = row.tPayHeadRows;
+          }
+          try {
+              var arr = this.$excel.ListAssemble(row.payRowList); //组装清单表格数据
+              this.list = [...arr];
+              this.findList(); //调用滚动渲染数据
+              this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+          } catch (error) {
+              this.$message({
+                  type: 'info',
+                  message: '发生错误！ 当前为子组件 '+this.mode+'  模式  应该是清单内容出错'+error
+              });
+                console.log(error)
+                this.loading = false;
+          }
+         
+    },
+    allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
+        this.$post('/head/allpay',{tenderId})
         .then((response) => {
-          this.form.headerList = response.data.originalHeadList;
+          // console.log('response')
+          // console.log(response)
+          this.form.headerList = response.data.payHeadList;
         }).catch(e => {
             this.$message({
               type: 'info',
-              message: 'id发生错误！'+e
+              message: '发生错误！'
             });
         });
     },
-    OneOriginal (id) { //原清单id
-        //此处请求一个审批单的一个原清单
-        this.$post('/original/row/getone',{ id })
+    oneHeader (id) {  //请求单个表头 表头id  表头类型
+       this.$post('/head/getone',{id,type:'pay'})
+        .then((response) => {
+          var data = response.data.onehead,
+          headsArr = this.$excel.Package(data['tPayHeadRows'],data.refCol,data.refRow);
+          this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+          this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+
+          //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+          this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+
+          this.payHead = { //保存表头信息
+              id: data.id,
+              name:data.name,
+              num: data.num
+          }
+          if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
+              this.payHead.refCol = data.refCol;
+              this.payHead.refRow = data.refRow;
+              this.payHead.tPayHeadRows = data.tPayHeadRows;
+          }
+          this.showHeader = false;
+          this.$nextTick(() => {  //强制重新渲染
+            this.showHeader = true;
+          })
+          this.loading = false;
+          this.list.length = this.hd.length = 0;
+
+          //调用表格公式解析 存储
+    
+          this.OneToPay( data.id ); // 调用相对应的累计支付清单内容
+      })
+    },
+    OnePay (id) { //支付清单id
+        //此处请求一个审批单的一个支付清单
+        this.$post('/pay/getonerow',{ id })
             .then((response) => {
-            // this.list = response.data.originalList.list;
-            if (!response.data.original.originalRowList) return this.loading = false;;
-            var arr = this.$excel.ListAssemble(response.data.original.originalRowList); //组装清单表格数据
+            var data = response.data.payrow;
+            if (!data && !data.payRowList) return this.loading = false;
+            var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow);
+            this.PackHeader = [...headsArr];
+            this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+
+            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+            this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+            this.payHead = { //保存表头信息
+                name:data.name,
+                num: data.num
+            }
+            this.loading = false;
+            this.list.length = this.hd.length = 0;
+
+            var arr = this.$excel.ListAssemble(data.payRowList); //组装清单表格数据
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-            this.loading = false;
         }).catch(e => {
             this.loading = false;
             console.log(e)
             this.$message({
                 type: 'info',
-                message: '233发生错误！'+e
+                message: '发生错误！'+e
             });
         })
     },
-    consoles () {
-        let rest = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据
-        console.log('检验一下数据对不对 rest list')
-        console.log(rest);
-        console.log(this.list);
+    OneToPay (id) {
+        this.$post('/totalpay/by/payheadid',{ id })
+        .then((response) => {
+          var data = response.data.totalpay,
+          arr = []; 
+          if (data && data.totalpayRowList && data.totalpayRowList.length >0 ) {
+              arr = this.$excel.ListAssemble(data.totalpayRowList);  //组装清单
+          }else{
+              this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+              return this.totalpayRowList = arr;
+          }
+          this.totalpayRowList = arr;
+          if (data && data.totalpayHead && data.totalpayHead.length >0 ) {
+              var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow),
+              col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
+              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              lastHeader = this.$excel.BikoFoArr([...col]),
+              header = Object.keys(lastHeader); //用来所需要的所有列(obj)（属性）名
+              for (let index = header.length -1; index >= 0; index--){
+                  var row = lastHeader[header[index]],
+                  str = row.attributeValue,
+                  colName = str.match(patt1)[0];
+                  if (row.attribute && row.attributeValue && row.attributeValue !=="" && row.attribute === "pay-total" ) {
+                      this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+                      return this.totalpayCol = colName;
+                  }
+              }
+          }
+          this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+        }).catch(e => {
+            this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+            this.$message({
+              type: 'info',
+              message: '请求相对应的累计计量清单数据发生错误！'+e
+            });
+        });
     },
-    impt(){ //button 按钮调用input文件选择事件
-        this.$refs.input.click();
+    OneTometerage (id) {  //请求相对应的累计计量清单数据
+        this.$post('/totalmeterage/by/payheadid',{ id })
+        .then((response) => {
+          var data = response.data.totalpay,
+          arr = []; 
+          if (data && data.totalpayRowList && data.totalpayRowList.length >0 ) {
+              arr = this.$excel.ListAssemble(data.tTotalpayHeadRows);  //组装清单
+          }
+          this.tometerageRowList = arr;
+
+          this.importfxx(); //调用支付清单内容组装函数
+        }).catch(e => {
+            this.importfxx(); //调用支付清单内容组装函数
+            this.$message({
+              type: 'info',
+              message: '请求相对应的累计计量清单数据发生错误！'+e
+            });
+        });
+    },
+
+    selectupdate (row, column, cell, event) { //新清单列表数据表格单击事件
+        this.oneUpatde(row.id); //调用请求清单
+        //关闭显示对应清单列表页面
+        this.showList = false;
+    },
+    handleSizeChange (pageSize) { 
+      this.pageVO.pageSize = pageSize;
+      this.allRelationUpdate();
+    },
+    handleCurrentChange (currentPage) {
+      this.pageVO.currentPage = currentPage
+      this.allRelationUpdate();
+    },
+    formatterDate (row, column, cellValue, index) {
+      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+    },
+    formatterType (row, column, cellValue, index) {
+      let obj = {
+        original: '新清单',
+        change: '变更清单',
+        update: '新清单',
+        pay: '计量清单',
+        totalpay: '累计计量清单',	
+        pay: '支付清单',
+        totalpay: '累计支付清单'
+      }
+      return cellValue ? obj[cellValue] : '未知'
+    },
+    tableRowClassName ({ row, rowIndex }) {
+      if (this.pendingRemoveList.some(item => item === row)) {
+        return 'delete-row';
+      }
+      return ''
     },
     importfxx() { //表头导入函数
         this.loading = true;
-        this.startTime = Date.now();
-        this.$excel.Imports(data=>{ //数据导入组装函数
-            this.hd.length = this.list.length = 0; //归为初始化状态
-            try { //先判断表头是否一致
-                // console.log(data);
-                var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-                datahd = Object.keys(data[0]);
-                if ( datahd.length < hd.length ) {
-                    this.loading = false;
-                    hd.length = datahd.length = 0;
-                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
-                }else{
-                    hd.length = datahd.length = 0;
-                }
-                var arr = [...this.PackHeader],
-                arrlen = arr.length = arr.length-1,
-                dataSplice = data.splice(0,arrlen), //去掉表头并且用来作判断是否一致
-                ff = arr.some( function( item, index, array ){ //判断导入的清单表头与文件Excel清单表头如果是否相等
-                      var hdsome = hd.some( function( val, i){ 
-                          var headrs = array[index][val];
-                          Rows = dataSplice[index][val];
-                          return headrs.colNum !== Rows.colNum || headrs.td !== Rows.td || headrs.tdRowspan !== Rows.tdRowspan || headrs.tdColspan !== Rows.tdColspan || headrs.trNum !== Rows.trNum;
-                      }); 
-                      return hdsome;
-                }); 
-                if (ff) {
-                    arr.length = hd.length = dataSplice.length = 0; //释放内存
-                    this.loading = false;
-                    return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
-                }
-            } catch (error) {
-               this.loading = false;
-               return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
+        this.hd.length = this.list.length = 0; //归为初始化状态
+        this.startTime = Date.now(); 
+        // 先生成一个完整表格数据
+        this.list = [];
+        var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+        patt1=/[A-Z+]*/g;
+        for (let index = 1; index >0; index--) {   //生成一行支付清单
+            this.list[index] = {};
+            for (let i = hd.length -1; i >= 0; i--) {
+              this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:index+1,upload: 1 };
             }
-            try {  //把数据载入表格
-                this.list = [...data];
-                this.showHeader = true;
-
-                 this.findList(); //调用滚动渲染数据
-                this.$excel.Formula(this.list, this.formula);  //调用公式计算
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-             
-                data.length = 0; //内存释放
-            } catch (e) {
-                data.length = this.list.length = 0;
-                this.loading =false;
-                // console.log(e);
-                this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
+        }
+        var cols = [...this.col],
+        sumArr = this.$excel.BikoFoArr(cols), //截取获取表格实际对应所有列最后一层的表头列 object
+        header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
+            var row = sumArr[header[index]];
+            if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "totalpay-pay" || row.attribute === "totalmeterage-head-total") ) {
+                let str = row.attributeValue;
+                let colName = str.match(patt1)[0];
+                for (let a = this.list.length -1; a >= 0 ; a--) {
+                      var Rlist = this.list[a][row.colNum];
+                      if (row.attribute === "totalpay-pay" ) {
+                          // this.list[a][row.colNum] = {...data[a][colName]};
+                          if (this.totalpayCol!='' && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
+                              Rlist = {...data[a][colName]};
+                          }else{  //无数据默认为0
+                              Rlist.td = 0;
+                          }
+                      }else if (row.attribute === "totalmeterage-head-total") { 
+                          //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
+                          if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
+                              Rlist = {...data[a][colName]};
+                              // var tohd = Object.keys(this.tometerageRowList[0]);
+                              var number = null;
+                              for (let index = this.tometerageRowList.length -1; index >= 0; index--) {
+                                  number += (this.tometerageRowList[index][colName].td)*1;
+                              }
+                              Rlist.td = number;
+                          }else{  //无数据默认为0
+                              Rlist.td = 0;
+                          }
+                      }
+                      Rlist.colNum = row.colNum;
+                      Rlist.trNum = a;
+                      Rlist.tdColspan = Rlist.tdRowspan = 1;
+                }
             }
-        })
+        }
+        try {  //把数据载入表格
+            this.$excel.Formula(this.list, this.formula);  //调用公式计算
+            this.findList(); //调用滚动渲染数据
+            this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+        } catch (e) {
+            this.loading =false;
+            this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
+        }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
+        // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            var str = column.property,
+            colName = str.substr(0,str.indexOf(".td"));
+            //判断是否哪种属性类型允许单元格编辑
+            if (this.lastHeader[colName].attribute !== 'pay') return false;
+            this.editRow = row[colName];
+            row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
+        }  
+    },
+    cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+        if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
             var str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
-            // console.log(colName)
-            this.editRow = row[colName];
-            row[colName].edit = "Y";  //Y为编辑模式N为只读状态
+
+            //判断是否哪种属性类型允许单元格编辑
+            if (this.lastHeader[colName].attribute !== 'pay') return false;
+            return {'background':'#FFFACD'}
         }  
+        return {};
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >2) {  //带选择框的情况
@@ -295,29 +487,27 @@ export default {
         return [1, 1]
     }, 
     findList () { //表格滚动渲染函数
-      // this.loading = true
+      this.loading = true;
       this.$nextTick(() => {
-        this.$refs.elxEditablecom.reload([])
-        setTimeout(() => {
-          // let startTime = Date.now()
-          this.$refs.elxEditablecom.reload(this.list);
-          this.loading = false;
-          
-        //  this.$nextTick(() => {
-          this.$message({ message: `渲染 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms`, type: 'success', duration: 6000, showClose: true })
-            // })
-        }, 200)
+        this.$refs.elxEditable1.reload([])
+        this.$refs.elxEditable1.reload(this.list);
+        this.loading = false;
+         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+
       })
     },
     getSummaries (param) {  //合计
         var { columns, data } = param,
         sums = [];
         // console.log('data[0]')
-        if (this.PackHeader.length >0 && this.list.length >0) {
+        if (this.PackHeader.length >1 && this.list.length >0) {
             var sumArr = this.PackHeader.slice(-1), //截取合计尾行
             header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
             TotalObj = {},
             Total = [];
+            console.log('header--------------------------')
+            console.log(header)
+            console.log(this.PackHeader)
             for (var i = header.length - 1; i >= 0; i--) {
                 var sum = sumArr[0][header[i]];
                 if (sum.attribute && sum.attribute === 'sumFormula') {
@@ -344,84 +534,23 @@ export default {
         }
         return sums;
     },
-    Analysis () {  //公式解析化为可运算的字符串
-        var patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
-        patt2 =/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
-        patt3 = /[0-9]/,  //判断是否有数字
-        patt4 = /[A-Z]/,
-        cols = [...this.col];
-        function BikoFoArr (col) {
-            let obj = {};
-            Biko(col);
-            function Biko (colArr) { //表头尾行 真正显示对应列的数据
-                for (let c = 0; c < colArr.length; c++) {
-                  if (colArr[c].children && colArr[c].children.length >0) {
-                      Biko(colArr[c].children);
-                  }else{
-                      obj[colArr[c].colNum] = colArr[c];
-                  }
-                }
-            }
-            return obj;
-        }
-        if (this.PackHeader.length <2) return false; 
-
-        // let sumArr = this.PackHeader.slice(-2)[0]; //截取合计尾行上一行
-        var sumArr = BikoFoArr(cols); //截取获取表格实际对应所有列的表头列 object
-        const header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
-        for (let index = 0; index < header.length; index++) {
-            var sumRow = sumArr[header[index]];
-            if (sumRow.attribute && sumRow.attribute === "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
-                var str = sumRow.attributeValue;
-                str = this.filterStr(str);  //去除空格与特殊符号
-                var arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
-                for (let i = 0; i < arr.length; i++) {
-                    var key = arr[i].match(patt2),
-                    arrlen = arr[i].length;
-                    for (let a = 0; a < str.length; a++) {
-                        let index = str.indexOf(arr[i],a);
-                        if ((str.length - index) < arrlen) break;
-                        if (index !== -1) {
-                            if (index === 0 && !patt3.test(str[index+arrlen])) {
-                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
-                            }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
-                                str = str.slice(0, index)+`(row["${key[0]}"].td)*1`+str.slice(index+arrlen);
-                            }
-                        }
-                    }
-                }
-                this.formula[sumRow.colNum] = str;
-            }      
-        }
-    },
-    filterStr (str) {  //去除空白以及特殊字符串
-        if (str==null)return '';
-        str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]"),
-        specialStr = "";  
-        for(var i=0;i<str.length;i++){  
-            specialStr += str.substr(i, 1).replace(pattern, '');   
-        }  
-        return specialStr;  
-    },
-  
     insertEvent () {
       // console.log('进来了吗')
-      this.$refs.elxEditablecom.insert({
+      this.$refs.elxEditable1.insert({
         '0': `New ${Date.now()}`,
       }).then(({ row }) => {
-        this.$refs.elxEditablecom.setActiveCell(row);
+        this.$refs.elxEditable1.setActiveCell(row);
       })
-      this.$refs.elxEditablecom.clearActive();
+      this.$refs.elxEditable1.clearActive();
     },
     getSelectLabel (value, valueProp, labelProp, list) {
       let item = XEUtils.find(list, item => item[valueProp] === value)
       return item ? item[labelProp] : null
     },
     getCascaderLabel (value, list) {
-      let values = value || [],
-      labels = [],
-      matchCascaderData = function (index, list) {
+      let values = value || [];
+      let labels = [];
+      let matchCascaderData = function (index, list) {
         let val = values[index];
         if (list && values.length > index) {
           list.forEach(item => {
@@ -454,9 +583,9 @@ export default {
 
     },
     submitEvent () {
-      this.$refs.elxEditablecom.validate(valid => {
+      this.$refs.elxEditable1.validate(valid => {
         if (valid) {
-            let list = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据;
+            let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
             list.forEach((item, index) => {
                 if (XEUtils.isDate(item.date)) {
                 item.date = item.date.getTime();
@@ -472,77 +601,125 @@ export default {
                 return false;
             }
             //解构数据进行提交
-            this.loading = true;
-            var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            refCol = header.length,
-            refRow = list.length,
-            originalRowList = [];
+          this.loading = true;
+          var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+          payRowList = [];
+          for (let index = list.length -1; index >=0 ; index--) {
+              for (let i = header.length -1; i >=0; i--) {
+                  if (list[index][header[i]] && list[index][header[i]].colNum) {
+                      // delete list[index][header[i]].edit;
+                      list[index][header[i]].formula = '';
+                      list[index][header[i]].trNum = index+1;                  
+                      list[index][header[i]].attribute = '';                  
+                      list[index][header[i]].upload = 1;    
+                      payRowList.push(list[index][header[i]]);
+                  }
+              }
+          }
+          //此处做个判断，判断是新建还是修改。
+         
 
-            for (let index = 0; index < refRow; index++) {
-                for (let i = 0; i < refCol; i++) {
-                    if (list[index][header[i]] && list[index][header[i]].colNum) {
-                        // delete list[index][header[i]].edit;
-                        list[index][header[i]].formula = '';
-                        list[index][header[i]].trNum = index+1;                  
-                        list[index][header[i]].attribute = '';                  
-                        list[index][header[i]].upload = 1;    
-                        originalRowList.push(list[index][header[i]]);
-                    }
+          switch(this.mode) {
+              case 'show': //此处为展示模式处理
+                  console.log('进入了show模式')
+                   var obj = {
+                      // id:                                    //计量清单id
+                      payHeadId: this.form.headerId,    //计量清单表头id
+                      processId: this.approval.id,         //审批单流程id
+                      sysOrder: '',                   //系统序号  预留，暂不使用
+                      sysNum: '',                    //系统编号  预留，暂不使用
+                      name: this.form.name,                     //计量清单名称
+                      num: this.form.num,                    //计量清单编号
+                      tenderId: this.tender.id,                     //标段id
+                      type: 'pay',                 //计量清单类别为”pay”
+                      payRowList                 //计量清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
+                  },
+                  payList = [];
+                  var url = '';
+                  if (this.uplist && !this.uplist.id ) { //此处是新建清单
+                      url = '/pay/save';
+                  }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
+                      obj.id = this.uplist.id;
+                      url = '/pay/update';
+                      console.log('这里保存')
+                  }
+                  if (url === '') return false;
+                  payList.push(obj);
+                  this.$post(url,{ payList })
+                      .then((response) => {   
+                      this.$message({ message: `已为你保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                      this.saveShow();
+                  }).catch(e => {
+                      this.loading = false;
+                      payRowList.length = 0;
+                      this.$message({
+                          type: 'info',
+                          message: '发生错误！'+e
+                      });
+                  })
+                  break;
+              default:    //此处为新建模式与修改模式
+                  console.log('此处为新建模式与修改模式')
+                  var payHead = this.payHead;
+                 
+                  if (this.uplist && (this.uplist.id || this.uplist.saveTime) ) {  //此处是修改清单
+                        console.log('此处是修改清单')
+                        if (!payHead.id || !payHead.tPayHeadRows) {
+                            payHead = this.uplist.payHead;
+                        }
+                        for (let index = this.payList.length -1; index >=0; index--) {
+                            var meindex = this.payList[index];
+                            if((meindex.saveTime === this.uplist.saveTime) || (meindex.id === this.uplist.id)){
+                                meindex.payHeadId = this.form.headerId;
+                                meindex.payRowList = [];
+                                meindex.payRowList = payRowList;
+                                meindex.name = this.form.name;
+                                meindex.num = this.form.num;
+                                meindex.payHead = payHead;
+                                meindex.updateTime = new Date();
+                                this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                                return this.saveShow();
+                            }
+                        }
+                  }else if (this.uplist) {  //此处是新建清单
+                        var obj = {
+                            payHeadId:this.form.headerId,
+                            processId: this.approval.id,
+                            sysOrder:'',
+                            sysNum:'',
+                            name:this.form.name,
+                            num:this.form.num,
+                            tenderId:this.tender.id,
+                            type:'pay',
+                            payRowList,
+                            payHead,//表头数据
+                            enter:this.list.length>0?1:0,
+                            tender:this.tender,
+                            saveTime:new Date(),
+                            saveEmployee:{name:this.$store.state.username}
+                        };
+                        this.payList.push(obj);
+                        this.$message({ message: `已为你保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                        return this.saveShow();
+                  }
+                
+          } 
 
-                }
-            }
-            //此处做个判断，判断是新建还是修改。
-            var obj = {
-                // id:                                    //原清单id
-                originalHeadId: this.form.headerId,    //原清单表头id
-                processId: this.approval.id,         //审批单流程id
-                sysOrder: '',                   //系统序号  预留，暂不使用
-                sysNum: '',                    //系统编号  预留，暂不使用
-                name: this.form.name,                     //原清单名称
-                num: this.form.num,                    //原清单编号
-                tenderId: this.tender.id,                     //标段id
-                type: 'original',                 //原清单类别为”original”
-                originalRowList                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
-            },
-            originalList = [],
-            url = '';
-            if (this.uplist && !this.uplist.id ) { //此处是新建清单
-                url = '/original/save';
-            }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
-                obj.id = this.uplist.id;
-                url = '/original/update';
-            }
-            if (url === '') return false;
-            originalList.push(obj);
-            this.$post(url,{ originalList })
-                .then((response) => {   
-                this.$message({ message: `已为你保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                let succre = false;
-                this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
-                this.loading = false;
-                originalRowList.length = this.list.length = this.hd.length = 0;
-                this.showHeader = false;
-                this.$nextTick(() => {  //强制重新渲染
-                    this.showHeader = true;
-                })
-            }).catch(e => {
-                this.loading = false;
-                originalRowList.length = 0;
-                this.$message({
-                    type: 'info',
-                    message: '585发生错误！'+e
-                });
-            })
-
-          
         }
       })
     },
-    saveRowList () {
-
+    saveShow () {
+        let succre = false;
+        this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
+        this.loading = false;
+        // this.list.length = this.hd.length = 0;
+        this.showHeader = false;
+        this.$nextTick(() => {  //强制重新渲染
+            this.showHeader = true;
+        })
     },
     exportCsvEvent () {
-      this.$refs.elxEditablecom.exportCsv();
+      this.$refs.elxEditable1.exportCsv();
     },
 
 
@@ -552,8 +729,16 @@ export default {
 
 <style scope>
 .click-table11-oper {
-  /* margin-bottom: 18px; */
+  margin-bottom: 5px;
   text-align: left;
+  position: relative;
+}
+.click-table11-oper .right {
+  position: absolute;
+}
+.click-table11-pagination {
+  margin-top: 18px;
+  text-align: right;
 }
 .click-table11 .drag-btn {
   font-size: 16px;

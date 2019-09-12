@@ -11,7 +11,7 @@
         :col="item" :Formula="Formula">
       </my-column> 
     </template>
-  </el-table-column>
+  </el-table-column> 
  
 </template>
 

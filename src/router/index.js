@@ -43,14 +43,7 @@ export default new Router({
         "requireAuth": true
       }
     },
-    {
-      path: '/ShowChangeList',
-      name: 'ShowChangeList',
-      component: ()=>import('@/components/ChangeSys/ShowChangeList.vue'),
-      meta:{
-        "requireAuth": true
-      }
-    },
+
     {
       path: '/MeterageList',
       name: 'MeterageList',
