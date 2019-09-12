@@ -341,6 +341,10 @@ export default {
               this.meterageHead.refRow = data.refRow;
               this.meterageHead.tMeterageHeadRows = data.tMeterageHeadRows;
           }
+          this.showHeader = false;
+          this.$nextTick(() => {  //强制重新渲染
+            this.showHeader = true;
+          })
           this.loading = false;
           this.list.length = this.hd.length = 0;
 
@@ -356,7 +360,7 @@ export default {
         this.$post('/meterage/getonerow',{ id })
             .then((response) => {
             var data = response.data.meteragerow;
-            if (data && !data.meterageRowList) return this.loading = false;
+            if (!data && !data.meterageRowList) return this.loading = false;
             var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数

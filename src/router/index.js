@@ -5,7 +5,6 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-
     {
       path: '/login',
       name: 'login',
@@ -35,14 +34,7 @@ export default new Router({
         "requireAuth": true
       }
     }, 
-    {
-      path: '/ShowOriginalList',
-      name: 'ShowOriginalList',
-      component: ()=>import('@/components/InventorySys/ShowOriginalList.vue'),
-      meta:{
-        "requireAuth": true
-      }
-    },     
+    
     {
       path: '/ChangeList',
       name: 'ChangeList',

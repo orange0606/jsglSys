@@ -1,42 +1,41 @@
 <template>
-  <div
+<div
     v-loading="loading"
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
-  <div class="click-table11-oper">
+    <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
         <el-form-item label="清单编号">
-          <el-input v-model="form.num" placeholder="请输入清单编号"></el-input>
+          <el-input :disabled="approval.state === 1?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
         </el-form-item>
         <el-form-item label="清单名称">
-          <el-input v-model="form.name" placeholder="请输入清单名称"></el-input>
+          <el-input :disabled="approval.state === 1?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
         </el-form-item>
         <el-form-item label="表头">
-          <el-select v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
-                  <el-option
-                    v-for="item in form.headerList"
-                    :key="item.id"
-                    :label="item.name"
-                    :value="item.id">
-                  </el-option>
+          <el-select :disabled="approval.state === 1?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+              <el-option
+                v-for="item in form.headerList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+              </el-option>
           </el-select>
         </el-form-item>
       </el-form>
     </div>
 
 
-    <p style="color: red;font-size: 12px;margin:15px 0 15px 0;text-align:left;">拖动排序/、右键菜单</p>
     <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
     <div class="click-table11-oper">
-      <el-button type="primary" size="mini" @click="impt">导入表格</el-button>
-      <el-button type="warning" size="mini" @click="submitEvent">保存</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="impt">导入表格</el-button>
+       <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button type="danger" size="mini" @click="$refs.elxEditable.removeSelecteds()">删除选中</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
-      <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button>
-      <el-button type="success" size="mini" @click="consoles">控制台打印所有数据</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -44,7 +43,7 @@
          <!-- :data.sync="list" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
-      ref="elxEditable"
+      ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
       height="400"
@@ -77,6 +76,8 @@
       <!-- 此处使用多级表头嵌套组件 -->
       <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" :approval="approval" ></my-column>
     </elx-editable>
+    <p style="color: red;font-size: 12px;margin:10px 0 5px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
+
   </div>
 </template>
 
@@ -136,28 +137,21 @@ export default {
     }
   },
  watch: {
-      list: function(newVal,oldVal){
-          // console.log('数据有发生改变吗')
-          // console.log(newVal)
-      },
       uplist: function(newVal,oldVal){  //子组件返回来的数据
-
-            //此处可进行判断，然后进行清单导入
-            this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
-  
+          //此处可进行判断，然后进行清单导入
+          this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
       }
   },
   computed: {
       
   },
   created () {
-    let tenderId = this.tender.id; 
-    this.allHeader( tenderId);//调用请求一个标段的所有原清单表头 
+    this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
+    this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
     this.rowDrop();//调用表格行拖拽函数
-    // this.findList()
   },
   mounted () {
-    this.rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+    this.rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
   },
   beforeDestroy () {
     this.rest.length = this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
@@ -202,7 +196,7 @@ export default {
                     this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
                     //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                     this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-                }); // 强制刷新
+              }); // 强制刷新
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -256,7 +250,7 @@ export default {
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
         this.originalHead = { //保存表头编号与名称
           id: data.id,
-          num: data.num,
+          name: data.name,
           num: data.num
         }
         if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
@@ -264,6 +258,10 @@ export default {
             this.originalHead.refRow = data.refRow;
             this.originalHead.tOriginalHeadRows = data.tOriginalHeadRows;
         }
+        this.showHeader = false;
+          this.$nextTick(() => {  //强制重新渲染
+            this.showHeader = true;
+        })
         this.loading = false;
         this.list.length = this.hd.length = 0;
 
@@ -294,7 +292,6 @@ export default {
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-            this.loading = false;
         }).catch(e => {
             this.loading = false;
             console.log(e)
@@ -305,7 +302,7 @@ export default {
         })
     },
     consoles () {
-        let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+        let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
         console.log('检验一下数据对不对 rest list')
         console.log(rest);
         console.log(this.list);
@@ -366,6 +363,7 @@ export default {
         })
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
+        if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
@@ -385,18 +383,13 @@ export default {
         return [1, 1]
     }, 
     findList () { //表格滚动渲染函数
-      // this.loading = true
+      this.loading = true;
       this.$nextTick(() => {
-        this.$refs.elxEditable.reload([])
-        setTimeout(() => {
-          // let startTime = Date.now()
-          this.$refs.elxEditable.reload(this.list);
-          this.loading = false;
-          
-        //  this.$nextTick(() => {
-          this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms  系统已为你自动去除表头`, type: 'success', duration: 6000, showClose: true })
-            // })
-        }, 200)
+        this.$refs.elxEditable1.reload([])
+        this.$refs.elxEditable1.reload(this.list);
+        this.loading = false;
+         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+
       })
     },
     getSummaries (param) {  //合计
@@ -447,12 +440,12 @@ export default {
 
     insertEvent () {
       // console.log('进来了吗')
-      this.$refs.elxEditable.insert({
+      this.$refs.elxEditable1.insert({
         '0': `New ${Date.now()}`,
       }).then(({ row }) => {
-        this.$refs.elxEditable.setActiveCell(row);
+        this.$refs.elxEditable1.setActiveCell(row);
       })
-      this.$refs.elxEditable.clearActive();
+      this.$refs.elxEditable1.clearActive();
     },
     getSelectLabel (value, valueProp, labelProp, list) {
       let item = XEUtils.find(list, item => item[valueProp] === value)
@@ -496,7 +489,7 @@ export default {
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {
         if (valid) {
-            let list = this.$refs.elxEditable.getRecords();//获取表格的全部数据;
+            let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
             list.forEach((item, index) => {
                 if (XEUtils.isDate(item.date)) {
                 item.date = item.date.getTime();
@@ -575,7 +568,7 @@ export default {
                  
                   if (this.uplist && (this.uplist.id || this.uplist.saveTime) ) {  //此处是修改清单
                         console.log('此处是修改清单')
-                        if (!originalHead.id || !originalHead.tMeterageHeadRows) {
+                        if (!originalHead.id || !originalHead.tOriginalHeadRows) {
                             originalHead = this.uplist.originalHead;
                         }
                         for (let index = this.originalList.length -1; index >=0; index--) {
@@ -610,6 +603,8 @@ export default {
                             saveEmployee:{name:this.$store.state.username}
                         };
                         this.originalList.push(obj);
+                        console.log('this.originalList');
+                        console.log(this.originalList);
                         this.$message({ message: `已为你保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                         return this.saveShow();
                   }
@@ -630,7 +625,7 @@ export default {
         })
     },
     exportCsvEvent () {
-      this.$refs.elxEditable.exportCsv();
+      this.$refs.elxEditable1.exportCsv();
     },
 
 
@@ -640,8 +635,12 @@ export default {
 
 <style scope>
 .click-table11-oper {
-  margin-bottom: 18px;
+  margin-bottom: 5px;
   text-align: left;
+  position: relative;
+}
+.click-table11-oper .right {
+  position: absolute;
 }
 .click-table11-pagination {
   margin-top: 18px;

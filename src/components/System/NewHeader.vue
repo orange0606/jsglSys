@@ -168,7 +168,7 @@
             <el-button @click="back">{{ cancelBtnName }}</el-button>
 
             <!-- || (Form.id && !btn.editAtt) -->
-            <el-button :disabled="Form.type === 'update' || (Form.id && !btn.editAtt) ?true:false" type="primary" @click="next">{{ nextBtnName }}</el-button>
+            <el-button :disabled="Form.type === 'update' ?true:false" type="primary" @click="next">{{ nextBtnName }}</el-button>
         </div>
         <br>
     </div>

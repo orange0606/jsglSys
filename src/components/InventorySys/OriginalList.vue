@@ -79,8 +79,8 @@
         </elx-editable>
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="85%" top="8vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="list" :uplist="uprow" :approval="approval" :mode="mode" ></inven-edit>
+          <el-dialog :title="EditTitle" width="95%" top="4vh"  :lock-scroll="false" :visible.sync="visibleNew">
+              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" ></inven-edit>
               <br><br><br>
           </el-dialog>
         </transition>
@@ -105,7 +105,7 @@ import XEUtils from 'xe-utils'
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     approval:{
       type: Object,
