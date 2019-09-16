@@ -107,6 +107,11 @@ import XEUtils from 'xe-utils'
       required: false,
       default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+      // type:Array,
+      required:false,
+      default:false   
+    },
     approval:{
       type: Object,
       required: false,
@@ -151,7 +156,12 @@ import XEUtils from 'xe-utils'
     visibleNew: function(newVal,oldVal){
         if (!newVal) {
             if (this.mode === 'show') {
-                this.findList();  //发起请求所有已录入计量清单
+                if (condition) {
+                    this.findList();  //发起请求所有已录入计量清单
+                }
+                this.joinParent
+                this.edit = true;
+
             }else{
                 this.$nextTick(() => {
                     this.list = this.originalList;
@@ -176,6 +186,7 @@ import XEUtils from 'xe-utils'
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
+                this.edit = true;
                 this.findList(); //请求该审批id的所有清单
                 break;
             case 'alter': //此处为修改模式处理

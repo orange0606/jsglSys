@@ -302,7 +302,7 @@ export default {
             });
         })
     },
-    OneToPay (id) {
+    OneToPay (id) { //请求关联的一个累计支付清单
         this.$post('/totalpay/by/payheadid',{ id })
         .then((response) => {
           var data = response.data.totalpay,
@@ -335,7 +335,7 @@ export default {
             this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
             this.$message({
               type: 'info',
-              message: '请求相对应的累计计量清单数据发生错误！'+e
+              message: '请求相对应的累计支付清单数据发生错误！'+e
             });
         });
     },
@@ -358,7 +358,6 @@ export default {
             });
         });
     },
-
     selectupdate (row, column, cell, event) { //新清单列表数据表格单击事件
         this.oneUpatde(row.id); //调用请求清单
         //关闭显示对应清单列表页面
@@ -372,21 +371,7 @@ export default {
       this.pageVO.currentPage = currentPage
       this.allRelationUpdate();
     },
-    formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
-    },
-    formatterType (row, column, cellValue, index) {
-      let obj = {
-        original: '新清单',
-        change: '变更清单',
-        update: '新清单',
-        pay: '计量清单',
-        totalpay: '累计计量清单',	
-        pay: '支付清单',
-        totalpay: '累计支付清单'
-      }
-      return cellValue ? obj[cellValue] : '未知'
-    },
+
     tableRowClassName ({ row, rowIndex }) {
       if (this.pendingRemoveList.some(item => item === row)) {
         return 'delete-row';
@@ -401,21 +386,21 @@ export default {
         this.list = [];
         var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
         patt1=/[A-Z+]*/g;
-        for (let index = 1; index >0; index--) {   //生成一行支付清单
+        for (let index =0; index < 1; index++) {   //生成一行支付清单
             this.list[index] = {};
-            for (let i = hd.length -1; i >= 0; i--) {
+            for (let i = 0; i < hd.length; i++) {
               this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:index+1,upload: 1 };
             }
         }
         var cols = [...this.col],
-        sumArr = this.$excel.BikoFoArr(cols), //截取获取表格实际对应所有列最后一层的表头列 object
-        header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        sumArr = this.$excel.BikoFoArr(cols); //截取获取表格实际对应所有列最后一层的表头列 object
+        var header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             var row = sumArr[header[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "totalpay-pay" || row.attribute === "totalmeterage-head-total") ) {
                 let str = row.attributeValue;
                 let colName = str.match(patt1)[0];
-                for (let a = this.list.length -1; a >= 0 ; a--) {
+                for (let a = 0; a < 1 ; a++) {
                       var Rlist = this.list[a][row.colNum];
                       if (row.attribute === "totalpay-pay" ) {
                           // this.list[a][row.colNum] = {...data[a][colName]};
@@ -617,8 +602,6 @@ export default {
               }
           }
           //此处做个判断，判断是新建还是修改。
-         
-
           switch(this.mode) {
               case 'show': //此处为展示模式处理
                   console.log('进入了show模式')

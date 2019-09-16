@@ -149,6 +149,7 @@ import XEUtils from 'xe-utils';
     visibleNew: function ( newVal,oldVal ) {
         if (!newVal) {
             if (this.mode === 'show') {
+                this.edit = true;
                 this.findList();  //发起请求所有已录入计量清单
             }else{
                 this.$nextTick(() => {
@@ -174,6 +175,7 @@ import XEUtils from 'xe-utils';
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
+                this.edit = true;
                 this.findList(); //请求该审批id的所有清单
                 break;
             case 'alter': //此处为修改模式处理

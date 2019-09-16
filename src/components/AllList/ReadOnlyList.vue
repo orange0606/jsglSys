@@ -97,7 +97,7 @@ import XEUtils from 'xe-utils';
     type:{  //新清单、累计计量、累计支付的类型
       type: String,
       required: false,
-      default: "update" //"update":新清单，“totalmeterage”:累计计量，totalpay:累计支付          
+      default: "totalmeterage" //"update":新清单，“totalmeterage”:累计计量，totalpay:累计支付          
     },
 
 
@@ -158,7 +158,7 @@ import XEUtils from 'xe-utils';
                 if (!this.joinParent) {  //请求累计计量清单列表
                     this.findList(newVal);
                 }else{
-                    this.list = this.totalmeterage;
+                    this.list = this.totalmeterageList;
                     this.loading = false;
                 };
                 this.text = '累计计量清单';
@@ -167,7 +167,7 @@ import XEUtils from 'xe-utils';
                 if (!this.joinParent) {  //请求累计支付清单列表
                     this.findList(newVal);
                 }else{
-                    this.list = this.totalpay;
+                    this.list = this.totalpayList;
                     this.loading = false;
                 };
                 this.text = '累计支付清单';

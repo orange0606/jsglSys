@@ -1,7 +1,7 @@
 <template>
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
-        <h3>计量清单列表</h3>
+        <h3>支付清单列表</h3>
         <!-- 业务按钮 -->
         <div class="manual-table2-oper">
             <span v-if="edit">
@@ -32,8 +32,8 @@
         <elx-editable-column prop="payHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="计量清单编号" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="计量清单名称" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="num" label="支付清单编号" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="支付清单名称" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -125,7 +125,7 @@ import XEUtils from 'xe-utils';
       edit: false, // 是否开启编辑
       uprow: null, //修改清单传入保存清单组组件的数据
       tenderList: null,  //全部标段
-      EditTitle: '查看计量清单', //清单子组件的标题文字内容
+      EditTitle: '查看支付清单', //清单子组件的标题文字内容
       dialogVisible:false,//显示隐藏
       isClearActiveFlag: true,
       rules: {
@@ -144,12 +144,12 @@ import XEUtils from 'xe-utils';
     payList: function ( newVal,oldVal ) {
         //此处判断父组件传来的展示模式类型
         this.modeType ( this.mode );
-        
     },
     visibleNew: function ( newVal,oldVal ) {
         if (!newVal) {
             if (this.mode === 'show') {
-                this.findList();  //发起请求所有已录入计量清单
+                this.edit = true;
+                this.findList();  //发起请求所有已录入支付清单
             }else{
                 this.$nextTick(() => {
                     this.list = this.payList;
@@ -174,6 +174,7 @@ import XEUtils from 'xe-utils';
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
+                this.edit = true;
                 this.findList(); //请求该审批id的所有清单
                 break;
             case 'alter': //此处为修改模式处理
@@ -196,9 +197,9 @@ import XEUtils from 'xe-utils';
     },
     see (row) { //预览和修改清单
         if (row.id || row.saveTime) {
-            this.EditTitle = '查看计量清单';
+            this.EditTitle = '查看支付清单';
         }else{
-            this.EditTitle = '新建计量清单';
+            this.EditTitle = '新建支付清单';
         }
         this.uprow = row;
         // console.log(this.uprow,' this.uprow')

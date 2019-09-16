@@ -612,6 +612,8 @@ import XEUtils from 'xe-utils';
             if (rest.length ==0 ) return this.$message({ message: '当前无数据不能提交！', type: 'error' });
             this.loading = true;
             //表头解构
+            console.log('rest-------------')
+            console.log(rest)
             this.Form.headRowList = this.$excel.Unpack(rest);
             var url = '';
             this.Form.id ? url = '/head/update' : url = '/head/add'

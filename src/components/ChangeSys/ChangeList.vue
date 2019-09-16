@@ -112,7 +112,7 @@ import XEUtils from 'xe-utils'
      mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     tender:{
       type: Object,
@@ -153,6 +153,7 @@ import XEUtils from 'xe-utils'
     visibleNew: function(newVal,oldVal){
         if (!newVal) {
             if (this.mode === 'show') {
+                this.edit = true;
                 this.findList();  //发起请求所有已录入变更清单
             }else{
                 this.$nextTick(() => {
@@ -174,11 +175,11 @@ import XEUtils from 'xe-utils'
             //此处设置不需要分页
             return this.list = this.changeList;
         }
-        //此处设置需要分页
         switch(type) {
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
+                this.edit = true;
                 this.findList(); //请求该审批id的所有清单
                 break;
             case 'alter': //此处为修改模式处理

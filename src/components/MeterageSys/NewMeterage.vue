@@ -192,6 +192,7 @@ export default {
       startTime:null,
       loading: false,
       dialogVisible: true,
+      totalmeterageCol:'',    //用来存储累计计量的的属性值
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       lastHeader: [], //最后一层表头数据（用来单元格点击编辑判断）
       formula:{}, //存储表头的公式数据
@@ -406,13 +407,51 @@ export default {
               arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
           }
           this.tomeRowList = arr;
-          
+          console.log('response--------------')
+          console.log(response)
+
       }).catch(e => {
           this.$message({
             type: 'info',
             message: '请求相对应的累计计量清单数据发生错误！'+e
           });
       });
+    },
+    OneToPay (id) {
+        this.$post('/totalmeterage/by/meterageheadid',{ id })
+        .then((response) => {
+          var data = response.data.totalmeterage,
+          arr = []; 
+          if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
+              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
+          }else{
+              this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+              return this.tomeRowList = arr;
+          }
+          this.tomeRowList = arr;
+          if (data && data.totalmeterageHead && data.totalmeterageHead.length >0 ) {
+              var headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
+              col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
+              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              lastHeader = this.$excel.BikoFoArr([...col]),
+              header = Object.keys(lastHeader); //用来所需要的所有列(obj)（属性）名
+              for (let index = header.length -1; index >= 0; index--){
+                  var row = lastHeader[header[index]],
+                  str = row.attributeValue,
+                  colName = str.match(patt1)[0];
+                  if (row.attribute && row.attributeValue && row.attributeValue !=="" && row.attribute === "pay-total" ) {
+                      return this.totalmeterageCol = colName;
+                  }
+              }
+          }
+          this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+        }).catch(e => {
+            this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+            this.$message({
+              type: 'info',
+              message: '请求相对应的累计支付清单数据发生错误！'+e
+            });
+        });
     },
     oneUpatde (id) {  //请求选择可导入新清单内容
         this.$post('/update/row/getone',{ id })

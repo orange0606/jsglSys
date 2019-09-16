@@ -274,7 +274,7 @@ let excelmodel = {
             for (let i = hd.length -1; i >= 0; i--) {
                 let row = list[index][hd[i]];
                 delete row.edit; //删除编辑状态
-                row.trNum = index;
+                row.trNum = index+1;
                 if (row.attribute == 'formula' && row.attributeValue && row.attributeValue !='' ) {
                     row.headFormula = this.Analysis(row.attributeValue);
                     // console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)
