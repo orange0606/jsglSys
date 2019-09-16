@@ -81,7 +81,7 @@
          <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
-              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="changeList" :uplist="uprow" :approval="approval" :mode="mode" ></new-change>
+              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="changeList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></new-change>
           </el-dialog>
         </transition>
 
@@ -89,7 +89,6 @@
     </el-collapse-transition>
 
 </template>
-
 <script>
 import NewChange from './NewChange';
 import XEUtils from 'xe-utils'
@@ -113,6 +112,11 @@ import XEUtils from 'xe-utils'
       type: String,
       required: false,
       default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+    },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+      // type:Array,
+      required:false,
+      default:false   
     },
     tender:{
       type: Object,
@@ -154,7 +158,9 @@ import XEUtils from 'xe-utils'
         if (!newVal) {
             if (this.mode === 'show') {
                 this.edit = true;
-                this.findList();  //发起请求所有已录入变更清单
+                 if (!this.joinParent) {  //是否接受父组件的值
+                    this.findList();  //请求该审批id的所有清单
+                }
             }else{
                 this.$nextTick(() => {
                     this.list = this.changeList;
@@ -180,7 +186,9 @@ import XEUtils from 'xe-utils'
                 break;
             case 'show': //此处为显示模式处理
                 this.edit = true;
-                this.findList(); //请求该审批id的所有清单
+                 if (!this.joinParent) {  //是否接受父组件的值
+                    this.findList();  //请求该审批id的所有清单
+                }
                 break;
             case 'alter': //此处为修改模式处理
                 break;

@@ -16,7 +16,7 @@
                 </el-switch>   
             </span>
         </div>
-        <!-- 主体表格 -->
+        <!-- 主体表格 --> 
         <elx-editable
         ref="elxEditable"
         class="manual-table2"
@@ -29,7 +29,7 @@
         <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <elx-editable-column prop="payHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="tPayHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <elx-editable-column prop="num" label="支付清单编号" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
@@ -78,7 +78,7 @@
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
-              <new-pay :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :payList="payList" :mode="mode" ></new-pay>
+              <new-pay :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :payList="payList" :mode="mode" :joinParent="joinParent" ></new-pay>
               <br>
           </el-dialog>
         </transition>
@@ -103,7 +103,12 @@ import XEUtils from 'xe-utils';
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+    },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+      // type:Array,
+      required:false,
+      default:false   
     },
     approval:{
       type: Object,
@@ -149,7 +154,9 @@ import XEUtils from 'xe-utils';
         if (!newVal) {
             if (this.mode === 'show') {
                 this.edit = true;
-                this.findList();  //发起请求所有已录入支付清单
+                 if (!this.joinParent) {  //是否接受父组件的值
+                    this.findList();  //请求该审批id的所有清单
+                }
             }else{
                 this.$nextTick(() => {
                     this.list = this.payList;
@@ -174,8 +181,10 @@ import XEUtils from 'xe-utils';
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
-                this.edit = true;
-                this.findList(); //请求该审批id的所有清单
+               this.edit = true;
+                if (!this.joinParent) {  //是否接受父组件的值
+                    this.findList();  //请求该审批id的所有清单
+                }
                 break;
             case 'alter': //此处为修改模式处理
                 break;
@@ -352,7 +361,19 @@ import XEUtils from 'xe-utils';
                 .then((response) => {
                 //删除成功
                 this.loading = false
-                this.findList();
+//                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+//                 if (!this.joinParent) {  //是否接受父组件的值
+//                     this.findList();  //请求该审批id的所有清单
+//                 }else{
+//                     this.$refs.elxEditable.remove(row);
+//                     this.$refs.elxEditable.remove(removeRecords);
+//                     this.$refs.elxEditable.remove(row);
+//                     let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+//                     this.payList.length = 0;
+//                     for (let index = 0; index < rest.length; index++) {
+//                         this.payList.push(rest[index]); 
+//                     }
+//                 }
                 this.$message({type: 'success', message: '删除所选选项成功!'})
               }).catch(e => {
                   this.$message({
@@ -369,7 +390,7 @@ import XEUtils from 'xe-utils';
             let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
             this.payList.length = 0;
             for (let index = 0; index < rest.length; index++) {
-            this.payList.push(rest[index]); 
+                this.payList.push(rest[index]); 
             }
             this.$message({type: 'success', message: '删除所选选项成功!'})
         }
@@ -446,6 +467,11 @@ import XEUtils from 'xe-utils';
                 this.$post(url,{ payList })
                     .then((response) => {   
                     this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
+                    if (!this.joinParent) {  //是否接受父组件的值
+                        this.findList();  //请求该审批id的所有清单
+                    }else{
+
+                    }
                     this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })
                 }).catch(e => {
                     this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态

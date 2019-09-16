@@ -107,6 +107,8 @@ export default {
     originalList:{  //父组件的清单列表
       type: Array,
     },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+    },
     refresh:{ //显示此组件的变量
     }
   },
@@ -171,7 +173,11 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    return this.OneOriginal(newVal.id);
+                    if (!this.joinParent) {
+                        return this.OneOriginal(newVal.id);
+                    }else{
+                        return this.updates(newVal);
+                    }
                     break;
                 case 'alter': //此处为修改模式处理
                     return this.updates(newVal);
@@ -187,8 +193,6 @@ export default {
     },
     updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
-          console.log('row-----------------------------------')
-          console.log(row)
           try {
               var headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝

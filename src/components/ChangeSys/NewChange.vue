@@ -160,6 +160,8 @@ export default {
     mode:{  //子组件的展示模式
       type: String, 
     },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+    },
     approval:{
       type: Object,
     },
@@ -251,7 +253,11 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    return this.OneChange(newVal.id);
+                    if (!this.joinParent) {
+                        return this.OneChange(newVal.id);
+                    }else{
+                        return this.updates(newVal);
+                    }
                     break;
                 case 'alter': //此处为修改模式处理
                     return this.updates(newVal);

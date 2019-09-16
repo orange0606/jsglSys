@@ -80,7 +80,7 @@
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" ></inven-edit>
+              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></inven-edit>
               <br><br><br>
           </el-dialog>
         </transition>
@@ -105,7 +105,7 @@ import XEUtils from 'xe-utils'
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
@@ -156,12 +156,10 @@ import XEUtils from 'xe-utils'
     visibleNew: function(newVal,oldVal){
         if (!newVal) {
             if (this.mode === 'show') {
-                if (condition) {
-                    this.findList();  //发起请求所有已录入计量清单
-                }
-                this.joinParent
                 this.edit = true;
-
+                 if (!this.joinParent) {  //是否接受父组件的值
+                    this.findList();  //请求该审批id的所有清单
+                }
             }else{
                 this.$nextTick(() => {
                     this.list = this.originalList;
@@ -187,7 +185,9 @@ import XEUtils from 'xe-utils'
                 break;
             case 'show': //此处为显示模式处理
                 this.edit = true;
-                this.findList(); //请求该审批id的所有清单
+                 if (!this.joinParent) {  //是否接受父组件的值
+                    this.findList();  //请求该审批id的所有清单
+                }
                 break;
             case 'alter': //此处为修改模式处理
                 break;
@@ -364,8 +364,8 @@ import XEUtils from 'xe-utils'
               this.$post('/original/delarray',{ originalIdList })
                 .then((response) => {
                 //删除成功
-                this.loading = false
-                this.findList();
+                this.loading = false;
+                this.$refs.elxEditable.remove(row);
                 this.$message({type: 'success', message: '删除所选选项成功!'})
               }).catch(e => {
                   this.$message({
@@ -377,7 +377,6 @@ import XEUtils from 'xe-utils'
             this.isClearActiveFlag = true
           })
         } else {    //新建模式与修改模式，仅进行数组的引用赋值修改
-            //存储该条数据的创建时间，然后原数据进行删除
             this.$refs.elxEditable.remove(row);
             let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
             this.originalList.length = 0;
@@ -408,7 +407,8 @@ import XEUtils from 'xe-utils'
                 this.$post('/original/delarray',{ originalIdList })
                   .then((response) => {
                   //删除成功
-                  this.loading = false
+                  this.loading = false;
+                  this.$refs.elxEditable.remove(removeRecords);
                   this.findList()
                   this.$message({
                     type: 'success',

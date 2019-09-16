@@ -160,6 +160,8 @@ export default {
     mode:{  //子组件的展示模式
       type: String, 
     },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。   
+    },
     approval:{
       type: Object,
     },
@@ -248,7 +250,11 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    return this.OneMeterage(newVal.id);
+                    if (!this.joinParent) {
+                        return this.OneMeterage(newVal.id);
+                    }else{
+                        return this.updates(newVal);
+                    }
                     break;
                 case 'alter': //此处为修改模式处理
                     return this.updates(newVal);
@@ -566,7 +572,7 @@ export default {
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'pay') return false;
+            if (this.lastHeader[colName].attribute !== 'meterage') return false;
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
@@ -578,7 +584,7 @@ export default {
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'pay') return false;
+            if (this.lastHeader[colName].attribute !== 'meterage') return false;
             return {'background':'#FFFACD'}
         }  
         return {};
