@@ -583,12 +583,18 @@ let excelmodel = {
                 for (var a = formuHd.length -1; a >= 0; a--) {
                     sum = formula[formuHd[a]];
                     var RowaTd = row[formuHd[a]].td;
-                    if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
+                    // if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
+                    //     // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
+                    //     index === 0 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
+                    //     evalSum = eval(sum);
+                    //     evalSum ? RowaTd = evalSum: RowaTd;  //字符串转代码计算
+                    // }
+                    // if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
                         // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
                         index === 0 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
                         evalSum = eval(sum);
-                        evalSum ? RowaTd = evalSum: RowaTd;  //字符串转代码计算
-                    }
+                        RowaTd = evalSum;
+                    // }
                 }
             }
         } catch (error) {

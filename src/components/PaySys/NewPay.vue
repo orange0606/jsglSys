@@ -312,6 +312,8 @@ export default {
     OneToPay (id) { //请求关联的一个累计支付清单
         this.$post('/totalpay/by/payheadid',{ id })
         .then((response) => {
+          console.log('/totalpay/by/payheadid')
+          console.log(response)
           var data = response.data.totalpay,
           arr = []; 
           if (data && data.totalpayRowList && data.totalpayRowList.length >0 ) {
@@ -349,10 +351,12 @@ export default {
     OneTometerage (id) {  //请求相对应的累计计量清单数据
         this.$post('/totalmeterage/by/payheadid',{ id })
         .then((response) => {
-          var data = response.data.totalpay,
+          console.log('/totalmeterage/by/payheadid')
+          console.log(response)
+          var data = response.data.totalmeterage,
           arr = []; 
-          if (data && data.totalpayRowList && data.totalpayRowList.length >0 ) {
-              arr = this.$excel.ListAssemble(data.tTotalpayHeadRows);  //组装清单
+          if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
+              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
           }
           this.tometerageRowList = arr;
 
@@ -365,11 +369,7 @@ export default {
             });
         });
     },
-    selectupdate (row, column, cell, event) { //新清单列表数据表格单击事件
-        this.oneUpatde(row.id); //调用请求清单
-        //关闭显示对应清单列表页面
-        this.showList = false;
-    },
+
     handleSizeChange (pageSize) { 
       this.pageVO.pageSize = pageSize;
       this.allRelationUpdate();
@@ -379,12 +379,6 @@ export default {
       this.allRelationUpdate();
     },
 
-    tableRowClassName ({ row, rowIndex }) {
-      if (this.pendingRemoveList.some(item => item === row)) {
-        return 'delete-row';
-      }
-      return ''
-    },
     importfxx() { //表头导入函数
         this.loading = true;
         this.hd.length = this.list.length = 0; //归为初始化状态
@@ -405,35 +399,54 @@ export default {
         for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             var row = sumArr[header[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "totalpay-pay" || row.attribute === "totalmeterage-head-total") ) {
+                console.log('进来了吗')
                 let str = row.attributeValue;
                 let colName = str.match(patt1)[0];
-                for (let a = 0; a < 1 ; a++) {
-                      var Rlist = this.list[a][row.colNum];
-                      if (row.attribute === "totalpay-pay" ) {
-                          // this.list[a][row.colNum] = {...data[a][colName]};
-                          if (this.totalpayCol!='' && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
-                              Rlist = {...data[a][colName]};
-                          }else{  //无数据默认为0
-                              Rlist.td = 0;
-                          }
-                      }else if (row.attribute === "totalmeterage-head-total") { 
-                          //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
-                          if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
-                              Rlist = {...data[a][colName]};
-                              // var tohd = Object.keys(this.tometerageRowList[0]);
-                              var number = null;
-                              for (let index = this.tometerageRowList.length -1; index >= 0; index--) {
-                                  number += (this.tometerageRowList[index][colName].td)*1;
-                              }
-                              Rlist.td = number;
-                          }else{  //无数据默认为0
-                              Rlist.td = 0;
-                          }
+                
+                  var Rlist = this.list[0][row.colNum];
+                  if (row.attribute === "totalpay-pay" ) {
+                      // console.log('进来了totalpay-pay')
+                      // this.list[a][row.colNum] = {...data[a][colName]};
+                      if (this.totalpayCol!='' && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
+                          Rlist = {...this.totalpayRowList[0][this.totalpayCol]};
+                          // console.log('进来了totalpay-pay-----Rlist')
+                          // console.log(this.totalpayRowList,this.totalpayCol)
+                      }else{  //无数据默认为0
+                          Rlist.td = 0;
+                          // console.log('进来了totalpay-pay-----Rlist ----为0')
+                          // console.log(this.totalpayRowList,this.totalpayCol)
                       }
-                      Rlist.colNum = row.colNum;
-                      Rlist.trNum = a;
-                      Rlist.tdColspan = Rlist.tdRowspan = 1;
-                }
+                  }else if (row.attribute === "totalmeterage-head-total") {
+                      try { 
+                            // console.log('进来了totalmeterage-head-total')
+                            //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
+                            if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
+                                // var tohd = Object.keys(this.tometerageRowList[0]);
+                                // console.log('this.tometerageRowList---------')
+                                // console.log(this.tometerageRowList,colName)
+                                var number = null;
+                                for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
+                                    number += (this.tometerageRowList[d][colName].td)*1;
+                                }
+                                Rlist.td = number;
+                                // console.log('进来了totalmeterage-head-total ----Rlist.td = number   ==number',number)
+                                // console.log('进来了totalmeterage-head-total----Rlist')
+                                // console.log(this.tometerageRowList,colName)
+                            }else{  //无数据默认为0
+                                Rlist.td = 0;
+                                // console.log('进来了totalpay-pay-----Rlist ----为0')
+                                // console.log(this.tometerageRowList,colName)
+                            }
+                      } catch (e) {   //如果数据对不上直接为0
+                            console.log('totalmeterage-head-total 处理的时候数据出错'+e)
+                            // this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
+                            Rlist.td = 0;
+                      }
+                  }
+                  Rlist.colNum = row.colNum;
+                  Rlist.trNum = 1;
+                  Rlist.tdColspan = Rlist.tdRowspan = 1;
+               
             }
         }
         try {  //把数据载入表格
@@ -497,9 +510,6 @@ export default {
             header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
             TotalObj = {},
             Total = [];
-            console.log('header--------------------------')
-            console.log(header)
-            console.log(this.PackHeader)
             for (var i = header.length - 1; i >= 0; i--) {
                 var sum = sumArr[0][header[i]];
                 if (sum.attribute && sum.attribute === 'sumFormula') {
@@ -535,33 +545,7 @@ export default {
       })
       this.$refs.elxEditable1.clearActive();
     },
-    getSelectLabel (value, valueProp, labelProp, list) {
-      let item = XEUtils.find(list, item => item[valueProp] === value)
-      return item ? item[labelProp] : null
-    },
-    getCascaderLabel (value, list) {
-      let values = value || [];
-      let labels = [];
-      let matchCascaderData = function (index, list) {
-        let val = values[index];
-        if (list && values.length > index) {
-          list.forEach(item => {
-            if (item.value === val) {
-              labels.push(item.td);
-              matchCascaderData(++index, item.children);
-            }
-          })
-        }
-      }
-      matchCascaderData(0, list)
-      return labels.join(' / ');
-    },
-    getDatePicker (value) {
-      return XEUtils.toDateString(value, 'yyyy/MM/dd');
-    },
-    formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
-    },
+
     rowDrop () {
       this.$nextTick(() => {
         Sortable.create(this.$el.querySelector('.el-table__body-wrapper tbody'), {

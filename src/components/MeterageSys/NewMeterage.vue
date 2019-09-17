@@ -541,7 +541,7 @@ export default {
                                     // console.log('this.tomeRowList[a][colName].td')
                                     // console.log(this.tomeRowList[a][colName].td)
                                 }else{  //当查询不到有对应累计计量清单时，进行默认为0 处理
-                                    console.log('为i00000')
+                                    console.log('为0')
                                     this.list[a][row.colNum].td = 0;
                                 }
                             } catch (e) {   //如果数据对不上直接为0
