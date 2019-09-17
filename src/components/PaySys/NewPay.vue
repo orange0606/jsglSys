@@ -1,5 +1,5 @@
 <template>
-  <div
+<div
     v-loading="loading"
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
@@ -7,13 +7,13 @@
     <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
         <el-form-item label="清单编号">
-          <el-input :disabled="approval.state === 1?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
+          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
         </el-form-item>
         <el-form-item label="清单名称">
-          <el-input :disabled="approval.state === 1?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
+          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
         </el-form-item>
         <el-form-item label="表头">
-          <el-select :disabled="approval.state === 1?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+          <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
               <el-option
                 v-for="item in form.headerList"
                 :key="item.id"
@@ -24,7 +24,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="click-table11-oper">
+    <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
       <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
@@ -328,16 +328,16 @@ export default {
               lastHeader = this.$excel.BikoFoArr([...col]),
               header = Object.keys(lastHeader); //用来所需要的所有列(obj)（属性）名
               for (let index = header.length -1; index >= 0; index--){
-                  var row = lastHeader[header[index]],
-                  str = row.attributeValue,
-                  colName = str.match(patt1)[0];
+                  var row = lastHeader[header[index]];
+                  // str = row.attributeValue,
+                  // colName = str.match(patt1)[0];
                   if (row.attribute && row.attributeValue && row.attributeValue !=="" && row.attribute === "pay-total" ) {
                       this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
-                      return this.totalpayCol = colName;
+                      return this.totalpayCol = row.trNum;
                   }
               }
           }
-          this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+            this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
         }).catch(e => {
             this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
             this.$message({

@@ -54,11 +54,13 @@
         </el-pagination>
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="85%" top="4vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
-
-              <!-- 此处引入预览清单组件 -->
-              <row-list :refresh.sync="visibleNew" :uplist="uprow" :type="type"></row-list>
-              <br><br><br>
+          <el-dialog :title="EditTitle" width="95%" top="4vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
+              <div style="width:100%;height:100%;">
+                  <!-- 此处引入预览清单组件 -->
+                  <row-list :refresh.sync="visibleNew" :uplist="uprow" :type="type"></row-list>
+                  <br><br><br>
+              </div>
+              
           </el-dialog>
         </transition>
     </div>
@@ -97,7 +99,7 @@ import XEUtils from 'xe-utils';
     type:{  //新清单、累计计量、累计支付的类型
       type: String,
       required: false,
-      default: "totalmeterage" //"update":新清单，“totalmeterage”:累计计量，totalpay:累计支付          
+      default: "update" //"update":新清单，“totalmeterage”:累计计量，totalpay:累计支付          
     },
 
 

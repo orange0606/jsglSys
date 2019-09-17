@@ -1,5 +1,5 @@
 <template>
-  <div
+<div
     v-loading="loading"
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
@@ -7,13 +7,13 @@
     <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
         <el-form-item label="清单编号">
-          <el-input :disabled="approval.state === 1?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
+          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
         </el-form-item>
         <el-form-item label="清单名称">
-          <el-input :disabled="approval.state === 1?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
+          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
         </el-form-item>
         <el-form-item label="表头">
-          <el-select :disabled="approval.state === 1?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+          <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
               <el-option
                 v-for="item in form.headerList"
                 :key="item.id"
@@ -24,6 +24,7 @@
         </el-form-item>
       </el-form>
     </div>
+
     <div class="click-table11-oper">
       <el-dialog
       width="85%"
@@ -85,13 +86,16 @@
         <choice-row v-else :inventory.sync="updateList" :innerVisible.sync="innerVisible" ></Choice-row>
 
     </el-dialog>
-      <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
-      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+    <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true">
+        <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
+        <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
+        <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+        <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
+        <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+        <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+        <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+    </div>
+      
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -286,13 +290,11 @@ export default {
             });
               this.loading = false;
           }
-
           this.meterageHead = { //保存表头信息
               id: row.id,
               name:row.name,
               num: row.num
           }
-
           if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
               this.meterageHead.refCol = row.refCol;
               this.meterageHead.refRow = row.refRow;
@@ -358,7 +360,7 @@ export default {
           this.formula = this.$excel.FormulaAnaly([...this.col]);
 
           this.allRelationUpdate( data.id ); //调用请求可导入所有对应的新清单列表
-          this.totalmeterageRow( data.id ); // 调用相对应的累计量清单数据请求函数
+          this.OneToTalmeterage( data.id ); // 调用相对应的累计量清单数据请求函数
       })
     },
     OneMeterage (id) { //计量清单id
@@ -404,26 +406,8 @@ export default {
           });
       });
     },
-    totalmeterageRow (id) {  //请求相对应的累计计量清单数据
-        this.$post('/totalmeterage/by/meterageheadid',{ id })
-        .then((response) => {
-          var data = response.data.totalmeterage,
-          arr = []; 
-          if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
-              arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
-          }
-          this.tomeRowList = arr;
-          console.log('response--------------')
-          console.log(response)
 
-      }).catch(e => {
-          this.$message({
-            type: 'info',
-            message: '请求相对应的累计计量清单数据发生错误！'+e
-          });
-      });
-    },
-    OneToPay (id) {
+    OneToTalmeterage (id) { //请求一个相对应的累计计量清单数据
         this.$post('/totalmeterage/by/meterageheadid',{ id })
         .then((response) => {
           var data = response.data.totalmeterage,
@@ -431,31 +415,39 @@ export default {
           if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
               arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
           }else{
-              this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
               return this.tomeRowList = arr;
           }
+
           this.tomeRowList = arr;
-          if (data && data.totalmeterageHead && data.totalmeterageHead.length >0 ) {
+          // console.log('response--------------')
+          // console.log(response)
+          if (data && data.totalmeterageHead && data.totalmeterageHead.tTotalmeterageHeadRows && data.totalmeterageHead.tTotalmeterageHeadRows.length >0 ) {
+              console.log('进来表头组装了')
               var headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
               col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               lastHeader = this.$excel.BikoFoArr([...col]),
               header = Object.keys(lastHeader); //用来所需要的所有列(obj)（属性）名
               for (let index = header.length -1; index >= 0; index--){
-                  var row = lastHeader[header[index]],
-                  str = row.attributeValue,
-                  colName = str.match(patt1)[0];
-                  if (row.attribute && row.attributeValue && row.attributeValue !=="" && row.attribute === "pay-total" ) {
-                      return this.totalmeterageCol = colName;
+                  // console.log('进来for循环了')
+                  
+                  var row = lastHeader[header[index]];
+                  // console.log('for玄幻的每个属性是什么  '+row.attribute)
+                  if (row.attribute && row.attribute === "meterage-total" ) {
+                      // console.log('组装的累计计量表格')
+                      // console.log('this.tomeRowList')
+                      // console.log(this.tomeRowList)
+                      // console.log('已经找到那个累计计量表头对应的属性了 row.colNum')
+                      // console.log(row.colNum)
+                      return this.totalmeterageCol = row.colNum;
                   }
               }
           }
-          this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
+
         }).catch(e => {
-            this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
             this.$message({
               type: 'info',
-              message: '请求相对应的累计支付清单数据发生错误！'+e
+              message: '请求相对应的累计计量清单数据发生错误！'+e
             });
         });
     },
@@ -537,14 +529,27 @@ export default {
                       if (row.attribute === "update" ) {
                           this.list[a][row.colNum] = {...data[a][colName]};
                       }else if (row.attribute === "totalmeterage-meterage") { 
-                          //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
-                          if (this.tomeRowList && this.tomeRowList.length  && this.list.length === this.tomeRowList.length ) {
-                              this.list[a][row.colNum] = {...this.tomeRowList[a][colName]};
-                              // console.log('this.tomeRowList[a][colName].td')
-                              // console.log(this.tomeRowList[a][colName].td)
-                          }else{  //当查询不到有对应累计计量清单时，进行默认为0 处理
-                              this.list[a][row.colNum].td = 0;
-                          }
+                            try {
+                                 console.log('进来和累计计量对应了嘛')
+                                //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
+                                if (this.totalmeterageCol!=='' && this.tomeRowList && this.tomeRowList.length  && this.list.length === this.tomeRowList.length  ) {
+                                    // console.log('this.list.length,this.tomeRowList.length this.totalmeterageCol')
+                                    // console.log(this.list.length,this.tomeRowList.length,this.totalmeterageCol)
+                                    // console.log(this.list[a][row.colNum],this.tomeRowList[a])
+                                    // this.list[a][row.colNum] = {...this.tomeRowList[a][this.totalmeterageCol]};
+                                    this.list[a][row.colNum].td = this.tomeRowList[a][this.totalmeterageCol].td;
+                                    // console.log('this.tomeRowList[a][colName].td')
+                                    // console.log(this.tomeRowList[a][colName].td)
+                                }else{  //当查询不到有对应累计计量清单时，进行默认为0 处理
+                                    console.log('为i00000')
+                                    this.list[a][row.colNum].td = 0;
+                                }
+                            } catch (e) {   //如果数据对不上直接为0
+                                console.log(e)
+                                // this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
+                                this.list[a][row.colNum].td = 0;
+                            }
+                           
                       }
                       this.list[a][row.colNum].colNum = row.colNum;
                       this.list[a][row.colNum].trNum = a;

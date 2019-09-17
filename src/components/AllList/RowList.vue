@@ -119,7 +119,6 @@ export default {
             this.list = XEUtils.clone(list, true); //深拷贝
             this.PackHeader = XEUtils.clone(header, true); //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
-
             if (this.list.length >0) {
                 this.findList(); //调用滚动渲染数据
                  this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
@@ -152,6 +151,7 @@ export default {
           // let startTime = Date.now()
           this.$refs.elxEditablecom.reload(this.list);
         //  this.$nextTick(() => {
+          this.loading = false;
           this.$message({ message: `渲染 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms`, type: 'success', duration: 6000, showClose: true })
             // })
         }, 200)
@@ -162,23 +162,31 @@ export default {
         sums = [];
         // console.log('data[0]')
         if (this.PackHeader.length >0 && this.list.length >0) {
-            var sumArr = this.PackHeader.slice(-1), //截取合计尾行
-            header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            TotalObj = {},
-            Total = [];
-            for (var i = header.length - 1; i >= 0; i--) {
-                var sum = sumArr[0][header[i]];
-                if (sum.attribute && sum.attribute === 'sumFormula') {
-                    Total.push(sum.colNum);
-                }
+            try {
+                  // console.log('this.PackHeader------------');
+                  // console.log(this.PackHeader);
+                  var sumArr = this.PackHeader.slice(-1), //截取合计尾行
+                  header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+                  TotalObj = {},
+                  Total = [];
+                  for (var i = header.length - 1; i >= 0; i--) {
+                      var sum = sumArr[0][header[i]];
+                      if (sum.attribute && sum.attribute === 'sumFormula') {
+                          Total.push(sum.colNum);
+                      }
+                  }
+                  for (var a = Total.length -1; a >= 0 ; a--) {
+                      var num = 0;
+                      for (let index = this.list.length - 1; index >= 0; index--) {
+                          num += this.list[index][Total[a]].td*1;
+                      }
+                      TotalObj[Total[a]+'.td'] = num;
+                  }
+            } catch (error) {
+                console.log('合计行出错了')
+                console.log(error)
             }
-            for (var a = Total.length -1; a >= 0 ; a--) {
-                var num = 0;
-                for (let index = this.list.length - 1; index >= 0; index--) {
-                    num += this.list[index][Total[a]].td*1;
-                }
-                TotalObj[Total[a]+'.td'] = num;
-            }
+            
         columns.forEach((column, index) => {
         // console.log(column.property);
           if (index === 0) {

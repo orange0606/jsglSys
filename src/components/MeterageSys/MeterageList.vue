@@ -3,7 +3,7 @@
     <div v-loading="loading" element-loading-text="飞速加载中">
         <h3>计量清单列表</h3>
         <!-- 业务按钮 -->
-        <div class="manual-table2-oper">
+        <div class="manual-table2-oper" v-if="joinParent && mode==='show'?false:true">
             <span v-if="edit">
                 <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
@@ -51,7 +51,7 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" :width="edit?'180':'70'" align="center" >
+        <elx-editable-column label="操作" :width="edit?'190':'70'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
@@ -113,7 +113,7 @@ import XEUtils from 'xe-utils';
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:330, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:177, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
@@ -154,11 +154,16 @@ import XEUtils from 'xe-utils';
     visibleNew: function ( newVal,oldVal ) {
         if (!newVal) {
             if (this.mode === 'show') {
-                this.edit = true;
+                this.edit = false;
                  if (!this.joinParent) {  //是否接受父组件的值
                     this.findList();  //请求该审批id的所有清单
+                    this.edit = true;
                 }
             }else{
+                this.edit = true;
+                if (this.mode === 'alter') {
+                    this.edit = false;
+                }
                 this.$nextTick(() => {
                     this.list = this.meterageList;
                 }); // 强制刷新
@@ -173,21 +178,23 @@ import XEUtils from 'xe-utils';
   },
   methods: {
     modeType ( type ) {
-        if (this.meterageList && this.meterageList.length >0) { //判断父组件是否传来数据
+        if (this.joinParent) { //判断父组件是否传来数据
             //此处设置不需要分页
-            return this.list = this.meterageList;
+            this.list = this.meterageList;
         }
-        //此处设置需要分页
+        this.edit = true;
         switch(type) {
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
-                this.edit = true;
-                 if (!this.joinParent) {  //是否接受父组件的值
+                this.edit = false;
+                if (!this.joinParent) {  //是否接受父组件的值
                     this.findList();  //请求该审批id的所有清单
+                    this.edit = true;
                 }
                 break;
             case 'alter': //此处为修改模式处理
+                this.edit = false;
                 break;
         } 
     },

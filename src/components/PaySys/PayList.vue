@@ -3,7 +3,7 @@
     <div v-loading="loading" element-loading-text="飞速加载中">
         <h3>支付清单列表</h3>
         <!-- 业务按钮 -->
-        <div class="manual-table2-oper">
+        <div class="manual-table2-oper" v-if="joinParent && mode==='show'?false:true">
             <span v-if="edit">
                 <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
@@ -153,11 +153,16 @@ import XEUtils from 'xe-utils';
     visibleNew: function ( newVal,oldVal ) {
         if (!newVal) {
             if (this.mode === 'show') {
-                this.edit = true;
+                 this.edit = false;
                  if (!this.joinParent) {  //是否接受父组件的值
                     this.findList();  //请求该审批id的所有清单
+                    this.edit = true;
                 }
             }else{
+                this.edit = true;
+                if (this.mode === 'alter') {
+                    this.edit = false;
+                }
                 this.$nextTick(() => {
                     this.list = this.payList;
                 }); // 强制刷新
@@ -172,21 +177,23 @@ import XEUtils from 'xe-utils';
   },
   methods: {
     modeType ( type ) {
-        if (this.payList && this.payList.length >0) { //判断父组件是否传来数据
+        if (this.joinParent) { //判断父组件是否传来数据
             //此处设置不需要分页
-            return this.list = this.payList;
+            this.list = this.payList;
         }
-        //此处设置需要分页
+        this.edit = true;
         switch(type) {
             case 'new': //此处为新建模式处理
                 break;
             case 'show': //此处为显示模式处理
-               this.edit = true;
+                this.edit = false;
                 if (!this.joinParent) {  //是否接受父组件的值
                     this.findList();  //请求该审批id的所有清单
+                    this.edit = true;
                 }
                 break;
             case 'alter': //此处为修改模式处理
+                this.edit = false;
                 break;
         } 
     },
