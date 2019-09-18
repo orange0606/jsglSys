@@ -254,14 +254,14 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    if (!this.joinParent) {
-                        return this.OneMeterage(newVal.id);
-                    }else{
-                        return this.updates(newVal);
-                    }
+                    return this.OneMeterage(newVal.id);
                     break;
                 case 'alter': //此处为修改模式处理
-                    return this.updates(newVal);
+                    if (newVal.meterageHead && newVal.meterageHead.tMeterageHeadRows && newVal.meterageRowList) {
+                        return this.updates(newVal);
+                    }else if (newVal.id){
+                        return this.OneMeterage(newVal.id);
+                    }
                     break;
             } 
         }else if(newVal && (!newVal.id && !newVal.saveTime)){ //此处为新建
@@ -280,6 +280,8 @@ export default {
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               this.$nextTick(() => {
                     this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+                    //调用表格公式解析 存储
+                    this.formula = this.$excel.FormulaAnaly([...this.col]);
                     //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                     this.lastHeader = this.$excel.BikoFoArr([...this.col]);
                 }); // 强制刷新
@@ -291,14 +293,14 @@ export default {
               this.loading = false;
           }
           this.meterageHead = { //保存表头信息
-              id: row.id,
-              name:row.name,
-              num: row.num
+              id: row.meterageHead.id,
+              name:row.meterageHead.name,
+              num: row.meterageHead.num
           }
           if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
-              this.meterageHead.refCol = row.refCol;
-              this.meterageHead.refRow = row.refRow;
-              this.meterageHead.tMeterageHeadRows = row.tMeterageHeadRows;
+              this.meterageHead.refCol = row.meterageHead.refCol;
+              this.meterageHead.refRow = row.meterageHead.refRow;
+              this.meterageHead.tMeterageHeadRows = row.meterageHead.tMeterageHeadRows;
           }
           try {
               var arr = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
@@ -372,12 +374,19 @@ export default {
             var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+            //调用表格公式解析 存储
+            this.formula = this.$excel.FormulaAnaly([...this.col]);
 
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.meterageHead = { //保存表头信息
-                name:data.name,
-                num: data.num
+                name: data.meterageHead.name,
+                num: data.meterageHead.num
+            }
+            if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
+                this.meterageHead.refCol = data.meterageHead.refCol;
+                this.meterageHead.refRow = data.meterageHead.refRow;
+                this.meterageHead.tMeterageHeadRows = data.meterageHead.tMeterageHeadRows;
             }
             this.loading = false;
             this.list.length = this.hd.length = 0;
@@ -531,11 +540,14 @@ export default {
                       }else if (row.attribute === "totalmeterage-meterage") { 
                             try {
                                  console.log('进来和累计计量对应了嘛')
+                                 console.log('this.list.length,this.tomeRowList this.totalmeterageCol')
+                                console.log(this.list.length,this.tomeRowList,this.totalmeterageCol)
+                                console.log(this.list[a][row.colNum],this.tomeRowList[a])
                                 //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                                 if (this.totalmeterageCol!=='' && this.tomeRowList && this.tomeRowList.length  && this.list.length === this.tomeRowList.length  ) {
-                                    // console.log('this.list.length,this.tomeRowList this.totalmeterageCol')
-                                    // console.log(this.list.length,this.tomeRowList,this.totalmeterageCol)
-                                    // console.log(this.list[a][row.colNum],this.tomeRowList[a])
+                                    console.log('this.list.length,this.tomeRowList this.totalmeterageCol')
+                                    console.log(this.list.length,this.tomeRowList,this.totalmeterageCol)
+                                    console.log(this.list[a][row.colNum],this.tomeRowList[a])
                                     // this.list[a][row.colNum] = {...this.tomeRowList[a][this.totalmeterageCol]};
                                     // console.log('------------------------====================')
                                     // console.log(this.list[a][row.colNum].td,'      BBBBBB     ',this.tomeRowList[a][this.totalmeterageCol].td)

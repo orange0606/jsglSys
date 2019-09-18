@@ -9,7 +9,7 @@
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                 <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
             </span>
-            <span style="position: absolute; right:0;top:10px;">
+            <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
                 <el-switch
                 v-model="edit"
                 active-text="开启操作"> 
@@ -110,7 +110,7 @@ import XEUtils from 'xe-utils'
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default:false  
+      default:false 
     },
     approval:{
       type: Object,
@@ -163,9 +163,6 @@ import XEUtils from 'xe-utils'
                 }
             }else{
                 this.edit = true;
-                if (this.mode === 'alter') {
-                    this.edit = false;
-                }
                 this.$nextTick(() => {
                     this.list = this.originalList;
                 }); // 强制刷新
@@ -196,7 +193,6 @@ import XEUtils from 'xe-utils'
                 }
                 break;
             case 'alter': //此处为修改模式处理
-                this.edit = false;
                 break;
         } 
     },

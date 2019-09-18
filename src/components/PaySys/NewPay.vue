@@ -167,14 +167,14 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    if (!this.joinParent) {
-                        return this.OnePay(newVal.id);
-                    }else{
-                        return this.updates(newVal);
-                    }
+                    return this.OnePay(newVal.id);
                     break;
                 case 'alter': //此处为修改模式处理
-                    return this.updates(newVal);
+                    if (newVal.payHead && newVal.payHead.tPayHeadRows && newVal.payRowList) {
+                        return this.updates(newVal);
+                    }else if (newVal.id){
+                        return this.OnePay(newVal.id);
+                    }
                     break;
             } 
         }else if(newVal && (!newVal.id && !newVal.saveTime)){ //此处为新建
@@ -193,6 +193,8 @@ export default {
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               this.$nextTick(() => {
                     this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+                    //调用表格公式解析 存储
+                    this.formula = this.$excel.FormulaAnaly([...this.col]);
                     //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                     this.lastHeader = this.$excel.BikoFoArr([...this.col]);
                 }); // 强制刷新
@@ -205,15 +207,15 @@ export default {
           }
 
           this.tPayHead= { //保存表头信息
-              id: row.id,
-              name:row.name,
-              num: row.num
+              id: row.payHead.id,
+              name:row.payHead.name,
+              num: row.payHead.num
           }
 
           if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
-              this.tPayHead.refCol = row.refCol;
-              this.tPayHead.refRow = row.refRow;
-              this.tPayHead.tPayHeadRows = row.tPayHeadRows;
+              this.payHead.refCol = row.payHead.refCol;
+              this.payHead.refRow = row.payHead.refRow;
+              this.payHead.tPayHeadRows = row.payHead.tPayHeadRows;
           }
           try {
               var arr = this.$excel.ListAssemble(row.payRowList	); //组装清单表格数据
@@ -250,6 +252,8 @@ export default {
           headsArr = this.$excel.Package(data['tPayHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+          //调用表格公式解析 存储
+          this.formula = this.$excel.FormulaAnaly([...this.col]);
 
           //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
           this.lastHeader = this.$excel.BikoFoArr([...this.col]);
@@ -280,18 +284,26 @@ export default {
         //此处请求一个审批单的一个支付清单
         this.$post('/pay/getonerow',{ id })
             .then((response) => {
+              console.log(response)
             var data = response.data.pay;
             if (!data && !data.payRowList && !data.payHead.tPayHeadRows ) return this.loading = false;
             var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+            //调用表格公式解析 存储
+            this.formula = this.$excel.FormulaAnaly([...this.col]);
 
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.payHead= { //保存表头信息
-                name:data.name,
-                num: data.num,
-                id: data.id,
+                name:data.payHead.name,
+                num: data.payHead.num,
+                id: data.payHead.id,
+            }
+            if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
+              this.payHead.refCol = data.payHead.refCol;
+              this.payHead.refRow = data.payHead.refRow;
+              this.payHead.tPayHeadRows = data.payHead.tPayHeadRows;
             }
             this.loading = false;
             this.list.length = this.hd.length = 0;
@@ -635,12 +647,12 @@ export default {
                   break;
               default:    //此处为新建模式与修改模式
                   console.log('此处为新建模式与修改模式')
-                  var tPayHead= this.payHead;
+                  var payHead= this.payHead;
                  
                   if (this.uplist && (this.uplist.id || this.uplist.saveTime) ) {  //此处是修改清单
                         console.log('此处是修改清单')
-                        if (!tPayHead.id || !tPayHead.tPayHeadRows) {
-                            tPayHead= this.uplist.payHead;
+                        if (!payHead.id || !payHead.tPayHeadRows) {
+                            payHead = this.uplist.payHead;
                         }
                         for (let index = this.payList.length -1; index >=0; index--) {
                             var meindex = this.payList[index];
@@ -650,7 +662,7 @@ export default {
                                 meindex.payRowList	 = payRowList;
                                 meindex.name = this.form.name;
                                 meindex.num = this.form.num;
-                                meindex.tPayHead= payHead;
+                                meindex.payHead = payHead;
                                 meindex.updateTime = new Date();
                                 this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                 return this.saveShow();

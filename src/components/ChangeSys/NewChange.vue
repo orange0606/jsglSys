@@ -254,14 +254,14 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    if (!this.joinParent) {
-                        return this.OneChange(newVal.id);
-                    }else{
-                        return this.updates(newVal);
-                    }
+                    return this.OneChange(newVal.id);
                     break;
                 case 'alter': //此处为修改模式处理
-                    return this.updates(newVal);
+                    if (newVal.changeHead && newVal.changeHead.tChangeHeadRows && newVal.changeRowList) {
+                        return this.updates(newVal);
+                    }else if (newVal.id){
+                        return this.OneChange(newVal.id);
+                    }
                     break;
             } 
             return false;
@@ -285,6 +285,8 @@ export default {
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               this.$nextTick(() => {
                     this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+                    //调用表格公式解析 存储
+                    this.formula = this.$excel.FormulaAnaly([...this.col]);
                     //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                     this.lastHeader = this.$excel.BikoFoArr([...this.col]);
                 }); // 强制刷新
@@ -297,15 +299,15 @@ export default {
           }
 
           this.changeHead = { //保存表头信息
-              id: row.id,
-              name:row.name,
-              num: row.num
+              id: row.changeHead.id,
+              name:row.changeHead.name,
+              num: row.changeHead.num
           }
 
           if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
-              this.changeHead.refCol = row.refCol;
-              this.changeHead.refRow = row.refRow;
-              this.changeHead.tChangeHeadRows = row.tChangeHeadRows;
+              this.changeHead.refCol = row.changeHead.refCol;
+              this.changeHead.refRow = row.changeHead.refRow;
+              this.changeHead.tChangeHeadRows = row.changeHead.tChangeHeadRows;
           }
           try {
               var arr = this.$excel.ListAssemble(row.changeRowList); //组装清单表格数据
@@ -341,8 +343,9 @@ export default {
           var data = response.data.onehead,
           headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-          this.col = new Array();  //新建一个数组存储多级表头嵌套
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+          //调用表格公式解析 存储
+          this.formula = this.$excel.FormulaAnaly([...this.col]);
 
            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
           this.lastHeader = this.$excel.BikoFoArr([...this.col]);
@@ -378,12 +381,18 @@ export default {
             var headsArr = this.$excel.Package(data['changeHead'].tChangeHeadRows,data['changeHead'].refCol,data['changeHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-
+            //调用表格公式解析 存储
+            this.formula = this.$excel.FormulaAnaly([...this.col]);
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.changeHead = { //保存表头信息
-                name:data.name,
-                num: data.num
+                name: data.changeHead.name,
+                num: data.changeHead.num
+            }
+            if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
+                this.changeHead.refCol = data.changeHead.refCol;
+                this.changeHead.refRow = data.changeHead.refRow;
+                this.changeHead.tChangeHeadRows = data.changeHead.tChangeHeadRows;
             }
             this.loading = false;
             this.list.length = this.hd.length = 0;
@@ -653,8 +662,8 @@ export default {
     },
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {
-        if (valid) {
-          let list = this.list;
+        if (valid) { 
+          let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
           list.forEach((item, index) => {
             if (XEUtils.isDate(item.date)) {
               item.date = item.date.getTime();

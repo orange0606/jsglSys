@@ -9,7 +9,7 @@
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                 <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
             </span>
-            <span style="position: absolute; right:0;top:10px;">
+            <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
                 <el-switch
                 v-model="edit"
                 active-text="开启操作"> 
@@ -165,9 +165,6 @@ import XEUtils from 'xe-utils'
                 }
             }else{
                 this.edit = true;
-                if (this.mode === 'alter') {
-                    this.edit = false;
-                }
                 this.$nextTick(() => {
                     this.list = this.changeList;
                 }); // 强制刷新

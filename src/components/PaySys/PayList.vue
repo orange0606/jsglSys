@@ -9,7 +9,7 @@
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                 <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
             </span>
-            <span style="position: absolute; right:0;top:10px;">
+            <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
                 <el-switch
                 v-model="edit"
                 active-text="开启操作"> 
@@ -113,7 +113,7 @@ import XEUtils from 'xe-utils';
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:110, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:301, name:"支付审批单-支付审批单1",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
@@ -160,9 +160,6 @@ import XEUtils from 'xe-utils';
                 }
             }else{
                 this.edit = true;
-                if (this.mode === 'alter') {
-                    this.edit = false;
-                }
                 this.$nextTick(() => {
                     this.list = this.payList;
                 }); // 强制刷新
@@ -193,7 +190,6 @@ import XEUtils from 'xe-utils';
                 }
                 break;
             case 'alter': //此处为修改模式处理
-                this.edit = false;
                 break;
         } 
     },
@@ -367,7 +363,8 @@ import XEUtils from 'xe-utils';
               this.$post('/pay/delarray',{ payIdList })
                 .then((response) => {
                 //删除成功
-                this.loading = false
+                this.loading = false;
+                this.findList();
 //                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
 //                 if (!this.joinParent) {  //是否接受父组件的值
 //                     this.findList();  //请求该审批id的所有清单

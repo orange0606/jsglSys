@@ -29,7 +29,6 @@
     <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
     <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
       <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="impt">导入表格</el-button>
-       <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
@@ -174,14 +173,14 @@ export default {
                     return this.updates(newVal);
                     break;
                 case 'show': //此处为显示模式处理
-                    if (!this.joinParent) {
-                        return this.OneOriginal(newVal.id);
-                    }else{
-                        return this.updates(newVal);
-                    }
+                    return this.OneOriginal(newVal.id);
                     break;
                 case 'alter': //此处为修改模式处理
-                    return this.updates(newVal);
+                    if (newVal.originalHead && newVal.originalHead.tOriginalHeadRows && newVal.originalRowList) {
+                        return this.updates(newVal);
+                    }else if (newVal.id){
+                        return this.OneOriginal(newVal.id);
+                    }
                     break;
             } 
         }else if(newVal && (!newVal.id && !newVal.saveTime)){ //此处为新建
@@ -193,14 +192,19 @@ export default {
         }
     },
     updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
+          console.log('row')
+          console.log(row)
+
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
           try {
               var headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               this.$nextTick(() => {
-                    this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-                    //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
-                    this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+                  this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+                  //调用表格公式解析 存储
+                  this.formula = this.$excel.FormulaAnaly([...this.col]);
+                  //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+                  this.lastHeader = this.$excel.BikoFoArr([...this.col]);
               }); // 强制刷新
           } catch (error) {
               this.$message({
@@ -210,14 +214,14 @@ export default {
               this.loading = false;
           }
           this.originalHead = { //保存表头信息
-              id: row.id,
-              name:row.name,
-              num: row.num
+              id: row.originalHead.id,
+              name:row.originalHead.name,
+              num: row.originalHead.num
           }
           if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
-              this.originalHead.refCol = row.refCol;
-              this.originalHead.refRow = row.refRow;
-              this.originalHead.tOriginalHeadRows = row.tOriginalHeadRows;
+              this.originalHead.refCol = row.originalHead.refCol;
+              this.originalHead.refRow = row.originalHead.refRow;
+              this.originalHead.tOriginalHeadRows = row.originalHead.tOriginalHeadRows;
           }
           try {
               var arr = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
@@ -278,6 +282,7 @@ export default {
         //此处请求一个审批单的一个原清单
         this.$post('/original/row/getone',{ id })
             .then((response) => {
+            console.log(response)
             var data = response.data.original;
             // this.list = response.data.originalList.list;
             if (!data && !data.originalRowList) return this.loading = false;
@@ -285,11 +290,19 @@ export default {
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
 
+            //调用表格公式解析 存储
+            this.formula = this.$excel.FormulaAnaly([...this.col]);
+
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.originalHead = { //保存表头信息
-                name:data.name,
-                num: data.num
+                name:data.originalHead.name,
+                num: data.originalHead.num
+            };
+            if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
+              this.originalHead.refCol = data.originalHead.refCol;
+              this.originalHead.refRow = data.originalHead.refRow;
+              this.originalHead.tOriginalHeadRows = data.originalHead.tOriginalHeadRows;
             }
             this.loading = false;
             this.list.length = this.hd.length = 0;
