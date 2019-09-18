@@ -533,10 +533,12 @@ export default {
                                  console.log('进来和累计计量对应了嘛')
                                 //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                                 if (this.totalmeterageCol!=='' && this.tomeRowList && this.tomeRowList.length  && this.list.length === this.tomeRowList.length  ) {
-                                    // console.log('this.list.length,this.tomeRowList.length this.totalmeterageCol')
-                                    // console.log(this.list.length,this.tomeRowList.length,this.totalmeterageCol)
+                                    // console.log('this.list.length,this.tomeRowList this.totalmeterageCol')
+                                    // console.log(this.list.length,this.tomeRowList,this.totalmeterageCol)
                                     // console.log(this.list[a][row.colNum],this.tomeRowList[a])
                                     // this.list[a][row.colNum] = {...this.tomeRowList[a][this.totalmeterageCol]};
+                                    // console.log('------------------------====================')
+                                    // console.log(this.list[a][row.colNum].td,'      BBBBBB     ',this.tomeRowList[a][this.totalmeterageCol].td)
                                     this.list[a][row.colNum].td = this.tomeRowList[a][this.totalmeterageCol].td;
                                     // console.log('this.tomeRowList[a][colName].td')
                                     // console.log(this.tomeRowList[a][colName].td)
@@ -558,8 +560,8 @@ export default {
             }
         }
         try {  //把数据载入表格
-             this.$excel.Formula(this.list, this.formula);  //调用公式计算
             this.findList(); //调用滚动渲染数据
+            this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             data.length = 0; //内存释放
         } catch (e) {

@@ -53,6 +53,7 @@
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       show-summary
+      :summary-method="getSummaries"
       :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
       style="width: 100%">
       
@@ -354,7 +355,7 @@ export default {
                 this.list = [...data];
                 this.showHeader = true;
                 this.findList(); //调用滚动渲染数据
-                this.$excel.Formula(this.list, this.formula);  //调用公式计算
+                this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
 
                 data.length = 0; //内存释放

@@ -502,8 +502,8 @@ export default {
             }
         }
         try {  //把数据载入表格
-            this.$excel.Formula(this.list, this.formula);  //调用公式计算
             this.findList(); //调用滚动渲染数据
+            this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             data.length = 0; //内存释放
         } catch (e) {

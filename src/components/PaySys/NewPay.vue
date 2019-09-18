@@ -450,8 +450,8 @@ export default {
             }
         }
         try {  //把数据载入表格
-            this.$excel.Formula(this.list, this.formula);  //调用公式计算
-            this.findList(); //调用滚动渲染数据
+                this.findList(); //调用滚动渲染数据
+                this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
         } catch (e) {
             this.loading =false;
@@ -459,6 +459,7 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
+        
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {

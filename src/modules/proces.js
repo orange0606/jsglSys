@@ -572,7 +572,7 @@ let excelmodel = {
     param formula: 存储相应列的eval 的字符串公式  object
     使用引用赋值
     */
-    Formula (list, formula) { //表格载入时进行处理公式计算
+    Formula (that, list, formula) { //表格载入时进行处理公式计算
         var formuHd = Object.keys(formula), //用来所需要的所有有公式的列(obj)（属性）名
         row = null,
         sum = null,
@@ -582,7 +582,7 @@ let excelmodel = {
                 row = list[index];
                 for (var a = formuHd.length -1; a >= 0; a--) {
                     sum = formula[formuHd[a]];
-                    var RowaTd = row[formuHd[a]].td;
+          
                     // if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
                     //     // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
                     //     index === 0 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
@@ -591,15 +591,39 @@ let excelmodel = {
                     // }
                     // if (RowaTd === "" || RowaTd === " " || RowaTd === null) {
                         // sum 格式大概是 parseInt(row["D"].td)*parseInt(row["E"].td)
-                        index === 0 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
+                        index == list.length - 1 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
                         evalSum = eval(sum);
-                        RowaTd = evalSum;
+                        // RowaTd = evalSum;
+                        evalSum ? evalSum : evalSum = 0;  //字符串转代码计算
+                        that.$set(row[formuHd[a]],'td',evalSum.toFixed(2))
+                        // console.log('evalSum,RowaTd---------------')
+                        // console.log(evalSum,RowaTd)
                     // }
                 }
             }
         } catch (error) {
             console.log(error)
             return Message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
+        }
+    },
+    Calculation (F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
+        var patt1 = /[\u4e00-\u9fa5]/g,
+        strArr = col['td'].match(patt1);
+        if (strArr !=null) {  //检测有中文的话，就不进行公式计算
+            return false;
+        }
+        col.td = this.filterStr(col['td']); //去除多余特殊字符串
+        try {
+            for (let index = 0; index < fkeys.length; index++) {
+                // setTimeout(()=>{
+                    let sum = F[fkeys[index]];
+                    let Eval = eval(sum);
+                    Eval || Eval==0 ? row[fkeys[index]].td = Eval.toFixed(2): row[fkeys[index]].td;  //字符串转代码计算
+                // },100)
+            }
+        } catch (error) {
+            console.log(error)
+            return Message({ message: '这边出现了点问题，貌似是公式错误，请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
         }
     },
 
