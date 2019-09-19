@@ -604,15 +604,17 @@ excelmodel = {
     param F: 存储相应列的eval 的字符串公式  object
     使用引用赋值
     */
-    Calculation (F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
-        var patt1 = /[\u4e00-\u9fa5]/g,
-        Eval = null,
-        strArr = col['td'].match(patt1),
-        fkeyslen = fkeys.length;
-        if (strArr !==null) {  //检测有中文的话，就不进行公式计算
-            return false;
+    Calculation (type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
+        if(type !=='original'){
+            col['td'] = Number(col['td']);
+            if (Number.isNaN(col['td'])) {
+                col['td'] = 0;
+            }
+        }else{
+            col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
         }
-        col.td = this.filterStr(col['td']); //去除多余特殊字符串
+        var Eval = null,
+        fkeyslen = fkeys.length;
         try {
             for (let index = 0; index < fkeyslen; index++) {
                 Eval = eval(F[fkeys[index]]);
@@ -625,41 +627,41 @@ excelmodel = {
         F = fkeys = row = col = patt1 = strArr = Eval = null;
     },
     getSummaries (PackHeader, list, param) {  //合计
-
+        console.log('是不是每次都进来了呀'+Math.random()*100)
         var { columns, data } = param,
-        sums = [];
-        // console.log('data[0]')
-        if (PackHeader.length >0 && list.length >0) {
-            var sumArr = PackHeader.slice(-1), //截取合计尾行
-            header = Object.keys(PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            TotalObj = {},
-            Total = [];
-            for (var i = header.length - 1; i >= 0; i--) {
-                var sum = sumArr[0][header[i]];
-                if (sum.attribute && sum.attribute === 'sumFormula') {
-                    Total.push(sum.colNum);
-                }
+        sums = [],
+        sumArr = PackHeader.slice(-1), //截取合计尾行
+        header = Object.keys(PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+        TotalObj = {},
+        Total = [],
+        listlen = list.length;
+        for (var i = header.length - 1; i >= 0; i--) {
+            var sum = sumArr[0][header[i]];
+            if (sum.attribute && sum.attribute === 'sumFormula') {
+                Total.push(sum.colNum);
             }
-            for (var a = Total.length -1; a >= 0 ; a--) {
-                var num = 0;
-                for (let index = list.length - 1; index >= 0; index--) {
-                    num += list[index][Total[a]].td*1;
-                }
-                TotalObj[Total[a]+'.td'] = num;
+        }
+        for (var a = Total.length -1; a >= 0 ; a--) {
+            var num = 0;
+            for (let index = listlen - 1; index >= 0; index--) {
+                // var Tdnum =  Number(list[index][Total[a]].td);
+                // num += Number.isNaN(Tdnum)?0:Tdnum;
+                num += list[index][Total[a]].td*1;
             }
+            TotalObj[Total[a]+'.td'] = num.toFixed(2);
+        }
         columns.forEach((column, index) => {
         // console.log(column.property);
-          if (index === 0) {
-              sums[index] = '汇总';
-              return;
-          }else if(index >2){
-              sums[index] = TotalObj[column.property];
-          }
+            if (index === 0) {
+                sums[index] = '合计';
+                return;
+            }else if(index >2){
+                sums[index] = TotalObj[column.property];
+            }
         })
+        sumArr = header = TotalObj = Total = null;
         return sums;
-        }
-        return sums;
-    },
+        },
 
 };
 let ABC =excelmodel.AZ();

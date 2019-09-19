@@ -55,7 +55,7 @@
       @cell-click ="cell_click"
       show-summary
       :summary-method="getSummaries"
-      :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
+      :edit-config="{render: 'scroll', renderSize: 80}"
       style="width: 100%">
       
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
@@ -76,7 +76,7 @@
         </template>
       </elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" :approval="approval" ></my-column>
+      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" ></my-column>
     </elx-editable>
     <p style="color: red;font-size: 12px;margin:10px 0 5px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
 
@@ -414,7 +414,10 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-        return this.$excel.getSummaries(this.PackHeader, this.list, param);//调用合计尾行。
+        if (!this.$refs.elxEditable1) return [];
+        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        if (this.PackHeader.length ===0 && list.length ===0) return [];
+        return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     insertEvent () {
       // console.log('进来了吗')

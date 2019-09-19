@@ -14,9 +14,10 @@
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
-      :summary-method="getSummaries"
       show-summary
-      :edit-config="{render: 'scroll', renderSize: 150, useDefaultValidTip: true}"
+      :summary-method="getSummaries"
+      
+      :edit-config="{render: 'scroll', renderSize: 150}"
       style="width: 100%">
     
       <elx-editable-column type="index" width="60" align="center" ></elx-editable-column>
@@ -110,22 +111,20 @@ export default {
         if( url === '' ) return false;
         this.$post( url, { id: row.id } )
             .then((response) => {
-            let data = response.data[this.type];
-            // console.log('response');
- 
-            // console.log(response);
-            var list = this.$excel.ListAssemble( data[rowlistkey] ), //组装清单表格数据
+            var data = response.data[this.type],
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
-            this.list = XEUtils.clone(list, true); //深拷贝
             this.PackHeader = XEUtils.clone(header, true); //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
+            this.loading = false;
+            var list = this.$excel.ListAssemble( data[rowlistkey] ); //组装清单表格数据
+            this.list = XEUtils.clone(list, true); //深拷贝
             if (this.list.length >0) {
                 this.findList(); //调用滚动渲染数据
-                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             }
             
-            list.length = header.length = 0;  //初始化
-            this.loading = false;
+            list = header = null;  //初始化
+            
         }).catch(e => {
             this.loading = false;
             console.log(e)
@@ -158,57 +157,14 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-        var { columns, data } = param,
-        sums = [];
-        // console.log('data[0]')
-        if (this.PackHeader.length >0 && this.list.length >0) {
-            try {
-                  // console.log('this.PackHeader------------');
-                  // console.log(this.PackHeader);
-                  var sumArr = this.PackHeader.slice(-1), //截取合计尾行
-                  header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-                  TotalObj = {},
-                  Total = [];
-                  for (var i = header.length - 1; i >= 0; i--) {
-                      var sum = sumArr[0][header[i]];
-                      if (sum.attribute && sum.attribute === 'sumFormula') {
-                          Total.push(sum.colNum);
-                      }
-                  }
-                  for (var a = Total.length -1; a >= 0 ; a--) {
-                      var num = 0;
-                      for (let index = this.list.length - 1; index >= 0; index--) {
-                          num += this.list[index][Total[a]].td*1;
-                      }
-                      TotalObj[Total[a]+'.td'] = num;
-                  }
-            } catch (error) {
-                console.log('合计行出错了')
-                console.log(error)
-            }
-            
-        columns.forEach((column, index) => {
-        // console.log(column.property);
-          if (index === 0) {
-              sums[index] = '汇总';
-              return;
-          }else if(index >2){
-              sums[index] = TotalObj[column.property];
-          }
-        })
-        return sums;
-        }
-        return sums;
-    },
-   
-    getDatePicker (value) {
-      return XEUtils.toDateString(value, 'yyyy/MM/dd');
+        if (!this.$refs.elxEditablecom) return [];
+        let list = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据;
+        if (this.PackHeader.length ===0 && list.length ===0) return [];
+        return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     formatterDate (row, column, cellValue, index) {
       return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
     },
-
-
     exportCsvEvent () {
       this.$refs.elxEditablecom.exportCsv();
     },
