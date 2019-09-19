@@ -627,39 +627,7 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-        var { columns, data } = param,
-        sums = [];
-        // console.log('data[0]')
-        if (this.PackHeader.length >0 && this.list.length >0) {
-            var sumArr = this.PackHeader.slice(-1), //截取合计尾行
-            header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            TotalObj = {},
-            Total = [];
-            for (var i = header.length - 1; i >= 0; i--) {
-                var sum = sumArr[0][header[i]];
-                if (sum.attribute && sum.attribute === 'sumFormula') {
-                    Total.push(sum.colNum);
-                }
-            }
-            for (var a = Total.length -1; a >= 0 ; a--) {
-                var num = 0;
-                for (let index = this.list.length - 1; index >= 0; index--) {
-                    num += this.list[index][Total[a]].td*1;
-                }
-                TotalObj[Total[a]+'.td'] = num;
-            }
-        columns.forEach((column, index) => {
-        // console.log(column.property);
-          if (index === 0) {
-              sums[index] = '汇总';
-              return;
-          }else if(index >2){
-              sums[index] = TotalObj[column.property];
-          }
-        })
-        return sums;
-        }
-        return sums;
+        return this.$excel.getSummaries(this.PackHeader, this.list, param);//调用合计尾行。
     },
     insertEvent () {
       // console.log('进来了吗')
@@ -669,30 +637,6 @@ export default {
         this.$refs.elxEditable1.setActiveCell(row);
       })
       this.$refs.elxEditable1.clearActive();
-    },
-    getSelectLabel (value, valueProp, labelProp, list) {
-      let item = XEUtils.find(list, item => item[valueProp] === value)
-      return item ? item[labelProp] : null
-    },
-    getCascaderLabel (value, list) {
-      let values = value || [];
-      let labels = [];
-      let matchCascaderData = function (index, list) {
-        let val = values[index];
-        if (list && values.length > index) {
-          list.forEach(item => {
-            if (item.value === val) {
-              labels.push(item.td);
-              matchCascaderData(++index, item.children);
-            }
-          })
-        }
-      }
-      matchCascaderData(0, list)
-      return labels.join(' / ');
-    },
-    getDatePicker (value) {
-      return XEUtils.toDateString(value, 'yyyy/MM/dd');
     },
     formatterDate (row, column, cellValue, index) {
       return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');

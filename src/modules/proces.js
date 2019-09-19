@@ -1,7 +1,7 @@
 import { MessageBox, Message } from 'element-ui'
-let patt1=/[A-Z+]*/g;
-let patt2=/\d+/g;
-let excelmodel = {
+let patt1=/[A-Z+]*/g,
+patt2=/\d+/g,
+excelmodel = {
 
     //表格读取处理函数============
     Imports(callback){
@@ -301,8 +301,6 @@ let excelmodel = {
                 // console.log(arr[j]+String.fromCharCode((65 + c)))
             }  
         }
-        // console.log(arr)
-
         return arr;
     },
     Create(ref,callback){   //根据范围生成空数据
@@ -486,8 +484,8 @@ let excelmodel = {
         //判断每行最少有几列是多余的,然后统一删除最少列的数量
         let Cnum = 0;
         for (let index = data.length-1; index >= 0; index--) {
-            let num = 0;
-            let hdobj = Object.keys(data[index]);
+            var num = 0,
+            hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
                 if (data[index][hdobj[r]].td === null  && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
@@ -577,25 +575,29 @@ let excelmodel = {
         var formuHd = Object.keys(formula), //用来所需要的所有有公式的列(obj)（属性）名
         row = null,
         sum = null,
-        evalSum = null;
+        evalSum = null,
+        fhdlen = formuHd.length;
         try {
             for (var index = list.length - 1; index >= 0; index--) {  
                 row = list[index];
-                for (var a = formuHd.length -1; a >= 0; a--) {
+                for (var a = fhdlen -1; a >= 0; a--) {
+                    var rowTd = row[formuHd[a]].td;
+                    if (rowTd !==null && rowTd !== '') break;  //不为空，马上跳出这个循环不进行计算
                     sum = formula[formuHd[a]];
-                    index == list.length - 1 ?Message({ message: `系统正在为您计算`, type: 'success', duration: 3000, showClose: true }): index;
                     evalSum = eval(sum);
                     evalSum ? evalSum : evalSum = 0;  //字符串转代码计算
                     that.$set(row[formuHd[a]],'td',evalSum.toFixed(2))
                 }
+                index === 0 ?Message({ message: `系统已为你计算完成`, type: 'success', duration: 3000, showClose: true }): index;
             }
         } catch (error) {
             console.log(error)
             return Message({ message: '这边出现了点问题，貌似是公式错误，建议请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
-        }
+        };
+        fhdlen = formula = that = formuHd = evalSum = sum = row = null;
     },
     /*
-    对数据进行公式计算(导入表格（与清单）时使用)
+    双击单元格修改数据进行公式计算(编辑表格（与清单）时使用)
     param fkeys: 参数F （object）的所有属性
     param row: 清单数据行   object
     param col: 清单数据（该单元格内容）   object
@@ -604,24 +606,62 @@ let excelmodel = {
     */
     Calculation (F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
         var patt1 = /[\u4e00-\u9fa5]/g,
-        strArr = col['td'].match(patt1);
-        if (strArr !=null) {  //检测有中文的话，就不进行公式计算
+        Eval = null,
+        strArr = col['td'].match(patt1),
+        fkeyslen = fkeys.length;
+        if (strArr !==null) {  //检测有中文的话，就不进行公式计算
             return false;
         }
         col.td = this.filterStr(col['td']); //去除多余特殊字符串
-        var fkeyslen = fkeys.length;
         try {
             for (let index = 0; index < fkeyslen; index++) {
-                var Eval = eval(F[fkeys[index]]);
+                Eval = eval(F[fkeys[index]]);
                 Eval ? row[fkeys[index]].td = Eval.toFixed(2): row[fkeys[index]].td = 0;  //字符串转代码计算
             }
         } catch (error) {
             console.log(error);
             return Message({ message: '这边出现了点问题，貌似是公式错误，请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
         }
+        F = fkeys = row = col = patt1 = strArr = Eval = null;
+    },
+    getSummaries (PackHeader, list, param) {  //合计
+
+        var { columns, data } = param,
+        sums = [];
+        // console.log('data[0]')
+        if (PackHeader.length >0 && list.length >0) {
+            var sumArr = PackHeader.slice(-1), //截取合计尾行
+            header = Object.keys(PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+            TotalObj = {},
+            Total = [];
+            for (var i = header.length - 1; i >= 0; i--) {
+                var sum = sumArr[0][header[i]];
+                if (sum.attribute && sum.attribute === 'sumFormula') {
+                    Total.push(sum.colNum);
+                }
+            }
+            for (var a = Total.length -1; a >= 0 ; a--) {
+                var num = 0;
+                for (let index = list.length - 1; index >= 0; index--) {
+                    num += list[index][Total[a]].td*1;
+                }
+                TotalObj[Total[a]+'.td'] = num;
+            }
+        columns.forEach((column, index) => {
+        // console.log(column.property);
+          if (index === 0) {
+              sums[index] = '汇总';
+              return;
+          }else if(index >2){
+              sums[index] = TotalObj[column.property];
+          }
+        })
+        return sums;
+        }
+        return sums;
     },
 
-}
+};
 let ABC =excelmodel.AZ();
 
 // export { AZ,Table }

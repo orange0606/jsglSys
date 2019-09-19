@@ -39,6 +39,8 @@
           <!-- show-summary
       :summary-method="getSummaries" -->
       <!-- :summary-method="getSummaries" -->
+            <!-- show-summary
+      :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
@@ -332,6 +334,7 @@ export default {
         this.loading = true;
         this.startTime = Date.now();
         this.$excel.Imports(data=>{ //数据导入组装函数
+            console.log('导入完成--------')
             this.hd.length = this.list.length = 0; //归为初始化状态
             try { //先判断表头是否一致
                 // console.log(data);
@@ -356,10 +359,10 @@ export default {
                       return hdsome;
                 }); 
                 if (ff) {
-                    arr.length = hd.length = dataSplice.length = 0; //释放内存
                     this.loading = false;
                     return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
                 }
+                arr = hd = dataSplice = null; //释放内存
             } catch (error) {
                this.loading = false;
                return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
@@ -367,13 +370,13 @@ export default {
             try {  //把数据载入表格
                 this.list = [...data];
                 this.showHeader = true;
-                this.findList(); //调用滚动渲染数据
                 this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
+                this.findList(); //调用滚动渲染数据
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
 
-                data.length = 0; //内存释放
+                data = null; //内存释放
             } catch (e) {
-                data.length = this.list.length = 0;
+                data = this.list = null;
                 this.loading =false;
                 // console.log(e);
                 this.$message({ message: `遇到问题了呀,表格导入失败,请检查表格。${e}`, type: 'error', duration: 6000, showClose: true })
@@ -411,51 +414,8 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-        var { columns, data } = param,
-        sums = [];
-        // console.log('data[0]')
-        if (this.PackHeader.length >0 && this.list.length >0) {
-            var sumArr = this.PackHeader.slice(-1), //截取合计尾行
-            header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            TotalObj = {},
-            Total = [];
-            for (var i = header.length - 1; i >= 0; i--) {
-                var sum = sumArr[0][header[i]];
-                if (sum.attribute && sum.attribute === 'sumFormula') {
-                    Total.push(sum.colNum);
-                }
-            }
-            for (var a = Total.length -1; a >= 0 ; a--) {
-                var num = 0;
-                for (let index = this.list.length - 1; index >= 0; index--) {
-                    num += this.list[index][Total[a]].td*1;
-                }
-                TotalObj[Total[a]+'.td'] = num;
-            }
-        columns.forEach((column, index) => {
-        // console.log(column.property);
-          if (index === 0) {
-              sums[index] = '汇总';
-              return;
-          }else if(index >2){
-              sums[index] = TotalObj[column.property];
-          }
-        })
-        return sums;
-        }
-        return sums;
+        return this.$excel.getSummaries(this.PackHeader, this.list, param);//调用合计尾行。
     },
-    filterStr (str) {  //去除空白以及特殊字符串
-        if (str==null)return '';
-        str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘；：”“'。，、？_]"),
-        specialStr = "";  
-        for(var i=0;i<str.length;i++){  
-            specialStr += str.substr(i, 1).replace(pattern, '');   
-        }  
-        return specialStr;  
-    },
-
     insertEvent () {
       // console.log('进来了吗')
       this.$refs.elxEditable1.insert({
@@ -464,33 +424,6 @@ export default {
         this.$refs.elxEditable1.setActiveCell(row);
       })
       this.$refs.elxEditable1.clearActive();
-    },
-    getSelectLabel (value, valueProp, labelProp, list) {
-      let item = XEUtils.find(list, item => item[valueProp] === value)
-      return item ? item[labelProp] : null
-    },
-    getCascaderLabel (value, list) {
-      let values = value || [],
-      labels = [],
-      matchCascaderData = function (index, list) {
-        let val = values[index];
-        if (list && values.length > index) {
-          list.forEach(item => {
-            if (item.value === val) {
-              labels.push(item.td);
-              matchCascaderData(++index, item.children);
-            }
-          })
-        }
-      }
-      matchCascaderData(0, list)
-      return labels.join(' / ');
-    },
-    getDatePicker (value) {
-      return XEUtils.toDateString(value, 'yyyy/MM/dd');
-    },
-    formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
     },
     rowDrop () {
       this.$nextTick(() => {

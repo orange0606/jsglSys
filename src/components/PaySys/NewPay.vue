@@ -47,6 +47,8 @@
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       :cell-style ="cell_select"
+      show-summary
+      :summary-method="getSummaries"
       size="small"
       :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 100, useDefaultValidTip: true}"
       style="width: 100%">
@@ -130,6 +132,7 @@ export default {
       totalpayRowList: [], //累计支付清单内容已组装好的数据
       totalpayCol:'', //累计支付表头内关联支付表头的属性值
       pendingRemoveList:[],
+      tTotalmeterageId:null, //累计计量清单id
     }
   },
 
@@ -206,17 +209,17 @@ export default {
               this.loading = false;
           }
 
-          this.tPayHead= { //保存表头信息
+          this.payHead= { //保存表头信息
               id: row.payHead.id,
               name:row.payHead.name,
               num: row.payHead.num
           }
-
           if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
               this.payHead.refCol = row.payHead.refCol;
               this.payHead.refRow = row.payHead.refRow;
               this.payHead.tPayHeadRows = row.payHead.tPayHeadRows;
           }
+          this.tTotalmeterageId = row.tTotalmeterageId; //累计计量清单id
           try {
               var arr = this.$excel.ListAssemble(row.payRowList	); //组装清单表格数据
               this.list = [...arr];
@@ -305,6 +308,7 @@ export default {
               this.payHead.refRow = data.payHead.refRow;
               this.payHead.tPayHeadRows = data.payHead.tPayHeadRows;
             }
+            this.tTotalmeterageId = data.tTotalmeterageId; //累计计量清单id
             this.loading = false;
             this.list.length = this.hd.length = 0;
 
@@ -367,6 +371,7 @@ export default {
           console.log(response)
           var data = response.data.totalmeterage,
           arr = []; 
+          this.tTotalmeterageId = data.id; //累计计量清单id
           if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
               arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
           }
@@ -515,39 +520,7 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-        var { columns, data } = param,
-        sums = [];
-        // console.log('data[0]')
-        if (this.PackHeader.length >1 && this.list.length >0) {
-            var sumArr = this.PackHeader.slice(-1), //截取合计尾行
-            header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-            TotalObj = {},
-            Total = [];
-            for (var i = header.length - 1; i >= 0; i--) {
-                var sum = sumArr[0][header[i]];
-                if (sum.attribute && sum.attribute === 'sumFormula') {
-                    Total.push(sum.colNum);
-                }
-            }
-            for (var a = Total.length -1; a >= 0 ; a--) {
-                var num = 0;
-                for (let index = this.list.length - 1; index >= 0; index--) {
-                    num += this.list[index][Total[a]].td*1;
-                }
-                TotalObj[Total[a]+'.td'] = num;
-            }
-        columns.forEach((column, index) => {
-        // console.log(column.property);
-          if (index === 0) {
-              sums[index] = '汇总';
-              return;
-          }else if(index >2){
-              sums[index] = TotalObj[column.property];
-          }
-        })
-        return sums;
-        }
-        return sums;
+        return this.$excel.getSummaries(this.PackHeader, this.list, param);//调用合计尾行。
     },
     insertEvent () {
       // console.log('进来了吗')
@@ -618,6 +591,7 @@ export default {
                       name: this.form.name,                     //计量清单名称
                       num: this.form.num,                    //计量清单编号
                       tenderId: this.tender.id,                     //标段id
+                      tTotalmeterageId : this.tTotalmeterageId, //累计计量清单id
                       type: 'pay',                 //计量清单类别为”pay”
                       payRowList                 //计量清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
                   },
@@ -655,15 +629,16 @@ export default {
                             payHead = this.uplist.payHead;
                         }
                         for (let index = this.payList.length -1; index >=0; index--) {
-                            var meindex = this.payList[index];
-                            if((meindex.saveTime === this.uplist.saveTime) || (meindex.id === this.uplist.id)){
-                                meindex.tPayHeadId = this.form.headerId;
-                                meindex.payRowList	 = [];
-                                meindex.payRowList	 = payRowList;
-                                meindex.name = this.form.name;
-                                meindex.num = this.form.num;
-                                meindex.payHead = payHead;
-                                meindex.updateTime = new Date();
+                            var PayIndex = this.payList[index];
+                            if((PayIndex.saveTime === this.uplist.saveTime) || (PayIndex.id === this.uplist.id)){
+                                PayIndex.tPayHeadId = this.form.headerId;
+                                PayIndex.tTotalmeterageId = this.tTotalmeterageId;
+                                PayIndex.payRowList	 = [];
+                                PayIndex.payRowList	 = payRowList;
+                                PayIndex.name = this.form.name;
+                                PayIndex.num = this.form.num;
+                                PayIndex.payHead = payHead;
+                                PayIndex.updateTime = new Date();
                                 this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                 return this.saveShow();
                             }
@@ -677,6 +652,7 @@ export default {
                             name:this.form.name,
                             num:this.form.num,
                             tenderId:this.tender.id,
+                            tTotalmeterageId: this.tTotalmeterageId,
                             type:'pay',
                             payRowList,
                             payHead,//表头数据
