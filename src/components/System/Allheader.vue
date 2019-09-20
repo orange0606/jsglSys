@@ -106,6 +106,14 @@ import headeratt from './NewHeader'
   export default {
   name: 'headers',
   components: {headeratt},
+  props: {
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+      // type:Array,
+      required:false,
+      default:false   
+    },
+
+  },
   data () {
     return {
       loading: false,
@@ -170,6 +178,9 @@ import headeratt from './NewHeader'
       }
       this.editShow = true; //显示表头组件
       this.textShow = '新建表头';
+      if ( this.joinParent ) {
+          this.$emit("newHead");
+      }
     },
     queryHeader (rows) {  //查询用户当前输入的表头名之类的是否已存在数据库
         let url = '/head/'+rows.type;

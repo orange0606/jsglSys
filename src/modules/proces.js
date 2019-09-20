@@ -309,6 +309,7 @@ excelmodel = {
         if (!ref)return;
         var sub = ref.indexOf(':'),
         //先获取开始的列坐标
+        
         start_c = ABC.indexOf(ref.substr(0,sub).match(patt1)[0])+1,
         //获取开始的行坐标
         start_r = ref.substr(0,sub).match(patt2)[0],
@@ -585,8 +586,11 @@ excelmodel = {
                     if (rowTd !==null && rowTd !== '') break;  //不为空，马上跳出这个循环不进行计算
                     sum = formula[formuHd[a]];
                     evalSum = eval(sum);
-                    evalSum ? evalSum : evalSum = 0;  //字符串转代码计算
-                    that.$set(row[formuHd[a]],'td',evalSum.toFixed(2))
+                    if (evalSum) {
+                        that.$set(row[formuHd[a]],'td',this.Count(evalSum));  //this.Count小数点精度计算 
+                    }else{
+                        that.$set(row[formuHd[a]],'td',0);
+                    }
                 }
                 index === 0 ?Message({ message: `系统已为你计算完成`, type: 'success', duration: 3000, showClose: true }): index;
             }
@@ -610,6 +614,7 @@ excelmodel = {
             if (Number.isNaN(col['td'])) {
                 col['td'] = 0;
             }
+            col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
         }else{
             col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
         }
@@ -618,7 +623,11 @@ excelmodel = {
         try {
             for (let index = 0; index < fkeyslen; index++) {
                 Eval = eval(F[fkeys[index]]);
-                Eval ? row[fkeys[index]].td = Eval.toFixed(2): row[fkeys[index]].td = 0;  //字符串转代码计算
+                if (Eval) {
+                    row[fkeys[index]].td = this.Count(Eval);   //调用精度计算小数点处理
+                }else{
+                    row[fkeys[index]].td = 0;
+                }
             }
         } catch (error) {
             console.log(error);
@@ -627,7 +636,7 @@ excelmodel = {
         F = fkeys = row = col = patt1 = strArr = Eval = null;
     },
     getSummaries (PackHeader, list, param) {  //合计
-        console.log('是不是每次都进来了呀'+Math.random()*100)
+        // console.log('是不是每次都进来了呀'+Math.random()*100)
         var { columns, data } = param,
         sums = [],
         sumArr = PackHeader.slice(-1), //截取合计尾行
@@ -648,7 +657,7 @@ excelmodel = {
                 // num += Number.isNaN(Tdnum)?0:Tdnum;
                 num += list[index][Total[a]].td*1;
             }
-            TotalObj[Total[a]+'.td'] = num.toFixed(2);
+            TotalObj[Total[a]+'.td'] = this.Count(num); //调用小数点精度计算
         }
         columns.forEach((column, index) => {
         // console.log(column.property);
@@ -661,7 +670,15 @@ excelmodel = {
         })
         sumArr = header = TotalObj = Total = null;
         return sums;
-        },
+    },
+    Count (result) {
+        if(result.toString().match(/\.\d\d\d99/) && result.toString().match(/\.\d\d\d99/).length>0){
+            result=Math.round(result*1000)/1000;    
+        }
+        result=Math.round(result*100)/100;
+        result=result.toString().replace(/\.0+$/g,'');
+        return result;
+    }
 
 };
 let ABC =excelmodel.AZ();

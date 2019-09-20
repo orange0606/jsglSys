@@ -622,7 +622,7 @@ export default {
         this.$refs.elxEditable1.reload([])
         this.$refs.elxEditable1.reload(this.list);
         this.loading = false;
-         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+        this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
 
       })
     },
@@ -691,8 +691,6 @@ export default {
               }
           }
           //此处做个判断，判断是新建还是修改。
-         
-
           switch(this.mode) {
               case 'show': //此处为展示模式处理
                   console.log('进入了show模式')
@@ -775,8 +773,7 @@ export default {
                         this.meterageList.push(obj);
                         this.$message({ message: `已为你保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                         return this.saveShow();
-                  }
-                
+                  } 
           } 
 
         }

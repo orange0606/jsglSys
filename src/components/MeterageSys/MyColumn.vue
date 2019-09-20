@@ -35,7 +35,6 @@ export default {
     return {
       F: this.Formula,
       fkeys: Object.keys(this.Formula),
-      type: this.type
     }
   },
   created (){

@@ -47,8 +47,6 @@
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       :cell-style ="cell_select"
-      show-summary
-      :summary-method="getSummaries"
       size="small"
       :edit-config="{render: 'scroll', renderSize: 80}"
       style="width: 100%">
@@ -164,7 +162,7 @@ export default {
             this.startTime = Date.now(); 
             this.form.name = newVal.name;
             this.form.num = newVal.num;
-            this.form.headerId = newVal.tPayHead.id;
+            this.form.headerId = newVal.payHead.id;
             switch(this.mode) {
                 case 'new': //此处为新建模式处理
                     return this.updates(newVal);
@@ -192,7 +190,7 @@ export default {
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
 
           try {
-              var headsArr = this.$excel.Package(row.tPayHead.tPayHeadRows,row.tPayHead.refCol,row.tPayHead.refRow);
+              var headsArr = this.$excel.Package(row.payHead.tPayHeadRows,row.payHead.refCol,row.payHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               this.$nextTick(() => {
                     this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
@@ -202,6 +200,7 @@ export default {
                     this.lastHeader = this.$excel.BikoFoArr([...this.col]);
                 }); // 强制刷新
           } catch (error) {
+              console.log(error)
               this.$message({
                 type: 'info',
                 message: '发生错误！ 当前为子组件 '+this.mode+' 模式  应该是表头内容出错'+error
@@ -465,8 +464,8 @@ export default {
             }
         }
         try {  //把数据载入表格
-                this.findList(); //调用滚动渲染数据
-                this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
+            this.findList(); //调用滚动渲染数据
+            this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
         } catch (e) {
             this.loading =false;
@@ -513,7 +512,7 @@ export default {
         this.$refs.elxEditable1.reload([])
         this.$refs.elxEditable1.reload(this.list);
         this.loading = false;
-         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+        this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
 
       })
     },

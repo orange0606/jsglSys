@@ -5,7 +5,7 @@
     element-loading-spinner="el-icon-loading"
   >
     <div class="click-table11-oper">
-      <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
+      <el-form :inline="true" :model="form" size="mini">
         <el-form-item label="清单编号">
           <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
         </el-form-item>
@@ -24,7 +24,6 @@
         </el-form-item>
       </el-form>
     </div>
-
 
     <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
     <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
@@ -47,7 +46,7 @@
       ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
-      height="400"
+      height="500"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
@@ -59,17 +58,6 @@
       style="width: 100%">
       
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-      <elx-editable-column width="40" align="center" >
-        <template v-slot:header="scope">
-          <el-tooltip class="item" placement="top">
-            <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
-        </template>
-        <template>
-          <i class="el-icon-rank drag-btn"></i>
-        </template>
-      </elx-editable-column>
       <elx-editable-column type="index" width="60" align="center" >
         <template v-slot:header>
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
@@ -86,8 +74,6 @@
 <script>
 import MyColumn from './MyColumn';
 import XEUtils from 'xe-utils';
-import Sortable from 'sortablejs';
-
 export default {
   name: 'InvenEdit',
   components: {
@@ -152,13 +138,10 @@ export default {
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
-    this.rowDrop();//调用表格行拖拽函数
   },
-  mounted () {
-    this.rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
-  },
+
   beforeDestroy () {
-    this.rest.length = this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
+    this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
     this.$refs.input = null;
   },
   methods: {
@@ -321,12 +304,6 @@ export default {
             });
         })
     },
-    consoles () {
-        let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
-        console.log('检验一下数据对不对 rest list')
-        console.log(rest);
-        console.log(this.list);
-    },
     impt(){ //button 按钮调用input文件选择事件
         this.$refs.input.click();
     },
@@ -370,8 +347,8 @@ export default {
             try {  //把数据载入表格
                 this.list = [...data];
                 this.showHeader = true;
-                this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
                 this.findList(); //调用滚动渲染数据
+                // this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
                 this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
 
                 data = null; //内存释放
@@ -396,9 +373,9 @@ export default {
         }  
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >2) {  //带选择框的情况
-            if (row[this.hd[columnIndex-3]]) {
-                return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
+        if (columnIndex >1) {  //带选择框的情况
+            if (row[this.hd[columnIndex-2]]) {
+                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
             }
         }
         return [1, 1]
@@ -409,7 +386,7 @@ export default {
         this.$refs.elxEditable1.reload([])
         this.$refs.elxEditable1.reload(this.list);
         this.loading = false;
-         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+        this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
 
       })
     },
@@ -427,18 +404,6 @@ export default {
         this.$refs.elxEditable1.setActiveCell(row);
       })
       this.$refs.elxEditable1.clearActive();
-    },
-    rowDrop () {
-      this.$nextTick(() => {
-        Sortable.create(this.$el.querySelector('.el-table__body-wrapper tbody'), {
-          handle: '.drag-btn',
-          onEnd: ({ newIndex, oldIndex }) => {
-            let currRow = this.list.splice(oldIndex, 1)[0];
-            this.list.splice(newIndex, 0, currRow);
-          }
-        })
-      })
-
     },
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {
@@ -589,7 +554,9 @@ export default {
 
 <style scope>
 .click-table11-oper {
+  height: 30px;
   margin-bottom: 5px;
+  /* border: 1px solid pink; */
   text-align: left;
   position: relative;
 }

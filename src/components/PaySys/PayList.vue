@@ -29,7 +29,7 @@
         <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <elx-editable-column prop="tPayHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column prop="payHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <elx-editable-column prop="num" label="支付清单编号" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     

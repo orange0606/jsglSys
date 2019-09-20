@@ -110,7 +110,7 @@
       @cell-click ="cell_click"
       :cell-style ="cell_select"
       show-summary
-      size="small"
+      size="mini"
       :summary-method="getSummaries"
       :edit-config="{render: 'scroll', renderSize: 80}"
       style="width: 100%">
@@ -740,7 +740,9 @@ export default {
 
 <style scope>
 .click-table11-oper {
-  /* margin-bottom: 5px; */
+  height: 30px;
+  margin-bottom: 5px;
+  /* border: 1px solid pink; */
   text-align: left;
   position: relative;
 }
