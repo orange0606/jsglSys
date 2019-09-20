@@ -102,6 +102,21 @@ import XEUtils from 'xe-utils'
       required: false,
       default: () => []
     },
+    originalAddList:{    //增加原清单数据列表，这个数据用于返回给父组件
+      type: Array,
+      required: false,
+      default: () => []
+    },
+    originalDelList:{    //删除原清单数据列表，这个数据用于返回给父组件
+      type: Array,
+      required: false,
+      default: () => []
+    },
+    originalAltList:{    //修改原清单数据列表，这个数据用于返回给父组件
+      type: Array,
+      required: false,
+      default: () => []
+    },
     mode:{  //子组件的展示模式
       type: String,
       required: false,
@@ -166,6 +181,15 @@ import XEUtils from 'xe-utils'
                 this.$nextTick(() => {
                     this.list = this.originalList;
                 }); // 强制刷新
+                //此处作判断是否有新增的数据进来（循环判断）
+                this.originalAddList.length = 0;
+                for (let index = this.originalList.length - 1; index >= 0; index--) {
+                    if( !this.originalList[index].id ) {
+                        this.originalAddList.push(this.originalList[index]);
+                        console.log('此处打印一下this.originalAddList 数组 this.originalList -------this.originalAddList')
+                        console.log(this.originalList, this.originalAddList)
+                    }
+                }
             }
             this.visibleNew = false; //关闭显示
         }
@@ -352,8 +376,8 @@ import XEUtils from 'xe-utils'
       }
     },
     removeEvent (row) {     //删除单个清单
-      if (row.id && this.mode === 'show') {   //展示模式才能进行网路保存
-          this.isClearActiveFlag = false
+      if ( row.id && this.mode === 'show') {   //展示模式才能进行网路保存
+          this.isClearActiveFlag = false;
           this.$confirm('确定永久删除该数据?', '温馨提示', {
             distinguishCancelAndClose: true,
             confirmButtonText: '确定',
@@ -378,12 +402,19 @@ import XEUtils from 'xe-utils'
           }).catch(action => action).then(() => {
             this.isClearActiveFlag = true
           })
-        } else {    //新建模式与修改模式，仅进行数组的引用赋值修改
+          return true;
+        } else if(this.mode !== 'show') {    //新建模式与修改模式，仅进行数组的引用赋值修改
             this.$refs.elxEditable.remove(row);
+            if ( this.mode ==='alter' && this.joinParent && row.id  ) {
+                this.originalDelList.push(row);
+            }
+            console.log('删除单个清单需记录  this.originalDelList，此处显示     this.originalList ------this.originalDelList');
+            console.log(this.originalList,this.originalDelList)
+
             let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
             this.originalList.length = 0;
             for (let index = 0; index < rest.length; index++) {
-            this.originalList.push(rest[index]); 
+                this.originalList.push(rest[index]); 
             }
             this.$message({type: 'success', message: '删除所选选项成功!'})
         }
@@ -424,6 +455,15 @@ import XEUtils from 'xe-utils'
                 })
             }else {   //此处为新建模式与修改模式所需要的引用赋值操作
                 this.$refs.elxEditable.remove(removeRecords);
+                if (this.mode ==='alter' && this.joinParent) {       
+                    for (let a = removeRecords.length -1; a >= 0; a--) {
+                        if ( row.id ) {
+                            this.originalDelList.push(row);
+                        }
+                    }
+                    console.log('删除多个个清单需记录  this.originalDelList，此处显示     removeRecords ------this.originalDelList');
+                    console.log(removeRecords,this.originalDelList);
+                }
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
                 this.originalList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
