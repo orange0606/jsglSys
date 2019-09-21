@@ -80,7 +80,7 @@
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh"  :lock-scroll="false" :visible.sync="visibleNew">
-              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></inven-edit>
+              <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :originalAltList="originalAltList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></inven-edit>
               <br><br><br>
           </el-dialog>
         </transition>
@@ -120,12 +120,12 @@ import XEUtils from 'xe-utils'
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default:false 
+      default: true 
     },
     approval:{
       type: Object,
@@ -256,22 +256,22 @@ import XEUtils from 'xe-utils'
         pay: '支付清单',
         totalpay: '累计支付清单'
       }
-      return cellValue ? obj[cellValue] : '未知'
+      return cellValue ? obj[cellValue] : '未知';
     },
     formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
+      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
     },
     clearActiveMethod ({ type, row }) {
       return this.isClearActiveFlag && type === 'out' ? this.checkOutSave(row) : this.isClearActiveFlag
     },
     filterHandler (value, row, column) {
-      const property = column['property']
-      return row[property] === value
+      const property = column['property'];
+      return row[property] === value;
     },
     // 点击表格外面处理
     checkOutSave (row) {
       if (!row.id) {
-        this.isClearActiveFlag = false
+        this.isClearActiveFlag = false;
         this.$confirm('该数据未保存，请确认操作?', '温馨提示', {
           distinguishCancelAndClose: true,
           confirmButtonText: '保存数据',
@@ -288,7 +288,7 @@ import XEUtils from 'xe-utils'
           this.isClearActiveFlag = true;
         })
       } else if (this.$refs.elxEditable.hasRowChange(row)) {
-        this.isClearActiveFlag = false
+        this.isClearActiveFlag = false;
         this.$confirm('检测到未保存的内容，请确认操作?', '温馨提示', {
           distinguishCancelAndClose: true,
           confirmButtonText: '保存数据',
@@ -296,23 +296,23 @@ import XEUtils from 'xe-utils'
           type: 'warning'
         }).then(() => {
           this.$refs.elxEditable.clearActive();
-          this.saveRowEvent(row)
+          this.saveRowEvent(row);
         }).catch(action => {
           if (action === 'cancel') {
-            this.$refs.elxEditable.revert(row)
+            this.$refs.elxEditable.revert(row);
             this.$refs.elxEditable.clearActive();
           }
         }).then(() => {
-          this.isClearActiveFlag = true
+          this.isClearActiveFlag = true;
         })
-        return false
+        return false;
       }
-      return this.isClearActiveFlag
+      return this.isClearActiveFlag;
     },
     // 编辑处理
     openActiveRowEvent (row) {
       this.$nextTick(() => {
-        let activeInfo = this.$refs.elxEditable.getActiveRow()
+        let activeInfo = this.$refs.elxEditable.getActiveRow();
         if (activeInfo && activeInfo.isUpdate) {
           this.isClearActiveFlag = false
           this.$confirm('检测到未保存的内容，请确认操作?', '温馨提示', {
@@ -321,25 +321,25 @@ import XEUtils from 'xe-utils'
             cancelButtonText: '取消修改',
             type: 'warning'
           }).then(() => {
-            this.$refs.elxEditable.setActiveRow(row)
-            this.saveRowEvent(activeInfo.row)
+            this.$refs.elxEditable.setActiveRow(row);
+            this.saveRowEvent(activeInfo.row);
           }).catch(action => {
             if (action === 'cancel') {
-              this.$refs.elxEditable.revert(activeInfo.row)
-              this.$refs.elxEditable.setActiveRow(row)
+              this.$refs.elxEditable.revert(activeInfo.row);
+              this.$refs.elxEditable.setActiveRow(row);
             }
           }).then(() => {
-            this.isClearActiveFlag = true
+            this.isClearActiveFlag = true;
           })
         } else {
-          this.$refs.elxEditable.setActiveRow(row)
+          this.$refs.elxEditable.setActiveRow(row);
         }
       })
     },
     // 取消处理
     cancelRowEvent (row) {
       if (!row.id) {
-        this.isClearActiveFlag = false
+        this.isClearActiveFlag = false;
         this.$confirm('该数据未保存，是否移除?', '温馨提示', {
           distinguishCancelAndClose: true,
           confirmButtonText: '移除数据',
@@ -347,12 +347,11 @@ import XEUtils from 'xe-utils'
           type: 'warning'
         }).then(action => {
           if (action === 'confirm') {
-            this.$refs.elxEditable.remove(row)
+            this.$refs.elxEditable.remove(row);
             // console.log('移除数据')
-            
           }
         }).catch(e => e).then(() => {
-          this.isClearActiveFlag = true
+          this.isClearActiveFlag = true;
         })
       } else if (this.$refs.elxEditable.hasRowChange(row)) {
         this.isClearActiveFlag = false
@@ -362,17 +361,17 @@ import XEUtils from 'xe-utils'
           cancelButtonText: '返回继续',
           type: 'warning'
         }).then(action => {
-          this.$refs.elxEditable.clearActive()
-          this.$refs.elxEditable.revert(row)
+          this.$refs.elxEditable.clearActive();
+          this.$refs.elxEditable.revert(row);
         }).catch(action => {
           if (action === 'cancel') {
-            this.$refs.elxEditable.setActiveRow(row)
+            this.$refs.elxEditable.setActiveRow(row);
           }
         }).then(() => {
-          this.isClearActiveFlag = true
+          this.isClearActiveFlag = true;
         })
       } else {
-        this.$refs.elxEditable.clearActive()
+        this.$refs.elxEditable.clearActive();
       }
     },
     removeEvent (row) {     //删除单个清单
@@ -400,7 +399,7 @@ import XEUtils from 'xe-utils'
                   });
               })
           }).catch(action => action).then(() => {
-            this.isClearActiveFlag = true
+            this.isClearActiveFlag = true;
           })
           return true;
         } else if(this.mode !== 'show') {    //新建模式与修改模式，仅进行数组的引用赋值修改
@@ -442,7 +441,7 @@ import XEUtils from 'xe-utils'
                   //删除成功
                   this.loading = false;
                   this.$refs.elxEditable.remove(removeRecords);
-                  this.findList()
+                  this.findList();
                   this.$message({
                     type: 'success',
                     message: '删除所选选项成功!'

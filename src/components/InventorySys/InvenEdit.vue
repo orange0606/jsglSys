@@ -31,7 +31,7 @@
       <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
     </div>
@@ -95,6 +95,9 @@ export default {
     originalList:{  //父组件的清单列表
       type: Array,
     },
+    originalAltList:{    //修改清单数据列表，这个数据用于返回给父组件
+      type: Array,
+    },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
     },
     refresh:{ //显示此组件的变量
@@ -122,8 +125,8 @@ export default {
       col: [
       ],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
-      list: [
-      ], //表格数据
+      list: [], //表格数据
+      originalRowDelList: [],//记录删除了的单元格
     }
   },
  watch: {
@@ -387,7 +390,6 @@ export default {
         this.$refs.elxEditable1.reload(this.list);
         this.loading = false;
         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-
       })
     },
     getSummaries (param) {  //合计
@@ -405,131 +407,186 @@ export default {
       })
       this.$refs.elxEditable1.clearActive();
     },
+    RemoveSelecteds () {  //删除选中
+      var selection = this.$refs.elxEditable1.getSelecteds(),
+      seleLen = selection.length;
+      if (seleLen && seleLen > 0) {
+          this.$refs.elxEditable1.removeSelecteds();
+          if (selection[0]['A'] && selection[0]['A'].trNum) {
+              this.Rowsort(selection[0]['A'].trNum-1);  //调用表格重新排序函数
+          }
+          for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格
+              for (let a = this.hd.length-1; a >= 0; a--) {
+                  this.originalRowDelList.push(selection[index][this.hd[a]]);
+              }
+          }
+          console.log('this.originalRowDelList')
+          console.log(this.originalRowDelList)
+      }
+      console.log('获取已选中数据')
+    },
+    Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格行号重新排列
+        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        try {
+            for (let index = list.length -1; index >= 0; index--) {
+                if (sub > index) break;
+                for (let a = this.hd.length -1; a >= 0; a--) {
+                    list[index][this.hd[a]].trNum = index+1;
+                }
+            }
+            this.$nextTick(() => {
+                this.$refs.elxEditable1.reload([]);
+                this.$refs.elxEditable1.reload(list);
+            })
+        } catch (error) {
+            console.log('删除后重新排序出了问题'+error);
+            return this.$message({ type: 'success',message: '删除后重新排序出了问题，请联系相关技术人员!' });
+        }
+        
+
+    },
+
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {
         if (valid) {
             let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-            list.forEach((item, index) => {
-                if (XEUtils.isDate(item.date)) {
-                item.date = item.date.getTime();
-                }
-                // 重新生成排序后的序号
-                item.seq = index;
-            })
-            if (list.length === 0) {
-                this.$message({
-                    type: 'success',
-                    message: '请先导入数据!'
-                })
-                return false;
-            }
+            if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
-          this.loading = true;
-          var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-          originalRowList = [];
-          for (let index = list.length -1; index >=0 ; index--) {
-              for (let i = header.length -1; i >=0; i--) {
-                  if (list[index][header[i]] && list[index][header[i]].colNum) {
-                      // delete list[index][header[i]].edit;
-                      list[index][header[i]].formula = '';
-                      list[index][header[i]].trNum = index+1;                  
-                      list[index][header[i]].attribute = '';                  
-                      list[index][header[i]].upload = 1;    
-                      originalRowList.push(list[index][header[i]]);
-                  }
-              }
-          }
-          //此处做个判断，判断是新建还是修改。
-         
-
-          switch(this.mode) {
-              case 'show': //此处为展示模式处理
-                  console.log('进入了show模式')
-                   var obj = {
-                      // id:                                    //计量清单id
-                      originalHeadId: this.form.headerId,    //计量清单表头id
-                      processId: this.approval.id,         //审批单流程id
-                      sysOrder: '',                   //系统序号  预留，暂不使用
-                      sysNum: '',                    //系统编号  预留，暂不使用
-                      name: this.form.name,                     //计量清单名称
-                      num: this.form.num,                    //计量清单编号
-                      tenderId: this.tender.id,                     //标段id
-                      type: 'original',                 //计量清单类别为”original”
-                      originalRowList                 //计量清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
-                  },
-                  originalList = [];
-                  var url = '';
-                  if (this.uplist && !this.uplist.id ) { //此处是新建清单
-                      url = '/original/save';
-                  }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
-                      obj.id = this.uplist.id;
-                      url = '/original/update';
-                      console.log('这里保存')
-                  }
-                  if (url === '') return false;
-                  originalList.push(obj);
-                  this.$post(url,{ originalList })
-                      .then((response) => {   
-                      this.$message({ message: `已为你保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                      this.saveShow();
-                  }).catch(e => {
-                      this.loading = false;
-                      originalRowList.length = 0;
-                      this.$message({
-                          type: 'info',
-                          message: '发生错误！'+e
-                      });
-                  })
-                  break;
-              default:    //此处为新建模式与修改模式
-                  console.log('此处为新建模式与修改模式')
-                  var originalHead = this.originalHead;
-                 
-                  if (this.uplist && (this.uplist.id || this.uplist.saveTime) ) {  //此处是修改清单
-                        console.log('此处是修改清单')
-                        if (!originalHead.id || !originalHead.tOriginalHeadRows) {
-                            originalHead = this.uplist.originalHead;
-                        }
-                        for (let index = this.originalList.length -1; index >=0; index--) {
-                            var meindex = this.originalList[index];
-                            if((meindex.saveTime === this.uplist.saveTime) || (meindex.id === this.uplist.id)){
-                                meindex.originalHeadId = this.form.headerId;
-                                meindex.originalRowList = [];
-                                meindex.originalRowList = originalRowList;
-                                meindex.name = this.form.name;
-                                meindex.num = this.form.num;
-                                meindex.originalHead = originalHead;
-                                meindex.updateTime = new Date();
-                                this.$message({ message: `已为你修改---保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                                return this.saveShow();
+            this.loading = true;
+            var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+            originalHead = this.originalHead, //表头数据
+            originalRowList = [], //清单内容
+            originalRowAddList = [],  //增
+            originalRowDelList = this.originalRowDelList,  //删
+            originalRowAltList = [];  //改
+            try {
+                for (let index = list.length -1; index >=0 ; index--) {
+                    for (let i = header.length -1; i >=0; i--) {
+                        var listRows = list[index][header[i]];
+                        if (listRows && listRows.colNum) {
+                            // delete listRows.edit;
+                            listRows['formula'] = '';
+                            listRows['trNum'] = index+1;                  
+                            listRows['attribute'] = '';                  
+                            listRows['upload'] = 1;    
+                            if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
+                                originalRowAddList.push(listRows);
+                            }else if ( listRows['alter'] ) {  //有alter 视为已修改过的数据 新增到originalRowAltList
+                                originalRowAltList.push(listRows);
                             }
+                            originalRowList.push(listRows);
                         }
-                  }else if (this.uplist) {  //此处是新建清单
-                        var obj = {
-                            originalHeadId:this.form.headerId,
-                            processId: this.approval.id,
-                            sysOrder:'',
-                            sysNum:'',
-                            name:this.form.name,
-                            num:this.form.num,
-                            tenderId:this.tender.id,
-                            type:'original',
-                            originalRowList,
-                            originalHead,//表头数据
-                            enter:this.list.length>0?1:0,
-                            tender:this.tender,
-                            saveTime:new Date(),
-                            saveEmployee:{name:this.$store.state.username}
-                        };
-                        this.originalList.push(obj);
-                        console.log('this.originalList');
-                        console.log(this.originalList);
-                        this.$message({ message: `已为你保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                        return this.saveShow();
-                  }
+                    }
+                }
+            } catch (error) {
+                this.loading = false;
+                console.log('保存数据遇到错误  :'+error)
+                return this.$message({ type: 'success',message: '存储失败，请联系相关技术人员!' });
+            }
+            var obj = { //新建清单的时候需要用
+                originalHeadId: this.form.headerId,    //清单表头id
+                processId: this.approval.id,         //审批单流程id
+                sysOrder: '',                   //系统序号  预留，暂不使用
+                sysNum: '',                    //系统编号  预留，暂不使用
+                name: this.form.name,               //清单名称
+                num: this.form.num,                 //清单编号
+                tenderId: this.tender.id,           //标段id
+                type: 'original',                 //清单类别为”original”
+                originalRowAddList,  //增
+                originalRowDelList,  //删
+                originalRowAltList,  //改
+                enter:this.list.length>0?1:0,
+                tender:this.tender,
+                saveTime:new Date(),
+                saveEmployee:{name:this.$store.state.username}
+            };
+            if (this.mode !=='show') {
+                obj['originalHead'] = originalHead; //表头数据
+                obj['originalRowList'] = originalRowList; //清单内容
+            }
+       
+            //此处做个判断，判断是新建还是修改。
+            if (this.joinParent) {  //接入父组件的情况
+                if (this.uplist && !this.uplist.id && !this.uplist.saveTime ) {  //当前属于新建清单====
+                    switch(this.mode) {
+                        case 'show':  //为show模式
+                            this.loading = false;
+                            return this.$message({ type: 'success',message: '当前为show模式，在joinParent=true 时 不支持新建清单！' })
+                            break;
+                        default:  //为 alter模式与 new模式    
+                            this.originalList.push(obj);
+                            this.$message({ message: `已为你保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                            return this.saveShow();                      
+                    } 
+                }else if (this.uplist && (this.uplist.id || this.uplist.saveTime)) {  //当前属于修改清单====
+                    switch(this.mode) {
+                        case 'show':  //为 show模式
+                            this.loading = false;
+                            return this.$message({ type: 'success',message: '当前为show模式，在joinParent=true 时 不支持更改清单！' })
+                            break;
+                        default:  //为 alter模式与 new模式 
+                            for (let index = this.originalList.length -1; index >=0; index--) {
+                                var ListRow = this.originalList[index];
+                                if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
+                                    ListRow.originalHeadId = this.form.headerId;
+                                    ListRow.originalRowList = originalRowList;
+                                    ListRow.originalRowAddList = originalRowAddList;  //增
+                                    ListRow.originalRowDelList = originalRowDelList;  //删
+                                    ListRow.originalRowAltList = originalRowAltList;  //改
+                                    ListRow.name = this.form.name;
+                                    ListRow.num = this.form.num;
+                                    ListRow.originalHead = originalHead;
+                                    ListRow.updateTime = new Date();
+                                    if (ListRow.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
+                                        for (let b = this.originalAltList.length -1; b >=0; b--) {
+                                            if (this.originalAltList[b].id === ListRow.id ) {
+                                                delete this.originalAltList[b];
+                                                break; //跳出此循环
+                                            }
+                                        }
+                                        this.originalAltList.push(ListRow);
+                                    }
+                                    this.$message({ message: `已为你修改---保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                                    return this.saveShow();
+                                }
+                                
+                            }
+                            
+                    } //switch的 }
+                }
                 
-          } 
+            }else{    //不接入父组件的情况
+                  var parameter = {
+                      originalAddList: [], //增清单
+                      originalDelList: [],   //删清单
+                      originalAltList: []  //改清单
+                  } 
+                  if (this.uplist && !this.uplist.id ) {  //当前为新建清单
+                      switch(this.mode) {
+                          case 'show':  //为show模式
+                              parameter.originalAddList.push(obj);
+                              this.saveOneList( parameter ); //调用网络保存函数
+                              break;
+                          default:  //为 alter模式与 new模式    
+                              this.loading = false;
+                              return this.$message({ type: 'success',message: '当前为'+this.mode+'模式，在joinParent=false 时 不支持新建清单！' })
+                                                 
+                      } 
+                  }else{  //当前为修改清单
+                      switch(this.mode) {
+                          case 'show':  //为show模式
+                              obj.id = this.uplist.id;
+                              parameter.originalAltList.push(obj);
+                              this.saveOneList( parameter ); //调用网络保存函数
+                              break;
+                          default:  //为 alter模式与 new模式    
+                              this.loading = false;
+                              return this.$message({ type: 'success',message: '当前为'+this.mode+'模式，在joinParent=false 时 不支持修改清单！' })
+                                                 
+                      } 
+                  }
 
+            }
         }
       })
     },
@@ -541,6 +598,19 @@ export default {
         this.showHeader = false;
         this.$nextTick(() => {  //强制重新渲染
             this.showHeader = true;
+        })
+    },
+    saveOneList ( obj ) {  //保存单个清单 仅show模式 且 this.joinParent=false 时可用
+        this.$post('/original/update',obj )
+            .then((response) => {   
+            this.$message({ message: `已为你保存数据 `, type: 'success', duration: 3000, showClose: true })
+            return this.saveShow();   
+        }).catch(e => {
+            this.loading = false;
+            this.$message({
+                type: 'info',
+                message: '保存清单发生错误！'+e
+            });
         })
     },
     exportCsvEvent () {

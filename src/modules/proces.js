@@ -609,6 +609,10 @@ excelmodel = {
     使用引用赋值
     */
     Calculation (type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
+        //此处做一个修改单元格标记col['alter'] = 'Y' 代表此单元格修改过
+        col['alter'] = 'Y'; 
+        console.log('代表此单元格修改过')
+        console.log(col)
         if(type !=='original'){
             col['td'] = Number(col['td']);
             if (Number.isNaN(col['td'])) {
