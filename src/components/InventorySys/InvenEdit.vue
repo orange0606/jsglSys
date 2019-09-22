@@ -32,7 +32,7 @@
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="Abandon">放弃更改</el-button>
       <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
     </div>
           <!-- show-summary
@@ -40,7 +40,8 @@
       <!-- :summary-method="getSummaries" -->
             <!-- show-summary
       :summary-method="getSummaries" -->
-         <!-- :data.sync="list" -->
+         <!-- :data.sync="list" 
+         autoScrollIntoView:true-->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <elx-editable
       ref="elxEditable1"
@@ -54,14 +55,11 @@
       @cell-click ="cell_click"
       show-summary
       :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 80}"
+      :edit-config="{render: 'scroll', renderSize: 80, }"
       style="width: 100%">
       
-      <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+      <elx-editable-column type="selection" align="center" width="55" ></elx-editable-column>
       <elx-editable-column type="index" width="60" align="center" >
-        <template v-slot:header>
-          <i class="el-icon-setting" @click="dialogVisible = true"></i>
-        </template>
       </elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
       <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" ></my-column>
@@ -116,17 +114,14 @@ export default {
       originalHead:null, //用来存储表头信息
       startTime:null,
       loading: false,
-      dialogVisible: true,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       rest:[],
       formula:{}, //存储表头的公式数据
-      row:null,//公式字符串转代码的全局变量
-      // col:[],//表头数据.
-      col: [
-      ],//已对PackHeader再次组装的多级表头数据.
+      row: null,//公式字符串转代码的全局变量
+      col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
       list: [], //表格数据
-      originalRowDelList: [],//记录删除了的单元格
+      RowDelList: [],//记录被删除有id的单元格
     }
   },
  watch: {
@@ -348,11 +343,16 @@ export default {
                return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
             }
             try {  //把数据载入表格
+                
                 this.list = [...data];
+                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                for (let index = this.list.length -1; index >=0; index--) {
+                    this.list[index]['seq'] = index;
+                }
                 this.showHeader = true;
                 this.findList(); //调用滚动渲染数据
                 // this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                
 
                 data = null; //内存释放
             } catch (e) {
@@ -400,38 +400,77 @@ export default {
     },
     insertEvent () {
       // console.log('进来了吗')
-      this.$refs.elxEditable1.insert({
-        '0': `New ${Date.now()}`,
-      }).then(({ row }) => {
-        this.$refs.elxEditable1.setActiveCell(row);
-      })
-      this.$refs.elxEditable1.clearActive();
+      var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+      restLen = rest.length,
+      NewRow = {};
+      for (let index = this.hd.length -1; index >= 0; index--) {
+          NewRow[this.hd[index]]= {attribute: null,colNum: this.hd[index],edit: "N",formula:null,td: restLen, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
+      }
+      if (!this.uplist['id']) NewRow['seq'] = restLen;
+      console.log('打印一下NewRow 新增的一行')
+      console.log(NewRow);
+      this.$refs.elxEditable1.insertAt(NewRow, -1)
+        // this.$refs.elxEditable1.setActiveCell(NewRow);
+   
+      // this.$refs.elxEditable1.clearActive();
+      // 滚动到第一行：
+      // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
+      // 滚动到最后一行：
+      // console.log(this.$refs.elxEditable1)
+      // console.log('this.$refs.elxEditable1..scrollTop1')
+      // console.log(this.$refs.elxEditable1.bodyWrappe)
+  
+      // console.log('this.$refs.elxEditable1.scrollTop2')
+      // console.log(this.$refs.elxEditable1.bodyWrappe)
+      // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
+    },
+    Abandon () {  //放弃更改
+        this.$refs.elxEditable1.revert(this.list);
+        this.RowDelList = []; //放弃更改后  删除数组清空
+
     },
     RemoveSelecteds () {  //删除选中
       var selection = this.$refs.elxEditable1.getSelecteds(),
       seleLen = selection.length;
+      console.log('seleLen')
+      console.log(selection)
       if (seleLen && seleLen > 0) {
           this.$refs.elxEditable1.removeSelecteds();
-          if (selection[0]['A'] && selection[0]['A'].trNum) {
-              this.Rowsort(selection[0]['A'].trNum-1);  //调用表格重新排序函数
+          var number = 0; //表格列表的下标
+          if (!this.uplist['id']) {
+              number = selection[0]['seq'];
+          }else{
+              number = ( selection[0]['A'].trNum ) - ( this.PackHeader.length ) -2; 
           }
-          for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格
+          this.Rowsort( number );  //调用表格重新排序函数
+
+          for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
               for (let a = this.hd.length-1; a >= 0; a--) {
-                  this.originalRowDelList.push(selection[index][this.hd[a]]);
+                  var item = selection[index][this.hd[a]];
+                  if (item['id']) this.RowDelList.push(item);
               }
           }
-          console.log('this.originalRowDelList')
-          console.log(this.originalRowDelList)
+          console.log('this.RowDelList')
+          console.log(this.RowDelList)
       }
       console.log('获取已选中数据')
     },
-    Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格行号重新排列
+    Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         try {
+            console.log('sub--------------')
+            console.log(sub)
+            
             for (let index = list.length -1; index >= 0; index--) {
+                console.log('sub->>>>>>>>>>>>>-----index break')
+                console.log(sub, index)
                 if (sub > index) break;
+                if (!this.uplist['id']) list[index]['seq']=index;  //只有原清单时才需要
                 for (let a = this.hd.length -1; a >= 0; a--) {
-                    list[index][this.hd[a]].trNum = index+1;
+                    var item = list[index][this.hd[a]];
+                    item.trNum = index+1;
+                    console.log('item.trNum--'+item.trNum)
+                    if (item['id']) item['alter'] = 'Y';   
                 }
             }
             this.$nextTick(() => {
@@ -457,8 +496,16 @@ export default {
             originalHead = this.originalHead, //表头数据
             originalRowList = [], //清单内容
             originalRowAddList = [],  //增
-            originalRowDelList = this.originalRowDelList,  //删
+            originalRowDelList = this.RowDelList, //删
             originalRowAltList = [];  //改
+
+            //查询上一次修改有无这个集合  ，有的话合并两个数组
+            if (tihs.uplist['originalRowDelList'] && tihs.uplist['originalRowDelList'].length) {
+                  console.log('this.RowDelList,   tihs.uplist[originalRowDelList]----------')
+                  console.log(this.RowDelList,tihs.uplist['originalRowDelList'])
+                  originalRowDelList = this.RowDelList.concat(tihs.uplist['originalRowDelList']);  //删
+             }
+          
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
@@ -471,7 +518,7 @@ export default {
                             listRows['upload'] = 1;    
                             if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
                                 originalRowAddList.push(listRows);
-                            }else if ( listRows['alter'] ) {  //有alter 视为已修改过的数据 新增到originalRowAltList
+                            }else if ( listRows['id'] && listRows['alter'] ) {  //有id 与 alter 视为已修改过的数据 新增到originalRowAltList
                                 originalRowAltList.push(listRows);
                             }
                             originalRowList.push(listRows);
@@ -504,7 +551,8 @@ export default {
                 obj['originalHead'] = originalHead; //表头数据
                 obj['originalRowList'] = originalRowList; //清单内容
             }
-       
+            console.log('打印一下即将提交的参数obj')
+            console.log(obj)
             //此处做个判断，判断是新建还是修改。
             if (this.joinParent) {  //接入父组件的情况
                 if (this.uplist && !this.uplist.id && !this.uplist.saveTime ) {  //当前属于新建清单====

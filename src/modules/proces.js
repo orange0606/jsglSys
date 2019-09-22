@@ -307,16 +307,16 @@ excelmodel = {
         // // 引入A-Z的所有列数组
         // index = this.AZ();
         if (!ref)return;
-        var sub = ref.indexOf(':'),
+        var subs = ref.indexOf(':'),
         //先获取开始的列坐标
         
-        start_c = ABC.indexOf(ref.substr(0,sub).match(patt1)[0])+1,
+        start_c = ABC.indexOf(ref.substr(0,subs).match(patt1)[0])+1,
         //获取开始的行坐标
-        start_r = ref.substr(0,sub).match(patt2)[0],
+        start_r = ref.substr(0,subs).match(patt2)[0],
         //获取结束的列坐标
-        end_c = ABC.indexOf(ref.substr(sub+1).match(patt1)[0])+1,
+        end_c = ABC.indexOf(ref.substr(subs+1).match(patt1)[0])+1,
         //获取结束的行坐标
-        end_r = ref.substr(sub+1).match(patt2)[0],
+        end_r = ref.substr(subs+1).match(patt2)[0],
 
         // console.log('表格的的范围：  开始的列坐标是：',start_c,'  开始的行坐标是：',start_r)
         // console.log('表格的的范围：  结束的列坐标是：',end_c,'  结束的行坐标是：',end_r)
@@ -610,8 +610,10 @@ excelmodel = {
     */
     Calculation (type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
         //此处做一个修改单元格标记col['alter'] = 'Y' 代表此单元格修改过
-        col['alter'] = 'Y'; 
+        if (col['id']) col['alter'] = 'Y';
+         
         console.log('代表此单元格修改过')
+        console.log(row)
         console.log(col)
         if(type !=='original'){
             col['td'] = Number(col['td']);
