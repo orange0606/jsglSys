@@ -209,8 +209,11 @@ export default {
           try {
               var arr = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
               this.list = [...arr];
-              this.findList(); //调用滚动渲染数据
               this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
+                  this.list[index]['seq'] = index;
+              }
+              this.findList(); //调用滚动渲染数据
           } catch (error) {
               this.$message({
                   type: 'info',
@@ -291,8 +294,12 @@ export default {
             this.list.length = this.hd.length = 0;
             var arr = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
             this.list = [...arr];
-            this.findList(); //调用滚动渲染数据
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
+                this.list[index]['seq'] = index;
+            }
+            this.findList(); //调用滚动渲染数据
+            
         }).catch(e => {
             this.loading = false;
             console.log(e)
@@ -352,8 +359,6 @@ export default {
                 this.showHeader = true;
                 this.findList(); //调用滚动渲染数据
                 // this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
-                
-
                 data = null; //内存释放
             } catch (e) {
                 data = this.list = null;
@@ -404,7 +409,8 @@ export default {
       restLen = rest.length,
       NewRow = {};
       for (let index = this.hd.length -1; index >= 0; index--) {
-          NewRow[this.hd[index]]= {attribute: null,colNum: this.hd[index],edit: "N",formula:null,td: restLen, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
+          NewRow['seq'] = restLen;
+          NewRow[this.hd[index]]= {attribute: null,colNum: this.hd[index],edit: "N",formula:null,td: restLen+1, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
       if (!this.uplist['id']) NewRow['seq'] = restLen;
       console.log('打印一下NewRow 新增的一行')
@@ -425,8 +431,12 @@ export default {
       // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
     },
     Abandon () {  //放弃更改
-        this.$refs.elxEditable1.revert(this.list);
-        this.RowDelList = []; //放弃更改后  删除数组清空
+        // this.$refs.elxEditable1.revert();
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([]);
+            this.$refs.elxEditable1.reload(this.list);
+            this.RowDelList = []; //放弃更改后  删除数组清空
+        })
 
     },
     RemoveSelecteds () {  //删除选中
@@ -436,12 +446,7 @@ export default {
       console.log(selection)
       if (seleLen && seleLen > 0) {
           this.$refs.elxEditable1.removeSelecteds();
-          var number = 0; //表格列表的下标
-          if (!this.uplist['id']) {
-              number = selection[0]['seq'];
-          }else{
-              number = ( selection[0]['A'].trNum ) - ( this.PackHeader.length ) -2; 
-          }
+          var number = selection[0]['seq'];; //表格列表的下标
           this.Rowsort( number );  //调用表格重新排序函数
 
           for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
@@ -465,7 +470,7 @@ export default {
                 console.log('sub->>>>>>>>>>>>>-----index break')
                 console.log(sub, index)
                 if (sub > index) break;
-                if (!this.uplist['id']) list[index]['seq']=index;  //只有原清单时才需要
+                list[index]['seq']=index;  //更新索引
                 for (let a = this.hd.length -1; a >= 0; a--) {
                     var item = list[index][this.hd[a]];
                     item.trNum = index+1;
@@ -500,10 +505,10 @@ export default {
             originalRowAltList = [];  //改
 
             //查询上一次修改有无这个集合  ，有的话合并两个数组
-            if (tihs.uplist['originalRowDelList'] && tihs.uplist['originalRowDelList'].length) {
-                  console.log('this.RowDelList,   tihs.uplist[originalRowDelList]----------')
-                  console.log(this.RowDelList,tihs.uplist['originalRowDelList'])
-                  originalRowDelList = this.RowDelList.concat(tihs.uplist['originalRowDelList']);  //删
+            if (this.uplist['originalRowDelList'] && this.uplist['originalRowDelList'].length) {
+                  console.log('this.RowDelList,   this.uplist[originalRowDelList]----------')
+                  console.log(this.RowDelList,this.uplist['originalRowDelList'])
+                  originalRowDelList = this.RowDelList.concat(this.uplist['originalRowDelList']);  //删
              }
           
             try {

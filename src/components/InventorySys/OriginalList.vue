@@ -34,8 +34,12 @@
         <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="num" label="原清单编号" min-width="100" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="原清单名称" min-width="120" align="center" fixed="left"  :edit-render="{name: 'ElInput'}" >
+            <template slot-scope="scope">
+              <el-link :underline="false" style="font-size:12px;" type="success" @click="see(scope.row)" >{{scope.row.name}}</el-link>
+            </template>
+        </elx-editable-column>
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -120,12 +124,12 @@ import XEUtils from 'xe-utils'
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default: true 
+      default: false 
     },
     approval:{
       type: Object,
@@ -385,8 +389,14 @@ import XEUtils from 'xe-utils'
           }).then(() => {
               this.loading = true
               // 进行发起请求删除
-              var originalIdList = [row.id];
-              this.$post('/original/delarray',{ originalIdList })
+              var obj = {
+                    originalAddList: [],    //增
+                    originalDelList: [],     //删 
+                    originalAltList: []   //改
+              };
+              if (row.id) obj.originalDelList.push(row);
+                
+              this.$post('/original/update',obj)
                 .then((response) => {
                 //删除成功
                 this.loading = false;
@@ -431,12 +441,16 @@ import XEUtils from 'xe-utils'
             this.loading = true
             // 进行发起请求删除
             if ( this.mode === 'show') {    //展示模式执行的网络请求批量删除
-                var originalIdList = [];
+                var obj = {
+                    originalAddList: [],    //增
+                    originalDelList: [],     //删 
+                    originalAltList: []   //改
+                };
                 for (let index = 0; index < removeRecords.length; index++) {
-                    originalIdList.push(removeRecords[index].id)
-                }
+                    if (removeRecords[index].id) obj.originalDelList.push(removeRecords[index]);
+                };
                 // 进行发起请求删除
-                this.$post('/original/delarray',{ originalIdList })
+                this.$post('/original/update', obj)
                   .then((response) => {
                   //删除成功
                   this.loading = false;
@@ -456,9 +470,7 @@ import XEUtils from 'xe-utils'
                 this.$refs.elxEditable.remove(removeRecords);
                 if (this.mode ==='alter' && this.joinParent) {       
                     for (let a = removeRecords.length -1; a >= 0; a--) {
-                        if ( row.id ) {
-                            this.originalDelList.push(row);
-                        }
+                        if ( removeRecords[a].id ) this.originalDelList.push(removeRecords[a]);
                     }
                     console.log('删除多个个清单需记录  this.originalDelList，此处显示     removeRecords ------this.originalDelList');
                     console.log(removeRecords,this.originalDelList);
@@ -489,15 +501,12 @@ import XEUtils from 'xe-utils'
         if (valid) {
             if (this.mode === 'show') {
                 var obj = {
-                id: row.id,                                    //原清单id
-                name: row.name,                     //原清单名称
-                num: row.num,                    //原清单编号
-                originalRowList: null                 //原清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
-                },
-                originalList = [],
-                url = '/original/update';
-                originalList.push(obj);
-                this.$post(url,{ originalList })
+                    originalAddList: [],    //增
+                    originalDelList: [],     //删 
+                    originalAltList: []   //改
+                };
+                if (row.id) obj.originalAltList.push(row);
+                this.$post('/original/update',obj)
                     .then((response) => {   
                     this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
                     this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })
@@ -510,9 +519,11 @@ import XEUtils from 'xe-utils'
                 })
             }else { //此处为新建模式与修改模式所需要的引用赋值操作
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
+                if ( row.id ) this.originalAltList.push(row); //添加到修改集合
+
                 this.originalList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
-                this.originalList.push(rest[index]); 
+                    this.originalList.push(rest[index]); 
                 }
                 this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true });
                 this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
