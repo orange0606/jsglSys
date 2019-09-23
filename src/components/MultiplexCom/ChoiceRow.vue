@@ -83,19 +83,11 @@ export default {
       inventory: function(newVal,oldVal){
           if (newVal!=null) {
               try {
-
-                  // let key = '';
-                  //  if(type == 'original'){
-                  //     key = this.all.originalRowList;
-                  // }else if (type == 'update') {
-                  //     key = this.all.updateRowList;
-
-                  // }else if (type== 'totalmeterage'){
-
-                  // }
+                  // console.log('选择表格组件获取到的值')
+                  // console.log(newVal)
                   this.all = newVal;
-                  let type = this.all.type;
-                  let id = this.all[type+'Head'].id;
+                  var type = this.all.type,
+                  id = this.all[type+'Head'].id;
                   this.oneHeader(id,type)//调用表头内容请求函数
               } catch (error) {
                   console.log(error)
@@ -113,7 +105,7 @@ export default {
         let arr = this.$excel.ListAssemble(list);
         this.hd = Object.keys(arr[0]);
         this.list = [...arr];
-        this.findList()//开始渲染表格数据
+        this.findList();//开始渲染表格数据
 
     },
     oneHeader (id,type) {  //请求单个表头 表头id  表头类型
@@ -138,9 +130,9 @@ export default {
         }
         let headsArr = this.$excel.Package(data[key],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-        this.col = new Array();  //新建一个数组存储多级表头嵌套
+        this.col = [];  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        let list = new Array();
+        let list = [];
         if(type == 'original'){
             list = this.all.originalRowList;
         }else if (type == 'update') {

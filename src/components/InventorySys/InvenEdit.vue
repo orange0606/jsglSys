@@ -412,7 +412,6 @@ export default {
           NewRow['seq'] = restLen;
           NewRow[this.hd[index]]= {attribute: null,colNum: this.hd[index],edit: "N",formula:null,td: restLen+1, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
-      if (!this.uplist['id']) NewRow['seq'] = restLen;
       console.log('打印一下NewRow 新增的一行')
       console.log(NewRow);
       this.$refs.elxEditable1.insertAt(NewRow, -1)
