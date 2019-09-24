@@ -546,7 +546,7 @@ export default {
         } catch (e) {
             console.log('出错了')
             console.log(e)
-            data.length = this.list.length = 0;
+            data.length = 0;
             this.loading =false;
             this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
         }
@@ -598,7 +598,7 @@ export default {
     getSummaries (param) {  //合计
         if (!this.$refs.elxEditable1) return [];
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-        if (this.PackHeader.length ===0 && list.length ===0) return [];
+        if (this.PackHeader.length ===0 || list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     
@@ -749,7 +749,7 @@ export default {
                 changeRowAddList,  //增
                 changeRowDelList,  //删
                 changeRowAltList,  //改
-                enter:this.list.length>0?1:0,
+                enter:list.length>0?1:0,
                 tender:this.tender,
                 saveTime:new Date(),
                 saveEmployee:{name:this.$store.state.username}

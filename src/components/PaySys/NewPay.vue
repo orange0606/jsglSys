@@ -27,10 +27,10 @@
     <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
       <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button>
+      <!-- <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button> -->
       <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+      <!-- <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -90,6 +90,9 @@ export default {
       type: Object,
     },
     payList: { //所有计量清单列表
+      type: Array,
+    },
+    payAltList:{    //修改清单数据列表，这个数据用于返回给父组件
       type: Array,
     },
     mode:{  //子组件的展示模式
@@ -237,8 +240,8 @@ export default {
     allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
         this.$post('/head/allpay',{tenderId})
         .then((response) => {
-          // console.log('response')
-          // console.log(response)
+          console.log('response')
+          console.log(response)
           this.form.headerList = response.data.payHeadList;
         }).catch(e => {
             this.$message({
@@ -326,7 +329,7 @@ export default {
     OneToPay (id) { //请求关联的一个累计支付清单
         this.$post('/totalpay/by/payheadid',{ id })
         .then((response) => {
-          console.log('/totalpay/by/payheadid')
+          console.log('/totalpay/by/payheadid请求关联的一个累计支付清单')
           console.log(response)
           var data = response.data.totalpay,
           arr = []; 
@@ -355,6 +358,8 @@ export default {
           }
             this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
         }).catch(e => {
+            console.log('/totalpay/by/payheadid请求关联的一个累计支付清单----出错')
+            console.log(e)
             this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
             this.$message({
               type: 'info',
@@ -365,10 +370,14 @@ export default {
     OneTometerage (id) {  //请求相对应的累计计量清单数据
         this.$post('/totalmeterage/by/payheadid',{ id })
         .then((response) => {
-          console.log('/totalmeterage/by/payheadid')
+          console.log('/totalmeterage/by/payheadid请求相对应的累计计量清单数据')
           console.log(response)
           var data = response.data.totalmeterage,
           arr = []; 
+          if (!data) {
+              this.tometerageRowList = arr;
+              return this.importfxx(); //调用支付清单内容组装函数
+          }
           this.tTotalmeterageId = data.id; //累计计量清单id
           if (data && data.totalmeterageRowList && data.totalmeterageRowList.length >0 ) {
               arr = this.$excel.ListAssemble(data.totalmeterageRowList);  //组装清单
@@ -378,6 +387,8 @@ export default {
           this.importfxx(); //调用支付清单内容组装函数
         }).catch(e => {
             this.importfxx(); //调用支付清单内容组装函数
+            console.log('/totalmeterage/by/payheadid请求相对应的累计计量清单数据------出错')
+            console.log(e)
             this.$message({
               type: 'info',
               message: '请求相对应的累计计量清单数据发生错误！'+e
@@ -441,8 +452,9 @@ export default {
                                 var number = null;
                                 for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
                                     number += (this.tometerageRowList[d][colName].td)*1;
+                                    // number += (this.tometerageRowList[d][colName].td).toFixed(2);
                                 }
-                                Rlist.td = number;
+                                Rlist.td = number.toFixed(2);
                                 // console.log('进来了totalmeterage-head-total ----Rlist.td = number   ==number',number)
                                 // console.log('进来了totalmeterage-head-total----Rlist')
                                 // console.log(this.tometerageRowList,colName)
@@ -522,152 +534,155 @@ export default {
         if (this.PackHeader.length ===0 && list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
-    insertEvent () {
-      // console.log('进来了吗')
-      this.$refs.elxEditable1.insert({
-        '0': `New ${Date.now()}`,
-      }).then(({ row }) => {
-        this.$refs.elxEditable1.setActiveCell(row);
-      })
-      this.$refs.elxEditable1.clearActive();
-    },
-
-    rowDrop () {
-      this.$nextTick(() => {
-        Sortable.create(this.$el.querySelector('.el-table__body-wrapper tbody'), {
-          handle: '.drag-btn',
-          onEnd: ({ newIndex, oldIndex }) => {
-            let currRow = this.list.splice(oldIndex, 1)[0];
-            this.list.splice(newIndex, 0, currRow);
-          }
-        })
-      })
-
-    },
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {
         if (valid) {
             let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-            list.forEach((item, index) => {
-                if (XEUtils.isDate(item.date)) {
-                item.date = item.date.getTime();
-                }
-                // 重新生成排序后的序号
-                item.seq = index;
-            })
-            if (list.length === 0) {
-                this.$message({
-                    type: 'success',
-                    message: '请先导入数据!'
-                })
-                return false;
-            }
+            console.log('list----------------');
+            console.log(list);
+            if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
-          this.loading = true;
-          var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
-          payRowList = [];
-          for (let index = list.length -1; index >=0 ; index--) {
-              for (let i = header.length -1; i >=0; i--) {
-                  if (list[index][header[i]] && list[index][header[i]].colNum) {
-                      // delete list[index][header[i]].edit;
-                      list[index][header[i]].formula = '';
-                      list[index][header[i]].trNum = index+1;                  
-                      list[index][header[i]].attribute = '';                  
-                      list[index][header[i]].upload = 1;    
-                      payRowList.push(list[index][header[i]]);
-                  }
-              }
-          }
-          //此处做个判断，判断是新建还是修改。
-          switch(this.mode) {
-              case 'show': //此处为展示模式处理
-                  console.log('进入了show模式')
-                   var obj = {
-                      // id:                                    //计量清单id
-                      tPayHeadId: this.form.headerId,    //计量清单表头id
-                      processId: this.approval.id,         //审批单流程id
-                      sysOrder: '',                   //系统序号  预留，暂不使用
-                      sysNum: '',                    //系统编号  预留，暂不使用
-                      name: this.form.name,                     //计量清单名称
-                      num: this.form.num,                    //计量清单编号
-                      tenderId: this.tender.id,                     //标段id
-                      tTotalmeterageId : this.tTotalmeterageId, //累计计量清单id
-                      type: 'pay',                 //计量清单类别为”pay”
-                      payRowList                 //计量清单内容，如果为null表示无内容修改，如果为空数组，表示删除全部内容
-                  },
-                  payList = [];
-                  var url = '';
-                  if (this.uplist && !this.uplist.id ) { //此处是新建清单
-                      url = '/pay/save';
-                  }else if (this.uplist && this.uplist.id) {    //此处是修改,先删除，再保存。二次请求
-                      obj.id = this.uplist.id;
-                      url = '/pay/update';
-                      console.log('这里保存')
-                  }
-                  if (url === '') return false;
-                  payList.push(obj);
-                  this.$post(url,{ payList })
-                      .then((response) => {   
-                      this.$message({ message: `已为你保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                      this.saveShow();
-                  }).catch(e => {
-                      this.loading = false;
-                      payRowList.length = 0;
-                      this.$message({
-                          type: 'info',
-                          message: '发生错误！'+e
-                      });
-                  })
-                  break;
-              default:    //此处为新建模式与修改模式
-                  console.log('此处为新建模式与修改模式')
-                  var payHead= this.payHead;
-                 
-                  if (this.uplist && (this.uplist.id || this.uplist.saveTime) ) {  //此处是修改清单
-                        console.log('此处是修改清单')
-                        if (!payHead.id || !payHead.tPayHeadRows) {
-                            payHead = this.uplist.payHead;
-                        }
-                        for (let index = this.payList.length -1; index >=0; index--) {
-                            var PayIndex = this.payList[index];
-                            if((PayIndex.saveTime === this.uplist.saveTime) || (PayIndex.id === this.uplist.id)){
-                                PayIndex.tPayHeadId = this.form.headerId;
-                                PayIndex.tTotalmeterageId = this.tTotalmeterageId;
-                                PayIndex.payRowList	 = [];
-                                PayIndex.payRowList	 = payRowList;
-                                PayIndex.name = this.form.name;
-                                PayIndex.num = this.form.num;
-                                PayIndex.payHead = payHead;
-                                PayIndex.updateTime = new Date();
-                                this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                                return this.saveShow();
-                            }
-                        }
-                  }else if (this.uplist) {  //此处是新建清单
-                        var obj = {
-                            tPayHeadId:this.form.headerId,
-                            processId: this.approval.id,
-                            sysOrder:'',
-                            sysNum:'',
-                            name:this.form.name,
-                            num:this.form.num,
-                            tenderId:this.tender.id,
-                            tTotalmeterageId: this.tTotalmeterageId,
-                            type:'pay',
-                            payRowList,
-                            payHead,//表头数据
-                            enter:this.list.length>0?1:0,
-                            tender:this.tender,
-                            saveTime:new Date(),
-                            saveEmployee:{name:this.$store.state.username}
-                        };
-                        this.payList.push(obj);
-                        this.$message({ message: `已为你保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                        return this.saveShow();
-                  }
-                
-          } 
+            this.loading = true;
+            var header = Object.keys(this.lastHeader), //用来所需要的所有列(obj)（属性）名
+            payHead = this.payHead, //表头数据
+            payRowList = [], //清单内容
+            payRowAddList = [],  //增
+            payRowDelList = [], //删
+            payRowAltList = [];  //改
 
+          // XEUtils.clone(up[r][colName], true);
+            try {
+                for (let index = list.length -1; index >=0 ; index--) {
+                    for (let i = header.length -1; i >=0; i--) {
+                        var listRows = list[index][header[i]];
+
+                        if (listRows && listRows.colNum) {
+                            // delete listRows.edit;
+                            listRows['formula'] = '';
+                            listRows['trNum'] = index+1;                  
+                            listRows['attribute'] = '';                  
+                            listRows['upload'] = 1;    
+                            if (!listRows.id) {  //无id则视为新增，新增到payRowAddList
+  
+                                payRowAddList.push(listRows);
+                            }else if ( listRows['id'] && listRows['alter'] ) {  //有id 与 alter 视为已修改过的数据 新增到payRowAltList
+                                payRowAltList.push(listRows);
+                            }
+                            payRowList.push(listRows);
+                        }
+                    }
+                }
+            } catch (error) {
+                this.loading = false;
+                console.log('保存数据遇到错误  :'+error)
+                return this.$message({ type: 'success',message: '存储失败，请联系相关技术人员!' });
+            }
+            // return false;
+            var obj = { //新建清单的时候需要用
+                tPayHeadId: this.form.headerId,    //清单表头id
+                processId: this.approval.id,         //审批单流程id
+                sysOrder: '',                   //系统序号  预留，暂不使用
+                sysNum: '',                    //系统编号  预留，暂不使用
+                name: this.form.name,               //清单名称
+                num: this.form.num,                 //清单编号
+                tenderId: this.tender.id,           //标段id
+                type: 'pay',                 //清单类别为”pay”
+                payRowAddList,  //增
+                payRowDelList,  //删
+                payRowAltList,  //改
+                enter:list.length>0?1:0,
+                tender:this.tender,
+                saveTime:new Date(),
+                saveEmployee:{name:this.$store.state.username}
+            };
+            if (this.mode !=='show') {
+                obj['payHead'] = payHead; //表头数据
+                obj['payRowList'] = payRowList; //清单内容
+            }
+            console.log('打印一下即将提交的参数obj')
+            console.log(obj)
+            //此处做个判断，判断是新建还是修改。
+            if (this.joinParent) {  //接入父组件的情况
+                if (this.uplist && !this.uplist.id && !this.uplist.saveTime ) {  //当前属于新建清单====
+                    switch(this.mode) {
+                        case 'show':  //为show模式
+                            this.loading = false;
+                            return this.$message({ type: 'success',message: '当前为show模式，在joinParent=true 时 不支持新建清单！' })
+                            break;
+                        default:  //为 alter模式与 new模式    
+                            this.payList.push(obj);
+                            this.$message({ message: `已为你保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                            return this.saveShow();                      
+                    } 
+                }else if (this.uplist && (this.uplist.id || this.uplist.saveTime)) {  //当前属于修改清单====
+                    switch(this.mode) {
+                        case 'show':  //为 show模式
+                            this.loading = false;
+                            return this.$message({ type: 'success',message: '当前为show模式，在joinParent=true 时 不支持更改清单！' })
+                            break;
+                        default:  //为 alter模式与 new模式 
+                            for (let index = this.payList.length -1; index >=0; index--) {
+                                var ListRow = this.payList[index];
+                                if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
+                                    ListRow.tPayHeadId = this.form.headerId;
+                                    ListRow.payRowList = payRowList;
+                                    ListRow.payRowAddList = payRowAddList;  //增
+                                    ListRow.payRowDelList = payRowDelList;  //删
+                                    ListRow.payRowAltList = payRowAltList;  //改
+                                    ListRow.name = this.form.name;
+                                    ListRow.num = this.form.num;
+                                    ListRow.payHead = payHead;
+                                    ListRow.updateTime = new Date();
+                                    if (ListRow.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
+                                        for (let b = this.payAltList.length -1; b >=0; b--) {
+                                            if (this.payAltList[b].id === ListRow.id ) {
+                                                delete this.payAltList[b];
+                                                break; //跳出此循环
+                                            }
+                                        }
+                                        this.payAltList.push(ListRow);
+                                    }
+                                    this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                                    return this.saveShow();
+                                }
+                                
+                            }
+                            
+                    } //switch的 }
+                }
+                
+            }else{    //不接入父组件的情况
+                  var parameter = {
+                      payAddList: [], //增清单
+                      payDelList: [],   //删清单
+                      payAltList: []  //改清单
+                  } 
+                  if (this.uplist && !this.uplist.id ) {  //当前为新建清单
+                      switch(this.mode) {
+                          case 'show':  //为show模式
+                              parameter.payAddList.push(obj);
+                              this.saveOneList( parameter ); //调用网络保存函数
+                              break;
+                          default:  //为 alter模式与 new模式    
+                              this.loading = false;
+                              return this.$message({ type: 'success',message: '当前为'+this.mode+'模式，在joinParent=false 时 不支持新建清单！' })
+                                                 
+                      } 
+                  }else{  //当前为修改清单
+                      switch(this.mode) {
+                          case 'show':  //为show模式
+                              obj.id = this.uplist.id;
+                              parameter.payAltList.push(obj);
+                              this.saveOneList( parameter ); //调用网络保存函数
+                              break;
+                          default:  //为 alter模式与 new模式    
+                              this.loading = false;
+                              return this.$message({ type: 'success',message: '当前为'+this.mode+'模式，在joinParent=false 时 不支持修改清单！' })
+                                                 
+                      } 
+                  }
+
+            }
         }
       })
     },
@@ -679,6 +694,19 @@ export default {
         this.showHeader = false;
         this.$nextTick(() => {  //强制重新渲染
             this.showHeader = true;
+        })
+    },
+    saveOneList ( obj ) {  //保存单个清单 仅show模式 且 this.joinParent=false 时可用
+        this.$post('/pay/update',obj )
+            .then((response) => {   
+            this.$message({ message: `已为你保存数据 `, type: 'success', duration: 3000, showClose: true })
+            return this.saveShow();   
+        }).catch(e => {
+            this.loading = false;
+            this.$message({
+                type: 'info',
+                message: '保存清单发生错误！'+e
+            });
         })
     },
     exportCsvEvent () {

@@ -35,7 +35,7 @@
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <elx-editable-column prop="num" label="变更清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="原清单名称" min-width="120" align="center" fixed="left"  :edit-render="{name: 'ElInput'}" >
+        <elx-editable-column prop="name" label="变更清单名称" min-width="120" align="center" fixed="left"  :edit-render="{name: 'ElInput'}" >
             <template slot-scope="scope">
               <el-link :underline="true" style="font-size:12px;" type="success" @click="see(scope.row)" >{{scope.row.name}}</el-link>
             </template>
