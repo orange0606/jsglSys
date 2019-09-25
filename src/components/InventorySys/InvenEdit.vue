@@ -93,9 +93,6 @@ export default {
     originalList:{  //父组件的清单列表
       type: Array,
     },
-    originalAltList:{    //修改清单数据列表，这个数据用于返回给父组件
-      type: Array,
-    },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
     },
     refresh:{ //显示此组件的变量
@@ -500,14 +497,16 @@ export default {
             originalHead = this.originalHead, //表头数据
             originalRowList = [], //清单内容
             originalRowAddList = [],  //增
-            originalRowDelList = this.RowDelList, //删
+            originalRowDelList = [], //删
             originalRowAltList = [];  //改
 
-            //查询上一次修改有无这个集合  ，有的话合并两个数组
-            if (this.uplist['originalRowDelList'] && this.uplist['originalRowDelList'].length) {
-                  console.log('this.RowDelList,   this.uplist[originalRowDelList]----------')
+             //查询上一次修改有无这个集合  ，有的话合并两个数组
+            if (this.uplist['originalRowDelList'] && this.uplist['originalRowDelList'].length >0) {
+                  console.log('已经开始二次修改删除操作 this.RowDelList,   this.uplist[originalRowDelList]----------')
                   console.log(this.RowDelList,this.uplist['originalRowDelList'])
                   originalRowDelList = this.RowDelList.concat(this.uplist['originalRowDelList']);  //删
+             }else{
+                  originalRowDelList = this.RowDelList;
              }
           
             try {
@@ -589,14 +588,8 @@ export default {
                                     ListRow.num = this.form.num;
                                     ListRow.originalHead = originalHead;
                                     ListRow.updateTime = new Date();
-                                    if (ListRow.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
-                                        for (let b = this.originalAltList.length -1; b >=0; b--) {
-                                            if (this.originalAltList[b].id === ListRow.id ) {
-                                                delete this.originalAltList[b];
-                                                break; //跳出此循环
-                                            }
-                                        }
-                                        this.originalAltList.push(ListRow);
+                                    if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
+                                        ListRow.alter ='Y'; //标记为修改
                                     }
                                     this.$message({ message: `已为你修改---保存 ${originalRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();

@@ -167,9 +167,6 @@ export default {
     changeList:{  //父组件的清单列表
       type: Array,
     },
-    changeAltList:{    //修改清单数据列表，这个数据用于返回给父组件
-      type: Array,
-    },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
     },
     refresh:{ //显示此组件的变量
@@ -513,7 +510,7 @@ export default {
                 rest[index][this.hd[i]] = {attribute: null,colNum: this.hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:listlen+index+1,upload: 1 };
             }
         }
-        console.log('打印一下rest1---')
+        console.log('打印一下1rest1---')
         console.log(rest)
         //现在进行遍历属性把原清单数据加入进去
         for (let c = this.hd.length -1; c >= 0; c--) {
@@ -613,7 +610,7 @@ export default {
           NewRow['seq'] = restLen;
           NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: '新增 ', tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
-      console.log()
+   
       
       //现在进行遍历属性把原清单数据加入进去
         for (let c = this.hd.length -1; c >= 0; c--) {
@@ -651,6 +648,7 @@ export default {
 
     },
     RemoveSelecteds () {  //删除选中
+      this.hd = Object.keys(this.lastHeader);
       var selection = this.$refs.elxEditable1.getSelecteds(),
       seleLen = selection.length;
       // console.log('seleLen')
@@ -667,7 +665,8 @@ export default {
               }
           }
       }
-      console.log('获取已选中数据')
+      console.log('获取已选中数据'+seleLen,'----',selection)
+      console.log(this.RowDelList)
     },
     Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
@@ -703,15 +702,18 @@ export default {
             changeHead = this.changeHead, //表头数据
             changeRowList = [], //清单内容
             changeRowAddList = [],  //增
-            changeRowDelList = this.RowDelList, //删
+            changeRowDelList = [], //删
             changeRowAltList = [];  //改
 
             //查询上一次修改有无这个集合  ，有的话合并两个数组
-            if (this.uplist['changeRowDelList'] && this.uplist['changeRowDelList'].length) {
-                  console.log('this.RowDelList,   this.uplist[changeRowDelList]----------')
+            if (this.uplist['changeRowDelList'] && this.uplist['changeRowDelList'].length >0) {
+                  console.log('已经开始二次修改删除操作 this.RowDelList,   this.uplist[changeRowDelList]----------')
                   console.log(this.RowDelList,this.uplist['changeRowDelList'])
                   changeRowDelList = this.RowDelList.concat(this.uplist['changeRowDelList']);  //删
+             }else{
+                  changeRowDelList = this.RowDelList;
              }
+
           
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
@@ -721,7 +723,7 @@ export default {
                             // delete listRows.edit;
                             listRows['formula'] = '';
                             listRows['trNum'] = index+1;                  
-                            listRows['attribute'] = '';                  
+                            // listRows['attribute'] = '';                  
                             listRows['upload'] = 1;    
                             if (!listRows['id']) {  //无id则视为新增，新增到changeRowAddList
                                 changeRowAddList.push(listRows);
@@ -792,14 +794,8 @@ export default {
                                     ListRow.num = this.form.num;
                                     ListRow.changeHead = changeHead;
                                     ListRow.updateTime = new Date();
-                                    if (ListRow.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
-                                        for (let b = this.changeAltList.length -1; b >=0; b--) {
-                                            if (this.changeAltList[b].id === ListRow.id ) {
-                                                delete this.changeAltList[b];
-                                                break; //跳出此循环
-                                            }
-                                        }
-                                        this.changeAltList.push(ListRow);
+                                     if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
+                                        ListRow.alter ='Y'; //标记为修改
                                     }
                                     this.$message({ message: `已为你修改---保存 ${changeRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();

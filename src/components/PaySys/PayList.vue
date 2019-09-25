@@ -7,6 +7,8 @@
             <span v-if="edit">
                 <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+                <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="Console">打印一下增删改集合</el-button>
+
                 <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
             </span>
             <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
@@ -82,7 +84,7 @@
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
-              <new-pay :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :payList="payList" :payAltList="payAltList" :mode="mode" :joinParent="joinParent" ></new-pay>
+              <new-pay :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :payList="payList" :mode="mode" :joinParent="joinParent" ></new-pay>
               <br>
           </el-dialog>
         </transition>
@@ -122,12 +124,12 @@ import XEUtils from 'xe-utils';
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default:false   
+      default:true   
     },
     approval:{
       type: Object,
@@ -182,15 +184,8 @@ import XEUtils from 'xe-utils';
                 this.$nextTick(() => {
                     this.list = this.payList;
                 }); // 强制刷新
-                //此处作判断是否有新增的数据进来（循环判断）
-                this.payAddList.length = 0;
-                for (let index = this.payList.length - 1; index >= 0; index--) {
-                    if( !this.payList[index].id ) {
-                        this.payAddList.push(this.payList[index]);
-                        console.log('此处打印一下this.payAddList 数组 this.payList -------this.payAddList')
-                        console.log(this.payList, this.payAddList)
-                    }
-                }
+                this.watchList(this.payList);  //监听清单列表 判断增/改 添加到对应增改集合
+                
             }
             this.visibleNew = false; //关闭显示
         }
@@ -201,6 +196,38 @@ import XEUtils from 'xe-utils';
     // }
   },
   methods: {
+    watchList (list) {  //监听清单列表 判断增/改 添加到对应增改集合
+        this.payAltList.length = this.payAddList.length = 0;
+        for (let index = list.length - 1; index >= 0; index--) {
+            if( !list[index].id ) { //无id的情况（新增清单）
+                this.payAddList.push(list[index]);
+                
+            }if (list[index].id && list[index].alter && list[index].alter==='Y') { //修改清单
+                this.payAltList.push(list[index]);
+            }
+        }
+        console.log('此处打印一下清单列表增删改')
+        console.log('this.payList')
+        console.log(this.payList)
+        console.log(' this.payAddList,')
+        console.log( this.payAddList,)
+        console.log('this.payDelList')
+        console.log(this.payDelList)        
+        console.log('this.payAltList')
+        console.log(this.payAltList)
+    },
+    Console () {
+        console.log('此处打印一下清单列表增删改')
+        console.log('this.payList')
+        console.log(this.payList)
+        console.log(' this.payAddList,')
+        console.log( this.payAddList,)
+        console.log('this.payDelList')
+        console.log(this.payDelList)        
+        console.log('this.payAltList')
+        console.log(this.payAltList)
+
+    },
     modeType ( type ) {
         if (this.joinParent) { //判断父组件是否传来数据
             //此处设置不需要分页
@@ -422,6 +449,7 @@ import XEUtils from 'xe-utils';
             for (let index = 0; index < rest.length; index++) {
                 this.payList.push(rest[index]); 
             }
+            this.watchList(this.payList);  //监听清单列表 判断增/改 添加到对应增改集合
             this.$message({type: 'success', message: '删除所选选项成功!'})
         }
     },
@@ -477,6 +505,7 @@ import XEUtils from 'xe-utils';
                 for (let index = 0; index < rest.length; index++) {
                     this.payList.push(rest[index]); 
                 }
+                this.watchList(this.payList);  //监听清单列表 判断增/改 添加到对应增改集合
                 this.loading = false;
                 this.$message({
                     type: 'success',
@@ -515,13 +544,14 @@ import XEUtils from 'xe-utils';
                     });
                 })
             }else { //此处为新建模式与修改模式所需要的引用赋值操作
+                if ( row.id ) row.alter='Y'; //标记为修改
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-                if ( row.id ) this.payAltList.push(row); //添加到修改集合
 
                 this.payList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
                     this.payList.push(rest[index]); 
                 }
+                this.watchList(this.payList);  //监听清单列表 判断增/改 添加到对应增改集合
                 this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true });
                 this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
             }

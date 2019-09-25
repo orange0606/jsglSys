@@ -7,6 +7,8 @@
             <span v-if="edit">
                 <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
+                <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="Console">打印一下增删改集合</el-button>
+
                 <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
             </span>
             <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
@@ -82,7 +84,7 @@
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
-              <new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :meterageAltList="meterageAltList" :mode="mode" :joinParent="joinParent" ></new-meterage>
+              <new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" :joinParent="joinParent" ></new-meterage>
               <br>
           </el-dialog>
         </transition>
@@ -122,12 +124,12 @@ import XEUtils from 'xe-utils';
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default:false   
+      default:true   
     },
     approval:{
       type: Object,
@@ -168,6 +170,8 @@ import XEUtils from 'xe-utils';
     meterageList: function ( newVal,oldVal ) {
         //此处判断父组件传来的展示模式类型
         this.modeType ( this.mode );
+        //此处作判断是否有新增的数据进来（循环判断）
+        
         
     },
     visibleNew: function ( newVal,oldVal ) {
@@ -183,15 +187,7 @@ import XEUtils from 'xe-utils';
                 this.$nextTick(() => {
                     this.list = this.meterageList;
                 }); // 强制刷新
-                //此处作判断是否有新增的数据进来（循环判断）
-                this.meterageAltList.length = 0;
-                for (let index = this.originalList.length - 1; index >= 0; index--) {
-                    if( !this.meterageList[index].id ) {
-                        this.meterageAltList.push(this.meterageList[index]);
-                        console.log('此处打印一下this.meterageAltList 数组 this.meterageList -------this.meterageAltList')
-                        console.log(this.meterageList, this.meterageAltList)
-                    }
-                }
+                this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
             }
             this.visibleNew = false; //关闭显示
         }
@@ -202,6 +198,38 @@ import XEUtils from 'xe-utils';
     // }
   },
   methods: {
+    watchList (list) {  //监听清单列表 判断增/改 添加到对应增改集合
+        this.meterageAltList.length = this.meterageAddList.length = 0;
+        for (let index = list.length - 1; index >= 0; index--) {
+            if( !list[index].id ) { //无id的情况（新增清单）
+                this.meterageAddList.push(list[index]);
+                
+            }if (list[index].id && list[index].alter && list[index].alter==='Y') { //修改清单
+                this.meterageAltList.push(list[index]);
+            }
+        }
+        console.log('此处打印一下清单列表增删改')
+        console.log('this.meterageList')
+        console.log(this.meterageList)
+        console.log(' this.meterageAddList,')
+        console.log( this.meterageAddList,)
+        console.log('this.meterageDelList')
+        console.log(this.meterageDelList)        
+        console.log('this.meterageAltList')
+        console.log(this.meterageAltList)
+    },
+    Console () {
+        console.log('此处打印一下清单列表增删改')
+        console.log('this.meterageList')
+        console.log(this.meterageList)
+        console.log(' this.meterageAddList,')
+        console.log( this.meterageAddList,)
+        console.log('this.meterageDelList')
+        console.log(this.meterageDelList)        
+        console.log('this.meterageAltList')
+        console.log(this.meterageAltList)
+
+    },
     modeType ( type ) {
         if (this.joinParent) { //判断父组件是否传来数据
             this.list = this.meterageList;
@@ -422,6 +450,7 @@ import XEUtils from 'xe-utils';
             for (let index = 0; index < rest.length; index++) {
                 this.meterageList.push(rest[index]); 
             }
+            this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
             this.$message({type: 'success', message: '删除所选选项成功!'})
         }
     },
@@ -469,14 +498,13 @@ import XEUtils from 'xe-utils';
                     for (let a = removeRecords.length -1; a >= 0; a--) {
                         if ( removeRecords[a].id ) this.meterageDelList.push(removeRecords[a]);
                     }
-                    console.log('删除多个个清单需记录  this.meterageDelList，此处显示     removeRecords ------this.meterageDelList');
-                    console.log(removeRecords,this.meterageDelList);
                 }
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
                 this.meterageList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
                     this.meterageList.push(rest[index]); 
                 }
+                this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
                 this.loading = false;
                 this.$message({
                     type: 'success',
@@ -498,12 +526,12 @@ import XEUtils from 'xe-utils';
         if (valid) {
             if (this.mode === 'show') {
                 var obj = {
-                    originalAddList: [],    //增
-                    originalDelList: [],     //删 
-                    originalAltList: []   //改
+                    meterageAddList: [],    //增
+                    meterageDelList: [],     //删 
+                    meterageAltList: []   //改
                 };
-                if (row.id) obj.originalAltList.push(row);
-                this.$post('/original/update',obj)
+                if (row.id) obj.meterageAltList.push(row);
+                this.$post('/meterage/update',obj)
                     .then((response) => {   
                     this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
                     this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })
@@ -515,13 +543,14 @@ import XEUtils from 'xe-utils';
                     });
                 })
             }else { //此处为新建模式与修改模式所需要的引用赋值操作
+                // if ( row.id ) this.meterageAltList.push(row); //添加到修改集合
+                if ( row.id ) row.alter='Y'; //标记为修改
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-                if ( row.id ) this.originalAltList.push(row); //添加到修改集合
-
-                this.originalList.length = 0;
+                this.meterageList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
-                    this.originalList.push(rest[index]); 
+                    this.meterageList.push(rest[index]); 
                 }
+                this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
                 this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true });
                 this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
             }

@@ -92,9 +92,6 @@ export default {
     payList: { //所有计量清单列表
       type: Array,
     },
-    payAltList:{    //修改清单数据列表，这个数据用于返回给父组件
-      type: Array,
-    },
     mode:{  //子组件的展示模式
       type: String, 
     },
@@ -148,8 +145,6 @@ export default {
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
-    this.rowDrop();//调用表格行拖拽函数
-
   },
   mounted () {
 
@@ -396,16 +391,7 @@ export default {
         });
     },
 
-    handleSizeChange (pageSize) { 
-      this.pageVO.pageSize = pageSize;
-      this.allRelationUpdate();
-    },
-    handleCurrentChange (currentPage) {
-      this.pageVO.currentPage = currentPage
-      this.allRelationUpdate();
-    },
-
-    importfxx() { //表头导入函数
+    importfxx() { //清单导入函数
         this.loading = true;
         this.hd.length = this.list.length = 0; //归为初始化状态
         this.startTime = Date.now(); 
@@ -446,18 +432,20 @@ export default {
                             // console.log('进来了totalmeterage-head-total')
                             //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                             if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
-                                // var tohd = Object.keys(this.tometerageRowList[0]);
-                                // console.log('this.tometerageRowList---------')
-                                // console.log(this.tometerageRowList,colName)
-                                var number = null;
+                 
+                                // var number = null;
+                                // for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
+                                //     number += (this.tometerageRowList[d][colName].td)*1;
+                                //     // number += (this.tometerageRowList[d][colName].td).toFixed(2);
+                                // }
+                                // Rlist.td = number.toFixed(2);
+                                var sumTd = [];
                                 for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
-                                    number += (this.tometerageRowList[d][colName].td)*1;
-                                    // number += (this.tometerageRowList[d][colName].td).toFixed(2);
+                                    sumTd.push(this.tometerageRowList[d][colName])
                                 }
-                                Rlist.td = number.toFixed(2);
-                                // console.log('进来了totalmeterage-head-total ----Rlist.td = number   ==number',number)
-                                // console.log('进来了totalmeterage-head-total----Rlist')
-                                // console.log(this.tometerageRowList,colName)
+                                Rlist.td = XEUtils.sum(sumTd, 'td');
+                                Rlist.td = this.$excel.Count(Rlist.td);
+                               
                             }else{  //无数据默认为0
                                 Rlist.td = 0;
                                 // console.log('进来了totalpay-pay-----Rlist ----为0')
@@ -550,6 +538,14 @@ export default {
             payRowDelList = [], //删
             payRowAltList = [];  //改
 
+            //查询上一次修改有无这个集合  ，有的话合并两个数组
+            if (this.uplist['payRowDelList'] && this.uplist['payRowDelList'].length >0) {
+                  console.log('已经开始二次修改删除操作 this.RowDelList,   this.uplist[payRowDelList]----------')
+                  console.log(this.RowDelList,this.uplist['payRowDelList'])
+                  payRowDelList = this.RowDelList.concat(this.uplist['payRowDelList']);  //删
+             }else{
+                  payRowDelList = this.RowDelList;
+             }
           // XEUtils.clone(up[r][colName], true);
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
@@ -633,14 +629,8 @@ export default {
                                     ListRow.num = this.form.num;
                                     ListRow.payHead = payHead;
                                     ListRow.updateTime = new Date();
-                                    if (ListRow.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
-                                        for (let b = this.payAltList.length -1; b >=0; b--) {
-                                            if (this.payAltList[b].id === ListRow.id ) {
-                                                delete this.payAltList[b];
-                                                break; //跳出此循环
-                                            }
-                                        }
-                                        this.payAltList.push(ListRow);
+                                    if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
+                                        ListRow.alter ='Y'; //标记为修改
                                     }
                                     this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();

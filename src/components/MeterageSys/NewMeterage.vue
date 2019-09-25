@@ -118,17 +118,7 @@
       :edit-config="{render: 'scroll', renderSize: 80}"
       style="width: 100%">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-      <elx-editable-column width="40" align="center" >
-        <template v-slot:header="scope">
-          <el-tooltip class="item" placement="top">
-            <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
-        </template>
-        <template>
-          <i class="el-icon-rank drag-btn"></i>
-        </template>
-      </elx-editable-column>
+  
       <elx-editable-column type="index" width="60" align="center" >
         <template v-slot:header>
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
@@ -159,9 +149,6 @@ export default {
       type: Object,
     },
     meterageList: { //所有计量清单列表
-      type: Array,
-    },
-    meterageAltList:{    //修改清单数据列表，这个数据用于返回给父组件
       type: Array,
     },
     mode:{  //子组件的展示模式
@@ -660,9 +647,9 @@ export default {
         return {};
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >2) {  //带选择框的情况
-            if (row[this.hd[columnIndex-3]]) {
-                return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
+        if (columnIndex >1) {  //带选择框的情况
+            if (row[this.hd[columnIndex-2]]) {
+                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
             }
         }
         return [1, 1]
@@ -697,8 +684,7 @@ export default {
           NewRow['seq'] = restLen;
           NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: 0, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
-      console.log()
-      
+   
       //现在进行遍历属性把原清单数据加入进去
         for (let c = this.hd.length -1; c >= 0; c--) {
             var row = sumArr[this.hd[c]],
@@ -791,15 +777,18 @@ export default {
             meterageHead = this.meterageHead, //表头数据
             meterageRowList = [], //清单内容
             meterageRowAddList = [],  //增
-            meterageRowDelList = this.RowDelList, //删
+            meterageRowDelList = [], //删
             meterageRowAltList = [];  //改
 
             //查询上一次修改有无这个集合  ，有的话合并两个数组
-            if (this.uplist['meterageRowDelList'] && this.uplist['meterageRowDelList'].length) {
-                  console.log('this.RowDelList,   this.uplist[meterageRowDelList]----------')
+            if (this.uplist['meterageRowDelList'] && this.uplist['meterageRowDelList'].length >0) {
+                  console.log('已经开始二次修改删除操作 this.RowDelList,   this.uplist[meterageRowDelList]----------')
                   console.log(this.RowDelList,this.uplist['meterageRowDelList'])
                   meterageRowDelList = this.RowDelList.concat(this.uplist['meterageRowDelList']);  //删
+             }else{
+                  meterageRowDelList = this.RowDelList;
              }
+
           // XEUtils.clone(up[r][colName], true);
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
@@ -883,14 +872,8 @@ export default {
                                     ListRow.num = this.form.num;
                                     ListRow.meterageHead = meterageHead;
                                     ListRow.updateTime = new Date();
-                                    if (ListRow.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
-                                        for (let b = this.meterageAltList.length -1; b >=0; b--) {
-                                            if (this.meterageAltList[b].id === ListRow.id ) {
-                                                delete this.meterageAltList[b];
-                                                break; //跳出此循环
-                                            }
-                                        }
-                                        this.meterageAltList.push(ListRow);
+                                    if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
+                                        ListRow.alter ='Y'; //标记为修改
                                     }
                                     this.$message({ message: `已为你修改---保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();
