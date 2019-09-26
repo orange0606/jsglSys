@@ -130,7 +130,7 @@ import XEUtils from 'xe-utils'
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default: true 
+      default: true
     },
     approval:{
       type: Object,

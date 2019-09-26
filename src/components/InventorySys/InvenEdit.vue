@@ -119,6 +119,7 @@ export default {
       PackHeader:[],//已组装的表头数据
       list: [], //表格数据
       RowDelList: [],//记录被删除有id的单元格
+      lastHeader: null,
     }
   },
  watch: {
@@ -179,13 +180,11 @@ export default {
           try {
               var headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-              this.$nextTick(() => {
-                  this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-                  //调用表格公式解析 存储
-                  this.formula = this.$excel.FormulaAnaly([...this.col]);
-                  //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
-                  this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-              }); // 强制刷新
+              this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              //调用表格公式解析 存储
+              this.formula = this.$excel.FormulaAnaly([...this.col]);
+              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              this.lastHeader = this.$excel.BikoFoArr([...this.col]);
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -206,7 +205,7 @@ export default {
           try {
               var arr = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
               this.list = [...arr];
-              this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -265,6 +264,7 @@ export default {
         //此处请求一个审批单的一个原清单
         this.$post('/original/row/getone',{ id })
             .then((response) => {
+            console.log('response-----------------------------')
             console.log(response)
             var data = response.data.original;
             // this.list = response.data.originalList.list;
@@ -278,8 +278,9 @@ export default {
 
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-            this.originalHead = { //保存表头信息
-                name:data.originalHead.name,
+            this.originalHead = { //.保存表头信息
+                id: data.originalHead.id,
+                name: data.originalHead.name,
                 num: data.originalHead.num
             };
             if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
@@ -459,19 +460,14 @@ export default {
     Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         try {
-            console.log('sub--------------')
-            console.log(sub)
-            
             for (let index = list.length -1; index >= 0; index--) {
-                console.log('sub->>>>>>>>>>>>>-----index break')
-                console.log(sub, index)
                 if (sub > index) break;
                 list[index]['seq']=index;  //更新索引
                 for (let a = this.hd.length -1; a >= 0; a--) {
                     var item = list[index][this.hd[a]];
                     item.trNum = index+1;
-                    console.log('item.trNum--'+item.trNum)
-                    if (item['id']) item['alter'] = 'Y';   
+                    // console.log('item.trNum--'+item.trNum)
+                    if (item['id']) list[index]['alter'] = 'Y';   
                 }
             }
             this.$nextTick(() => {
@@ -482,7 +478,6 @@ export default {
             console.log('删除后重新排序出了问题'+error);
             return this.$message({ type: 'success',message: '删除后重新排序出了问题，请联系相关技术人员!' });
         }
-        
 
     },
 
@@ -521,7 +516,8 @@ export default {
                             listRows['upload'] = 1;    
                             if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
                                 originalRowAddList.push(listRows);
-                            }else if ( listRows['id'] && listRows['alter'] ) {  //有id 与 alter 视为已修改过的数据 新增到originalRowAltList
+                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter'])) {  //有id 与 alter 视为已修改过的数据 新增到originalRowAddList
+                                listRows['alter'] = "Y";
                                 originalRowAltList.push(listRows);
                             }
                             originalRowList.push(listRows);

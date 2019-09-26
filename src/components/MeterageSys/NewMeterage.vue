@@ -271,13 +271,12 @@ export default {
           try {
               var headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-              this.$nextTick(() => {
-                    this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-                    //调用表格公式解析 存储
-                    this.formula = this.$excel.FormulaAnaly([...this.col]);
-                    //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
-                    this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-                }); // 强制刷新
+              
+              this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              //调用表格公式解析 存储
+              this.formula = this.$excel.FormulaAnaly([...this.col]);
+              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              this.lastHeader = this.$excel.BikoFoArr([...this.col]);
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -298,7 +297,7 @@ export default {
           try {
               var arr = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
               this.list = [...arr];
-              this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -380,12 +379,12 @@ export default {
             this.meterageHead = { //保存表头信息
                 name: data.meterageHead.name,
                 num: data.meterageHead.num
-            }
+            };
             if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
                 this.meterageHead.refCol = data.meterageHead.refCol;
                 this.meterageHead.refRow = data.meterageHead.refRow;
                 this.meterageHead.tMeterageHeadRows = data.meterageHead.tMeterageHeadRows;
-            }
+            };
             this.allRelationUpdate( data.meterageHead.id ); //调用请求可导入所有对应的新清单列表
             this.loading = false;
             this.list.length = this.hd.length = 0;
@@ -431,7 +430,6 @@ export default {
           }else{
               return this.tomeRowList = arr;
           }
-
           this.tomeRowList = arr;
           // console.log('response--------------')
           // console.log(response)
@@ -457,7 +455,6 @@ export default {
                   }
               }
           }
-
         }).catch(e => {
             this.$message({
               type: 'info',
@@ -741,7 +738,7 @@ export default {
       console.log('获取已选中数据'+seleLen,'----',selection)
       console.log(this.RowDelList)
     },
-    Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
+   Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         try {
             for (let index = list.length -1; index >= 0; index--) {
@@ -750,7 +747,8 @@ export default {
                 for (let a = this.hd.length -1; a >= 0; a--) {
                     var item = list[index][this.hd[a]];
                     item.trNum = index+1;
-                    if (item['id']) item['alter'] = 'Y';   
+                    // console.log('item.trNum--'+item.trNum)
+                    if (item['id']) list[index]['alter'] = 'Y';   
                 }
             }
             this.$nextTick(() => {
@@ -761,7 +759,6 @@ export default {
             console.log('删除后重新排序出了问题'+error);
             return this.$message({ type: 'success',message: '删除后重新排序出了问题，请联系相关技术人员!' });
         }
-        
 
     },
   submitEvent () {
@@ -804,7 +801,8 @@ export default {
 
                             if (!listRows.id) {  //无id则视为新增，新增到meterageRowAddList
                                 meterageRowAddList.push(listRows);
-                            }else if ( listRows['id'] && listRows['alter'] ) {  //有id 与 alter 视为已修改过的数据 新增到meterageRowAltList
+                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter'])) {  //有id 与 alter 视为已修改过的数据 新增到meterageRowAddList
+                                listRows['alter'] = "Y";
                                 meterageRowAltList.push(listRows);
                             }
                             meterageRowList.push(listRows);

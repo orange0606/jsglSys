@@ -357,8 +357,14 @@ excelmodel = {
                         try{
                             // console.log(arr[i].sheets[key])
                             var cos = ABC.indexOf(key.match(patt1)[0]),  //选择所有的大写字母进行查询当作列下标
-                            row = parseInt(key.match(patt2)[0])-1;   //选择所有的数字,当作行下标
-                            data[row][ABC[cos]].td = arr[i].sheets[key].v;   //给空数据加入真实的数据
+                            row = parseInt(key.match(patt2)[0])-1,   //选择所有的数字,当作行下标
+                            Td = arr[i].sheets[key].v;
+                            
+                            if (!Number.isNaN(Number(Td))) {
+                                Td = this.Count(Td);
+                            }
+                            data[row][ABC[cos]].td = Td;   //给空数据加入真实的数据
+                            
                         }
                         catch (e) {
                             Message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
@@ -609,12 +615,7 @@ excelmodel = {
     使用引用赋值
     */
     Calculation (type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
-        //此处做一个修改单元格标记col['alter'] = 'Y' 代表此单元格修改过
-        if (col['id']) col['alter'] = 'Y';
-         
-        console.log('代表此单元格修改过')
-        console.log(row)
-        console.log(col)
+
         if(type !=='original'){
             col['td'] = Number(col['td']);
             if (Number.isNaN(col['td'])) {
@@ -639,7 +640,14 @@ excelmodel = {
             console.log(error);
             return Message({ message: '这边出现了点问题，貌似是公式错误，请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
         }
-        F = fkeys = row = col = patt1 = strArr = Eval = null;
+        //此处做一个修改单元格标记col['alter'] = 'Y' 代表此单元格修改过
+        // if (col['id']) col['alter'] = 'Y';
+        
+        if (col['id']) row['alter'] = 'Y';
+        console.log('代表此单元格修改过')
+        console.log(row)
+        console.log(col)
+        F = fkeys = row = col = patt1 = Eval = null;
     },
     getSummaries (PackHeader, list, param) {  //合计
         // console.log('是不是每次都进来了呀'+Math.random()*100)

@@ -190,13 +190,13 @@ export default {
           try {
               var headsArr = this.$excel.Package(row.payHead.tPayHeadRows,row.payHead.refCol,row.payHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-              this.$nextTick(() => {
-                    this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-                    //调用表格公式解析 存储
-                    this.formula = this.$excel.FormulaAnaly([...this.col]);
-                    //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
-                    this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-                }); // 强制刷新
+              
+              this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              //调用表格公式解析 存储
+              this.formula = this.$excel.FormulaAnaly([...this.col]);
+              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+                
           } catch (error) {
               console.log(error)
               this.$message({
@@ -221,7 +221,7 @@ export default {
               var arr = this.$excel.ListAssemble(row.payRowList	); //组装清单表格数据
               this.list = [...arr];
               this.findList(); //调用滚动渲染数据
-              this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
           } catch (error) {
               this.$message({
                   type: 'info',
@@ -561,7 +561,8 @@ export default {
                             if (!listRows.id) {  //无id则视为新增，新增到payRowAddList
   
                                 payRowAddList.push(listRows);
-                            }else if ( listRows['id'] && listRows['alter'] ) {  //有id 与 alter 视为已修改过的数据 新增到payRowAltList
+                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter'])) {  //有id 与 alter 视为已修改过的数据 新增到payRowAddList
+                                listRows['alter'] = "Y";
                                 payRowAltList.push(listRows);
                             }
                             payRowList.push(listRows);
