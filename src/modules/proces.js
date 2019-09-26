@@ -615,16 +615,15 @@ excelmodel = {
     使用引用赋值
     */
     Calculation (type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
-
-        if(type !=='original'){
-            col['td'] = Number(col['td']);
-            if (Number.isNaN(col['td'])) {
-                col['td'] = 0;
-            }
-            col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
-        }else{
+        if (col['id']) row['alter'] = 'Y';
+        
+        if (Number.isNaN(Number(col['td']))) {
+            // col['td'] = 0;
             col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
+            return false;
         }
+        col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
+        
         var Eval = null,
         fkeyslen = fkeys.length;
         try {
@@ -643,7 +642,6 @@ excelmodel = {
         //此处做一个修改单元格标记col['alter'] = 'Y' 代表此单元格修改过
         // if (col['id']) col['alter'] = 'Y';
         
-        if (col['id']) row['alter'] = 'Y';
         console.log('代表此单元格修改过')
         console.log(row)
         console.log(col)

@@ -7,8 +7,8 @@ import axios from 'axios';
 const global = window.global;
 axios.defaults.withCredentials = true;  //axios  请求带上cookie
 axios.defaults.timeout = 600000;
-// axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.226:8080';
-axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.196:8080';
+axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.226:8080';
+// axios.defaults.baseURL = global && global.url ? global.url : 'http://192.168.2.196:8080';
 // axios.defaults.baseURL ='http://192.168.0.226:8080';
 // axios.defaults.baseURL ='http://192.168.0.196:8080';
 

@@ -115,17 +115,7 @@
       :edit-config="{render: 'scroll', renderSize: 80}"
       style="width: 100%">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-      <elx-editable-column width="40" align="center" >
-        <template v-slot:header="scope">
-          <el-tooltip class="item" placement="top">
-            <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
-        </template>
-        <template>
-          <i class="el-icon-rank drag-btn"></i>
-        </template>
-      </elx-editable-column>
+     
       <elx-editable-column type="index" width="60" align="center" >
         <template v-slot:header>
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
@@ -554,10 +544,28 @@ export default {
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+
             var str = column.property,
-            colName = str.substr(0,str.indexOf(".td"));
+            colName = str.substr(0,str.indexOf(".td")),
+            patt1=/[A-Z+]*/g,
+            sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'fluctuate') return false;
+
+            if (this.lastHeader[colName].attribute !== 'fluctuate') {
+                 if (!row[colName].attribute) return false;
+                if (row[colName].attribute !=='add') return false;
+            };
+
+            //现在进行遍历属性把原数量，禁止修改
+            for (let c = this.hd.length -1; c >= 0; c--) {
+                var hederRow = sumArr[this.hd[c]],
+                Atr = hederRow.attributeValue;
+                if (hederRow.attribute && hederRow.attribute === "fluctuate" && hederRow.attributeValue && hederRow.attributeValue !="") {
+                    let col = Atr.match(patt1)[0];
+                    if (col === colName)  return false;
+                }
+            }
+
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
@@ -569,15 +577,20 @@ export default {
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'fluctuate') return false;
-            return {'background':'#FFFACD'}
+            if (this.lastHeader[colName].attribute !== 'fluctuate') {
+                if (row[colName].attribute && row[colName].attribute==='add') {
+                    return {'background':'#99ff005c'} //新增一行的颜色
+                }
+                return {}
+            }
+            return {'background':'#FFFFE0'} //编辑区颜色
         }  
-        return {};
+        return {'background':'#FFFFFF'};
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >2) {  //带选择框的情况
-            if (row[this.hd[columnIndex-3]]) {
-                return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
+        if (columnIndex >1) {  //带选择框的情况
+            if (row[this.hd[columnIndex-2]]) {
+                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
             }
         }
         return [1, 1]
@@ -600,18 +613,21 @@ export default {
     },
     
     insertEvent () {
+      this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+      this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+      if (!this.hd.length || this.hd.length===0) return false;
       // console.log('进来了吗')
       var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
       restLen = rest.length,
       NewRow = {},
       patt1=/[A-Z+]*/g,
       sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
+      
       for (let index = this.hd.length -1; index >= 0; index--) {
           NewRow['seq'] = restLen;
-          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: '新增 ', tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
+          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
-   
-      
+
       //现在进行遍历属性把原清单数据加入进去
         for (let c = this.hd.length -1; c >= 0; c--) {
             var row = sumArr[this.hd[c]],

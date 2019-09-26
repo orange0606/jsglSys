@@ -185,6 +185,7 @@ export default {
               this.formula = this.$excel.FormulaAnaly([...this.col]);
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -205,7 +206,6 @@ export default {
           try {
               var arr = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
               this.list = [...arr];
-              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -239,6 +239,8 @@ export default {
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = [];  //新建一个数组存储多级表头嵌套
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+        this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+        this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
         this.originalHead = { //保存表头编号与名称
           id: data.id,
           name: data.name,
@@ -278,6 +280,7 @@ export default {
 
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+            this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             this.originalHead = { //.保存表头信息
                 id: data.originalHead.id,
                 name: data.originalHead.name,
@@ -292,7 +295,6 @@ export default {
             this.list.length = this.hd.length = 0;
             var arr = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
             this.list = [...arr];
-            this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                 this.list[index]['seq'] = index;
             }
@@ -373,7 +375,6 @@ export default {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
             var str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
-            // console.log(colName)
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态
         }  
@@ -403,12 +404,15 @@ export default {
     },
     insertEvent () {
       // console.log('进来了吗')
+      this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+      this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+      if (!this.hd.length || this.hd.length===0) return false;
       var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
       restLen = rest.length,
       NewRow = {};
       for (let index = this.hd.length -1; index >= 0; index--) {
           NewRow['seq'] = restLen;
-          NewRow[this.hd[index]]= {attribute: null,colNum: this.hd[index],edit: "N",formula:null,td: restLen+1, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
+          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
       console.log('打印一下NewRow 新增的一行')
       console.log(NewRow);

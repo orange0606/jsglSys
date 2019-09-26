@@ -618,15 +618,43 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
+        // if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
+        // this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
+        // if (column.property) {
+        // // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+        //     var str = column.property,
+        //     colName = str.substr(0,str.indexOf(".td"));
+
+        //     //判断是否哪种属性类型允许单元格编辑
+        //     if (this.lastHeader[colName].attribute !== 'meterage') return false;
+        //     this.editRow = row[colName];
+        //     row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
+        // }  
+
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
-        // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            var str = column.property,
-            colName = str.substr(0,str.indexOf(".td"));
+            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
 
+            var str = column.property,
+            colName = str.substr(0,str.indexOf(".td")),
+            patt1=/[A-Z+]*/g,
+            sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'meterage') return false;
+
+            if (this.lastHeader[colName].attribute !== 'meterage') {
+                 if (!row[colName].attribute) return false;
+                if (row[colName].attribute !=='add') return false;
+            };
+
+            //现在进行遍历属性把原数量，禁止修改
+            for (let c = this.hd.length -1; c >= 0; c--) {
+                var hederRow = sumArr[this.hd[c]];
+                if (hederRow.attribute && hederRow.attribute === "totalmeterage-meterage" ) {
+                    if (hederRow.colNum === colName)  return false;
+                }
+            }
+
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
@@ -638,10 +666,15 @@ export default {
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'meterage') return false;
-            return {'background':'#FFFACD'}
+            if (this.lastHeader[colName].attribute !== 'meterage') {
+                if (row[colName].attribute && row[colName].attribute==='add') {
+                    return {'background':'#99ff005c'} //新增一行的颜色
+                }
+                return {}
+            }
+            return {'background':'#FFFFE0'} //编辑区颜色
         }  
-        return {};
+        return {'background':'#FFFFFF'};
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >1) {  //带选择框的情况
@@ -667,46 +700,46 @@ export default {
         if (this.PackHeader.length ===0 || list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
-     insertEvent () {
-      // console.log('进来了吗')
-      var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
-      restLen = rest.length,
-      NewRow = {},
-      patt1=/[A-Z+]*/g,
-      sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
-      this.hd = Object.keys(sumArr);
-      console.log('this.lastHeader')
-      console.log(this.lastHeader)
-      for (let index = this.hd.length -1; index >= 0; index--) {
-          NewRow['seq'] = restLen;
-          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: 0, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
-      }
-   
-      //现在进行遍历属性把原清单数据加入进去
-        for (let c = this.hd.length -1; c >= 0; c--) {
-            var row = sumArr[this.hd[c]],
-            str = row.attributeValue;
-            if (row.attribute && row.attribute === "totalmeterage-meterage" && row.attributeValue && row.attributeValue !="") {
-                let colName = str.match(patt1)[0];
-                NewRow[colName].td = 0;
-            }
+    insertEvent () {
+        // console.log('进来了吗')
+        this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+        this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+        if (!this.hd.length || this.hd.length===0) return false;
+        var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+        restLen = rest.length,
+        NewRow = {},
+        patt1=/[A-Z+]*/g,
+        sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
+
+        for (let index = this.hd.length -1; index >= 0; index--) {
+            NewRow['seq'] = restLen;
+            NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
         }
-      console.log('打印一下NewRow 新增的一行')
-      console.log(NewRow);
-      this.$refs.elxEditable1.insertAt(NewRow, -1)
-        // this.$refs.elxEditable1.setActiveCell(NewRow);
-   
-      // this.$refs.elxEditable1.clearActive();
-      // 滚动到第一行：
-      // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
-      // 滚动到最后一行：
-      // console.log(this.$refs.elxEditable1)
-      // console.log('this.$refs.elxEditable1..scrollTop1')
-      // console.log(this.$refs.elxEditable1.bodyWrappe)
-  
-      // console.log('this.$refs.elxEditable1.scrollTop2')
-      // console.log(this.$refs.elxEditable1.bodyWrappe)
-      // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
+    
+        //现在进行遍历属性把原清单数据加入进去
+          for (let c = this.hd.length -1; c >= 0; c--) {
+              var row = sumArr[this.hd[c]],
+              str = row.attributeValue;
+              if (row.attribute && row.attribute === "totalmeterage-meterage" ) {
+                  NewRow[row.colNum].td = 0;
+              }
+          }
+        console.log('打印一下NewRow 新增的一行')
+        console.log(NewRow);
+        this.$refs.elxEditable1.insertAt(NewRow, -1)
+          // this.$refs.elxEditable1.setActiveCell(NewRow);
+    
+        // this.$refs.elxEditable1.clearActive();
+        // 滚动到第一行：
+        // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
+        // 滚动到最后一行：
+        // console.log(this.$refs.elxEditable1)
+        // console.log('this.$refs.elxEditable1..scrollTop1')
+        // console.log(this.$refs.elxEditable1.bodyWrappe)
+    
+        // console.log('this.$refs.elxEditable1.scrollTop2')
+        // console.log(this.$refs.elxEditable1.bodyWrappe)
+        // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
     },
     Abandon () {  //放弃更改
         // this.$refs.elxEditable1.revert();
