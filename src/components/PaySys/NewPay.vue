@@ -334,22 +334,13 @@ export default {
               this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
               return this.totalpayRowList = arr;
           }
+
           this.totalpayRowList = arr;
-          if (data && data.totaltPayHead&& data.totaltPayHead.length >0 ) {
-              var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow),
-              col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
-              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
-              lastHeader = this.$excel.BikoFoArr([...col]),
-              header = Object.keys(lastHeader); //用来所需要的所有列(obj)（属性）名
-              for (let index = header.length -1; index >= 0; index--){
-                  var row = lastHeader[header[index]];
-                  // str = row.attributeValue,
-                  // colName = str.match(patt1)[0];
-                  if (row.attribute && row.attributeValue && row.attributeValue !=="" && row.attribute === "pay-total" ) {
-                      this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
-                      return this.totalpayCol = row.trNum;
-                  }
-              }
+          if (data && data.totalpayHead && data.totalpayHead.tTotalpayHeadRows.length >0 ) {
+              var headsArr = this.$excel.Package(data['totalpayHead'].tTotalpayHeadRows,data['totalpayHead'].refCol,data['totalpayHead'].refRow),
+              Col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              this.totalpayCol = this.$excel.BikoFoArr([...Col]);
           }
             this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
         }).catch(e => {
@@ -411,22 +402,51 @@ export default {
         for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             var row = sumArr[header[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "totalpay-pay" || row.attribute === "totalmeterage-head-total") ) {
-                console.log('进来了吗')
                 var str = row.attributeValue,
                 colName = str.match(patt1)[0],
                 Rlist = this.list[0][row.colNum];
-                  if (row.attribute === "totalpay-pay" ) {
-                      // console.log('进来了totalpay-pay')
-                      // this.list[a][row.colNum] = {...data[a][colName]};
-                      if (this.totalpayCol!='' && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
-                          Rlist = {...this.totalpayRowList[0][this.totalpayCol]};
-                          // console.log('进来了totalpay-pay-----Rlist')
-                          // console.log(this.totalpayRowList,this.totalpayCol)
-                      }else{  //无数据默认为0
+             
+                if (row.attribute === "totalpay-pay" ) {
+                    try {
+                          // console.log('进来了totalpay-pay++++++++++++')
+                          // console.log(this.totalpayCol)
+                          // console.log(this.totalpayRowList)
+                          // this.list[a][row.colNum] = {...data[a][colName]};
+                          var topayheader = Object.keys(this.totalpayCol); //用来所需要的所有列(obj)（属性）名
+                          if (topayheader && topayheader.length>0 && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
+                              console.log('有没有进去这个if判断-----------topayheader && topayheader.length>0--------')
+                              for (let index = topayheader.length -1; index >= 0; index--){
+                                  var ToPayrow = this.totalpayCol[topayheader[index]],
+                                  Tostr = ToPayrow.attributeValue,
+                                  TocolName = str.match(patt1)[0];
+                                  if (ToPayrow.attribute && Tostr && Tostr !=="" && ToPayrow.attribute === "pay-total" ) {
+                                      // console.log('有没有进去这个if判断----------ToPayrow.attribute === "pay-total" -====TocolName +++ colName')
+                                      // console.log(TocolName,'   ',colName)
+                                      if (TocolName === colName) {  //属性值两对应
+                                          // console.log(TocolName,' 进来值相等了  ',colName)
+                                          this.list[0][row.colNum] = this.totalpayRowList[0][ToPayrow.colNum];
+              
+                                          console.log(Rlist)
+                                          delete this.list[0][row.colNum].id;
+                                          break;
+                                      }
+              
+                                  }
+                              }
+                              
+                              console.log('进来了totalpay-pay-----Rlist')
+                              console.log(this.totalpayRowList,this.totalpayCol)
+                          }else{  //无数据默认为0
+                              Rlist.td = 0;
+                              // console.log('进来了totalpay-pay-----Rlist ----为0')
+                              // console.log(this.totalpayRowList,this.totalpayCol)
+                          }
+                      } catch (error) {
+                          this.$message({ message: `row.attribute === "totalpay-pay" 处理的时候数据出错 默认单元格为0处理。${e}`, type: 'error', duration: 4000, showClose: true })
+                          console.log('row.attribute === "totalpay-pay" 处理的时候数据出错'+e)
                           Rlist.td = 0;
-                          // console.log('进来了totalpay-pay-----Rlist ----为0')
-                          // console.log(this.totalpayRowList,this.totalpayCol)
                       }
+                    
                   }else if (row.attribute === "totalmeterage-head-total") {
                       try { 
                             // console.log('进来了totalmeterage-head-total')
@@ -453,6 +473,8 @@ export default {
                             }
                       } catch (e) {   //如果数据对不上直接为0
                             console.log('totalmeterage-head-total 处理的时候数据出错'+e)
+                            this.$message({ message: `row.attribute === totalmeterage-head-total 处理的时候数据出错 默认单元格为0处理。${e}`, type: 'error', duration: 4000, showClose: true })
+
                             // this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
                             Rlist.td = 0;
                       }
@@ -464,9 +486,11 @@ export default {
             }
         }
         try {  //把数据载入表格
-            this.findList(); //调用滚动渲染数据
+            console.log('this.list---------------');
+            console.log(this.list);
             this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
-            this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+
+            this.findList(); //调用滚动渲染数据
         } catch (e) {
             this.loading =false;
             this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })

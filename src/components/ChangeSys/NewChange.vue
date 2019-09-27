@@ -230,7 +230,9 @@ export default {
      upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
+
             console.log('进来预览修改了')
+            console.log(newVal)
             this.loading = true;
             this.startTime = Date.now(); 
             this.form.name = newVal.name;
@@ -520,6 +522,8 @@ export default {
         }
         console.log('打印一下rest2---')
         console.log(rest)
+        this.$excel.Formula(this, rest, this.formula);  //调用公式计算
+
         try {  //把数据载入表格
             // this.findList(); //调用滚动渲染数据
             this.$nextTick(() => {
@@ -528,7 +532,6 @@ export default {
                 }
             })
             this.list = this.$refs.elxEditable1.getRecords();
-            this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
             data = null; //内存释放
         } catch (e) {
             console.log('出错了')

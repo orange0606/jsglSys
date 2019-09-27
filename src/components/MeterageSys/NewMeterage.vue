@@ -595,7 +595,7 @@ export default {
         }
         console.log('看一下生成的数据ya')
         console.log(rest)
-        // this.$excel.Formula(this, newrest, this.formula);  //调用公式计算
+        this.$excel.Formula(this, rest, this.formula);  //调用公式计算
 
         try {  //把数据载入表格
             // this.list = this.list.concat(rest);

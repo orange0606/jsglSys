@@ -291,7 +291,7 @@ import XEUtils from 'xe-utils';
                 sumNull:'合计（空）',
                 sumFormula:'合计（公式）',
                 original:'原清单',
-                originalnull:'新清单（无）',
+                originalnull:'原清单（无）',
                 change:'变更清单',
                 update:'新清单',
                 updatenull:'新清单（无）',
