@@ -743,7 +743,7 @@ export default {
                             listRows['upload'] = 1;    
                             if (!listRows['id']) {  //无id则视为新增，新增到changeRowAddList
                                 changeRowAddList.push(listRows);
-                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter'])) {  //有id 与 alter 视为已修改过的数据 新增到changeRowAltList+
+                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {   //有id 与 alter 视为已修改过的数据 新增到changeRowAltList+
                                 listRows['alter'] = "Y";
                                 changeRowAltList.push(listRows);
                             }
