@@ -432,29 +432,16 @@ export default {
               return this.tomeRowList = arr;
           }
           this.tomeRowList = arr;
-          // console.log('response--------------')
-          // console.log(response)
+          console.log('response--------------')
+          console.log(response)
           if (data && data.totalmeterageHead && data.totalmeterageHead.tTotalmeterageHeadRows && data.totalmeterageHead.tTotalmeterageHeadRows.length >0 ) {
               console.log('进来表头组装了')
               var headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
-              col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
-              //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
-              lastHeader = this.$excel.BikoFoArr([...col]),
-              header = Object.keys(lastHeader); //用来所需要的所有列(obj)（属性）名
-              for (let index = header.length -1; index >= 0; index--){
-                  // console.log('进来for循环了')
-                  
-                  var row = lastHeader[header[index]];
-                  // console.log('for玄幻的每个属性是什么  '+row.attribute)
-                  if (row.attribute && row.attribute === "meterage-total" ) {
-                      // console.log('组装的累计计量表格')
-                      // console.log('this.tomeRowList')
-                      // console.log(this.tomeRowList)
-                      // console.log('已经找到那个累计计量表头对应的属性了 row.colNum')
-                      // console.log(row.colNum)
-                      return this.totalmeterageCol = row.colNum;
-                  }
-              }
+              col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+
+              // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+              this.totalmeterageCol = this.$excel.BikoFoArr([...col]);
+
           }
         }).catch(e => {
             this.$message({
@@ -573,19 +560,37 @@ export default {
                         rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
                     }else if (row.attribute === "totalmeterage-meterage") {
                         try {
-                            if (to.length===0 ) {
+                            var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
+                            if (to.length===0 || !totmheader || totmheader.length===0 ) {
                                 // console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
                             } else {
                                 // console.log('进来了这里>=0')
-                                // console.log(to[r][this.totalmeterageCol])
-                                rest[r][row.colNum] = {...to[r][this.totalmeterageCol]};
+                                for (let index = totmheader.length -1; index >= 0; index--){
+                                    var Totorow = this.totalmeterageCol[totmheader[index]],
+                                    Tostr = Totorow.attributeValue,
+                                    TocolName = str.match(patt1)[0];
+                                    if (Totorow.attribute && Tostr && Tostr !=="" && Totorow.attribute === "meterage-total" ) {
+                                        // console.log('有没有进去这个if判断----------Totorow.attribute === "meterage-total" -====TocolName +++ colName')
+                                        // console.log(TocolName,'   ',colName)
+                                        if (TocolName === colName) {  //属性值两对应
+                                            // console.log(TocolName,' 进来值相等了  ',colName)
+                                            rest[r][row.colNum] = to[r][Totorow.colNum];
+
+                                            delete rest[r][row.colNum].id;
+                                            break;
+                                        }
+                
+                                    }
+                                }
+
                             }
                         } catch (error) {
                             this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
                             console.log('设置上期累计数量报错默认为0'+error)
                             rest[r][row.colNum].td = 0;
                         }
+
                     }
                     rest[r][row.colNum]['colNum'] = row['colNum'];
                     rest[r][row.colNum]['trNum'] = r;
