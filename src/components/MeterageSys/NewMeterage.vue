@@ -377,6 +377,7 @@ export default {
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             this.meterageHead = { //保存表头信息
+                id: data.meterageHead.id,
                 name: data.meterageHead.name,
                 num: data.meterageHead.num
             };

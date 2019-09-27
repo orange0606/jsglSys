@@ -384,6 +384,7 @@ export default {
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.changeHead = { //保存表头信息
+                id: data.changeHead.id,
                 name: data.changeHead.name,
                 num: data.changeHead.num
             }

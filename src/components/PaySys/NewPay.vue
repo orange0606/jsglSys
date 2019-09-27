@@ -131,6 +131,7 @@ export default {
       totalpayCol:'', //累计支付表头内关联支付表头的属性值
       pendingRemoveList:[],
       tTotalmeterageId:null, //累计计量清单id
+      RowDelList:[],// 删除集合
     }
   },
 
