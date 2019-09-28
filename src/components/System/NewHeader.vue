@@ -11,7 +11,7 @@
                     <el-button type="success" size="mini" @click="edit" v-text="btn.stateEdit?'关闭编辑':'开启编辑'"></el-button>
                     <!-- <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button> -->
                     <!-- <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button> -->
-                    <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
+                    <el-button type="success" size="mini" @click="insertEvent">手动添加合计尾行</el-button>
                     <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                     <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>
                     <!-- <el-button type="info" size="mini" @click="$refs.elxEditable.clear()">清空表格</el-button> -->
@@ -24,10 +24,9 @@
                 ref="elxEditable"
                 class="scroll-table4"
                 border
-                height="300"
+                height="400"
                 size="small"
                 :span-method="arraySpanMethod"
-                :row-class-name="tableRowClassName"
                 @cell-click ="cellClick"
                 :cell-style ="cell_select"
                 :edit-config="{ render: 'scroll', renderSize: 80}"
@@ -331,7 +330,20 @@ import XEUtils from 'xe-utils';
     },
     watch: {
         'Form.headRowList': function(New, Old){
+            this.showAtt = false;   //隐藏属性组件
+            this.hd.length = this.list.length = 0;  //数据清空
+            this.row = {};  //属性设置的状态
+            this.ifInput.length = this.Attribute.length = 0;
+            this.btn.stateEdit = false; //关闭编辑
+            this.setState= null; //属性设置状态
+            this.attVal = {   //点击显示关联的表的单元格，获取到的属性值和id
+                id: null,
+                key: null
+            };
+            this.$nextTick(() => { this.showTable = false; })   //隐藏关联表格
+            this.$refs.elxEditable.reload([]);
             if(New ==null || !this.Form.id || New.length === 0) return false;
+            
             // console.log('父组件传表头类型值过来了')
             // console.log(this.Form)
             // console.log(New);
@@ -409,8 +421,6 @@ import XEUtils from 'xe-utils';
                     this.row.attributeValue = New.key;
                     this.row.attributeMeterageHeadId = New.id;
                 }else if (this.setState === 'pay' && this.Form.type === 'totalpay') {
-                    console.log('进来了嘛')
-                    console.log(this.row)
                     this.row.attributeValue = New.key;
                     this.row.attributePayHeadRowId = New.id;
                 }
@@ -501,6 +511,38 @@ import XEUtils from 'xe-utils';
                 }, 300)
             })
         },
+        insertEvent () {
+            // console.log('进来了吗')
+            if (!this.hd.length || this.hd.length===0) return false;
+            var rest = this.$refs.elxEditable.getRecords(),//获取表格的全部数据;
+            restLen = rest.length,
+            NewRow = {};
+            console.log(rest)
+            for (let index = this.hd.length -1; index >= 0; index--) {
+               NewRow[this.hd[index]]= {name : null, //名称
+                col_width : 120, //列宽（注意上行与下行的列宽要相等）
+                colWdthProportion : null,//列宽比例
+                trHigh : 35, // 行高
+                trHighproportion : null,//行高比例
+                attribute : null, //属性
+                attributeValue : null, //属性值
+                textAlign : 'center', //文本对齐对齐方式
+                tLimit : null,    //限制值类型 
+                limitValue : null, //限制值
+                colNum: this.hd[index],
+                trNum:restLen+1,
+                td: null,
+                tdColspan: 1,
+                tdRowspan: 1,
+                trNum:restLen+1,
+                colNum: this.hd[index]
+                }
+    
+            }
+            console.log('打印一下NewRow 新增的一行')
+            console.log(NewRow);
+            this.$refs.elxEditable.insertAt(NewRow, -1)
+        },
         next(){  //编辑完成点击下一步(完成提交新建表头按钮)
             let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
             if (this.Form.type !==null) {
@@ -523,18 +565,7 @@ import XEUtils from 'xe-utils';
                 this.startTime = Date.now();    //开启计时
                 this.btn.editAtt = false;
                 if (!this.Form.id) {
-                    //此处生成合计尾行
-                    let tr = XEUtils.clone(rest[rest.length-1], true);
-                    rest.push(tr);
-                    let hd = Object.keys(rest[0]);
-                    for (let i = 0; i < hd.length; i++) {
-                    let tb = rest[rest.length-1][hd[i]];
-                    // let tb2 = rest[rest.length-2][hd[i]];
-                    tb.td = '合计'+i;
-                    tb.trNum +=1;
-                    tb.tdRowspan >= 0 ? tb.tdRowspan =1 : tb.tdRowspan=1;
-                    tb.tdColspan >= 0 ? tb.tdColspan =1 : tb.tdColspan=1;
-                    }
+                    this.insertEvent(); //添加一行合计尾行
                     this.list = rest;   
                     var lastTwo = this.list.slice(-2)[0],
                     arr = Object.keys(lastTwo),
@@ -549,7 +580,7 @@ import XEUtils from 'xe-utils';
                         }
                     }
                     this.$notify({title: '提示',duration: 5000,message: `系统已自动生成合计尾行`,type: 'success'});
-                    this.findList();
+                    // this.findList();
                 }   
             }else{  //提交新建表头数据到父组件
                 // alert('直接完成')
@@ -579,9 +610,7 @@ import XEUtils from 'xe-utils';
                 if (!this.Form.id) {
                     //此处删除合计尾行
                     let rest = this.$refs.elxEditable.getRecords()  //获取表格的全部数据
-                    rest.pop();
-                    this.list =rest;
-                    this.findList();
+                    this.$refs.elxEditable.remove(rest[rest.length-1]);
                 }
             }
         },
@@ -889,24 +918,6 @@ import XEUtils from 'xe-utils';
             }
             this.setState = null; //初始状态，可随意切换单元格设置属性状态。
             this.$nextTick(() => { this.showTable = false; })   //隐藏关联表格
-        },
-
-
-        formatterDate (row, column, cellValue, index) {
-            return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
-        },
-        insertEvent () {
-            this.$refs.elxEditable.insert({
-                name: `New ${Date.now()}`,
-                age: 26,
-                rate: 2
-            }).then(({ row }) => {
-                this.$refs.elxEditable.setActiveCell(row);
-            })
-        },
-        getSelectLabel (value, valueProp, labelProp, list) {
-            let item = XEUtils.find(list, item => item[valueProp] === value)
-            return item ? item[labelProp] : null;
         },
         deleteSelectedEvent () {    //删除选中
             let selection = this.$refs.elxEditable.getSelecteds()

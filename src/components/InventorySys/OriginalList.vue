@@ -290,13 +290,7 @@ import XEUtils from 'xe-utils'
     formatterDate (row, column, cellValue, index) {
       return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
     },
-    clearActiveMethod ({ type, row }) {
-      return this.isClearActiveFlag && type === 'out' ? this.checkOutSave(row) : this.isClearActiveFlag
-    },
-    filterHandler (value, row, column) {
-      const property = column['property'];
-      return row[property] === value;
-    },
+
     // 点击表格外面处理
     checkOutSave (row) {
       if (!row.id) {
