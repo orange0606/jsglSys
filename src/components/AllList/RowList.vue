@@ -9,16 +9,17 @@
       ref="elxEditablecom"
       class="scroll-table4 click-table11"
       border
-      height="500"
+      :height="Height"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
       show-summary
       :summary-method="getSummaries"
-      
+      :row-style="{height:'20px'}"
+      :cell-style="{padding:'0px'}"
       :edit-config="{render: 'scroll', renderSize: 150}"
-      style="width: 100%">
+      :style="{ width: Width + '%' }">
     
       <elx-editable-column type="index" width="60" align="center" ></elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
@@ -53,6 +54,8 @@ export default {
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
+      Height: 400,
+      Width:99.9
     }
   },
  watch: {
@@ -69,13 +72,26 @@ export default {
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
   },
 
-  mounted () {
- 
+  mounted(){
+      this.tViewSize();
+      window.onresize = () => {
+        return (() => {
+            this.tViewSize();
+        })();
+      }
   },
   beforeDestroy () {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
+    tViewSize () {
+        let obj = this.$getViewportSize();
+        this.Width = 99.99;
+        this.$nextTick(() => {
+            this.Height = obj.height-190;
+            this.Width = 100;
+        });
+    },
     upif ( newVal ) {   //处理父组件传来的值
         if (newVal && newVal.id) {  //判断返回的是不是一个数组
             this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;

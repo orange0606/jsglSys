@@ -1,5 +1,5 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum" show-overflow-tooltip :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum" :fit="true" :align="col.textAlign">
     <template slot-scope="scope">
       <span>{{scope.row.data[col.colNum].td}}</span>
       <!-- <span>{{scope.row.data}}</span> -->

@@ -41,7 +41,7 @@
       ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
-      height="500"
+      :height="Height"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
@@ -49,7 +49,7 @@
       :cell-style ="cell_select"
       size="small"
       :edit-config="{render: 'scroll', renderSize: 80}"
-      style="width: 100%">
+      :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column width="40" align="center" >
         <template v-slot:header="scope">
@@ -132,6 +132,8 @@ export default {
       pendingRemoveList:[],
       tTotalmeterageId:null, //累计计量清单id
       RowDelList:[],// 删除集合
+      Height: 400,
+      Width:99.9
     }
   },
 
@@ -147,13 +149,26 @@ export default {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
   },
-  mounted () {
-
+  mounted(){
+      this.tViewSize();
+      window.onresize = () => {
+        return (() => {
+            this.tViewSize();
+        })();
+      }
   },
   beforeDestroy () {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    tViewSize () {
+        let obj = this.$getViewportSize();
+        this.Width = 99.99;
+        this.$nextTick(() => {
+            this.Height = obj.height-260;
+            this.Width = 100;
+        });
+    },
      upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改

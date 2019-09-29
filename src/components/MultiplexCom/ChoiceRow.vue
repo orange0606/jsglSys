@@ -10,13 +10,13 @@
       ref="elxEditable4"
       class="scroll-table4 click-table11"
       border
-      height="400"
+      :height="Height"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
       :edit-config="{ render: 'scroll', renderSize: 80, useDefaultValidTip: true}"
-      style="width: 100%">
+      :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column type="index" align="center" width="80"></elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
@@ -60,6 +60,8 @@ export default {
       PackHeader:null,//表头已组装数据
       list:[],//表格数据
       hd:[],//用作单元格合并
+      Height: 500,
+      Width:99.9
       
     }
   },
@@ -79,6 +81,14 @@ export default {
 
     this.$message.closeAll();
   },
+  mounted(){
+      this.tViewSize();
+      window.onresize = () => {
+        return (() => {
+            this.tViewSize();
+        })();
+      }
+  },
   watch: {
       inventory: function(newVal,oldVal){
           if (newVal!=null) {
@@ -97,6 +107,14 @@ export default {
       }
   },
   methods: {
+    tViewSize () {
+        let obj = this.$getViewportSize();
+        this.Width = 99.99;
+        this.$nextTick(() => {
+            this.Height = obj.height-270;
+            this.Width = 100;
+        });
+    },
     handle (list) { //数据处理表格数据等等 数据、列数、行数、
         if (list.length == 0) {
             return false

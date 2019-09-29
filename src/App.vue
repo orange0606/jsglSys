@@ -144,7 +144,31 @@ body .el-table th.gutter{
     border-radius: 2px;
     background: rgba(0,0,0,0.1);
 } 
+/* .scroll-table4 .elx-editable-column {
+    height: 20px;
+    padding: 0;
+    margin: 0;
+} */
+/* .scroll-table4 .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 18px;
+}
+.scroll-table4 td {
+    padding: 0px 0;
+    margin: 0;
+}
 
+.scroll-table4 th {
+    padding: 4px 0;
+} */
+.scroll-table4 td input{
+    padding-top: 1px 4px;
+    margin: 0;
+}
+.scroll-table4 th { padding: 2px; }
 
 
 .el-menu-item, .el-submenu__title{

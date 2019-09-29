@@ -27,11 +27,10 @@
 
     <div class="click-table11-oper">
       <el-dialog
-      width="85%"
+      width="89%"
       title="选择清单"
-      top="8vh"
+      top="6vh"
       :visible.sync="innerVisible"
-      
       append-to-body>
       <div v-if="showList">
           <p style="color: red;font-size: 12px;margin:5px 0 10px 0;text-align:left;">请单击选择你要导入的清单</p>
@@ -39,7 +38,7 @@
             ref="elxEditable"
             class="click-table2"
             border
-            height="300"
+            :height="UpHeight"
             size="small"
             :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="update"
@@ -106,19 +105,18 @@
       ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
-      height="500"
+      :height="Height"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
       @cell-click ="cell_click"
       :cell-style ="cell_select"
       show-summary
-      size="small"
+      size="mini"
       :summary-method="getSummaries"
       :edit-config="{render: 'scroll', renderSize: 80}"
-      style="width: 100%">
+      :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-  
       <elx-editable-column type="index" width="60" align="center" >
         <template v-slot:header>
           <i class="el-icon-setting" @click="dialogVisible = true"></i>
@@ -200,6 +198,9 @@ export default {
       totalmeterageCol:'',    //用来存储累计计量的的属性值
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
+      Height: 400,
+      Width:99.9,
+      UpHeight:300,
     }
   },
 
@@ -227,13 +228,27 @@ export default {
     // this.rowDrop();//调用表格行拖拽函数/
 
   },
-  mounted () {
-
+  mounted(){
+      this.tViewSize();
+      window.onresize = () => {
+        return (() => {
+            this.tViewSize();
+        })();
+      }
   },
   beforeDestroy () {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    tViewSize () {
+        let obj = this.$getViewportSize();
+        this.Width = 99.99;
+        this.$nextTick(() => {
+            this.Height = obj.height-260;
+            this.Width = 100;
+            this.UpHeight = obj.height-360;
+        });
+    },
      upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
@@ -558,6 +573,7 @@ export default {
                     // let RowTd = rest[r][row.colNum];
                     if (row.attribute === "update" ) {
                         rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
+                        rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalmeterage-meterage") {
                         try {
                             var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
@@ -576,8 +592,6 @@ export default {
                                         if (TocolName === colName) {  //属性值两对应
                                             // console.log(TocolName,' 进来值相等了  ',colName)
                                             rest[r][row.colNum] = to[r][Totorow.colNum];
-                                            rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
-                                            delete rest[r][row.colNum].id;
                                             break;
                                         }
                 

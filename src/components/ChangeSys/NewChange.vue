@@ -26,9 +26,9 @@
     </div>
     <div class="click-table11-oper">
       <el-dialog
-      width="85%"
+      width="89%"
       title="选择清单"
-      top="8vh"
+      top="6vh"
       :visible.sync="innerVisible"
       
       append-to-body>
@@ -38,7 +38,7 @@
             ref="elxEditable"
             class="click-table2"
             border
-            height="300"
+            :height="OrHeight"
             size="small"
             :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="original"
@@ -103,7 +103,7 @@
       ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
-      height="500"
+      :height="Height"
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
@@ -113,7 +113,7 @@
       size="mini"
       :summary-method="getSummaries"
       :edit-config="{render: 'scroll', renderSize: 80}"
-      style="width: 100%">
+      :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
      
       <elx-editable-column type="index" width="60" align="center" >
@@ -195,6 +195,9 @@ export default {
       ], //表格数据
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
+      Height: 400,
+      Width:99.9,
+      OrHeight:300,
     }
   },
 
@@ -220,13 +223,27 @@ export default {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
   },
-  mounted () {
-
+  mounted(){
+      this.tViewSize();
+      window.onresize = () => {
+        return (() => {
+            this.tViewSize();
+        })();
+      }
   },
   beforeDestroy () {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    tViewSize () {
+        let obj = this.$getViewportSize();
+        this.Width = 99.99;
+        this.$nextTick(() => {
+            this.Height = obj.height-260;
+            this.Width = 100;
+            this.OrHeight = obj.height-360;
+        });
+    },
      upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改

@@ -131,12 +131,12 @@ export default {
       }
   },
   mounted(){
-        this.tViewSize();
-        window.onresize = () => {
-          return (() => {
-              this.tViewSize();
-          })();
-        }
+      this.tViewSize();
+      window.onresize = () => {
+        return (() => {
+            this.tViewSize();
+        })();
+      }
   },
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
@@ -152,13 +152,9 @@ export default {
         let obj = this.$getViewportSize();
         this.Width = 99.99;
         this.$nextTick(() => {
-            this.Height = obj.height-260;
+            this.Height = obj.height-230;
             this.Width = 100;
-            // setTimeout(() => {
-            //     this.Width = 100;
-            // }, 300)
         });
-        console.log('进入了吗')
     },
     upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表

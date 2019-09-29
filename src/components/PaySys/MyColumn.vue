@@ -1,5 +1,5 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.attribute+'('+col.attributeValue+')'" show-overflow-tooltip :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.attribute+'('+col.attributeValue+')'" :fit="true" :align="col.textAlign">
     <template slot-scope="scope">
       <!-- <span>{{scope.row.data[col.colNum].td}}</span> -->
       <span v-if="scope.row.data[col.colNum].edit ==='N'">{{scope.row.data[col.colNum].td}}</span>

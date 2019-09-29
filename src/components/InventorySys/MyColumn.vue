@@ -1,5 +1,5 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td+' ( '+col.colNum+' ) '+col.attribute+col.tdRowspan+col.tdColspan" show-overflow-tooltip :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td+' ( '+col.colNum+' ) '+col.attribute+col.tdRowspan+col.tdColspan" :fit="true" :align="col.textAlign">
     <template slot-scope="scope">
       <span v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='N'">{{scope.row.data[col.colNum].td}}</span>
       <el-input v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='Y'" style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="$excel.Calculation(type, F, fkeys, scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
