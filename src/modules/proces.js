@@ -109,6 +109,41 @@ excelmodel = {
     param arr: 已组装的表格数据(数组对象)
     return : 完整多级嵌套数据(已除去合并行)
     */
+    // Nesting (arr) {
+    //     let arrHd = Object.keys(arr[0]);
+    //     // let ABC = this.$excel.AZ();
+    //     if (arr[0]) {
+    //         var headers = [],
+    //         arrlen =  arr.length -2;
+    //         for (let index = arrlen; index >=0 ; index--) {
+    //             var arrHdlen = arrHd.length;
+    //             for (let i = 0; i < arrHdlen; i++) {  //添加第一层
+    //                   if (index !=0) {
+    //                       if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
+    //                           arr[index-1][arrHd[i]].children =[];
+    //                           for (let e = 0; e < arrHd.length; e++) {
+    //                               if (arr[index][arrHd[e]] && arr[index][arrHd[e]].tdRowspan !=0 && arr[index][arrHd[e]].tdColspan !=0) {
+    //                                   if ((arr[index][arrHd[e]].trNum == arr[index-1][arrHd[i]].trNum+1) && (arr[index][arrHd[e]].colNum == arr[index-1][arrHd[i]].colNum)) {
+    //                                       arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+    //                                   }else if(arr[index-1][arrHd[i]].tdColspan > 1  && ABC.indexOf(arr[index][arrHd[e]].colNum) > ABC.indexOf(arr[index-1][arrHd[i]].colNum)){
+    //                                       arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+    //                                   }
+    //                               }
+    //                           }
+    //                       }
+    //                   }else{
+    //                       if (arr[index][arrHd[i]] && arr[index][arrHd[i]].tdRowspan !=0 && arr[index][arrHd[i]].tdColspan !=0) {
+    //                         headers.push(arr[index][arrHd[i]])
+    //                       }
+    //                   }
+                    
+    //             }
+    //         }
+    //     arrHd = arr = null;
+    //     return headers;
+    //     }
+        
+    // },
     Nesting (arr) {
         let arrHd = Object.keys(arr[0]);
         // let ABC = this.$excel.AZ();
@@ -120,20 +155,23 @@ excelmodel = {
                 for (let i = 0; i < arrHdlen; i++) {  //添加第一层
                       if (index !=0) {
                           if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
-                              arr[index-1][arrHd[i]].children =new Array();
+                              arr[index-1][arrHd[i]].children =[];
                               for (let e = 0; e < arrHd.length; e++) {
                                   if (arr[index][arrHd[e]] && arr[index][arrHd[e]].tdRowspan !=0 && arr[index][arrHd[e]].tdColspan !=0) {
                                       if ((arr[index][arrHd[e]].trNum == arr[index-1][arrHd[i]].trNum+1) && (arr[index][arrHd[e]].colNum == arr[index-1][arrHd[i]].colNum)) {
                                           arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
                                       }else if(arr[index-1][arrHd[i]].tdColspan > 1  && ABC.indexOf(arr[index][arrHd[e]].colNum) > ABC.indexOf(arr[index-1][arrHd[i]].colNum)){
-                                          arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+                                            if (( ABC.indexOf(arr[index][arrHd[e]].colNum)-ABC.indexOf(arr[index-1][arrHd[i]].colNum) ) < arr[index-1][arrHd[i]].tdColspan) {
+                                                arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
+                                            }
+                                          
                                       }
                                   }
                               }
                           }
                       }else{
                           if (arr[index][arrHd[i]] && arr[index][arrHd[i]].tdRowspan !=0 && arr[index][arrHd[i]].tdColspan !=0) {
-                            headers.push(arr[index][arrHd[i]])
+                                headers.push(arr[index][arrHd[i]])
                           }
                       }
                     

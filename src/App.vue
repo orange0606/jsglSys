@@ -124,23 +124,28 @@ body, html, #app{
 .el-table{
     overflow:visible !important;
 }
-/* 表头错位兼容问题 */
-.el-table th.gutter{
+body .el-table th.gutter{
     display: table-cell!important;
 }
 
-.el-table th.gutter
-{
-    display: table-cell!important;
+/* //滚动条的宽度 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-body .el-table th.gutter
-{
-    display: table-cell!important;
+
+::-webkit-scrollbar-thumb {
+    height: 30px;
+    background-color: #E3FBFE;
+    border-radius: 2px;
 }
-body .el-table colgroup.gutter
-{
-    display: table-cell!important;
+::-webkit-scrollbar-track{
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    background: rgba(0,0,0,0.1);
 } 
+
+
 
 .el-menu-item, .el-submenu__title{
     font-size: 0.8em;

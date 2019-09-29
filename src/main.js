@@ -75,9 +75,20 @@ Vue.prototype.$confirm = MessageBox.confirm;
 // 引入excel 表格导入js处理函数模块
 import excelmodel from './modules/proces';
 Vue.prototype.$excel = excelmodel;
+
+/**
+ * 获取屏幕宽高
+ */
+Vue.prototype.$getViewportSize = function(){
+  return {
+    width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+    height: window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+  };
+};
+
+
+
 // 引入工具类-目录自定义
-// import fetch from '@/utils/request'
-// import axios from 'axios'
 import store from '@/utils/Store'
 Vue.prototype.$store = store;
 import {post,fetch,patch,put} from '@/utils/request'

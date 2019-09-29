@@ -47,7 +47,7 @@
       ref="elxEditable1"
       class="scroll-table4 click-table11"
       border
-      height="500"
+      :height="Height"
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
@@ -56,7 +56,7 @@
       show-summary
       :summary-method="getSummaries"
       :edit-config="{render: 'scroll', renderSize: 80, }"
-      style="width: 100%">
+      :style="{ width: Width + '%' }">
       
       <elx-editable-column type="selection" align="center" width="55" ></elx-editable-column>
       <elx-editable-column type="index" width="60" align="center" >
@@ -65,7 +65,7 @@
       <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" ></my-column>
     </elx-editable>
     <p style="color: red;font-size: 12px;margin:10px 0 5px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
-
+    <br>
   </div>
 </template>
 
@@ -120,6 +120,8 @@ export default {
       list: [], //表格数据
       RowDelList: [],//记录被删除有id的单元格
       lastHeader: null,
+      Height: 400,
+      Width:99.9
     }
   },
  watch: {
@@ -128,8 +130,13 @@ export default {
           this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
       }
   },
-  computed: {
-      
+  mounted(){
+        this.tViewSize();
+        window.onresize = () => {
+          return (() => {
+              this.tViewSize();
+          })();
+        }
   },
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
@@ -141,6 +148,18 @@ export default {
     this.$refs.input = null;
   },
   methods: {
+    tViewSize () {
+        let obj = this.$getViewportSize();
+        this.Width = 99.99;
+        this.$nextTick(() => {
+            this.Height = obj.height-260;
+            this.Width = 100;
+            // setTimeout(() => {
+            //     this.Width = 100;
+            // }, 300)
+        });
+        console.log('进入了吗')
+    },
     upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
@@ -394,7 +413,9 @@ export default {
         this.$refs.elxEditable1.reload(this.list);
         this.loading = false;
         this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-      })
+      });
+      this.tViewSize();
+
     },
     getSummaries (param) {  //合计
         if (!this.$refs.elxEditable1) return [];

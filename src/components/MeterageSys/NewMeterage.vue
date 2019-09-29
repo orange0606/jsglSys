@@ -576,7 +576,7 @@ export default {
                                         if (TocolName === colName) {  //属性值两对应
                                             // console.log(TocolName,' 进来值相等了  ',colName)
                                             rest[r][row.colNum] = to[r][Totorow.colNum];
-
+                                            rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                                             delete rest[r][row.colNum].id;
                                             break;
                                         }
