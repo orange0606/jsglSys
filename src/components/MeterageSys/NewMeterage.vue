@@ -114,7 +114,7 @@
       show-summary
       size="mini"
       :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 80}"
+      :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true}"
       :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column type="index" width="60" align="center" >
@@ -123,7 +123,7 @@
         </template>
       </elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" ></my-column>
+      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader"></my-column>
     </elx-editable>
       <p style="color: red;font-size: 12px;margin:5px 0 15px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
 

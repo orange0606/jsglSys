@@ -1,4 +1,4 @@
-import { MessageBox, Message } from 'element-ui'
+import { MessageBox, Message, Switch } from 'element-ui'
 let patt1=/[A-Z+]*/g,
 patt2=/\d+/g,
 excelmodel = {
@@ -646,13 +646,14 @@ excelmodel = {
     },
     /*
     双击单元格修改数据进行公式计算(编辑表格（与清单）时使用)
+    param lastHeader: 表头的最后一层 object
     param fkeys: 参数F （object）的所有属性
     param row: 清单数据行   object
     param col: 清单数据（该单元格内容）   object
     param F: 存储相应列的eval 的字符串公式  object
     使用引用赋值
     */
-    Calculation (type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
+    Calculation (lastHeader, type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
         if (col['id']) row['alter'] = 'Y';
         
         if (Number.isNaN(Number(col['td']))) {
@@ -661,6 +662,47 @@ excelmodel = {
             return false;
         }
         col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
+        let that = this;
+        console.log('0-100-------------')
+        console.log(0-100)
+
+        Object.keys(lastHeader).forEach(function(key){
+            var keyObj = lastHeader[key],
+            Att = keyObj.attribute,
+            AttVal = keyObj.attributeValue;
+             console.log('attributeValue');
+             console.log(AttVal);
+            if ( Att && ( Att==='fluctuate' || Att==='meterage' || Att==='pay') && AttVal && AttVal !=='') {
+                console.log('AttVal----------------2222222222222')
+                console.log(AttVal)
+                let colTr = AttVal.match(patt1)[0];   //属性值  列号
+                var sumNb = null;
+                switch (type) {
+                    case 'change':
+                        if (Number.isNaN(Number(row[colTr]['td']))) {
+                            return Message({ message: '原数量不是有效的数字类型', type: 'warning', duration: 3000, showClose: true });;
+                        }
+                        sumNb = that.Count(Number(row[colTr]['td'])+ col['td']*1);
+                        console.log('-------console.log(sumNb);',colTr+row[colTr].td);
+                        console.log(sumNb);
+                        if (sumNb < 0 ) {
+                            Message({ message: '警告 减少的数量不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 3000, showClose: true });
+                            col['td'] = 0-row[colTr].td;
+                        }
+                        break;
+
+                    case 'meterage':
+                    
+                        break;
+    
+                    case 'pay':
+            
+                        break;
+                }
+            }
+        });
+
+
         
         var Eval = null,
         fkeyslen = fkeys.length;
@@ -683,7 +725,7 @@ excelmodel = {
         console.log('代表此单元格修改过')
         console.log(row)
         console.log(col)
-        F = fkeys = row = col = patt1 = Eval = null;
+        F = fkeys = row = col = Eval = null;
     },
     getSummaries (PackHeader, list, param) {  //合计
         // console.log('是不是每次都进来了呀'+Math.random()*100)

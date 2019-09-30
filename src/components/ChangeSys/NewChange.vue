@@ -122,7 +122,7 @@
         </template>
       </elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" ></my-column>
+      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" ></my-column>
     </elx-editable>
     <p style="color: red;font-size: 12px;margin:10px 0 10px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
     <br>
