@@ -120,6 +120,8 @@ body, html, #app{
     padding: 10px 2.5% 10px 2.5% ;
     overflow: auto;
 }
+
+
 /* 合计尾行不显示兼容问题 */
 .el-table{
     overflow:visible !important;

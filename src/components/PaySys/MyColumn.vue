@@ -27,8 +27,8 @@ export default {
       type: Object
     },
     type: {
-
-    }
+    },
+    lastHeader: {}
   },
   data() {
     return {

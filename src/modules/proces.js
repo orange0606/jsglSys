@@ -655,7 +655,6 @@ excelmodel = {
     */
     Calculation (lastHeader, type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
         if (col['id']) row['alter'] = 'Y';
-        
         if (Number.isNaN(Number(col['td']))) {
             // col['td'] = 0;
             col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
@@ -692,11 +691,51 @@ excelmodel = {
                         break;
 
                     case 'meterage':
-                    
+                        Object.keys(lastHeader).forEach(function(key){
+                            let mekeyObj = lastHeader[key],
+                            meAtt = mekeyObj.attribute,
+                            meAttVal = mekeyObj.attributeValue;
+                            console.log('attributeValue');
+                            console.log(meAttVal);
+                            if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
+                                console.log('AttVal----------------333333333333333')
+                                console.log(meAttVal)
+                                let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
+                                if (mecolTr === col.colNum) {
+                                    sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ col['td']*1);
+                                        console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
+                                        console.log('row[colTr]------------',row[colTr]['td'])
+                                    if (sumNb>row[colTr]['td']*1 ){
+                                        Message({ message: '警告 上期累计数量与本期的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                        col['td'] = row[colTr].td-row[mekeyObj.colNum]['td'];
+                                    }
+                                }
+                            }
+                        });
                         break;
     
                     case 'pay':
-            
+                            Object.keys(lastHeader).forEach(function(key){
+                               let paykeyObj = lastHeader[key],
+                               payAtt =paykeyObj.attribute,
+                               payAttVal =paykeyObj.attributeValue;
+                                console.log('attributeValue');
+                                console.log(payAttVal);
+                                if (payAtt &&payAtt==='totalpay-pay'  &&payAttVal &&payAttVal !=='') {
+                                    console.log('AttVal----------------4444444444444444444')
+                                    console.log(payAttVal)
+                                    let paycolTr =payAttVal.match(patt1)[0];   //属性值  列号
+                                    if (paycolTr === col.colNum) {
+                                        sumNb = that.Count(row[paykeyObj.colNum]['td']*1+ col['td']*1);
+                                            console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
+                                            console.log('row[colTr]------------',row[colTr]['td'])
+                                        if (sumNb>row[colTr]['td']*1 ){
+                                            col['td'] = row[colTr].td-row[paykeyObj.colNum]['td'];
+                                            Message({ message: '警告 本期支付金额与上期累计支付金额的和不能超过累计计量金额! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                        }
+                                    }
+                                }
+                            });
                         break;
                 }
             }
