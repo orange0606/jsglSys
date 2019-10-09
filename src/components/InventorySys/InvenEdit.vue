@@ -288,6 +288,11 @@ export default {
             var headsArr = this.$excel.Package(data['originalHead'].tOriginalHeadRows,data['originalHead'].refCol,data['originalHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+            console.log('this.PackHeader---------------')
+            console.log(this.PackHeader)            
+            console.log('this.col----------')
+            console.log(this.col)
+            this.PackHeader
             this.$nextTick(() => {  //强制重新渲染
                 this.showHeader = false;
                 this.showHeader = true;
@@ -312,6 +317,8 @@ export default {
             this.list.length = this.hd.length = 0;
             var arr = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
             this.list = [...arr];
+            console.log('this.list------------')
+            console.log(this.list)
             for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                 this.list[index]['seq'] = index;
             }

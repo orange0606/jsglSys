@@ -115,13 +115,7 @@ body, html, #app{
     padding: 10px 2.5% 10px 2.5% ;
     overflow: auto;
 }
-/* 合计尾行不显示兼容问题 */
-.el-table{
-    overflow:visible !important;
-}
-body .el-table th.gutter{
-    display: table-cell!important;
-}
+
 /* //滚动条的宽度 */
 ::-webkit-scrollbar {
   width: 10px;
@@ -142,16 +136,38 @@ body .el-table th.gutter{
     margin: 0;
     padding: 0;
 }
-.scroll-table4 td input{
-    margin: 0;
+/* 合计尾行不显示兼容问题 */
+.el-table{
+    overflow:visible !important;
+}
+body .el-table th.gutter{
+    display: table-cell!important;
+}
+
+/* 表格行高input等高度设置 */
+.scroll-table4.el-table--mini .elx-editable-column {
     padding: 0;
-    height: 15px;
+    height: 23px;
+    line-height: 23px;
+}
+/* .elx-editable.el-table--mini .elx-editable-column {
+    padding: 0;
+    height: 22px;
+} */
+.scroll-table4 .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 17px;
+}
+.scroll-table4 .el-input--mini .el-input__inner {
+    margin: 0;
+    height: 22px;
+    line-height: 22px;
 }
 .scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
-.scroll-table4 {
-      /* border:1px solid transparent; */
-      padding: 1px;
-}
+
 /* 清单显示弹出框 */
 .el-dialog__body {
   padding: 0 20px;
@@ -160,20 +176,16 @@ body .el-table th.gutter{
   border:1px solid transparent;
 }
 
-/* .el-table--border, .el-table--group {
-    border: 1px solid #CCCCCC;
+/* 表头错乱 */
+body .el-table th.gutter {
+  display: table-cell !important;
 }
-.el-table td, .el-table th.is-leaf {
-    border-bottom: 1px solid #CCCCCC;
+
+body .el-table colgroup.gutter {
+  display: table-cell !important;
 }
-.el-table--border td, .el-table--border th {
-    border-right: 1px solid #CCCCCC;
-} */
-/* 
-.el-table thead.is-group th {
-  
-    background: #59AA6447;
-} */
+
+/* 表格边框颜色 */
 .el-table--border, .el-table--group {
     border: 1px solid #909399;
 }

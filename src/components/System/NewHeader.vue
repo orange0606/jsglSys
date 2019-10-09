@@ -22,7 +22,7 @@
                 <!-- <el-alert title="系统已为你自动添加合计行" type="info"></el-alert> -->
                 <elx-editable
                 ref="elxEditable"
-                class="scroll-table4"
+                class="click-table1"
                 border
                 height="300"
                 size="mini"
@@ -565,6 +565,7 @@ import XEUtils from 'xe-utils';
                 this.btn.editAtt = false;
                 if (!this.Form.id) {
                     this.insertEvent(); //添加一行合计尾行
+                    let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
                     this.list = rest;   
                     var lastTwo = this.list.slice(-2)[0],
                     arr = Object.keys(lastTwo),
@@ -1002,10 +1003,16 @@ import XEUtils from 'xe-utils';
 }
 
 /* 合计尾行特别样式 */
-.scroll-table4.elx-editable .elx-editable-row .success-row {
+.click-table1.elx-editable .elx-editable-row .success-row {
     background: #f0f9eb;
 }
-
+.click-table1-oper {
+  margin-bottom: 18px;
+}
+.click-table1.elx-editable .elx-editable-row.new-insert,
+.click-table1.elx-editable .elx-editable-row.new-insert:hover>td {
+  background-color: #f0f9eb;
+}
 .color {
     width: 100%;
     height: 100%;
