@@ -24,8 +24,8 @@
                 ref="elxEditable"
                 class="scroll-table4"
                 border
-                height="400"
-                size="small"
+                height="300"
+                size="mini"
                 :span-method="arraySpanMethod"
                 @cell-click ="cellClick"
                 :cell-style ="cell_select"
@@ -52,7 +52,6 @@
                     <click-table :obj="headerTypeObj" :attVal.sync="attVal" :showTable="showTable"></click-table>
                 </div>
             </el-col>
-
 
             <el-col :span="5" :offset="1" :xs="23" :sm="13" :md="8" :lg="6" :xl="5">
                 <div class="headerform">

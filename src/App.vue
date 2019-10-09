@@ -79,7 +79,6 @@ body, html, #app{
     width: 100%;
     height: 100%;
 }
-
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -87,10 +86,8 @@ body, html, #app{
   text-align: center;
   color: #2c3e50;
   /* margin-top: 10px; */
-
   /* padding: 10px; */
 }
-
 .top {
   width: 100%;
   height: 50px;
@@ -102,12 +99,10 @@ body, html, #app{
 .top span {
   margin: 0 5px 0 5px;
 }
-
 .main {
   width: 100%;
   height: 87%;
   display: inline-flex;
-
 }
 .main .nav {
     width: 12.5%;
@@ -120,8 +115,6 @@ body, html, #app{
     padding: 10px 2.5% 10px 2.5% ;
     overflow: auto;
 }
-
-
 /* 合计尾行不显示兼容问题 */
 .el-table{
     overflow:visible !important;
@@ -129,13 +122,11 @@ body, html, #app{
 body .el-table th.gutter{
     display: table-cell!important;
 }
-
 /* //滚动条的宽度 */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-
 ::-webkit-scrollbar-thumb {
     height: 30px;
     background-color: #E3FBFE;
@@ -146,45 +137,27 @@ body .el-table th.gutter{
     border-radius: 2px;
     background: rgba(0,0,0,0.1);
 } 
-/* .scroll-table4 .elx-editable-column {
-    height: 20px;
+
+*{
+    margin: 0;
     padding: 0;
-    margin: 0;
-} */
-/* .scroll-table4 .cell {
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    white-space: normal;
-    word-break: break-all;
-    line-height: 18px;
 }
-.scroll-table4 td {
-    padding: 0px 0;
-    margin: 0;
-}
-
-.scroll-table4 th {
-    padding: 4px 0;
-} */
 .scroll-table4 td input{
-    padding-top: 1px 4px;
     margin: 0;
+    padding: 0;
+    height: 15px;
 }
-.scroll-table4 th { padding: 2px; }
-
-
-.el-menu-item, .el-submenu__title{
-    font-size: 0.8em;
-    height: 40px;
-    line-height: 40px;
-    list-style: none;
-    position: relative;
-    white-space: nowrap;
+.scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
+.scroll-table4 {
+      /* border:1px solid transparent; */
+      padding: 1px;
 }
-
+/* 清单显示弹出框 */
 .el-dialog__body {
   padding: 0 20px;
+  margin: 0;
   font-size:12px;
+  border:1px solid transparent;
 }
 
 /* .el-table--border, .el-table--group {
@@ -205,11 +178,11 @@ body .el-table th.gutter{
     border: 1px solid #909399;
 }
 .el-table td, .el-table th.is-leaf, .el-table--border th{
-    border-bottom: 1px solid #909399;
+    
+    border-bottom: 0.5px solid #909399;
 }
 .el-table--border td, .el-table--border th {
-    border-right: 1px solid #909399;
+    border-right: 0.5px solid #909399;
 }
-
 
 </style>

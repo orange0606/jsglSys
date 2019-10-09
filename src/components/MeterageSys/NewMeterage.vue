@@ -385,6 +385,10 @@ export default {
             var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = false;
+                this.showHeader = true;
+            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 

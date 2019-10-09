@@ -64,8 +64,7 @@
       <!-- 此处使用多级表头嵌套组件 -->
       <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" ></my-column>
     </elx-editable>
-    <p style="color: red;font-size: 12px;margin:10px 0 5px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
-    <br>
+    <p style="color: red;font-size: 12px;margin:6px 0 0px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
   </div>
 </template>
 
@@ -289,7 +288,10 @@ export default {
             var headsArr = this.$excel.Package(data['originalHead'].tOriginalHeadRows,data['originalHead'].refCol,data['originalHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = false;
+                this.showHeader = true;
+            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 
@@ -687,7 +689,7 @@ export default {
 <style scope>
 .click-table11-oper {
   height: 30px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   /* border: 1px solid pink; */
   text-align: left;
   position: relative;

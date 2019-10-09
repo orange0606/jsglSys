@@ -15,8 +15,14 @@
         <elx-editable-column type="index" width="50" align="center" fixed="left" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
         <elx-editable-column :prop="type+'Head.name'" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="num" :label="text+'编号'" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" :label="text+'名称'" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>
+        <elx-editable-column prop="num" :label="text+'编号'" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
+        <elx-editable-column prop="name" :label="text+'名称'" min-width="120" align="center" fixed="left"  >
+            <template slot-scope="scope">
+              <el-link :underline="true" style="font-size:12px;" type="success" @click="see(scope.row)" >{{scope.row.name}}</el-link>
+            </template>
+        </elx-editable-column>
+        
+        
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
         <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
        <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
@@ -123,7 +129,7 @@ import XEUtils from 'xe-utils';
         totalResult: 0
       },
      
-    }
+    } 
   },
   created () {
       this.loading = true;

@@ -7,7 +7,7 @@
   >
     <elx-editable
       ref="elxEditablecom"
-      class="scroll-table4 click-table11"
+      class="scroll-table4"
       border
       :height="Height"
       size="mini"
@@ -16,8 +16,6 @@
       :span-method="arraySpanMethod"
       show-summary
       :summary-method="getSummaries"
-      :row-style="{height:'20px'}"
-      :cell-style="{padding:'0px'}"
       :edit-config="{render: 'scroll', renderSize: 150}"
       :style="{ width: Width + '%' }">
     
@@ -87,10 +85,14 @@ export default {
     tViewSize () {
         let obj = this.$getViewportSize();
         this.Width = 99.99;
-        this.$nextTick(() => {
-            this.Height = obj.height-190;
-            this.Width = 100;
-        });
+        this.Height = obj.height-190;
+        setTimeout(()=>{
+            this.$nextTick(() => {
+                this.Height = obj.height-190;
+                this.Width = 100;
+             });
+        },300)
+        
     },
     upif ( newVal ) {   //处理父组件传来的值
         if (newVal && newVal.id) {  //判断返回的是不是一个数组
@@ -131,6 +133,10 @@ export default {
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
             this.PackHeader = XEUtils.clone(header, true); //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = false;
+                this.showHeader = true;
+            })
             this.loading = false;
             var list = this.$excel.ListAssemble( data[rowlistkey] ); //组装清单表格数据
             this.list = XEUtils.clone(list, true); //深拷贝
