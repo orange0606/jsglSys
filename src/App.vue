@@ -137,7 +137,13 @@ body, html, #app{
     padding: 0;
 }
 
-
+/* 清单显示弹出框 */
+.el-dialog__body {
+  padding: 0 20px;
+  margin: 0;
+  font-size:12px;
+  border:1px solid transparent;
+}
 /* 表格边框颜色 */
 .el-table--border, .el-table--group {
     border: 1px solid #909399;

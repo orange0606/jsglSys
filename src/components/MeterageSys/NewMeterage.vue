@@ -114,7 +114,7 @@
       show-summary
       size="mini"
       :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true}"
+      :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true, autoScrollIntoView: true}"
       :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column type="index" width="60" align="center" >
@@ -240,6 +240,7 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    
     tViewSize () {
         let obj = this.$getViewportSize();
         this.Width = 99.99;
@@ -750,7 +751,17 @@ export default {
           }
         console.log('打印一下NewRow 新增的一行')
         console.log(NewRow);
-        this.$refs.elxEditable1.insertAt(NewRow, -1)
+        this.$refs.elxEditable1.insertAt(NewRow, -1);
+      
+        this.$refs.elxEditable1.setActiveRow(NewRow);
+
+// this.$refs.elxEditable.insert({
+//         name: `New ${Date.now()}`,
+//         age: 26,
+//         rate: 2
+//       }).then(({ row }) => {
+//         this.$refs.elxEditable.setActiveRow(row)
+//       })
           // this.$refs.elxEditable1.setActiveCell(NewRow);
     
         // this.$refs.elxEditable1.clearActive();
