@@ -280,6 +280,7 @@ export default {
         //此处请求一个审批单的一个原清单
         this.$post('/original/row/getone',{ id })
             .then((response) => {
+            this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
             console.log('response-----------------------------')
             console.log(response)
             var data = response.data.original;
@@ -314,7 +315,6 @@ export default {
               this.originalHead.tOriginalHeadRows = data.originalHead.tOriginalHeadRows;
             }
             this.loading = false;
-            this.list.length = this.hd.length = 0;
             var arr = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
             this.list = [...arr];
             console.log('this.list------------')
@@ -725,10 +725,60 @@ export default {
   background-color: #fff6b2;
 }
 .scroll-table4-oper {
-  margin-bottom: 18px;
+  margin-bottom: 15px;
 }
 .scroll-table4.elx-editable .elx-editable-row.new-insert,
 .scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
   background-color: #f0f9eb;
+}
+
+
+/* 合计尾行不显示兼容问题 */
+.el-table{
+    overflow:visible !important;
+}
+body .el-table th.gutter{
+    display: table-cell!important;
+}
+
+/* 表格行高input等高度设置 */
+.scroll-table4.el-table--mini .elx-editable-column {
+    padding: 0;
+    height: 23px;
+    line-height: 23px;
+}
+/* .elx-editable.el-table--mini .elx-editable-column {
+    padding: 0;
+    height: 22px;
+} */
+.scroll-table4 .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 17px;
+}
+.scroll-table4 .el-input--mini .el-input__inner {
+    margin: 0;
+    height: 22px;
+    line-height: 22px;
+}
+.scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
+
+/* 清单显示弹出框 */
+.el-dialog__body {
+  padding: 0 20px;
+  margin: 0;
+  font-size:12px;
+  border:1px solid transparent;
+}
+
+/* 表头错乱 */
+body .el-table th.gutter {
+  display: table-cell !important;
+}
+
+body .el-table colgroup.gutter {
+  display: table-cell !important;
 }
 </style>

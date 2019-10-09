@@ -953,4 +953,53 @@ export default {
 .scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
   background-color: #f0f9eb;
 }
+
+/* 合计尾行不显示兼容问题 */
+.el-table{
+    overflow:visible !important;
+}
+body .el-table th.gutter{
+    display: table-cell!important;
+}
+
+/* 表格行高input等高度设置 */
+.scroll-table4.el-table--mini .elx-editable-column {
+    padding: 0;
+    height: 23px;
+    line-height: 23px;
+}
+/* .elx-editable.el-table--mini .elx-editable-column {
+    padding: 0;
+    height: 22px;
+} */
+.scroll-table4 .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 17px;
+}
+.scroll-table4 .el-input--mini .el-input__inner {
+    margin: 0;
+    height: 22px;
+    line-height: 22px;
+}
+.scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
+
+/* 清单显示弹出框 */
+.el-dialog__body {
+  padding: 0 20px;
+  margin: 0;
+  font-size:12px;
+  border:1px solid transparent;
+}
+
+/* 表头错乱 */
+body .el-table th.gutter {
+  display: table-cell !important;
+}
+
+body .el-table colgroup.gutter {
+  display: table-cell !important;
+}
 </style>
