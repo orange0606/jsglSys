@@ -83,16 +83,19 @@ export default {
   },
   methods: {
     tViewSize () {
+        this.loading = true;
         let obj = this.$getViewportSize();
-        this.Width = 99.99;
-        this.Height = obj.height-190;
-        setTimeout(()=>{
-            this.$nextTick(() => {
-                this.Height = obj.height-190;
-                this.Width = 100;
-             });
-        },300)
-        
+        this.$nextTick(() => {
+            this.Width = Math.floor(Math.random()*10);
+            this.Height = this.Height;
+            setTimeout(()=>{
+              this.Height = obj.height-210;
+              this.Width = 100;
+              this.OrHeight = obj.height-360;
+              this.loading = false;
+            },100)
+            
+        });
     },
     upif ( newVal ) {   //处理父组件传来的值
         if (newVal && newVal.id) {  //判断返回的是不是一个数组
@@ -165,21 +168,22 @@ export default {
         return [1, 1]
     }, 
     findList () { //表格滚动渲染函数
-      // this.loading = true
+      this.loading = true;
       this.$nextTick(() => {
         this.$refs.elxEditablecom.reload([])
         setTimeout(() => {
           // let startTime = Date.now()
           this.$refs.elxEditablecom.reload(this.list);
         //  this.$nextTick(() => {
-          this.loading = false;
+          // this.loading = false;
           this.$message({ message: `渲染 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms`, type: 'success', duration: 6000, showClose: true })
             // })
+          this.tViewSize();
         }, 200)
       })
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditablecom) return [];
+        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
         let list = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据;
         if (this.PackHeader.length ===0 && list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。

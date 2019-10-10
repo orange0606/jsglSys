@@ -101,32 +101,33 @@
          <!-- :data.sync="list" -->
            <!-- :cell-style="cellStyle" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <elx-editable
-      ref="elxEditable1"
-      class="scroll-table4 click-table11"
-      border
-      :height="Height"
-      :show-header="showHeader"
-      v-if="showHeader"
-      :span-method="arraySpanMethod"
-      @cell-click ="cell_click"
-      :cell-style ="cell_select"
-      show-summary
-      size="mini"
-      :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true,}"
-      :style="{ width: Width + '%' }">
-      <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-      <elx-editable-column type="index" width="60" align="center" >
-        <template v-slot:header>
-          <i class="el-icon-setting" @click="dialogVisible = true"></i>
-        </template>
-      </elx-editable-column>
-      <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader"></my-column>
-    </elx-editable>
-      <p style="color: red;font-size: 12px;margin:5px 0 15px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
-
+    <div :style="{ width:'100%', height: Height+'px' }">
+        <elx-editable
+          ref="elxEditable1"
+          class="scroll-table4 click-table11"
+          border
+          height="100%"
+          :show-header="showHeader"
+          v-if="showHeader"
+          :span-method="arraySpanMethod"
+          @cell-click ="cell_click"
+          :cell-style ="cell_select"
+          show-summary
+          size="mini"
+          :summary-method="getSummaries"
+          :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true,}"
+          :style="{ width: Width + '%' }">
+          <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" >
+            <template v-slot:header>
+              <i class="el-icon-setting" @click="dialogVisible = true"></i>
+            </template>
+          </elx-editable-column>
+          <!-- 此处使用多级表头嵌套组件 -->
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader"></my-column>
+        </elx-editable>
+          <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
+    </div>
   </div>
 </template>
 
@@ -199,7 +200,7 @@ export default {
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
       Height: 400,
-      Width:99.9,
+      Width:  99.9,
       UpHeight:300,
     }
   },
@@ -242,23 +243,24 @@ export default {
   methods: {
     
     tViewSize () {
+        this.loading = true;
         let obj = this.$getViewportSize();
-        this.Width = 99.99;
         this.$nextTick(() => {
-            this.Height = obj.height-260;
-            this.Width = 100;
-            this.UpHeight = obj.height-360;
+            this.Width = Math.floor(Math.random()*10);
+            this.Height = this.Height;
+            setTimeout(()=>{
+              this.Height = obj.height-210;
+              this.Width = 100;
+              this.UpHeight = obj.height-360;
+              this.loading = false;
+            },100)
+            
         });
     },
      upif ( newVal ) {   //处理父组件传来的值
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
             this.loading = true;
-            this.showHeader = false;
-            this.$nextTick(() => {  //强制重新渲染
-                this.showHeader = true;
-                this.startTime = Date.now(); 
-            })
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.meterageHead.id;
@@ -390,6 +392,14 @@ export default {
             var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+            this.$nextTick(() => {  //强制重新渲染
+                this.startTime = Date.now(); 
+                this.showHeader = false;
+                setTimeout(()=>{
+                    this.showHeader = true;
+                },200);
+            })
+            
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 
@@ -713,14 +723,19 @@ export default {
       this.loading = true;
       this.$nextTick(() => {
         this.$refs.elxEditable1.reload([])
-        this.$refs.elxEditable1.reload(this.list);
-        this.loading = false;
-        this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+        setTimeout(() => {
+            this.$refs.elxEditable1.reload(this.list);
+            this.loading = false;
+            this.$nextTick(() => {
+                this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+            });
+            this.tViewSize();
+        }, 300)
+      });
 
-      })
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditable1) return [];
+        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         if (this.PackHeader.length ===0 || list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。

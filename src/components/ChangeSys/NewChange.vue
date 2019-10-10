@@ -95,37 +95,38 @@
           <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
         </div>
     </div>
-          <!-- show-summary
-      :summary-method="getSummaries" -->
-         <!-- :data.sync="list" -->
-    <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <elx-editable
-      ref="elxEditable1"
-      class="scroll-table4 click-table11"
-      border
-      :height="Height"
-      :show-header="showHeader"
-      v-if="showHeader"
-      :span-method="arraySpanMethod"
-      @cell-click ="cell_click"
-      :cell-style ="cell_select"
-      show-summary
-      size="mini"
-      :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 80}"
-      :style="{ width: Width + '%' }">
-      <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-     
-      <elx-editable-column type="index" width="60" align="center" >
-        <template v-slot:header>
-          <i class="el-icon-setting" @click="dialogVisible = true"></i>
-        </template>
-      </elx-editable-column>
-      <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" ></my-column>
-    </elx-editable>
-    <p style="color: red;font-size: 12px;margin:10px 0 10px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
-    <br>
+    <div :style="{ width:'100%', height: Height+'px' }">
+              <!-- show-summary
+          :summary-method="getSummaries" -->
+            <!-- :data.sync="list"   :height="Height"-->
+        <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
+        <elx-editable
+          ref="elxEditable1"
+          class="scroll-table4 click-table11"
+          border
+          height="100%"
+          :show-header="showHeader"
+          v-if="showHeader"
+          :span-method="arraySpanMethod"
+          @cell-click ="cell_click"
+          :cell-style ="cell_select"
+          show-summary
+          size="mini"
+          :summary-method="getSummaries"
+          :edit-config="{render: 'scroll', renderSize: 80}"
+          :style="{ width: Width + '%' }">
+          <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+        
+          <elx-editable-column type="index" width="60" align="center" >
+            <template v-slot:header>
+              <i class="el-icon-setting" @click="dialogVisible = true"></i>
+            </template>
+          </elx-editable-column>
+          <!-- 此处使用多级表头嵌套组件 -->
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" ></my-column>
+        </elx-editable>
+        <p style="color: red;font-size: 12px;margin:10px 0 10px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
+      </div>
   </div>
 </template>
 
@@ -236,12 +237,18 @@ export default {
   },
   methods: {
     tViewSize () {
+        this.loading = true;
         let obj = this.$getViewportSize();
-        this.Width = 99.99;
         this.$nextTick(() => {
-            this.Height = obj.height-260;
-            this.Width = 100;
-            this.OrHeight = obj.height-360;
+            this.Width = Math.floor(Math.random()*10);
+            this.Height = this.Height;
+            setTimeout(()=>{
+              this.Height = obj.height-210;
+              this.Width = 100;
+              this.OrHeight = obj.height-360;
+              this.loading = false;
+            },100)
+            
         });
     },
      upif ( newVal ) {   //处理父组件传来的值
@@ -251,11 +258,6 @@ export default {
             console.log('进来预览修改了')
             console.log(newVal)
             this.loading = true;
-            this.showHeader = false;
-            this.$nextTick(() => {  //强制重新渲染
-                this.showHeader = true;
-                this.startTime = Date.now(); 
-            })
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.changeHead.id;
@@ -400,10 +402,19 @@ export default {
             var headsArr = this.$excel.Package(data['changeHead'].tChangeHeadRows,data['changeHead'].refCol,data['changeHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+            this.$nextTick(() => {  //强制重新渲染
+                this.startTime = Date.now(); 
+                this.showHeader = false;
+                setTimeout(()=>{
+                    this.showHeader = true;
+                },300);
+            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+            this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+
             this.changeHead = { //保存表头信息
                 id: data.changeHead.id,
                 name: data.changeHead.name,
@@ -419,7 +430,7 @@ export default {
             this.loading = false;
             var arr = this.$excel.ListAssemble(data.changeRowList); //组装清单表格数据
             this.list = [...arr];
-            this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            
             for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                 this.list[index]['seq'] = index;
             }
@@ -619,17 +630,23 @@ export default {
         return [1, 1]
     }, 
     findList () { //表格滚动渲染函数
-        this.loading = true;
-        this.$nextTick(() => {
+      this.loading = true;
+      this.$nextTick(() => {
         this.$refs.elxEditable1.reload([])
-        this.$refs.elxEditable1.reload(this.list);
-        this.loading = false;
-        this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+        setTimeout(() => {
+            this.$refs.elxEditable1.reload(this.list);
+            this.loading = false;
+            this.$nextTick(() => {
+                this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+            });
+            this.tViewSize();
 
-        })
+        }, 300)
+      });
+
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditable1) return [];
+        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         if (this.PackHeader.length ===0 || list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。

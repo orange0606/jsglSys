@@ -88,6 +88,16 @@
               <br>
           </el-dialog>
         </transition>
+        <el-pagination
+          class="manual-table4-pagination"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageVO.currentPage"
+          :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
+          :page-size="pageVO.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="pageVO.totalResult">
+        </el-pagination>
     </div>
     </el-collapse-transition>
 </template>
@@ -96,7 +106,7 @@
 import NewMeterage from './NewMeterage';
 import XEUtils from 'xe-utils';
   export default {
-  name: 'MeterageList',
+  name: 'AllMeterageList',
   components: {
     NewMeterage
   },
@@ -124,12 +134,12 @@ import XEUtils from 'xe-utils';
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default:true   
+      default:false   
     },
     approval:{
       type: Object,
@@ -144,21 +154,26 @@ import XEUtils from 'xe-utils';
   },
   data () { 
     return {
-      list: [],
-      visibleNew:false,
-      refresh:false,
-      loading: false,
-      edit: false, // 是否开启编辑
-      uprow: null, //修改清单传入保存清单组组件的数据
-      tenderList: null,  //全部标段
-      EditTitle: '查看计量清单', //清单子组件的标题文字内容
-      dialogVisible:false,//显示隐藏
-      isClearActiveFlag: true,
-      rules: {
-          name: [
+        list: [],
+        visibleNew:false,
+        refresh:false,
+        loading: false,
+        edit: false, // 是否开启编辑
+        uprow: null, //修改清单传入保存清单组组件的数据
+        tenderList: null,  //全部标段
+        EditTitle: '查看计量清单', //清单子组件的标题文字内容
+        dialogVisible:false,//显示隐藏
+        isClearActiveFlag: true,
+        rules: {
+            name: [
             { required: true, message: '请输入活动名称', trigger: 'blur' },
             { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-          ]
+            ]
+        },
+         pageVO: {
+            currentPage: 1,
+            pageSize: 10,
+            totalResult: 0
         },
     }
   },
@@ -198,6 +213,18 @@ import XEUtils from 'xe-utils';
     // }
   },
   methods: {
+    searchEvent () {
+      this.pageVO.currentPage = 1
+      this.findList()
+    },
+    handleSizeChange (pageSize) {
+      this.pageVO.pageSize = pageSize
+      this.findList()
+    },
+    handleCurrentChange (currentPage) {
+      this.pageVO.currentPage = currentPage
+      this.findList()
+    },
     watchList (list) {  //监听清单列表 判断增/改 添加到对应增改集合
         this.meterageAltList.length = this.meterageAddList.length = 0;
         for (let index = list.length - 1; index >= 0; index--) {
@@ -251,9 +278,11 @@ import XEUtils from 'xe-utils';
     },
     findList () {
             // 发起网络请求
-        this.$post('/meterage/getall',{id: this.approval.id})
+        this.$post('/meterage/all',{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
             .then((response) => {
-            this.list = response.data.meterageList;
+            this.list = response.data.meterageList.list;
+            this.pageVO.totalResult = response.data.meterageList.total;
+
             this.loading = false;
         }).catch(e => {
             this.loading = false;

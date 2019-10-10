@@ -1,8 +1,8 @@
 <template>
     <el-collapse-transition>
     <div v-loading="loading" element-loading-text="飞速加载中">
-        <h3>计量清单列表</h3>
-        <!-- 业务按钮 -->
+        <h3>变更清单列表</h3>
+       <!-- 业务按钮 -->
         <div class="manual-table2-oper" v-if="joinParent && mode==='show'?false:true">
             <span v-if="edit">
                 <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
@@ -25,19 +25,21 @@
         border
         size="mini"
         :data.sync="list"
+        :cell-style ="cell_select"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
         style="width: 100%">
-        <elx-editable-column type="selection" width="50" align="center" ></elx-editable-column>
-        <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
+        <elx-editable-column type="selection" width="50" align="center" fixed="left" ></elx-editable-column>
+        <elx-editable-column type="index" width="50" align="center" fixed="left" > </elx-editable-column>
         <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
                 
-        <elx-editable-column prop="meterageHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
+        <!-- <elx-editable-column prop="changeHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
+        <elx-editable-column prop="changeHead.name" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
         <!-- <elx-editable-column prop="process.num" label="审批单编号" align="center" show-overflow-tooltip ></elx-editable-column> -->
         <!-- <elx-editable-column prop="process.name" label="审批单名称" align="center" show-overflow-tooltip ></elx-editable-column> -->
-        <elx-editable-column prop="num" label="计量清单编号" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
-        <elx-editable-column prop="name" label="计量清单名称" min-width="110" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+        <elx-editable-column prop="num" label="变更清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip :edit-render="{name: 'ElInput'}" ></elx-editable-column>     
+        <elx-editable-column prop="name" label="变更清单名称" min-width="120" align="center" fixed="left"  :edit-render="{name: 'ElInput'}" >
             <template slot-scope="scope">
-                <el-link :underline="true" style="font-size:12px;" type="success" @click="see(scope.row)" >{{scope.row.name}}</el-link>
+              <el-link :underline="true" style="font-size:12px;" type="success" @click="see(scope.row)" >{{scope.row.name}}</el-link>
             </template>
         </elx-editable-column>
         <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
@@ -57,7 +59,7 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" :width="edit?'190':'70'" align="center" >
+        <elx-editable-column label="操作" :width="edit?'180':'70'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
@@ -81,60 +83,70 @@
             </template>
         </elx-editable-column>
         </elx-editable>
-        <!-- 引入计量清单组件 -->
+
+         <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
-              <new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" :joinParent="joinParent" ></new-meterage>
-              <br>
+              <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="changeList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></new-change>
           </el-dialog>
         </transition>
+        <el-pagination
+          class="manual-table4-pagination"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageVO.currentPage"
+          :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
+          :page-size="pageVO.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="pageVO.totalResult">
+        </el-pagination>
     </div>
     </el-collapse-transition>
-</template>
 
+</template>
 <script>
-import NewMeterage from './NewMeterage';
-import XEUtils from 'xe-utils';
+import NewChange from './NewChange';
+import XEUtils from 'xe-utils'
   export default {
-  name: 'MeterageList',
+  name: 'AllChangeList',
   components: {
-    NewMeterage
+    NewChange
   },
   props: {
-    meterageList:{    //变更清单数据列表，这个数据用于返回给父组件
+     changeList:{    //变更清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
     },
-    meterageAddList:{    //增加原清单数据列表，这个数据用于返回给父组件
+    changeAddList:{    //增加变更清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
     },
-    meterageDelList:{    //删除原清单数据列表，这个数据用于返回给父组件
+    changeDelList:{    //删除变更清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
     },
-    meterageAltList:{    //修改原清单数据列表，这个数据用于返回给父组件
+    changeAltList:{    //修改变更清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
       default: () => []
-    },
-    mode:{  //子组件的展示模式
-      type: String,
-      required: false,
-      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
-    },
-    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
-      // type:Array,
-      required:false,
-      default:true   
     },
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:862, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
+    },
+     mode:{  //子组件的展示模式
+      type: String,
+      required: false,
+      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+    },
+    joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+      // type:Array,
+      required:false,
+      default:false   
     },
     tender:{
       type: Object,
@@ -142,23 +154,28 @@ import XEUtils from 'xe-utils';
       default: () => ({id:37, name:"机电标段"})
     }
   },
-  data () { 
+  data () {
     return {
-      list: [],
-      visibleNew:false,
-      refresh:false,
-      loading: false,
-      edit: false, // 是否开启编辑
-      uprow: null, //修改清单传入保存清单组组件的数据
-      tenderList: null,  //全部标段
-      EditTitle: '查看计量清单', //清单子组件的标题文字内容
-      dialogVisible:false,//显示隐藏
-      isClearActiveFlag: true,
-      rules: {
-          name: [
+        list: [],
+        visibleNew:false,
+        refresh:false,
+        loading: false,
+        edit: false, // 是否开启编辑
+        EditTitle: '查看变更清单', //清单子组件的标题文字内容
+        uprow:  null,//修改清单（传入子组件的数据）
+        tenderList:null,  //全部标段
+        dialogVisible:false,//显示隐藏
+        isClearActiveFlag: true,
+        rules: {
+            name: [
             { required: true, message: '请输入活动名称', trigger: 'blur' },
             { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-          ]
+            ]
+        },
+        pageVO: {
+            currentPage: 1,
+            pageSize: 10,
+            totalResult: 0
         },
     }
   },
@@ -167,17 +184,15 @@ import XEUtils from 'xe-utils';
       this.modeType ( this.mode );
   },
   watch: {
-    meterageList: function ( newVal,oldVal ) {
+    changeList: function ( newVal,oldVal ) {
         //此处判断父组件传来的展示模式类型
         this.modeType ( this.mode );
-        //此处作判断是否有新增的数据进来（循环判断）
-        
         
     },
-    visibleNew: function ( newVal,oldVal ) {
+    visibleNew: function(newVal,oldVal){
         if (!newVal) {
             if (this.mode === 'show') {
-                this.edit = false;
+                 this.edit = false;
                  if (!this.joinParent) {  //是否接受父组件的值
                     this.findList();  //请求该审批id的所有清单
                     this.edit = true;
@@ -185,54 +200,68 @@ import XEUtils from 'xe-utils';
             }else{
                 this.edit = true;
                 this.$nextTick(() => {
-                    this.list = this.meterageList;
+                    this.list = this.changeList;
                 }); // 强制刷新
-                this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
+                this.watchList(this.changeList);  //监听清单列表 判断增/改 添加到对应增改集合
             }
             this.visibleNew = false; //关闭显示
         }
     },
+
   },
   computed: {
     // enter: function () {
     // }
   },
   methods: {
-    watchList (list) {  //监听清单列表 判断增/改 添加到对应增改集合
-        this.meterageAltList.length = this.meterageAddList.length = 0;
+      searchEvent () {
+      this.pageVO.currentPage = 1
+      this.findList()
+    },
+    handleSizeChange (pageSize) {
+      this.pageVO.pageSize = pageSize
+      this.findList()
+    },
+    handleCurrentChange (currentPage) {
+      this.pageVO.currentPage = currentPage
+      this.findList()
+    },
+     watchList (list) {  //监听清单列表 判断增/改 添加到对应增改集合
+        this.changeAltList.length = this.changeAddList.length = 0;
         for (let index = list.length - 1; index >= 0; index--) {
             if( !list[index].id ) { //无id的情况（新增清单）
-                this.meterageAddList.push(list[index]);
+                this.changeAddList.push(list[index]);
                 
             }if (list[index].id && list[index].alter && list[index].alter==='Y') { //修改清单
-                this.meterageAltList.push(list[index]);
+                this.changeAltList.push(list[index]);
             }
         }
         console.log('此处打印一下清单列表增删改')
-        console.log('this.meterageList')
-        console.log(this.meterageList)
-        console.log(' this.meterageAddList,')
-        console.log( this.meterageAddList,)
-        console.log('this.meterageDelList')
-        console.log(this.meterageDelList)        
-        console.log('this.meterageAltList')
-        console.log(this.meterageAltList)
+        console.log('this.changeList')
+        console.log(this.changeList)
+        console.log(' this.changeAddList,')
+        console.log( this.changeAddList,)
+        console.log('this.changeDelList')
+        console.log(this.changeDelList)        
+        console.log('this.changeAltList')
+        console.log(this.changeAltList)
     },
     Console () {
         console.log('此处打印一下清单列表增删改')
-        console.log('this.meterageList')
-        console.log(this.meterageList)
-        console.log(' this.meterageAddList,')
-        console.log( this.meterageAddList,)
-        console.log('this.meterageDelList')
-        console.log(this.meterageDelList)        
-        console.log('this.meterageAltList')
-        console.log(this.meterageAltList)
+        console.log('this.changeList')
+        console.log(this.changeList)
+        console.log(' this.changeAddList,')
+        console.log( this.changeAddList,)
+        console.log('this.changeDelList')
+        console.log(this.changeDelList)        
+        console.log('this.changeAltList')
+        console.log(this.changeAltList)
 
     },
     modeType ( type ) {
         if (this.joinParent) { //判断父组件是否传来数据
-            this.list = this.meterageList;
+            //此处设置不需要分页
+            this.list = this.changeList;
         }
         this.edit = true;
         switch(type) {
@@ -251,34 +280,42 @@ import XEUtils from 'xe-utils';
     },
     findList () {
             // 发起网络请求
-        this.$post('/meterage/getall',{id: this.approval.id})
+        this.$post('/change/all',{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
             .then((response) => {
-            this.list = response.data.meterageList;
+            this.list = response.data.changeList.list;
+            this.pageVO.totalResult = response.data.changeList.total;
             this.loading = false;
         }).catch(e => {
             this.loading = false;
             this.$message({
                 type: 'info',
-                message: '发生错误！'
+                message: '发生错误！'+e
             });
         })
     },
     see (row) { //预览和修改清单
         if (row.id || row.saveTime) {
-            this.EditTitle = '查看计量清单';
+            this.EditTitle = '查看变更清单';
         }else{
-            this.EditTitle = '新建计量清单';
+            this.EditTitle = '新建变更清单';
         }
+        this.uprow = null;
         this.uprow = row;
-        // console.log(this.uprow,' this.uprow')
-        // console.log(this.meterageList,' meterageList')
         this.visibleNew = true; //显示建立清单组件
+    },
+    handleSizeChange (pageSize) {
+      this.pageVO.pageSize = pageSize
+      this.findList()
+    },
+    handleCurrentChange (currentPage) {
+      this.pageVO.currentPage = currentPage
+      this.findList()
     },
     formatterType (row, column, cellValue, index) {
       let obj = {
         original: '原清单',
         change: '变更清单',
-        update: '新清单',
+        update: '变更后的清单',
         meterage: '计量清单',
         totalmeterage: '累计计量清单',	
         pay: '支付清单',
@@ -296,6 +333,7 @@ import XEUtils from 'xe-utils';
       const property = column['property']
       return row[property] === value
     },
+    
     // 点击表格外面处理
     checkOutSave (row) {
       if (!row.id) {
@@ -306,11 +344,11 @@ import XEUtils from 'xe-utils';
           cancelButtonText: '移除数据',
           type: 'warning'
         }).then(action => {
-          this.$refs.elxEditable.clearActive();
-          this.saveRowEvent(row);
+          this.$refs.elxEditable.clearActive()
+          this.saveRowEvent(row)
         }).catch(action => {
           if (action === 'cancel') {
-            this.$refs.elxEditable.remove(row);
+            this.$refs.elxEditable.remove(row)
           }
         }).then(() => {
           this.isClearActiveFlag = true;
@@ -323,12 +361,12 @@ import XEUtils from 'xe-utils';
           cancelButtonText: '取消修改',
           type: 'warning'
         }).then(() => {
-          this.$refs.elxEditable.clearActive();
+          this.$refs.elxEditable.clearActive()
           this.saveRowEvent(row)
         }).catch(action => {
           if (action === 'cancel') {
             this.$refs.elxEditable.revert(row)
-            this.$refs.elxEditable.clearActive();
+            this.$refs.elxEditable.clearActive()
           }
         }).then(() => {
           this.isClearActiveFlag = true
@@ -377,7 +415,6 @@ import XEUtils from 'xe-utils';
           if (action === 'confirm') {
             this.$refs.elxEditable.remove(row)
             // console.log('移除数据')
-            
           }
         }).catch(e => e).then(() => {
           this.isClearActiveFlag = true
@@ -415,13 +452,13 @@ import XEUtils from 'xe-utils';
               this.loading = true
               // 进行发起请求删除
               var obj = {
-                    meterageAddList: [],    //增
-                    meterageDelList: [],     //删 
-                    meterageAltList: []   //改
+                    changeAddList: [],    //增
+                    changeDelList: [],     //删 
+                    changeAltList: []   //改
               };
-              if (row.id) obj.meterageDelList.push(row);
+              if (row.id) obj.changeDelList.push(row);
                 
-              this.$post('/meterage/update',obj)
+              this.$post('/change/update',obj)
                 .then((response) => {
                 //删除成功
                 this.loading = false;
@@ -440,17 +477,17 @@ import XEUtils from 'xe-utils';
         } else if(this.mode !== 'show') {    //新建模式与修改模式，仅进行数组的引用赋值修改
             this.$refs.elxEditable.remove(row);
             if ( this.mode ==='alter' && this.joinParent && row.id  ) {
-                this.meterageDelList.push(row);
+                this.changeDelList.push(row);
             }
-            console.log('删除单个清单需记录  this.meterageDelList，此处显示     this.meterageList ------this.meterageDelList');
-            console.log(this.meterageList,this.meterageDelList)
+            console.log('删除单个清单需记录  this.changeDelList，此处显示     this.changeList ------this.changeDelList');
+            console.log(this.changeList,this.changeDelList)
 
             let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-            this.meterageList.length = 0;
+            this.changeList.length = 0;
             for (let index = 0; index < rest.length; index++) {
-                this.meterageList.push(rest[index]); 
+                this.changeList.push(rest[index]); 
             }
-            this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
+            this.watchList(this.changeList);  //监听清单列表 判断增/改 添加到对应增改集合
             this.$message({type: 'success', message: '删除所选选项成功!'})
         }
     },
@@ -468,15 +505,15 @@ import XEUtils from 'xe-utils';
             // 进行发起请求删除
             if ( this.mode === 'show') {    //展示模式执行的网络请求批量删除
                 var obj = {
-                    meterageAddList: [],    //增
-                    meterageDelList: [],     //删 
-                    meterageAltList: []   //改
+                    changeAddList: [],    //增
+                    changeDelList: [],     //删 
+                    changeAltList: []   //改
                 };
                 for (let index = 0; index < removeRecords.length; index++) {
-                    if (removeRecords[index].id) obj.meterageDelList.push(removeRecords[index]);
+                    if (removeRecords[index].id) obj.changeDelList.push(removeRecords[index]);
                 };
                 // 进行发起请求删除
-                this.$post('/meterage/update', obj)
+                this.$post('/change/update', obj)
                   .then((response) => {
                   //删除成功
                   this.loading = false;
@@ -496,15 +533,17 @@ import XEUtils from 'xe-utils';
                 this.$refs.elxEditable.remove(removeRecords);
                 if (this.mode ==='alter' && this.joinParent) {       
                     for (let a = removeRecords.length -1; a >= 0; a--) {
-                        if ( removeRecords[a].id ) this.meterageDelList.push(removeRecords[a]);
+                        if ( removeRecords[a].id ) this.changeDelList.push(removeRecords[a]);
                     }
+                    console.log('删除多个个清单需记录  this.changeDelList，此处显示     removeRecords ------this.changeDelList');
+                    console.log(removeRecords,this.changeDelList);
                 }
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-                this.meterageList.length = 0;
+                this.changeList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
-                    this.meterageList.push(rest[index]); 
+                    this.changeList.push(rest[index]); 
                 }
-                this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
+                this.watchList(this.changeList);  //监听清单列表 判断增/改 添加到对应增改集合
                 this.loading = false;
                 this.$message({
                     type: 'success',
@@ -526,12 +565,12 @@ import XEUtils from 'xe-utils';
         if (valid) {
             if (this.mode === 'show') {
                 var obj = {
-                    meterageAddList: [],    //增
-                    meterageDelList: [],     //删 
-                    meterageAltList: []   //改
+                    changeAddList: [],    //增
+                    changeDelList: [],     //删 
+                    changeAltList: []   //改
                 };
-                if (row.id) obj.meterageAltList.push(row);
-                this.$post('/meterage/update',obj)
+                if (row.id) obj.changeAltList.push(row);
+                this.$post('/change/update',obj)
                     .then((response) => {   
                     this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
                     this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true })
@@ -543,14 +582,14 @@ import XEUtils from 'xe-utils';
                     });
                 })
             }else { //此处为新建模式与修改模式所需要的引用赋值操作
-                // if ( row.id ) this.meterageAltList.push(row); //添加到修改集合
                 if ( row.id ) row.alter='Y'; //标记为修改
                 let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
-                this.meterageList.length = 0;
+
+                this.changeList.length = 0;
                 for (let index = 0; index < rest.length; index++) {
-                    this.meterageList.push(rest[index]); 
+                    this.changeList.push(rest[index]); 
                 }
-                this.watchList(this.meterageList);  //监听清单列表 判断增/改 添加到对应增改集合
+                this.watchList(this.changeList);  //监听清单列表 判断增/改 添加到对应增改集合
                 this.$message({ message: `修改成功`, type: 'success', duration: 3000, showClose: true });
                 this.$refs.elxEditable.clearActive();//清除所有单元格编辑状态
             }
@@ -571,9 +610,6 @@ import XEUtils from 'xe-utils';
 </script>
 
 <style scoped>
-.dialogs {
-    height: 90%;
-}
 .manual-table2-oper {
   width: 100%;
   height: 25px;

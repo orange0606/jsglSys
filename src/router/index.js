@@ -34,7 +34,14 @@ export default new Router({
         "requireAuth": true
       }
     }, 
-    
+    {
+      path: '/AllOriginals',
+      name: 'AllOriginalList',
+      component: ()=>import('@/components/InventorySys/AllOriginalList.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    }, 
     {
       path: '/ChangeList',
       name: 'ChangeList',
@@ -43,11 +50,26 @@ export default new Router({
         "requireAuth": true
       }
     },
-
+    {
+      path: '/AllChangeList',
+      name: 'AllChangeList',
+      component: ()=>import('@/components/ChangeSys/AllChangeList.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    },
     {
       path: '/MeterageList',
       name: 'MeterageList',
       component: ()=>import('@/components/MeterageSys/MeterageList.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    },
+    {
+      path: '/AllMeterageList',
+      name: 'AllMeterageList',
+      component: ()=>import('@/components/MeterageSys/AllMeterageList.vue'),
       meta:{
         "requireAuth": true
       }
@@ -64,6 +86,14 @@ export default new Router({
       path: '/PayList',
       name: 'PayList',
       component: ()=>import('@/components/PaySys/PayList.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    },
+    {
+      path: '/AllPayList',
+      name: 'AllPayList',
+      component: ()=>import('@/components/PaySys/AllPayList.vue'),
       meta:{
         "requireAuth": true
       }
