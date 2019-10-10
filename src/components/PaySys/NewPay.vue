@@ -173,7 +173,11 @@ export default {
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
             this.loading = true;
-            this.startTime = Date.now(); 
+            this.showHeader = false;
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = true;
+                this.startTime = Date.now(); 
+            })
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.payHead.id;
@@ -305,10 +309,6 @@ export default {
             var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.showHeader = false;
-                this.showHeader = true;
-            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 
@@ -326,8 +326,6 @@ export default {
             }
             this.tTotalmeterageId = data.tTotalmeterageId; //累计计量清单id
             this.loading = false;
-            this.list.length = this.hd.length = 0;
-
             var arr = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据

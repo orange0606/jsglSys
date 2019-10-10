@@ -114,7 +114,7 @@
       show-summary
       size="mini"
       :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true, autoScrollIntoView: true}"
+      :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true,}"
       :style="{ width: Width + '%' }">
       <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
       <elx-editable-column type="index" width="60" align="center" >
@@ -254,7 +254,11 @@ export default {
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
             this.loading = true;
-            this.startTime = Date.now(); 
+            this.showHeader = false;
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = true;
+                this.startTime = Date.now(); 
+            })
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.meterageHead.id;
@@ -386,10 +390,6 @@ export default {
             var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.showHeader = false;
-                this.showHeader = true;
-            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 
@@ -751,9 +751,9 @@ export default {
           }
         console.log('打印一下NewRow 新增的一行')
         console.log(NewRow);
-        this.$refs.elxEditable1.insertAt(NewRow, -1);
-      
-        this.$refs.elxEditable1.setActiveRow(NewRow);
+        this.$refs.elxEditable1.insertAt(NewRow, -1)
+          this.$refs.elxEditable1.setActiveRow(NewRow)
+        
 
 // this.$refs.elxEditable.insert({
 //         name: `New ${Date.now()}`,

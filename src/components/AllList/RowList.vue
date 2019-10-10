@@ -11,7 +11,7 @@
       border
       :height="Height"
       size="mini"
-      :show-header="showHeader"
+      :show-header="showHeader" 
       v-if="showHeader"
       :span-method="arraySpanMethod"
       show-summary
@@ -100,7 +100,7 @@ export default {
             this.loading = true;
             this.showHeader = false;
             this.$nextTick(() => {  //强制重新渲染
-            this.showHeader = true;
+                this.showHeader = true;
                 this.startTime = Date.now(); 
             })
             this.oneList(newVal);

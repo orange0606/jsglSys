@@ -144,7 +144,6 @@ export default {
 
   beforeDestroy () {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
-    this.$refs.input = null;
   },
   methods: {
     tViewSize () {
@@ -159,7 +158,11 @@ export default {
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
             this.loading = true;
-            this.startTime = Date.now(); 
+            this.showHeader = false;
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = true;
+                this.startTime = Date.now(); 
+            })
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.originalHead.id;
@@ -293,11 +296,6 @@ export default {
             console.log(this.PackHeader)            
             console.log('this.col----------')
             console.log(this.col)
-            this.PackHeader
-            this.$nextTick(() => {  //强制重新渲染
-                this.showHeader = false;
-                this.showHeader = true;
-            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 

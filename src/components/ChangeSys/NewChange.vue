@@ -251,7 +251,11 @@ export default {
             console.log('进来预览修改了')
             console.log(newVal)
             this.loading = true;
-            this.startTime = Date.now(); 
+            this.showHeader = false;
+            this.$nextTick(() => {  //强制重新渲染
+                this.showHeader = true;
+                this.startTime = Date.now(); 
+            })
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.changeHead.id;
@@ -396,10 +400,6 @@ export default {
             var headsArr = this.$excel.Package(data['changeHead'].tChangeHeadRows,data['changeHead'].refCol,data['changeHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.showHeader = false;
-                this.showHeader = true;
-            })
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -417,8 +417,6 @@ export default {
                 this.changeHead.tChangeHeadRows = data.changeHead.tChangeHeadRows;
             }
             this.loading = false;
-            this.list.length = this.hd.length = 0;
-
             var arr = this.$excel.ListAssemble(data.changeRowList); //组装清单表格数据
             this.list = [...arr];
             this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
