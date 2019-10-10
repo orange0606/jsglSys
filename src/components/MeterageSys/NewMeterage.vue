@@ -107,6 +107,7 @@
           class="scroll-table4 click-table11"
           border
           height="100%"
+          v-loading="loading"
           :show-header="showHeader"
           v-if="showHeader"
           :span-method="arraySpanMethod"
@@ -241,19 +242,20 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    
     tViewSize () {
         this.loading = true;
         let obj = this.$getViewportSize();
+        this.Width = Math.random()*99;
+
         this.$nextTick(() => {
-            this.Width = Math.floor(Math.random()*10);
             this.Height = this.Height;
-            setTimeout(()=>{
-              this.Height = obj.height-210;
+            // setTimeout(()=>{
+              this.Height = obj.height-180;
               this.Width = 100;
               this.UpHeight = obj.height-360;
               this.loading = false;
-            },100)
+            // },100);
+            
             
         });
     },
@@ -641,6 +643,7 @@ export default {
                     this.$refs.elxEditable1.insertAt(rest[index], -1); 
                 }
             })
+            this.tViewSize();
             // this.list = this.$refs.elxEditable1.getRecords();
             // up = to = null;
         } catch (e) {
@@ -722,7 +725,7 @@ export default {
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([])
+        this.$refs.elxEditable1.reload([]);
         setTimeout(() => {
             this.$refs.elxEditable1.reload(this.list);
             this.loading = false;

@@ -85,7 +85,6 @@
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
               <new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" :joinParent="joinParent" ></new-meterage>
-              <br>
           </el-dialog>
         </transition>
     </div>

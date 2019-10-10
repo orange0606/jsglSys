@@ -123,7 +123,7 @@ export default {
       RowDelList: [],//记录被删除有id的单元格
       lastHeader: null,
       Height: 400,
-      Width:99.9
+      Width:100
     }
   },
  watch: {
@@ -153,12 +153,11 @@ export default {
         this.loading = true;
         let obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Width = Math.floor(Math.random()*10);
+            this.Width = Math.random()*100;
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-210;
+              this.Height = obj.height-180;
               this.Width = 100;
-              this.OrHeight = obj.height-360;
               this.loading = false;
             },100)
             
@@ -303,7 +302,7 @@ export default {
                 this.showHeader = false;
                 setTimeout(()=>{
                     this.showHeader = true;
-                },200);
+                },300);
             })
             console.log('this.PackHeader---------------')
             console.log(this.PackHeader)            

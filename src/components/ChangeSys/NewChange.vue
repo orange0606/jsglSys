@@ -240,10 +240,10 @@ export default {
         this.loading = true;
         let obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Width = Math.floor(Math.random()*10);
+            this.Width = Math.random()*100;
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-210;
+              this.Height = obj.height-180;
               this.Width = 100;
               this.OrHeight = obj.height-360;
               this.loading = false;
