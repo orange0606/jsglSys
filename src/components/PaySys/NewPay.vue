@@ -37,7 +37,7 @@
          <!-- :data.sync="list" -->
            <!-- :cell-style="cellStyle" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <div :style="{ width:'100%', height: Height+'px' }">
+    <div :style="{ height: Height+'px' }">
         <elx-editable
           ref="elxEditable1"
           class="scroll-table4 click-table11"
@@ -49,21 +49,10 @@
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           size="small"
-          :edit-config="{render: 'scroll', renderSize: 80}"
-          :style="{ width: Width + '%' }">
-          <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-          <elx-editable-column width="40" align="center" >
-            <template v-slot:header="scope">
-              <el-tooltip class="item" placement="top">
-                <div slot="content">按住后可以上下拖动排序，<br>完成后点击保存即可！</div>
-                <i class="el-icon-question"></i>
-              </el-tooltip>
-            </template>
-            <template>
-              <i class="el-icon-rank drag-btn"></i>
-            </template>
-          </elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" >
+          :edit-config="{render: 'scroll', renderSize: 80}">
+          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
+          
+          <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
             <template v-slot:header>
               <i class="el-icon-setting" @click="dialogVisible = true"></i>
             </template>
@@ -71,7 +60,7 @@
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="pay" :lastHeader="lastHeader"></my-column>
         </elx-editable>
-          <p style="color: red;font-size: 12px;margin:5px 0 15px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
+          <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
     </div>
   </div>
 </template>
@@ -79,7 +68,7 @@
 <script>
 import MyColumn from './MyColumn';
 import XEUtils from 'xe-utils';
-import Sortable from 'sortablejs';
+
 
 export default {
   name: 'NewPay',
@@ -162,16 +151,22 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    tViewSize () {
+    refreshTable () {  //刷新表格布局
+        this.$nextTick(() => {  //强制重新渲染
+          this.startTime = Date.now(); 
+          this.showHeader = false;
+          setTimeout(()=>{
+              this.showHeader = true;
+          },100);
+        })
+    },
+    tViewSize () {  //动态调整表格的高度
         this.loading = true;
         let obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Width = Math.floor(Math.random()*10);
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-210;
-              this.Width = 100;
-              this.OrHeight = obj.height-360;
+              this.Height = obj.height-300;
               this.loading = false;
             },100)
             
@@ -215,6 +210,7 @@ export default {
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              this.refreshTable(); //刷新表格布局
               //调用表格公式解析 存储
               this.formula = this.$excel.FormulaAnaly([...this.col]);
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -280,6 +276,7 @@ export default {
 
           //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
           this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+          this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
           this.payHead= { //保存表头信息
               id: data.id,
               name:data.name,
@@ -290,12 +287,9 @@ export default {
               this.payHead.refRow = data.refRow;
               this.payHead.tPayHeadRows = data.tPayHeadRows;
           }
-          this.showHeader = false;
-          this.$nextTick(() => {  //强制重新渲染
-            this.showHeader = true;
-          })
+          this.refreshTable(); //刷新表格布局
           this.loading = false;
-          this.list.length = this.hd.length = 0;
+          this.list.length = 0;
 
           //调用表格公式解析 存储
     
@@ -312,13 +306,7 @@ export default {
             var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.startTime = Date.now(); 
-                this.showHeader = false;
-                setTimeout(()=>{
-                    this.showHeader = true;
-                },200);
-            })
+            this.refreshTable(); //刷新表格布局
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 
@@ -553,9 +541,9 @@ export default {
         return {};
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >2) {  //带选择框的情况
-            if (row[this.hd[columnIndex-3]]) {
-                return [row[this.hd[columnIndex-3]].tdRowspan, row[this.hd[columnIndex-3]].tdColspan]
+        if (columnIndex >1) {  //带选择框的情况
+            if (row[this.hd[columnIndex-2]]) {
+                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
             }
         }
         return [1, 1]
@@ -563,7 +551,8 @@ export default {
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([])
+        // this.$refs.elxEditable1.reload([])
+
         setTimeout(() => {
             this.$refs.elxEditable1.reload(this.list);
             this.loading = false;
@@ -770,7 +759,9 @@ export default {
 
 <style scope>
 .click-table11-oper {
+  height: 30px;
   margin-bottom: 5px;
+  /* border: 1px solid pink; */
   text-align: left;
   position: relative;
 }
@@ -804,6 +795,7 @@ export default {
 .scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
   background-color: #f0f9eb;
 }
+
 /* 合计尾行不显示兼容问题 */
 .el-table{
     overflow:visible !important;

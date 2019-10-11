@@ -809,7 +809,14 @@ excelmodel = {
         result=Math.round(result*100)/100;
         result=result.toString().replace(/\.0+$/g,'');
         return result;
-    }
+    },
+    randomkey () {    //el-table-column 的key值 用于表头错乱修正
+        function S4() {
+          return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        }
+        console.log((S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4()));
+        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+    },
 
 };
 let ABC =excelmodel.AZ();

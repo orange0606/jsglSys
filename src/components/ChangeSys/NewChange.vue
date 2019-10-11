@@ -95,7 +95,7 @@
           <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
         </div>
     </div>
-    <div :style="{ width:'100%', height: Height+'px' }">
+    <div :style="{ height: Height+'px' }">
               <!-- show-summary
           :summary-method="getSummaries" -->
             <!-- :data.sync="list"   :height="Height"-->
@@ -105,7 +105,7 @@
           class="scroll-table4 click-table11"
           border
           height="100%"
-          :show-header="showHeader"
+          :show-header="showHeader" 
           v-if="showHeader"
           :span-method="arraySpanMethod"
           @cell-click ="cell_click"
@@ -113,11 +113,10 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80}"
-          :style="{ width: Width + '%' }">
-          <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+          :edit-config="{render: 'scroll', renderSize: 80}">
+          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
         
-          <elx-editable-column type="index" width="60" align="center" >
+          <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
             <template v-slot:header>
               <i class="el-icon-setting" @click="dialogVisible = true"></i>
             </template>
@@ -134,7 +133,6 @@
 import MyColumn from './MyColumn';
 import ChoiceRow from '../MultiplexCom/ChoiceRow';
 import XEUtils from 'xe-utils';
-import Sortable from 'sortablejs';
 
 export default {
   name: 'NewChange',
@@ -236,15 +234,22 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    tViewSize () {
+    refreshTable () {  //刷新表格布局
+        this.$nextTick(() => {  //强制重新渲染
+          this.startTime = Date.now(); 
+          this.showHeader = false;
+          setTimeout(()=>{
+              this.showHeader = true;
+          },100);
+        })
+    },
+    tViewSize () {  //动态调整表格的高度
         this.loading = true;
         let obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Width = Math.random()*100;
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-180;
-              this.Width = 100;
+              this.Height = obj.height-200;
               this.OrHeight = obj.height-360;
               this.loading = false;
             },100)
@@ -299,11 +304,13 @@ export default {
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              this.refreshTable(); //刷新表格布局
               //调用表格公式解析 存储
               this.formula = this.$excel.FormulaAnaly([...this.col]);
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-                
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -327,7 +334,6 @@ export default {
           try {
               var arr = this.$excel.ListAssemble(row.changeRowList); //组装清单表格数据
               this.list = [...arr];
-              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -362,12 +368,14 @@ export default {
           headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+          this.refreshTable(); //刷新表格布局
+          
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
 
            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
           this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-
+          this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
           this.changeHead = { //保存表头信息
               id: data.id,
               name:data.name,
@@ -378,12 +386,8 @@ export default {
               this.changeHead.refRow = data.refRow;
               this.changeHead.tChangeHeadRows = data.tChangeHeadRows;
           }
-          this.showHeader = false;
-          this.$nextTick(() => {  //强制重新渲染
-              this.showHeader = true;
-          })
           this.loading = false;
-          this.list.length = this.hd.length = 0;
+          this.list.length = 0;
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
           this.allRelationOriginal(data.id); //3.35.	读取一个标段的对应变更表头id的原清单列表
@@ -402,13 +406,7 @@ export default {
             var headsArr = this.$excel.Package(data['changeHead'].tChangeHeadRows,data['changeHead'].refCol,data['changeHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.startTime = Date.now(); 
-                this.showHeader = false;
-                setTimeout(()=>{
-                    this.showHeader = true;
-                },300);
-            })
+            this.refreshTable(); //刷新表格布局
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -515,6 +513,8 @@ export default {
     },
 
     importfxx(data) { //新建导入数据
+        console.log('this.hd----------------')
+        console.log(this.hd)
         // this.loading = true;
         this.startTime = Date.now(); 
         var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
@@ -522,7 +522,6 @@ export default {
         rest = [],
         patt1=/[A-Z+]*/g,
         sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
-        this.hd = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         listlen === 0? this.list = []: listlen;
         // 先生成一个完整表格数据
 
@@ -553,6 +552,7 @@ export default {
         }
         console.log('打印一下rest2---')
         console.log(rest)
+        console.log(this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
 
         try {  //把数据载入表格
@@ -653,8 +653,7 @@ export default {
     },
     
     insertEvent () {
-      this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-      this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+
       if (!this.hd.length || this.hd.length===0) return false;
       // console.log('进来了吗')
       var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
@@ -679,20 +678,7 @@ export default {
         }
       console.log('打印一下NewRow 新增的一行')
       console.log(NewRow);
-      this.$refs.elxEditable1.insertAt(NewRow, -1)
-        // this.$refs.elxEditable1.setActiveCell(NewRow);
-   
-      // this.$refs.elxEditable1.clearActive();
-      // 滚动到第一行：
-      // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
-      // 滚动到最后一行：
-      // console.log(this.$refs.elxEditable1)
-      // console.log('this.$refs.elxEditable1..scrollTop1')
-      // console.log(this.$refs.elxEditable1.bodyWrappe)
-  
-      // console.log('this.$refs.elxEditable1.scrollTop2')
-      // console.log(this.$refs.elxEditable1.bodyWrappe)
-      // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
+      this.$refs.elxEditable1.insertAt(NewRow, -1);
     },
     Abandon () {  //放弃更改
         // this.$refs.elxEditable1.revert();

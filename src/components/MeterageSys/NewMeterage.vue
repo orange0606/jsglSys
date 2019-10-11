@@ -43,7 +43,6 @@
             :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="update"
             @cell-click ="selectupdate"
-            :row-class-name="tableRowClassName"
             :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
             <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
@@ -101,14 +100,13 @@
          <!-- :data.sync="list" -->
            <!-- :cell-style="cellStyle" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <div :style="{ width:'100%', height: Height+'px' }">
+    <div :style="{ height: Height+'px' }">
         <elx-editable
           ref="elxEditable1"
           class="scroll-table4 click-table11"
           border
           height="100%"
-          v-loading="loading"
-          :show-header="showHeader"
+          :show-header="showHeader" 
           v-if="showHeader"
           :span-method="arraySpanMethod"
           @cell-click ="cell_click"
@@ -116,19 +114,19 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80, autoScrollIntoView: true,}"
-          :style="{ width: Width + '%' }">
-          <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" >
+          :edit-config="{render: 'scroll', renderSize: 80}">
+          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
+        
+          <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
             <template v-slot:header>
               <i class="el-icon-setting" @click="dialogVisible = true"></i>
             </template>
           </elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
-          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader"></my-column>
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" ></my-column>
         </elx-editable>
-          <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
-    </div>
+        <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
+      </div>
   </div>
 </template>
 
@@ -136,8 +134,6 @@
 import MyColumn from './MyColumn';
 import ChoiceRow from '../MultiplexCom/ChoiceRow';
 import XEUtils from 'xe-utils';
-import Sortable from 'sortablejs';
-
 export default {
   name: 'NewMeterage',
   components: {
@@ -188,7 +184,6 @@ export default {
       startTime:null,
       loading: false,
       dialogVisible: true,
-
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
       lastHeader: [], //最后一层表头数据（用来单元格点击编辑判断）
       formula:{}, //存储表头的公式数据
@@ -205,7 +200,6 @@ export default {
       UpHeight:300,
     }
   },
-
  watch: {
     updateList: function(newVal,oldVal){  //ChoiceRow子组件返回来的数据
         //此处可进行判断，然后进行清单导入
@@ -228,7 +222,6 @@ export default {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
     // this.rowDrop();//调用表格行拖拽函数/
-
   },
   mounted(){
       this.tViewSize();
@@ -242,20 +235,25 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    tViewSize () {
+    refreshTable () {  //刷新表格布局
+        this.$nextTick(() => {  //强制重新渲染
+          this.startTime = Date.now(); 
+          this.showHeader = false;
+          setTimeout(()=>{
+              this.showHeader = true;
+          },300);
+        })
+    },
+    tViewSize () {  //动态调整表格的高度
         this.loading = true;
         let obj = this.$getViewportSize();
-        this.Width = Math.random()*99;
-
         this.$nextTick(() => {
             this.Height = this.Height;
-            // setTimeout(()=>{
-              this.Height = obj.height-180;
-              this.Width = 100;
+            setTimeout(()=>{
+               this.Height = obj.height-200;
               this.UpHeight = obj.height-360;
               this.loading = false;
-            // },100);
-            
+            },100)
             
         });
     },
@@ -291,16 +289,18 @@ export default {
     },
     updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
-
           try {
               var headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              this.refreshTable(); //刷新表格布局
               //调用表格公式解析 存储
               this.formula = this.$excel.FormulaAnaly([...this.col]);
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.lastHeader = this.$excel.BikoFoArr([...this.col]);
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -321,7 +321,6 @@ export default {
           try {
               var arr = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
               this.list = [...arr];
-              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -357,7 +356,8 @@ export default {
           headsArr = this.$excel.Package(data['tMeterageHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-
+          this.refreshTable(); //刷新表格布局
+          
           //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
           this.lastHeader = this.$excel.BikoFoArr([...this.col]);
           this.hd = Object.keys(this.lastHeader);
@@ -371,16 +371,10 @@ export default {
               this.meterageHead.refRow = data.refRow;
               this.meterageHead.tMeterageHeadRows = data.tMeterageHeadRows;
           }
-          this.showHeader = false;
-          this.$nextTick(() => {  //强制重新渲染
-            this.showHeader = true;
-          })
           this.loading = false;
           
-
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
-
           this.allRelationUpdate( data.id ); //调用请求可导入所有对应的新清单列表
           this.OneToTalmeterage( data.id ); // 调用相对应的累计量清单数据请求函数
       })
@@ -394,17 +388,10 @@ export default {
             var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.startTime = Date.now(); 
-                this.showHeader = false;
-                setTimeout(()=>{
-                    this.showHeader = true;
-                },200);
-            })
+            this.refreshTable(); //刷新表格布局
             
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
-
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
             this.lastHeader = this.$excel.BikoFoArr([...this.col]);
             this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
@@ -420,8 +407,6 @@ export default {
             };
             this.allRelationUpdate( data.meterageHead.id ); //调用请求可导入所有对应的新清单列表
             this.loading = false;
-            this.list.length = this.hd.length = 0;
-
             var arr = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据
             this.list = [...arr];
             
@@ -452,7 +437,6 @@ export default {
           });
       });
     },
-
     OneToTalmeterage (id) { //请求一个相对应的累计计量清单数据
         this.$post('/totalmeterage/by/meterageheadid',{ id })
         .then((response) => {
@@ -470,10 +454,8 @@ export default {
               console.log('进来表头组装了')
               var headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
               col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-
               // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.totalmeterageCol = this.$excel.BikoFoArr([...col]);
-
           }
         }).catch(e => {
             this.$message({
@@ -521,12 +503,12 @@ export default {
       }
       return cellValue ? obj[cellValue] : '未知'
     },
-    tableRowClassName ({ row, rowIndex }) {
-      if (this.pendingRemoveList.some(item => item === row)) {
-        return 'delete-row';
-      }
-      return ''
-    },
+    // tableRowClassName ({ row, rowIndex }) {
+    //   if (this.pendingRemoveList.some(item => item === row)) {
+    //     return 'delete-row';
+    //   }
+    //   return ''
+    // },
     consoles () {
         let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
         // console.log('检验一下数据对不对 rest list')
@@ -560,7 +542,6 @@ export default {
         // console.log(update)
         // console.log(todate)
         this.importfxx(update, todate, uplen);
-
     },
     importfxx(up, to, len) { //表头导入函数 up 新清单数据  to 累计计量清单数据 len 本次导入数据的数量
         var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
@@ -569,11 +550,9 @@ export default {
         patt1=/[A-Z+]*/g,
         sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
         listlen === 0? this.list = []: listlen;
-        this.hd = Object.keys(sumArr);
         // 先生成一个完整表格数据
         console.log('this.hd')
         console.log(this.hd)
-
         for (let index = len -1; index >= 0; index--) {
             rest[index] = {};
             rest[index]['seq'] = index+listlen;
@@ -614,14 +593,12 @@ export default {
                 
                                     }
                                 }
-
                             }
                         } catch (error) {
                             this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
                             console.log('设置上期累计数量报错默认为0'+error)
                             rest[r][row.colNum].td = 0;
                         }
-
                     }
                     rest[r][row.colNum]['colNum'] = row['colNum'];
                     rest[r][row.colNum]['trNum'] = r;
@@ -632,18 +609,15 @@ export default {
         }
         console.log('看一下生成的数据ya')
         console.log(rest)
-        this.$excel.Formula(this, rest, this.formula);  //调用公式计算
-
+        console.log(this, rest, this.formula)
+        // this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格
-            // this.list = this.list.concat(rest);
-            // this.findList(); //调用滚动渲染数据
             rest = rest.concat([]);
             this.$nextTick(() => {
                 for (let index = 0; index < len; index++) {
                     this.$refs.elxEditable1.insertAt(rest[index], -1); 
                 }
             })
-            this.tViewSize();
             // this.list = this.$refs.elxEditable1.getRecords();
             // up = to = null;
         } catch (e) {
@@ -662,29 +636,24 @@ export default {
         // // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
         //     var str = column.property,
         //     colName = str.substr(0,str.indexOf(".td"));
-
         //     //判断是否哪种属性类型允许单元格编辑
         //     if (this.lastHeader[colName].attribute !== 'meterage') return false;
         //     this.editRow = row[colName];
         //     row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         // }  
-
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-
             var str = column.property,
             colName = str.substr(0,str.indexOf(".td")),
             patt1=/[A-Z+]*/g,
             sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
             //判断是否哪种属性类型允许单元格编辑
-
             if (this.lastHeader[colName].attribute !== 'meterage') {
                  if (!row[colName].attribute) return false;
                 if (row[colName].attribute !=='add') return false;
             };
-
             //现在进行遍历属性把原数量，禁止修改
             for (let c = this.hd.length -1; c >= 0; c--) {
                 var hederRow = sumArr[this.hd[c]];
@@ -692,7 +661,6 @@ export default {
                     if (hederRow.colNum === colName)  return false;
                 }
             }
-
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
@@ -702,7 +670,6 @@ export default {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
             var str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
-
             //判断是否哪种属性类型允许单元格编辑
             if (this.lastHeader[colName].attribute !== 'meterage') {
                 if (row[colName].attribute && row[colName].attribute==='add') {
@@ -723,18 +690,19 @@ export default {
         return [1, 1]
     }, 
     findList () { //表格滚动渲染函数
-      this.loading = true;
-      this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([]);
-        setTimeout(() => {
-            this.$refs.elxEditable1.reload(this.list);
-            this.loading = false;
-            this.$nextTick(() => {
-                this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-            });
-            this.tViewSize();
-        }, 300)
-      });
+        this.loading = true;
+        this.$nextTick(() => {
+          this.$refs.elxEditable1.reload([])
+          setTimeout(() => {
+              this.$refs.elxEditable1.reload(this.list);
+              this.loading = false;
+              this.$nextTick(() => {
+                  this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+              });
+              this.tViewSize();
+
+          }, 300)
+        });
 
     },
     getSummaries (param) {  //合计
@@ -744,16 +712,14 @@ export default {
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     insertEvent () {
-        // console.log('进来了吗')
-        this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-        this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+        console.log('this.hd-----------------p')
+        console.log(this.hd)
         if (!this.hd.length || this.hd.length===0) return false;
         var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
         restLen = rest.length,
         NewRow = {},
         patt1=/[A-Z+]*/g,
         sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
-
         for (let index = this.hd.length -1; index >= 0; index--) {
             NewRow['seq'] = restLen;
             NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
@@ -769,30 +735,9 @@ export default {
           }
         console.log('打印一下NewRow 新增的一行')
         console.log(NewRow);
-        this.$refs.elxEditable1.insertAt(NewRow, -1)
-          this.$refs.elxEditable1.setActiveRow(NewRow)
-        
+        this.$refs.elxEditable1.insertAt(NewRow, -1);
 
-// this.$refs.elxEditable.insert({
-//         name: `New ${Date.now()}`,
-//         age: 26,
-//         rate: 2
-//       }).then(({ row }) => {
-//         this.$refs.elxEditable.setActiveRow(row)
-//       })
-          // this.$refs.elxEditable1.setActiveCell(NewRow);
-    
-        // this.$refs.elxEditable1.clearActive();
-        // 滚动到第一行：
-        // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
-        // 滚动到最后一行：
-        // console.log(this.$refs.elxEditable1)
-        // console.log('this.$refs.elxEditable1..scrollTop1')
-        // console.log(this.$refs.elxEditable1.bodyWrappe)
-    
-        // console.log('this.$refs.elxEditable1.scrollTop2')
-        // console.log(this.$refs.elxEditable1.bodyWrappe)
-        // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
+  
     },
     Abandon () {  //放弃更改
         // this.$refs.elxEditable1.revert();
@@ -801,7 +746,6 @@ export default {
             this.$refs.elxEditable1.reload(this.list);
             this.RowDelList = []; //放弃更改后  删除数组清空
         })
-
     },
     RemoveSelecteds () {  //删除选中
       this.hd = Object.keys(this.lastHeader);
@@ -813,7 +757,6 @@ export default {
           this.$refs.elxEditable1.removeSelecteds();
           var number = selection[0]['seq'];; //表格列表的下标
           this.Rowsort( number );  //调用表格重新排序函数
-
           for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
               for (let a = this.hd.length-1; a >= 0; a--) {
                   var item = selection[index][this.hd[a]];
@@ -845,7 +788,6 @@ export default {
             console.log('删除后重新排序出了问题'+error);
             return this.$message({ type: 'success',message: '删除后重新排序出了问题，请联系相关技术人员!' });
         }
-
     },
   submitEvent () {
       this.$refs.elxEditable1.validate(valid => {
@@ -862,7 +804,6 @@ export default {
             meterageRowAddList = [],  //增
             meterageRowDelList = [], //删
             meterageRowAltList = [];  //改
-
             //查询上一次修改有无这个集合  ，有的话合并两个数组
             if (this.uplist['meterageRowDelList'] && this.uplist['meterageRowDelList'].length >0) {
                   console.log('已经开始二次修改删除操作 this.RowDelList,   this.uplist[meterageRowDelList]----------')
@@ -871,20 +812,17 @@ export default {
              }else{
                   meterageRowDelList = this.RowDelList;
              }
-
           // XEUtils.clone(up[r][colName], true);
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
                         var listRows = list[index][header[i]];
-
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
                             listRows['formula'] = '';
                             listRows['trNum'] = index+1;                  
                             // listRows['attribute'] = '';                  
                             listRows['upload'] = 1;    
-
                             if (!listRows.id) {  //无id则视为新增，新增到meterageRowAddList
                                 meterageRowAddList.push(listRows);
                             }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {  //有id 与 alter 视为已修改过的数据 新增到meterageRowAddList
@@ -998,7 +936,6 @@ export default {
                                                  
                       } 
                   }
-
             }
         }
       })
@@ -1029,19 +966,16 @@ export default {
     exportCsvEvent () {
       this.$refs.elxEditable1.exportCsv();
     },
-
-    exportCsvEvent () {
-      this.$refs.elxEditable1.exportCsv();
-    },
-
-
   }
 }
 </script>
 
+
 <style scope>
 .click-table11-oper {
+  height: 30px;
   margin-bottom: 5px;
+  /* border: 1px solid pink; */
   text-align: left;
   position: relative;
 }
@@ -1075,6 +1009,7 @@ export default {
 .scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
   background-color: #f0f9eb;
 }
+
 /* 合计尾行不显示兼容问题 */
 .el-table{
     overflow:visible !important;

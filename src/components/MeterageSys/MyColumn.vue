@@ -1,5 +1,5 @@
 <template>
-   <el-table-column :prop="col.colNum+'.td'" :label="col.td+' ( '+col.colNum+' ) '+col.attribute" :fit="true" :align="col.textAlign">
+   <el-table-column :prop="col.colNum+'.td'" :label="col.td+' ( '+col.colNum+' ) '+col.attribute" :fit="true" :key="$excel.randomkey()" :align="col.textAlign">
     <template slot-scope="scope">
       <!-- <span>{{scope.row.data[col.colNum].td}}</span> -->
       <span v-if="scope.row.data[col.colNum].edit ==='N'">{{scope.row.data[col.colNum].td}}</span>

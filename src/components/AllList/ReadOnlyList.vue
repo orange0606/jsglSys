@@ -12,21 +12,21 @@
         :data.sync="list"
         :edit-config="{}"
         style="width: 100%">
-        <elx-editable-column type="index" width="50" align="center" fixed="left" > </elx-editable-column>
-        <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
-        <elx-editable-column :prop="type+'Head.name'" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="num" :label="text+'编号'" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
-        <elx-editable-column prop="name" :label="text+'名称'" min-width="120" align="center" fixed="left"  >
+        <elx-editable-column :key="$excel.randomkey()" type="index" width="50" align="center" fixed="left" > </elx-editable-column>
+        <!-- <elx-editable-column :key="$excel.randomkey()" prop="id" label="ID" width="80"></elx-editable-column> -->
+        <elx-editable-column :key="$excel.randomkey()" :prop="type+'Head.name'" min-width="110" label="表头名称" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column :key="$excel.randomkey()" prop="num" :label="text+'编号'" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
+        <elx-editable-column :key="$excel.randomkey()" prop="name" :label="text+'名称'" min-width="120" align="center" fixed="left"  >
             <template slot-scope="scope">
               <el-link :underline="true" style="font-size:12px;" type="success" @click="see(scope.row)" >{{scope.row.name}}</el-link>
             </template>
         </elx-editable-column>
         
         
-        <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-       <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
-        <elx-editable-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
+        <elx-editable-column :key="$excel.randomkey()" prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
+        <elx-editable-column :key="$excel.randomkey()" prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
+       <elx-editable-column :key="$excel.randomkey()" prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
+        <elx-editable-column :key="$excel.randomkey()" prop="enter" label="录入状态" align="center" show-overflow-tooltip >
             <template slot-scope="scope">
                 <!-- 1已录入 0未录入 其他出错-->
                 <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
@@ -34,12 +34,12 @@
                 <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
             </template>
         </elx-editable-column>
-        <!-- <elx-editable-column prop="startTime" label="发起时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column> -->
-        <elx-editable-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
-        <!-- <elx-editable-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column> -->
-        <!-- <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column> -->
-        <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
-        <elx-editable-column label="操作" fixed="right" width="100" align="center" >
+        <!-- <elx-editable-column :key="$excel.randomkey()" prop="startTime" label="发起时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column> -->
+        <elx-editable-column :key="$excel.randomkey()" prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
+        <!-- <elx-editable-column :key="$excel.randomkey()" prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column> -->
+        <!-- <elx-editable-column :key="$excel.randomkey()" prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column> -->
+        <elx-editable-column :key="$excel.randomkey()" prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
+        <elx-editable-column :key="$excel.randomkey()" label="操作" fixed="right" width="100" align="center" >
             <template v-slot="scope">
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
                     <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>

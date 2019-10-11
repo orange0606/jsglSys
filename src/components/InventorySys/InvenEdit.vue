@@ -43,7 +43,7 @@
          <!-- :data.sync="list" 
          autoScrollIntoView:true-->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <div :style="{ width:'100%', height: Height+'px' }">
+    <div :style="{height: Height+'px' }">
         <elx-editable
           ref="elxEditable1"
           class="scroll-table4 click-table11"
@@ -56,11 +56,10 @@
           @cell-click ="cell_click"
           show-summary
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80, }"
-          :style="{ width: Width + '%' }">
+          :edit-config="{render: 'scroll', renderSize: 80, }">
           
-          <elx-editable-column type="selection" align="center" width="55" ></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" >
+          <elx-editable-column type="selection" align="center" width="55" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" >
           </elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" ></my-column>
@@ -149,15 +148,22 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
-    tViewSize () {
+    refreshTable () {  //刷新表格布局
+        this.$nextTick(() => {  //强制重新渲染
+          this.startTime = Date.now(); 
+          this.showHeader = false;
+          setTimeout(()=>{
+              this.showHeader = true;
+          },100);
+        })
+    },
+    tViewSize () {  //动态调整表格的高度
         this.loading = true;
         let obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Width = Math.random()*100;
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-180;
-              this.Width = 100;
+              this.Height = obj.height-200;
               this.loading = false;
             },100)
             
@@ -202,6 +208,7 @@ export default {
               var headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+              this.refreshTable(); //刷新表格布局
               //调用表格公式解析 存储
               this.formula = this.$excel.FormulaAnaly([...this.col]);
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -259,6 +266,7 @@ export default {
         headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
         this.col = [];  //新建一个数组存储多级表头嵌套
+        this.refreshTable(); //刷新表格布局
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
         this.lastHeader = this.$excel.BikoFoArr([...this.col]);
         this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
@@ -272,10 +280,6 @@ export default {
             this.originalHead.refRow = data.refRow;
             this.originalHead.tOriginalHeadRows = data.tOriginalHeadRows;
         }
-        this.showHeader = false;
-          this.$nextTick(() => {  //强制重新渲染
-            this.showHeader = true;
-        })
         this.loading = false;
         this.list.length = this.hd.length = 0;
 
@@ -297,13 +301,7 @@ export default {
             this.PackHeader = [...headsArr];
 
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.$nextTick(() => {  //强制重新渲染
-                this.startTime = Date.now(); 
-                this.showHeader = false;
-                setTimeout(()=>{
-                    this.showHeader = true;
-                },300);
-            })
+            this.refreshTable(); //刷新表格布局
             console.log('this.PackHeader---------------')
             console.log(this.PackHeader)            
             console.log('this.col----------')
@@ -346,12 +344,12 @@ export default {
     impt(){ //button 按钮调用input文件选择事件
         this.$refs.input.click();
     },
-    importfxx() { //表头导入函数
+    importfxx() { //导入函数
         this.loading = true;
         this.startTime = Date.now();
         this.$excel.Imports(data=>{ //数据导入组装函数
             console.log('导入完成--------')
-            this.hd.length = this.list.length = 0; //归为初始化状态
+            this.list.length = 0; //归为初始化状态
             try { //先判断表头是否一致
                 // console.log(data);
                 var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
@@ -390,7 +388,7 @@ export default {
                 for (let index = this.list.length -1; index >=0; index--) {
                     this.list[index]['seq'] = index;
                 }
-                this.showHeader = true;
+                
                 this.findList(); //调用滚动渲染数据
                 // this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
                 data = null; //内存释放
@@ -443,9 +441,7 @@ export default {
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     insertEvent () {
-      // console.log('进来了吗')
-      this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-      this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+
       if (!this.hd.length || this.hd.length===0) return false;
       var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
       restLen = rest.length,
@@ -457,19 +453,6 @@ export default {
       console.log('打印一下NewRow 新增的一行')
       console.log(NewRow);
       this.$refs.elxEditable1.insertAt(NewRow, -1)
-        // this.$refs.elxEditable1.setActiveCell(NewRow);
-   
-      // this.$refs.elxEditable1.clearActive();
-      // 滚动到第一行：
-      // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
-      // 滚动到最后一行：
-      // console.log(this.$refs.elxEditable1)
-      // console.log('this.$refs.elxEditable1..scrollTop1')
-      // console.log(this.$refs.elxEditable1.bodyWrappe)
-  
-      // console.log('this.$refs.elxEditable1.scrollTop2')
-      // console.log(this.$refs.elxEditable1.bodyWrappe)
-      // this.$refs.elxEditable1.bodyWrapper.scrollTop =this.$refs.elxEditable1.bodyWrapper.scrollHeight;
     },
     Abandon () {  //放弃更改
         // this.$refs.elxEditable1.revert();

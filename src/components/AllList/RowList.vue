@@ -5,24 +5,26 @@
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
-    <elx-editable
-      ref="elxEditablecom"
-      class="scroll-table4"
-      border
-      :height="Height"
-      size="mini"
-      :show-header="showHeader" 
-      v-if="showHeader"
-      :span-method="arraySpanMethod"
-      show-summary
-      :summary-method="getSummaries"
-      :edit-config="{render: 'scroll', renderSize: 150}"
-      :style="{ width: Width + '%' }">
+  <div :style="{ height: Height+'px' }">
+        <elx-editable
+        ref="elxEditablecom"
+        class="scroll-table4"
+        border
+        height="100%"
+        size="mini"
+        :show-header="showHeader" 
+        v-if="showHeader"
+        :span-method="arraySpanMethod"
+        show-summary
+        :summary-method="getSummaries"
+        :edit-config="{render: 'scroll', renderSize: 150}">
+      
+        <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" ></elx-editable-column>
+        <!-- 此处使用多级表头嵌套组件 -->
+        <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column>
+      </elx-editable>
+  </div>
     
-      <elx-editable-column type="index" width="60" align="center" ></elx-editable-column>
-      <!-- 此处使用多级表头嵌套组件 -->
-      <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column>
-    </elx-editable>
   </div>
 </template>
 
@@ -82,16 +84,23 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
-    tViewSize () {
+    refreshTable () {  //刷新表格布局
+        this.$nextTick(() => {  //强制重新渲染
+          this.startTime = Date.now(); 
+          this.showHeader = false;
+          setTimeout(()=>{
+              this.showHeader = true;
+          },300);
+        })
+    },
+    tViewSize () {  //动态调整表格的高度
         this.loading = true;
         let obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Width = Math.floor(Math.random()*10);
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-210;
-              this.Width = 100;
-              this.OrHeight = obj.height-360;
+               this.Height = obj.height-180;
+              this.UpHeight = obj.height-360;
               this.loading = false;
             },100)
             
