@@ -24,7 +24,19 @@
                 :edit-config="{ render: 'scroll'}"
                 >
                     <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
-                    <elx-editable-column  :prop="val+'.td'" :label="hd[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i" align="center"  >
+                    <!-- <elx-editable-column  :prop="val+'.td'" :label="hd[i]" show-overflow-tooltip v-for="(val,i) in hd" :key="i" align="center"  >
+                    </elx-editable-column> -->
+                    <elx-editable-column :prop="val+'.td'" :label="hd[i]" align="center" show-overflow-tooltip v-for="(val,i) in hd" :key="i">
+                        <template slot-scope="scope" >
+                           
+                            <div >
+                                <!-- <el-badge is-dot :class="[scope.row[val].attribute === null ? 'state':'statenull']">{{scope.row[val].td}}</el-badge> -->
+                                <!-- <el-badge :style="{display:'block','text-align':scope.row[val].textAlign}" v-if="scope.row[val].attribute ==null " is-dot class="item_red">{{scope.row[val].td ==null || scope.row[val].td === ''?'&nbsp;&nbsp;':scope.row[val].td}}</el-badge> -->
+                                <span :style="{display:'block','text-align':scope.row[val].textAlign}">{{scope.row[val].td}}</span>
+                                <el-badge v-show="scope.row[val].attribute !==null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>
+                                <el-badge v-show="scope.row[val].tLimit !==null" type="success" :value="badge_name[scope.row[val].tLimit]" class="new"></el-badge>
+                            </div>
+                        </template>
                     </elx-editable-column>
             </elx-editable>
     </div>
@@ -77,6 +89,39 @@
             row:null,
             col:null
         },
+        badge_name:{
+            sysOrder:'序号',
+            sysNum:'编号',
+            formula:'公式',
+            sumText:'合计（文本）',
+            sumNull:'合计（空）',
+            sumFormula:'合计（公式）',
+            original:'原清单',
+            originalnull:'原清单（无）',
+            change:'变更清单',
+            update:'新清单',
+            updatenull:'新清单（无）',
+            meterage:'计量清单',
+            fluctuate:'变更清单增减',
+            totalpay:'累计支付清单',
+            totalpay_null:'累计支付清单（无）',
+            paynull: '支付清单无对应',
+            pay: '支付清单',
+            'meteragenull': '计量清单（无）',
+            'totalmeterage-meterage':'累计计量对应的计量清单',
+            'totalmeterage-sum-onerow-auto': '对应累计计量的系统合计行',
+            'totalpay-pay': '累计支付对应的支付清单',
+            'pay-total': '对应支付清单项的累计相加',
+            'meterage-total': '对应计量清单项的累计',
+            'totalchange-change': '累计变更对应的变更清单',
+            'totalmeterage-head-total': '累计计量表头合计内容',
+            'totalchangenull': '累计变更清单（无对应）',
+            'change-total': '对应变更清单项的累加',
+            totalmeteragenull:'累计计量清单(无)',
+            max:'max', //max
+            increaseMax:'增加MAX',  //increaseMax
+            decreaseMax:'减少MAX' //decreaseMax
+        }
        
       }
     },
@@ -137,6 +182,9 @@
                 case 'pay':
                     key = 'tPayHeadRows';
                     break;
+                case 'change':
+                    key = 'tChangeHeadRows';
+                    break;
             } 
             if (key === '' || !id || !type) return false;
             this.$post('/head/getone',params)
@@ -186,9 +234,14 @@
                 var key = `${row[colum].colNum}${row[colum].trNum}`,
                 id = null,
                 succre = {};
+                console.log('row[colum]--------------------')
+                console.log(row[colum])
                 switch (this.type) {
                     case 'original':
                         id = row[colum].toId;
+                        break;
+                    case 'change':
+                        id = row[colum].tcId;
                         break;
                     case 'update':
                         id = row[colum].tuId;
@@ -209,7 +262,7 @@
                 succre.key = key;
                 // console.log('单击表格正在发送点击数据到父组件')
                 // console.log(succre)
-                this.$emit("update:attVal", succre)    
+                this.$emit("update:attVal", succre);
             }
                 
        },

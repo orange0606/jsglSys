@@ -67,36 +67,43 @@
                             <el-select v-model="Form.type" placeholder="请选择表头类型" @change="typeChange" :disabled="Form.id?true:false" size="small" style=" width:100%;">
                                 <el-option label="原清单" value="original"></el-option>
                                 <el-option label="变更清单" value="change"></el-option>
+                                <el-option label="累计变更清单" value="totalchange"></el-option>
                                 <el-option v-if="Form.type =='update'" label="新清单" value="update"></el-option>
                                 <el-option label="计量清单" value="meterage"></el-option>
                                 <el-option label="累计计量清单" value="totalmeterage"></el-option>
                                 <el-option label="支付清单" value="pay"></el-option>
                                 <el-option label="累计支付清单" value="totalpay"></el-option>
+                                
                             </el-select>
                         </el-form-item>
-                        <el-form-item v-if="Form.type === 'change'" label="选择表头" prop="tOriginalHeadId">
+                        <el-form-item v-if="Form.type === 'change' || Form.type === 'totalchange'" label="选择表头" prop="tOriginalHeadId">
                             <el-select v-model="Form.tOriginalHeadId" placeholder="请选择原清单表头" clearable size="small" style=" width:100%;">
                                 <el-option v-for="(val,i) in HeadList" :key="i+'a'" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
+                        <el-form-item v-if="Form.type === 'totalchange'" label="选择表头" prop="tChangeHeadId">
+                            <el-select v-model="Form.tChangeHeadId" placeholder="请选择变更清单表头" clearable size="small" style=" width:100%;">
+                                <el-option v-for="(val,i) in ChangeHeadList" :key="i+'b'" :label="val.name" :value="val.id"></el-option>
+                            </el-select>
+                        </el-form-item>
                         <el-form-item v-if="Form.type === 'meterage' || Form.type === 'totalmeterage'" label="选择新清单表头" prop="tUpdateHeadId">
-                            <el-select v-model="Form.tUpdateHeadId" placeholder="请选择变更后新清单表头" clearable size="small" style=" width:100%;">
-                                <el-option v-for="val in HeadList" :key="val.id" :label="val.name" :value="val.id"></el-option>
+                            <el-select v-model="Form.tUpdateHeadId" placeholder="请选择新清单表头" clearable size="small" style=" width:100%;">
+                                <el-option v-for="val in HeadList" :key="val.id+'c'" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'totalmeterage'" label="选择计量表头" prop="tMeterageHeadId">
                             <el-select  value-key="3a" v-model="Form.tMeterageHeadId" @change="$forceUpdate()" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
-                                <el-option v-for="val in MeterageHeadList" :key="val.id" :label="val.name" :value="val.id"></el-option>
+                                <el-option v-for="val in MeterageHeadList" :key="val.id+'d'" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>                    
                         <el-form-item v-if="Form.type === 'pay' || Form.type === 'totalpay' " label="选择累计计量表头" prop="tTotalmeterageHeadId">
                             <el-select v-model="Form.tTotalmeterageHeadId" placeholder="请选择累计计量清单清单表头"  clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in ToMeterageHeadList" :key="i+'d'" :label="val.name" :value="val.id"></el-option>
+                                <el-option v-for="(val,i) in ToMeterageHeadList" :key="i+'e'" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                        <el-form-item v-if="Form.type === 'totalpay'" label="选择支付表头" prop="tTotalmeterageHeadId">
                             <el-select v-model="Form.payHeadId" placeholder="请选择支付清单清单表头"  clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in payHeadList" :key="i+'e'" :label="val.name" :value="val.id"></el-option>
+                                <el-option v-for="(val,i) in payHeadList" :key="i+'f'" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="表头编号" prop="num">
@@ -110,14 +117,14 @@
 
 
                     <!-- 此处引入表头单元格内容属性设置Form表单组件 -->
-                    <el-form v-show="showAtt" :model="row" ref="row" :rules="rules" label-width="100" width="800" size="small">
+                    <el-form v-if="showAtt" :model="row" ref="row" :rules="rules" label-width="100" width="800" size="small">
                         <el-form-item label="设置属性" prop="att">
                             <el-select  v-model="row.attribute" placeholder="请选择属性" filterable remote  @change="attChange" size="small" style=" width:100%;" prop="attribute">
                                 <!-- <el-option v-for="(val,i) in allAttribute" :key="i" :label="val.name" :value="val.value"></el-option> -->
-                                <el-option v-for="(val,i) in Attribute" :key="i+'a'" :label="val.name" :value="val.value"></el-option>
+                                <el-option v-for="(val,i) in Attribute" :key="i+'aa'" :label="val.name" :value="val.value"></el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item v-for="(val,i) in Attribute" :key="i+'b'" v-show="row.attribute && row.attribute!==null && val.value === row.attribute && val.input && row.attribute !=='sumText'" label="属性值(点击左边表格的单元格选择值)" >
+                        <el-form-item v-for="(val,i) in Attribute" :key="i+'bb'" v-show="row.attribute && row.attribute!==null && val.value === row.attribute && val.input && row.attribute !=='sumText'" label="属性值(点击左边表格的单元格选择值)" >
                             <el-input ref="attValue" v-model="row.attributeValue" :disabled="setState && setState === 'limit'" @focus="attValueFocus">
                                 <el-button slot="append" :style="setState !==null && setState !== 'limit' && row.attributeValue ?[c]:[]" type="primary" @click="attValBtn(row.attributeValue)" >确定</el-button>
                                 <!-- <button slot="append" @click="attValBtn(row.attributeValue)" >确定</button> -->
@@ -129,7 +136,8 @@
                         </el-form-item>
                         <el-form-item v-show ="Limit.length >0" label="限制单元格大小值">
                             <el-select v-model="row.tLimit" placeholder="请选择限制类型" @change="LimitChange" clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in Limit" :key="i+'c'" :label="val.name" :value="val.value"></el-option>
+                                <!-- <el-option v-for="(val,i) in Limit" :key="i+'cc'" :label="val.name" :value="val.value"></el-option> -->
+                                <el-option  :key="'c33c'" :label="'敬请期待'" :value="null"></el-option>
 
                             </el-select>
                         </el-form-item>
@@ -194,8 +202,9 @@ import XEUtils from 'xe-utils';
                 num: null,    //表头编号
                 name: null,           //表名
                 type: null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-                tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
-                tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
+                tOriginalHeadId: null,    //原清单表头ID 建变更清单和累计变更清单表头时传
+                tChangeHeadId: null,  //   变更清单表头ID 建累计变更清单表头时传
+                tUpdateHeadId: null,   //（新）清单表ID  建计量清单和累计计量清单表头时传
                 tTotalmeterageHeadId: null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
                 tMeterageHeadId: null,         //计量清单表头id     建累计计量清单表头时传
                 payHeadId: null,    ////支付清单表头ID    建累计支付清单表头时传
@@ -222,6 +231,7 @@ import XEUtils from 'xe-utils';
             //表单的变量
             tenderList: [],//全部标段
             HeadList: [], //该标段所有清单(原清单与新清单)
+            ChangeHeadList: [],//该标段所有变更清单表头列表
             MeterageHeadList: [],//该标段所有计量清单表头列表
             ToMeterageHeadList: [], //该标段所有累计计量表头
             payHeadList: [], //该标段所有支付清单表头列表
@@ -265,6 +275,9 @@ import XEUtils from 'xe-utils';
                 tOriginalHeadId: [
                     { required: true, message: '请选择原清单表头', trigger: 'change' }
                 ],
+                tChangeHeadId: [
+                    { required: true, message: '请选择变更清单表头', trigger: 'change' }
+                ],
                 tUpdateHeadId: [
                     { required: true, message: '请选择新清单表头', trigger: 'change' }
                 ],
@@ -303,9 +316,12 @@ import XEUtils from 'xe-utils';
                 'totalmeterage-meterage':'累计计量对应的计量清单',
                 'totalmeterage-sum-onerow-auto': '对应累计计量的系统合计行',
                 'totalpay-pay': '累计支付对应的支付清单',
-                'pay-total': 'pay-total"对应支付清单项的累计相加',
+                'pay-total': '对应支付清单项的累计相加',
                 'meterage-total': '对应计量清单项的累计',
+                'totalchange-change': '累计变更对应的变更清单',
                 'totalmeterage-head-total': '累计计量表头合计内容',
+                'totalchangenull': '累计变更清单（无对应）',
+                'change-total': '对应变更清单项的累加',
                 totalmeteragenull:'累计计量清单(无)',
                 max:'max', //max
                 increaseMax:'增加MAX',  //increaseMax
@@ -331,7 +347,7 @@ import XEUtils from 'xe-utils';
         'Form.headRowList': function(New, Old){
             this.showAtt = false;   //隐藏属性组件
             this.hd.length = this.list.length = 0;  //数据清空
-            this.row = {};  //属性设置的状态
+            this.row = null;  //属性设置的状态
             this.ifInput.length = this.Attribute.length = 0;
             this.btn.stateEdit = false; //关闭编辑
             this.setState= null; //属性设置状态
@@ -376,11 +392,13 @@ import XEUtils from 'xe-utils';
             if(this.Form.type =='update') return false; //新清单不需要修改
             // 组装属性
             this.Attribute = inven.Attribute(New);  //该表头类型的所有可设置的属性
+            console.log('该表头类型的所有可设置的属性  '+New)
+            console.log(this.Attribute)
             this.ifInput = inven.ifInput(New);    //该表头类型要设置属性值的所有属性名
             this.Limit = inven.Limit(New);  //该表头类型要设置的所有限制值属性
         },
-        'Form.tOriginalHeadId': function(New, Old){ //原清单表头ID 建变更清单表头和变更后清单表头时传
-            if ( New && this.Form.type === 'change' || this.Form.type === 'update'){
+        'Form.tOriginalHeadId': function(New, Old){ //原清单表头ID 建变更清单表头和累计变更清单表头时传
+            if ( New && this.Form.type === 'change' || this.Form.type === 'totalchange'){
                 // console.log('请求原清单表头')
                 this.headerTypeObj = {
                     id: New,
@@ -388,12 +406,21 @@ import XEUtils from 'xe-utils';
                 }
             }
         },
-        'Form.tUpdateHeadId': function(New, Old){   //变更后（新）清单表头ID  建计量清单表头和累计计量清单表头时传
+        'Form.tUpdateHeadId': function(New, Old){   //（新）清单表头ID  建计量清单表头和累计计量清单表头时传
             if ( New && this.Form.type === 'meterage' || this.Form.type === 'totalmeterage' ){
-                // console.log('请求变更后清单表头')
+                // console.log('请求新清单表头')
                 this.headerTypeObj = {
                     id: New,
                     type: 'update'
+                }
+            }
+        },
+        'Form.tChangeHeadId': function(New, Old){ //变更清单表头ID 建累计变更清单表头时传
+            if ( New && this.Form.type === 'totalchange'){
+                // console.log('请求变更清单表头')
+                this.headerTypeObj = {
+                    id: New,
+                    type: 'change'
                 }
             }
         },
@@ -416,6 +443,11 @@ import XEUtils from 'xe-utils';
                 }else if (this.setState === 'limit') {
                     this.row.limitValue = New.key;
                     this.row.limitId = New.id;
+                }else if (this.setState === 'change-total' && this.Form.type === 'totalchange') {
+                    console.log('有无进来这里change-total')
+                    console.log(this.row.attributeValue, this.row.attributeChangeHeadId)
+                    this.row.attributeValue = New.key;
+                    this.row.attributeChangeHeadId = New.id;
                 }else if (this.setState === 'meterage-total' && this.Form.type === 'totalmeterage') {
                     this.row.attributeValue = New.key;
                     this.row.attributeMeterageHeadId = New.id;
@@ -438,19 +470,25 @@ import XEUtils from 'xe-utils';
             if(!this.Form.tenderId) return false;
             // 是否调用了
             this.row = {};
-            this.HeadList.length = this.MeterageHeadList.length = this.payHeadList.length = 0;//清空数据
-           if (req === 'change') {
+            this.HeadList = this.MeterageHeadList = this.payHeadList = this.ChangeHeadList = null;//清空表头列表数据
+           if (req === 'change' || req === 'totalchange') {
                 this.alloriginal();
-                this.Form.payHeadId = this.Form.tMeterageHeadId = this.Form.tUpdateHeadId = this.Form.tTotalmeterageHeadId = null;
+                if (req === 'totalchange') {
+                    console.log('这里请求变更清单表头列表')
+                    //这里请求变更清单表头列表
+                    this.Form.payHeadId = this.Form.tMeterageHeadId = this.Form.tUpdateHeadId = this.Form.tTotalmeterageHeadId = null;
+                    return this.allchange();
+                }
+                this.Form.tChangeHeadId = this.Form.payHeadId = this.Form.tMeterageHeadId = this.Form.tUpdateHeadId = this.Form.tTotalmeterageHeadId = null;
             }else if (req === 'meterage' || req === 'totalmeterage') {
                 this.allupdate();
                 if (req === 'totalmeterage') {
                     // console.log('这里请求计量清单表头列表')
                     //这里请求计量清单表头列表
-                    this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tTotalmeterageHeadId = null;
+                    this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tTotalmeterageHeadId = this.Form.tChangeHeadId = null;
                     return this.allmeterage();
                 }
-                this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tMeterageHeadId = null;
+                this.Form.tChangeHeadId = this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tMeterageHeadId = null;
 
             }else if (req === 'pay' || req === 'totalpay' ) {
             
@@ -459,7 +497,7 @@ import XEUtils from 'xe-utils';
                     this.allpay();
                     return this.Form.tOriginalHeadId = this.Form.tUpdateHeadId = null;
                 }
-                this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tUpdateHeadId = null;
+                this.Form.tChangeHeadId = this.Form.payHeadId = this.Form.tOriginalHeadId = this.Form.tUpdateHeadId = null;
             }
         },
         impt () { //button 按钮调用input文件选择事件
@@ -545,12 +583,11 @@ import XEUtils from 'xe-utils';
         next(){  //编辑完成点击下一步(完成提交新建表头按钮)
             let rest = this.$refs.elxEditable.getRecords();//获取表格的全部数据
             if (this.Form.type !==null) {
-                if (this.Form.type === 'change') {
+                if (this.Form.type === 'change' || this.Form.type === 'totalchange') {
                     if (this.Form.tOriginalHeadId === null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择原清单表头'});
+                    if (this.Form.type === 'totalchange' && this.Form.tChangeHeadId === null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择变更清单表头'}); 
                 }else if(this.Form.type === 'meterage' || this.Form.type === 'totalmeterage'){
-                    if (this.Form.type === 'totalmeterage' && this.Form.tMeterageHeadId === null) {
-                        return this.$notify.info({title: '提示',duration: 3000,message: '请先选择计量清单表头'}); 
-                    }
+                    if (this.Form.type === 'totalmeterage' && this.Form.tMeterageHeadId === null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择计量清单表头'}); 
                     if (this.Form.tUpdateHeadId === null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择新清单表头'}); 
                 }else if(this.Form.type === 'pay' || this.Form.type === 'totalpay'){
                     if (this.Form.tTotalmeterageHeadId === null) return this.$notify.info({title: '提示',duration: 3000,message: '请先选择累计计量清单表头'}); 
@@ -696,7 +733,7 @@ import XEUtils from 'xe-utils';
             this.HeadList = response.data.originalHeadList;
           })
         },
-        allupdate () {  //所有该标段的变更后新清单表头的id和名字
+        allupdate () {  //所有该标段的新清单表头的id和名字
              this.$post('/head/allupdate',{tenderId:this.Form.tenderId})
             .then((response) => {
             // console.log('所有变更后清单的id和名字')
@@ -704,7 +741,15 @@ import XEUtils from 'xe-utils';
             this.HeadList = response.data.updateHeadList;
           })
         },
-        allmeterage () {
+        allchange () {  //所有该标段的变更清单的id和名字
+             this.$post('/head/allchange',{tenderId:this.Form.tenderId})
+            .then((response) => {
+            // console.log('所有原清单的id和名字')
+            // console.log(response)
+            this.ChangeHeadList = response.data.changeHeadList;
+          })
+        },
+        allmeterage () {    //所有计量清单表头的id和名字
             this.$post('/head/allmeterage',{tenderId:this.Form.tenderId})
             .then((response) => {
                 // console.log('所有计量清单表头的id和名字')
@@ -740,7 +785,7 @@ import XEUtils from 'xe-utils';
                 name: this.Form.name,
                 type: this.Form.type
             }
-            if ( params.tenderId && params.num && params.name && params.name =='' && params.type) {
+            if ( !params.tenderId || !params.num || !params.name || params.name =='' || !params.type) {
                 return false;
             }
             var url = '/head/'+this.Form.type;
@@ -801,10 +846,17 @@ import XEUtils from 'xe-utils';
             }
         },
         cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-            if (columnIndex >1) { //带选择框的情况
-                row = row[this.hd[columnIndex-2]];
-                if (rowIndex === this.cellStyle.row-1 && column.id === this.cellStyle.col) {
-                    return { 'border':'1px solid #409EFF' };
+            if (column.property && !this.btn.editAtt) {  //做容错处理，防止触发此事件
+                if (columnIndex >1) { //带选择框的情况
+                    row = row[this.hd[columnIndex-2]];
+                    if (this.row && this.row['colNum'] && this.row['trNum']) {
+                        if (rowIndex === this.row['trNum']-1 && this.hd[columnIndex-2] === this.row['colNum']) {
+                            return { 'background':'#99FFFF' };
+                        }
+                    }
+                    if (rowIndex === this.cellStyle.row-1 && column.id === this.cellStyle.col) {
+                        return { 'border':'1px solid #409EFF' };
+                    }
                 }
             }
             return {};
@@ -825,6 +877,12 @@ import XEUtils from 'xe-utils';
                 return this.$nextTick(() => { this.showTable = true; }); //显示关联表格
             }else if (type =='original' || type === 'update' || type === 'totalmeterage-head-total'){
                 this.setState = 'relation'; //改为关联设置属性状态
+                if (this.Form.type =='change' || this.Form.type =='totalchange'){
+                    this.headerTypeObj = {
+                        id: this.Form.tOriginalHeadId,
+                        type: 'original'
+                    }
+                }
                 if (this.Form.type =='totalmeterage' && this.headerTypeObj.type === 'meterage'){
                     // console.log('当前是正在建累计计量表头，上一个表头是'+this.headerTypeObj.type+',所以现在请求新清单表头')
                     this.headerTypeObj = {
@@ -852,7 +910,20 @@ import XEUtils from 'xe-utils';
                 //此处要清空其他id
                 }
                 return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
-            }else if(type === 'formula'){ //设置公式                        
+            }else if (type =="change-total"){
+                // console.log('没进来吗----------------')
+                this.setState = 'change-total'; //改为关联属性状态
+                if ( this.Form.type =='totalchange'){ //建立累计变更表头时，需要选择一个变更表头
+                    // console.log('请求计量表头')
+                    this.headerTypeObj = {
+                        id: this.Form.tChangeHeadId,
+                        type: 'change'
+                    }
+                //此处要清空其他id
+                }
+                return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
+            }
+            else if(type === 'formula'){ //设置公式                        
                 this.setState = 'formula'; //改为公式状态
             }else if(type === 'sumText'){ //设置合计尾行文字            
                 this.setState = null;  //改为设置合计尾行单元格文字状态
@@ -891,17 +962,11 @@ import XEUtils from 'xe-utils';
             }
             if(type =='null') return this.setState = null; //初始状态，可随意切换单元格设置属性状态。
             this.setState = 'limit';
-            if (this.Form.type =='totalmeterage' && this.headerTypeObj.type === 'meterage'){
-                // console.log('当前是正在建累计计量表头，上一个表头是'+this.headerTypeObj.type+',所以现在请求新清单表头')
-                this.headerTypeObj = {
-                    id: this.Form.tUpdateHeadId,
-                    type: 'update'
-                }
-                //此处要清空其他表头id
-            }
-            return this.$nextTick(() => { this.showTable = true; }) //显示关联表格
+            
         },
         LimitChange (type) {  //选择属性的选择框改变事件
+            return false;  //敬请期待
+
             this.row.limitId = this.row.limitValue = null;
             this.LimitAttState(type);  //调用限制值属性值设置状态
         },

@@ -129,14 +129,15 @@ import headeratt from './NewHeader'
           num: null,    //表头编号
           name: null,           //表名
           type: null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-          tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
-          tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
+          tOriginalHeadId: null,    //原清单表头ID 建变更清单和累计变更清单表头时传
+          tChangeHeadId: null,  //   变更清单表头ID 建累计变更清单表头时传
+          tUpdateHeadId: null,   //（新）清单表ID  建计量清单和累计计量清单表头时传
           tTotalmeterageHeadId: null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
           tMeterageHeadId: null,         //计量清单表头id     建累计计量清单表头时传
           payHeadId: null,    ////支付清单表头ID    建累计支付清单表头时传
           refCol:null,   //多少列
           refRow:null,   //多少行
-          headRowList:[],           //表头单元格内容   
+          headRowList:[],           //表头单元格内容
       },
       editShow:false,//显示隐藏修改表头
       textShow:'新建表头',
@@ -167,14 +168,16 @@ import headeratt from './NewHeader'
           tenderId: null,   //标段id 
           num: null,    //表头编号
           name: null,           //表名
-          type:  null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
-          tOriginalHeadId: null,    //原清单表头ID 建变更清单和变更后清单表头时传
-          tUpdateHeadId: null,   //变更后（新）清单表ID  建计量清单和累计计量清单表头时传
-          tTotalmeterageHeadId:  null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
+          type: null,          //类别 original原清单change变更清单update变更后的清单meterage计量清单 totalmeterage累计计量清单 pay支付清单 totalpay累计支付清单
+          tOriginalHeadId: null,    //原清单表头ID 建变更清单和累计变更清单表头时传
+          tChangeHeadId: null,  //   变更清单表头ID 建累计变更清单表头时传
+          tUpdateHeadId: null,   //（新）清单表ID  建计量清单和累计计量清单表头时传
+          tTotalmeterageHeadId: null, //累计计量清单表头ID 建支付清单和累计支付清单表头时传
+          tMeterageHeadId: null,         //计量清单表头id     建累计计量清单表头时传
           payHeadId: null,    ////支付清单表头ID    建累计支付清单表头时传
           refCol:null,   //多少列
           refRow:null,   //多少行
-          headRowList:[],           //表头单元格内容   
+          headRowList:[],           //表头单元格内容
       }
       this.editShow = true; //显示表头组件
       this.textShow = '新建表头';
@@ -265,6 +268,8 @@ import headeratt from './NewHeader'
           key = 'tOriginalHeadRows';
         }else if (type == 'change'){
           key = 'tChangeHeadRows';
+        }else if (type == 'totalchange'){
+          key = 'totalchangeHeadRows';
         }else if (type == 'update'){
           key = 'tUpdateHeadRows';
         }else if (type == 'totalmeterage'){
@@ -285,7 +290,6 @@ import headeratt from './NewHeader'
         
       })
 
-
     },
     searchEvent () {
       this.pageVO.currentPage = 1
@@ -303,7 +307,8 @@ import headeratt from './NewHeader'
       let obj = {
         original: '原清单',
         change: '变更清单',
-        update: '变更后的清单',
+        update: '新清单',
+        totalchange: '累计变更清单',
         meterage: '计量清单',
         totalmeterage: '累计计量清单',	
         pay: '支付清单',

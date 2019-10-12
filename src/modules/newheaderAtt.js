@@ -24,14 +24,16 @@ let data = {
         ],
         change:[    //变更清单
             { value: 'original', name: '“original”原清单', input: true },
-            { value: 'originalnull', name: '“originalnull”新清单（无对应）', input: false },
+            { value: 'originalnull', name: '“originalnull”原清单（无对应）', input: false },
             { value: 'change', name: '“change”变更清单', input: false },
-            { value: 'fluctuate', name: '“fluctuate”变更清单增减', input: true }
+            { value: 'fluctuate', name: '“fluctuate”变更清单增减', input: true },
+            { value: 'totalchange-change', name: '"totalchange-change"累计变更对应的变更清单。目的是对应累计变更的值，但通过变更清单做对应', input: true }
         ],
-        // update[    //变更后（新）清单
-        //     attribute:[ //属性及属性值
-        //     ]
-        // },
+        totalchange:[    //累计变更清单
+            { value: 'original', name: '“original”原清单', input: true },
+            { value: 'totalchangenull', name: '“totalchangenull”累计变更清单（无对应）', input: false },
+            { value: 'change-total', name: '"change-total"对应变更清单项的累加', input: true }
+        ],
         meterage:[    //计量清单
             { value: 'update', name: '“update”新清单', input: true },
             { value: 'meteragenull', name: '“meteragenull”计量清单（无对应）', input: false },
