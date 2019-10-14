@@ -662,8 +662,6 @@ excelmodel = {
         }
         col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
         let that = this;
-        console.log('0-100-------------')
-        console.log(0-100)
 
         Object.keys(lastHeader).forEach(function(key){
             var keyObj = lastHeader[key],
@@ -672,8 +670,8 @@ excelmodel = {
              console.log('attributeValue');
              console.log(AttVal);
             if ( Att && ( Att==='fluctuate' || Att==='meterage' || Att==='pay') && AttVal && AttVal !=='') {
-                console.log('AttVal----------------2222222222222')
-                console.log(AttVal)
+                // console.log('AttVal----------------2222222222222')
+                // console.log(AttVal)
                 let colTr = AttVal.match(patt1)[0];   //属性值  列号
                 var sumNb = null;
                 switch (type) {
@@ -682,8 +680,8 @@ excelmodel = {
                             return Message({ message: '原数量不是有效的数字类型', type: 'warning', duration: 3000, showClose: true });;
                         }
                         sumNb = that.Count(Number(row[colTr]['td'])+ col['td']*1);
-                        console.log('-------console.log(sumNb);',colTr+row[colTr].td);
-                        console.log(sumNb);
+                        // console.log('-------console.log(sumNb);',colTr+row[colTr].td);
+                        // console.log(sumNb);
                         if (sumNb < 0 ) {
                             Message({ message: '警告 减少的数量不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 3000, showClose: true });
                             col['td'] = 0-row[colTr].td;
@@ -698,13 +696,13 @@ excelmodel = {
                             console.log('attributeValue');
                             console.log(meAttVal);
                             if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
-                                console.log('AttVal----------------333333333333333')
-                                console.log(meAttVal)
+                                // console.log('AttVal----------------333333333333333')
+                                // console.log(meAttVal)
                                 let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
                                 if (mecolTr === col.colNum) {
                                     sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ col['td']*1);
-                                        console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
-                                        console.log('row[colTr]------------',row[colTr]['td'])
+                                        // console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
+                                        // console.log('row[colTr]------------',row[colTr]['td'])
                                     if (sumNb>row[colTr]['td']*1 ){
                                         Message({ message: '警告 上期累计数量与本期的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
                                         col['td'] = row[colTr].td-row[mekeyObj.colNum]['td'];
@@ -722,13 +720,13 @@ excelmodel = {
                                 console.log('attributeValue');
                                 console.log(payAttVal);
                                 if (payAtt &&payAtt==='totalpay-pay'  &&payAttVal &&payAttVal !=='') {
-                                    console.log('AttVal----------------4444444444444444444')
-                                    console.log(payAttVal)
+                                    // console.log('AttVal----------------4444444444444444444')
+                                    // console.log(payAttVal)
                                     let paycolTr =payAttVal.match(patt1)[0];   //属性值  列号
                                     if (paycolTr === col.colNum) {
                                         sumNb = that.Count(row[paykeyObj.colNum]['td']*1+ col['td']*1);
-                                            console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
-                                            console.log('row[colTr]------------',row[colTr]['td'])
+                                            // console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
+                                            // console.log('row[colTr]------------',row[colTr]['td'])
                                         if (sumNb>row[colTr]['td']*1 ){
                                             col['td'] = row[colTr].td-row[paykeyObj.colNum]['td'];
                                             Message({ message: '警告 本期支付金额与上期累计支付金额的和不能超过累计计量金额! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
@@ -762,8 +760,8 @@ excelmodel = {
         // if (col['id']) col['alter'] = 'Y';
         
         console.log('代表此单元格修改过')
-        console.log(row)
-        console.log(col)
+        // console.log(row)
+        // console.log(col)
         F = fkeys = row = col = Eval = null;
     },
     getSummaries (PackHeader, list, param) {  //合计
@@ -814,7 +812,7 @@ excelmodel = {
         function S4() {
           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
         }
-        console.log((S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4()));
+        // console.log((S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4()));
         return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
     },
 
