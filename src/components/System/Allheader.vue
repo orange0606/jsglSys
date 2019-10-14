@@ -18,7 +18,7 @@
         size="mini"
         max-height="600"
         :data.sync="list"
-        :cell-style ="cell_select"
+        :row-style="RowCss"
         :edit-config="{trigger: 'manual', mode: 'row', autoClearActive: false}"
         v-loading="loading" 
         element-loading-text="飞速加载中"
@@ -36,7 +36,12 @@
             </template>
         </elx-editable-column>
         <elx-editable-column prop="num" label="表头编号" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
-        <elx-editable-column prop="name" label="表头名称" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}"></elx-editable-column>
+        <elx-editable-column prop="name" label="表头名称" align="center" show-overflow-tooltip :edit-render="{name: 'ElInput'}" >
+            <template slot-scope="scope">
+                <el-link :underline="true" style="font-size:12px;" type="success" @click="seeTbale(scope.row)" >{{scope.row.name}}</el-link>
+            </template>
+        </elx-editable-column>
+        
         <elx-editable-column prop="type" label="类别" align="center" show-overflow-tooltip :formatter="formatterType">
         </elx-editable-column>
         <elx-editable-column prop="saveEmployee.name" align="center" width="80" label="创建人" >
@@ -161,6 +166,14 @@ import headeratt from './NewHeader'
       },
   },
   methods: {
+    RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
+        if (row.type === 'update') {
+          return 'background:#00662a0f'
+        }
+          // console.log('row, rowIndex')
+          // console.log(row, rowIndex)
+      return '';
+    },
     newHeader () {
       this.Form = {  //表单数据
           sysOrder: null,          //系统序号 预留，暂时不用
@@ -524,6 +537,8 @@ import headeratt from './NewHeader'
       this.$refs.elxEditable.exportCsv()
     },
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+        console.log('row, column, rowIndex, columnIndex')
+        console.log(row, column, rowIndex, columnIndex)
         if (columnIndex >0) { //带选择框的情况
             //  return {'text-align': 'center'}
         }
