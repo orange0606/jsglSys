@@ -43,7 +43,6 @@
             :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="original"
             @cell-click ="selectOriginal"
-            :row-class-name="tableRowClassName"
             :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
             <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
@@ -86,7 +85,7 @@
 
     </el-dialog>
         <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
-          <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="innerVisible = true;showList =true;" >选择清单</el-button>
+          <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="OneToTalchange" >选择清单</el-button>
           <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
           <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
           <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
@@ -192,6 +191,8 @@ export default {
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
+      tochRowList:null,//对应累计变更清单数据
+      totalchangeCol:null,    //截取获取累计变更实际对应所有列最后一层的表头列 object(用来单元格点击判断)
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
       Height: 400,
@@ -206,7 +207,8 @@ export default {
         if (Array.isArray(newVal)) {  //判断返回的是不是一个数组
           //  console.log('最终用户选择的需要引入的清单数据在这里返回啦沙雕');
           //  console.log(newVal);
-           this.importfxx(newVal);//这里调用表格处理函数
+          //  this.importfxx(newVal);//这里调用表格处理函数
+          this.packtotalchange(newVal);
           //这里进行处理
         }
     },
@@ -330,7 +332,6 @@ export default {
               this.changeHead.refRow = row.changeHead.refRow;
               this.changeHead.tChangeHeadRows = row.changeHead.tChangeHeadRows;
           }
-          this.allRelationOriginal( this.changeHead.id );//根据一个变更表头id请求原清单列表
           try {
               var arr = this.$excel.ListAssemble(row.changeRowList); //组装清单表格数据
               this.list = [...arr];
@@ -390,11 +391,13 @@ export default {
           this.list.length = 0;
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
-          this.allRelationOriginal(data.id); //3.35.	读取一个标段的对应变更表头id的原清单列表
-        
       })
     },
      OneChange (id) { //变更清单id
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([])
+        })
+        this.list.length=0;
         //此处请求一个审批单的一个变更清单
         this.$post('/change/row/getone',{ id })
             .then((response) => {
@@ -418,8 +421,7 @@ export default {
                 name: data.changeHead.name,
                 num: data.changeHead.num
             }
-            this.allRelationOriginal( data.changeHead.id );//根据一个变更表头id请求原清单列表
-
+          
             if ( this.mode !== 'show') {  //为新建模式与修改模式才添加的数据
                 this.changeHead.refCol = data.changeHead.refCol;
                 this.changeHead.refRow = data.changeHead.refRow;
@@ -444,17 +446,61 @@ export default {
         })
     },
     allRelationOriginal (id) {  //3.38.	读取原清单列表（根据变更表头id）
-        this.$post('/original/byChangeHeadId',{ changeHeadId:id, current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
+        this.$post('/original/byChangeHeadId',{ changeHeadId:this.changeHead.id, current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
         .then((response) => {
           console.log('/original/byChangeHeadId')
           console.log(response)
           this.original = response.data.originalList.list;
+          this.innerVisible = true;
+          this.showList =true;
       }).catch(e => {
           this.$message({
             type: 'info',
             message: '发生错误！'
           });
       });
+    },
+    OneToTalchange () { //请求一个相对应的累计变更清单数据(根据计量清单表头id)
+        if (!this.changeHead || !this.changeHead.id) return this.$message({type: 'info',message: '表头错误，请检查，或者重新选择！'});
+        return this.allRelationOriginal()
+        this.$post('/totalchange/by/changeheadid',{ id:this.changeHead.id })
+        .then((response) => {
+            var data = response.data.totalchange,
+            arr = []; 
+            console.log('打印一下请求到的相关累计变更清单response')
+            console.log(response)
+            if (!data) {
+                this.allRelationOriginal();//根据一个变更表头id请求原清单列表 
+                this.tochRowList = arr;
+                return this.$message({type: 'info',message: '暂无查询到有相关累计变更清单信息'});
+            }
+            
+            if (data.totalchangeRowList && data.totalchangeRowList.length >0 ) {
+                arr = this.$excel.ListAssemble(data.totalchangeRowList);  //组装清单
+            }else{
+                 this.allRelationOriginal();//根据一个变更表头id请求原清单列表 
+                this.tochRowList = arr;
+                return this.$message({type: 'info',message: '累计变更清单内容为空或者异常'});
+            }
+            this.tochRowList = arr;
+
+            if (data && data.totalchangeHead && data.totalchangeHead.tTotalchangeHeadRows && data.totalchangeHead.tTotalchangeHeadRows.length >0 ) {
+                console.log('进来表头组装了')
+                var headsArr = this.$excel.Package(data['totalchangeHead'].tTotalchangeHeadRows,data['totalchangeHead'].refCol,data['totalchangeHead'].refRow),
+                col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+                // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+                this.totalchangeCol = this.$excel.BikoFoArr([...col]);
+
+            }else{
+                this.$message({type: 'info',message: '累计变更清单表头内容为空或者异常'});
+            }
+             this.allRelationOriginal();//根据一个变更表头id请求原清单列表 
+        }).catch(e => {
+            this.$message({
+              type: 'info',
+              message: '请求相对应的累计变更清单数据发生错误！'+e
+            });
+        });
     },
     oneOriginal (id) {  //请求选择可导入原清单内容
         this.$post('/original/row/getone',{ id })
@@ -468,10 +514,7 @@ export default {
       });
     },
     selectOriginal (row, column, cell, event) { //原清单列表数据表格单击事件
-        // console.log('row, column, cell, event22')
-        // console.log(row, column, cell, event);
-        let id = row.id;
-        this.oneOriginal(id); //调用请求清单
+        this.oneOriginal(row.id); //调用请求清单
         //关闭显示关联清单列表页面
         this.showList = false;
     },
@@ -498,80 +541,191 @@ export default {
       }
       return cellValue ? obj[cellValue] : '未知'
     },
-    tableRowClassName ({ row, rowIndex }) {
-      if (this.pendingRemoveList.some(item => item === row)) {
-        return 'delete-row'
-      }
-      return ''
-    },
-    
+
     consoles () {
         let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
         // console.log('检验一下数据对不对 rest list')
         // console.log(rest);
         // console.log(this.list);
     },
-
-    importfxx(data) { //新建导入数据
-        console.log('this.hd----------------')
-        console.log(this.hd)
-        // this.loading = true;
+    packtotalchange (original) { //根据已选择的新清单数据选择对应累计变更清单数据
+        if (!this.tochRowList) this.tochRowList=[];
         this.startTime = Date.now(); 
+        var orlen = original.length,
+        tolen = this.tochRowList.length,
+        todate = [];  //用来存储与选择对应的清单数据的累计变更清单数据
+        if (!orlen || orlen === 0) return false;
+        if (this.tochRowList===null || !tolen || tolen === 0 || this.totalchangeCol ==='') {   //直接调用数据组装函数
+            console.log('累计变更无数据')
+            return this.importfxx(original, todate, orlen);
+        }
+        console.log('累计变更有数据')
+        for (let index = original.length -1; index >= 0; index--) {
+            var upRowA = original[index]['A']['trNum'];
+            // console.log('original当前的下标index  '+index)
+            for (let to = this.tochRowList.length -1; to >=0; to--) {
+                // console.log('this.tochRowList当前的下标to  '+to)
+                var toRow = this.tochRowList[to];
+                if (upRowA === toRow['A']['trNum']) {
+                    todate[index] = toRow;
+                    // console.log('结束最内层的循环，执行下一循环index---to',index,'    ', to )
+                    break;  //结束最内层的循环，执行下一循环
+                }
+            }
+        }
+        // console.log('最后的结果')
+        // console.log(original)
+        // console.log(todate)
+
+        this.importfxx(original, todate, orlen);
+    },
+    // importfxx(data) { //新建导入数据
+    //     console.log('this.hd----------------')
+    //     console.log(this.hd)
+    //     // this.loading = true;
+    //     this.startTime = Date.now(); 
+    //     var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+    //     listlen = list.length,
+    //     rest = [],
+    //     patt1=/[A-Z+]*/g,
+    //     sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
+    //     listlen === 0? this.list = []: listlen;
+    //     // 先生成一个完整表格数据
+
+    //     for (let index = data.length -1; index >= 0; index--) {
+    //         rest[index] = {};
+    //         rest[index]['seq'] = index+listlen;
+    //         for (let i = this.hd.length -1; i >= 0; i--) {
+    //             rest[index][this.hd[i]] = {attribute: null,colNum: this.hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:listlen+index+1,upload: 1 };
+    //         }
+    //     }
+    //     console.log('打印一下1rest1---')
+    //     console.log(rest)
+    //     //现在进行遍历属性把原清单数据加入进去
+    //     for (let c = this.hd.length -1; c >= 0; c--) {
+    //         var row = sumArr[this.hd[c]],
+    //         str = row.attributeValue;
+    //         if (row.attribute && row.attribute === "original" && row.attributeValue && row.attributeValue !="") {
+    //             let colName = str.match(patt1)[0];
+    //             for (let a = rest.length -1; a >= 0 ; a--) {
+    //                 rest[a][row.colNum] = {...data[a][colName]};
+    //                 rest[a][row.colNum].colNum = row.colNum;
+    //                 rest[a][row.colNum].trNum = rest[a]['seq']+1;
+    //                 rest[a][row.colNum].originalRowId = rest[a][row.colNum].id;
+    //                 rest[a][row.colNum].tdColspan = rest[a][row.colNum].tdRowspan = 1;
+    //                 delete rest[a][row.colNum].id;
+    //             }
+    //         }
+    //     }
+    //     console.log('打印一下rest2---')
+    //     console.log(rest)
+    //     console.log(this.formula)
+    //     this.$excel.Formula(this, rest, this.formula);  //调用公式计算
+
+    //     try {  //把数据载入表格
+    //         // this.findList(); //调用滚动渲染数据
+    //         this.$nextTick(() => {
+    //             for (let index = 0; index < rest.length; index++) {
+    //                 this.$refs.elxEditable1.insertAt(rest[index], -1); 
+    //             }
+    //         })
+    //         this.list = this.$refs.elxEditable1.getRecords();
+    //         data = null; //内存释放
+    //     } catch (e) {
+    //         console.log('出错了')
+    //         console.log(e)
+    //         data.length = 0;
+    //         this.loading =false;
+    //         this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
+    //     }
+
+    // },
+    importfxx(or, to, len) { //表头导入函数 up 新清单数据  to 累计计量清单数据 len 本次导入数据的数量
         var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
         listlen = list.length,
-        rest = [],
+        rest = [],    //存储本次新增清单的数据
         patt1=/[A-Z+]*/g,
         sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
         listlen === 0? this.list = []: listlen;
         // 先生成一个完整表格数据
-
-        for (let index = data.length -1; index >= 0; index--) {
+        console.log('this.hd')
+        console.log(this.hd)
+        for (let index = len -1; index >= 0; index--) {
             rest[index] = {};
             rest[index]['seq'] = index+listlen;
             for (let i = this.hd.length -1; i >= 0; i--) {
                 rest[index][this.hd[i]] = {attribute: null,colNum: this.hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:listlen+index+1,upload: 1 };
             }
         }
-        console.log('打印一下1rest1---')
-        console.log(rest)
-        //现在进行遍历属性把原清单数据加入进去
-        for (let c = this.hd.length -1; c >= 0; c--) {
-            var row = sumArr[this.hd[c]],
-            str = row.attributeValue;
-            if (row.attribute && row.attribute === "original" && row.attributeValue && row.attributeValue !="") {
-                let colName = str.match(patt1)[0];
-                for (let a = rest.length -1; a >= 0 ; a--) {
-                    rest[a][row.colNum] = {...data[a][colName]};
-                    rest[a][row.colNum].colNum = row.colNum;
-                    rest[a][row.colNum].trNum = rest[a]['seq']+1;
-                    rest[a][row.colNum].originalRowId = rest[a][row.colNum].id;
-                    rest[a][row.colNum].tdColspan = rest[a][row.colNum].tdRowspan = 1;
-                    delete rest[a][row.colNum].id;
+        for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
+            var row = sumArr[this.hd[index]];
+            if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === 'original' || row.attribute === "totalchange-change") ) {
+                let str = row.attributeValue;
+                let colName = str.match(patt1)[0]; 
+                for (let r = len -1; r >= 0; r--) {
+                    // let RowTd = rest[r][row.colNum];
+                    if (row.attribute === 'original' ) {
+                        // rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
+                        rest[r][row.colNum] = or[r][colName];
+                        rest[r][row.colNum].originalRowId = rest[r][row.colNum].id;
+                    }else if (row.attribute === "totalchange-change") {
+                        try {
+                            var tochangeHd = Object.keys(this.totalchangeCol); //用来所需要的所有列(obj)（属性）名
+                            if (to.length===0 || !tochangeHd || tochangeHd.length===0 ) {
+                                console.log('to.length设置上期累计数量默认为0');
+                                rest[r][row.colNum]['td'] = 0;
+                            } else {
+                                console.log('进来了这里>=0')
+                                for (let index = tochangeHd.length -1; index >= 0; index--){
+                                    var Totorow = this.totalchangeCol[tochangeHd[index]],
+                                    Tostr = Totorow.attributeValue,
+                                    TocolName = str.match(patt1)[0];
+                                    if (Totorow.attribute && Tostr && Tostr !=="" && Totorow.attribute === "change-total" ) {
+                                        console.log('有没有进去这个if判断----------Totorow.attribute === "change-total" -====TocolName +++ colName')
+                                        console.log(TocolName,'   ',colName)
+                                        if (TocolName === colName) {  //属性值两对应
+                                            // console.log(TocolName,' 进来值相等了  ',colName)
+                                            rest[r][row.colNum] = to[r][Totorow.colNum];
+                                            console.log('设置上期累计数量  ==='+rest[r][row.colNum].td)
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
+                            console.log('设置上期累计数量报错默认为0'+error)
+                            rest[r][row.colNum].td = 0;
+                        }
+                    }
+                    rest[r][row.colNum]['colNum'] = row['colNum'];
+                    rest[r][row.colNum]['trNum'] = r;
+                    rest[r][row.colNum]['tdColspan'] = rest[r][row.colNum]['tdRowspan'] = 1;
+                    delete rest[r][row.colNum]['id'];
                 }
             }
         }
-        console.log('打印一下rest2---')
+        console.log('看一下生成的数据ya')
         console.log(rest)
-        console.log(this.formula)
+        console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
-
         try {  //把数据载入表格
-            // this.findList(); //调用滚动渲染数据
+            rest = rest.concat([]);
             this.$nextTick(() => {
-                for (let index = 0; index < rest.length; index++) {
+                for (let index = 0; index < len; index++) {
                     this.$refs.elxEditable1.insertAt(rest[index], -1); 
                 }
             })
-            this.list = this.$refs.elxEditable1.getRecords();
-            data = null; //内存释放
+            // this.list = this.$refs.elxEditable1.getRecords();
+            // up = to = null;
         } catch (e) {
             console.log('出错了')
             console.log(e)
-            data.length = 0;
+            rest.length =0;
+            or = to = null;
             this.loading =false;
             this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
         }
-
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。

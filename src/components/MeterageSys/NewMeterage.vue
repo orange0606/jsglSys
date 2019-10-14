@@ -192,7 +192,7 @@ export default {
       list: [
       ], //计量清单表格数据
       tomeRowList:null,//对应累计计量清单数据
-      totalmeterageCol:'',    //用来存储累计计量的的属性值
+      totalmeterageCol:null,    //截取获取实际累计计量表头对应所有列最后一层的表头列 object(用来单元格点击判断)
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
       Height: 400,
