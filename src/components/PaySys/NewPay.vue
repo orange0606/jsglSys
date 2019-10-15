@@ -467,7 +467,7 @@ export default {
                     
                   }else if (row.attribute === "totalmeterage-head-total") {
                       try { 
-                            // console.log('进来了totalmeterage-head-total')
+                            console.log('进来了totalmeterage-head-total')
                             //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                             if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
                  
@@ -479,6 +479,8 @@ export default {
                                 // Rlist.td = number.toFixed(2);
                                 var sumTd = [];
                                 for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
+                                    console.log('this.tometerageRowList[d][colName].td')
+                                    console.log(this.tometerageRowList[d][colName].td)
                                     sumTd.push(this.tometerageRowList[d][colName])
                                 }
                                 Rlist.td = XEUtils.sum(sumTd, 'td');
