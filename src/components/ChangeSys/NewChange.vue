@@ -112,7 +112,7 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80}">
+          :edit-config="{render: 'scroll', renderSize: 60}">
           <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
@@ -268,6 +268,7 @@ export default {
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.changeHead.id;
+            this.tochRowList = this.totalchangeCol = null;
             console.log('this.mode')
             console.log(this.mode )
             switch(this.mode) {
@@ -670,7 +671,12 @@ export default {
                         rest[r][row.colNum].originalRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalchange-change") {
                         try {
-                            var tochangeHd = Object.keys(this.totalchangeCol); //用来所需要的所有列(obj)（属性）名
+                            if (this.totalchangeCol) {
+                                var tochangeHd = Object.keys(this.totalchangeCol); //用来所需要的所有列(obj)（属性）名
+                            }else{
+                                var tochangeHd = null;
+                            }
+           
                             if (to.length===0 || !tochangeHd || tochangeHd.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;

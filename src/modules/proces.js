@@ -312,11 +312,12 @@ excelmodel = {
             for (let i = hd.length -1; i >= 0; i--) {
                 let row = list[index][hd[i]];
                 delete row.edit; //删除编辑状态
+                delete row.id; //删除id
                 row.trNum = index+1;
                 if (row.attribute == 'formula' && row.attributeValue && row.attributeValue !='' ) {
                     row.headFormula = this.Analysis(row.attributeValue);
-                    // console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)
-                    // console.log(row)
+                    console.log(row.formula_col,'--------------判断公式对不对----------'+row.attributeValue)
+                    console.log(row)
                 }
                 headRowList.push(row);
             }
@@ -670,39 +671,73 @@ excelmodel = {
              console.log('attributeValue');
              console.log(AttVal);
             if ( Att && ( Att==='fluctuate' || Att==='meterage' || Att==='pay') && AttVal && AttVal !=='') {
-                // console.log('AttVal----------------2222222222222')
-                // console.log(AttVal)
+                console.log('AttVal----------------2222222222222')
+                console.log(AttVal)
                 let colTr = AttVal.match(patt1)[0];   //属性值  列号
                 var sumNb = null;
+                console.log('type----------------------------')
+                console.log(type)
                 switch (type) {
-                    case 'change':
-                        if (Number.isNaN(Number(row[colTr]['td']))) {
-                            return Message({ message: '原数量不是有效的数字类型', type: 'warning', duration: 3000, showClose: true });;
-                        }
-                        sumNb = that.Count(Number(row[colTr]['td'])+ col['td']*1);
-                        // console.log('-------console.log(sumNb);',colTr+row[colTr].td);
-                        // console.log(sumNb);
-                        if (sumNb < 0 ) {
-                            Message({ message: '警告 减少的数量不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 3000, showClose: true });
-                            col['td'] = 0-row[colTr].td;
-                        }
-                        break;
+                    // case 'change':
+                    //     if (Number.isNaN(Number(row[colTr]['td']))) {
+                    //         return Message({ message: '原数量不是有效的数字类型', type: 'warning', duration: 3000, showClose: true });;
+                    //     }
+                    //     sumNb = that.Count(Number(row[colTr]['td'])+ col['td']*1);
+                    //     // console.log('-------console.log(sumNb);',colTr+row[colTr].td);
+                    //     // console.log(sumNb);
+                    //     if (sumNb < 0 ) {
+                    //         Message({ message: '警告 减少的数量不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 3000, showClose: true });
+                    //         col['td'] = 0-row[colTr].td;
+                    //     }
+                    //     break;
+                        case 'change':
+                            Object.keys(lastHeader).forEach(function(key){
+                                let chkeyObj = lastHeader[key],
+                                chAtt = chkeyObj.attribute,
+                                chAttVal = chkeyObj.attributeValue;
+                                console.log('attributeValue');
+                                console.log(chAttVal);
+                                if ( chAtt && chAtt==='totalchange-change'  && chAttVal && chAttVal !=='') {
+                                    // console.log('AttVal----------------333333333333333')
+                                    // console.log(chAttVal)
+                                    let chcolTr = chAttVal.match(patt1)[0];   //属性值  列号
+                                    if (chcolTr === col.colNum) {
+                                        sumNb = that.Count(row[chkeyObj.colNum]['td']*1+ col['td']*1);
+                                        let summmm = (row[colTr]['td']*1)+(sumNb*1);
 
+                                            // console.log(row[chkeyObj.colNum]['td']*1,'  row[chkeyObj.colNum]  ', col['td']*1)
+                                            // console.log('row[colTr]------------',row[colTr]['td'])
+                                            console.log('本期计量和上期计量数量  ：'+sumNb)
+                                            console.log('原数量  ：'+row[colTr]['td']*1)
+                                            console.log('本期计量和上期计量数量 + 原数量  ：'+summmm)
+          
+                                        if ( ((row[colTr]['td']*1)+(sumNb*1)) <0 ){
+                                            Message({ message: '警告 减少的数量不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                            col['td'] = 0-(row[colTr].td-row[chkeyObj.colNum]['td']);
+                                        }
+                                    }
+                                }
+                            });
+                            break;
                     case 'meterage':
+                        console.log('有没有进来')
                         Object.keys(lastHeader).forEach(function(key){
                             let mekeyObj = lastHeader[key],
                             meAtt = mekeyObj.attribute,
                             meAttVal = mekeyObj.attributeValue;
                             console.log('attributeValue');
                             console.log(meAttVal);
+                            console.log('meAtt-------------');
+
+                            console.log(meAtt);
                             if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
-                                // console.log('AttVal----------------333333333333333')
-                                // console.log(meAttVal)
+                                console.log('AttVal----------------333333333333333')
+                                console.log(meAttVal)
                                 let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
                                 if (mecolTr === col.colNum) {
                                     sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ col['td']*1);
-                                        // console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
-                                        // console.log('row[colTr]------------',row[colTr]['td'])
+                                        console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', col['td']*1)
+                                        console.log('row[colTr]------------',row[colTr]['td'])
                                     if (sumNb>row[colTr]['td']*1 ){
                                         Message({ message: '警告 上期累计数量与本期的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
                                         col['td'] = row[colTr].td-row[mekeyObj.colNum]['td'];

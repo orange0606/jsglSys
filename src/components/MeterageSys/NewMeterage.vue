@@ -114,7 +114,7 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80}">
+          :edit-config="{render: 'scroll', renderSize: 60}">
           <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
@@ -123,7 +123,7 @@
             </template>
           </elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
-          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" ></my-column>
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader" ></my-column>
         </elx-editable>
         <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
       </div>
@@ -264,6 +264,7 @@ export default {
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.meterageHead.id;
+            this.tomeRowList = this.totalmeterageCol = null;
             switch(this.mode) {
                 case 'new': //此处为新建模式处理
                     return this.updates(newVal);
@@ -592,7 +593,12 @@ export default {
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalmeterage-meterage") {
                         try {
-                            var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
+                            if (this.totalmeterageCol) {
+                                var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
+                            }else{
+                                var totmheader = null;
+                            }
+                           
                             if (to.length===0 || !totmheader || totmheader.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
@@ -715,7 +721,7 @@ export default {
 
           }, 300)
         });
-
+        this.refreshTable();
     },
     getSummaries (param) {  //合计
         if (!this.$refs.elxEditable1 || !this.showHeader) return [];
