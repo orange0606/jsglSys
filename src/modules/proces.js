@@ -534,7 +534,7 @@ excelmodel = {
             hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index][hdobj[r]].td === ''  && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
+                if (data[index][hdobj[r]].td === null && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
                     num++;
                 }else{
                     if (index === data.length-1) {
@@ -777,8 +777,6 @@ excelmodel = {
             }
         });
 
-
-        
         var Eval = null,
         fkeyslen = fkeys.length;
         try {
@@ -838,7 +836,7 @@ excelmodel = {
         sumArr = header = TotalObj = Total = null;
         return sums;
     },
-    Count (result) {
+    Count (result) {    //js精度计算
         if(result.toString().match(/\.\d\d\d99/) && result.toString().match(/\.\d\d\d99/).length>0){
             result=Math.round(result*1000)/1000;    
         }
@@ -853,6 +851,26 @@ excelmodel = {
         // console.log((S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4()));
         return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
     },
+
+    /*
+    选择表头限制  （新建各种清单时对表头列表可选择的表头作限制）
+    param type: 清单（表头类型） str
+    param list: 清单列表 （Array）
+    param hdlist: 可选择的表头列表 （Array）
+    使用引用赋值
+    */
+    limitHeader(type, list, hdlist) {
+        if (!type || type==='' || !list || !list.length || list.length===0 || !hdlist || !hdlist.length || hdlist.length===0 ) return false;
+        for (let index = list.length-1; index >= 0; index--) {
+            let item = list[index][type+'HeadId'];
+            for (let i = hdlist.length-1; i >= 0; i--) {
+                if (item === hdlist[i]['id']) {
+                    hdlist[i].limit=true;
+                    break;
+                }
+            }
+        }
+    }
 
 };
 let ABC =excelmodel.AZ();

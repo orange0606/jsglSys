@@ -147,10 +147,15 @@ export default {
             .then((response) => {
             console.log('rowlistkey-----------')
             console.log(rowlistkey)
+            console.log('response-------------------------')
+            console.log(response)
             var data = response.data[this.type],
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
+
             this.PackHeader = XEUtils.clone(header, true); //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
+            console.log('this.col----------- ')
+            console.log(this.col)
             this.$nextTick(() => {  //强制重新渲染
                 this.showHeader = false;
                 this.showHeader = true;
@@ -164,6 +169,8 @@ export default {
             }
             
             list = header = null;  //初始化
+            console.log('this.list')
+            console.log(this.list)
             
         }).catch(e => {
             this.loading = false;
@@ -198,9 +205,9 @@ export default {
       })
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
+        if (!this.$refs.elxEditablecom || !this.showHeader) return [];
         let list = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据;
-        if (this.PackHeader.length ===0 && list.length ===0) return [];
+        if (this.PackHeader.length ===0 || list.length ===0) return [];
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     formatterDate (row, column, cellValue, index) {

@@ -17,6 +17,7 @@
               <el-option
                 v-for="item in form.headerList"
                 :key="item.id"
+                :disabled="item.limit?true:false"
                 :label="item.name"
                 :value="item.id">
               </el-option>
@@ -334,14 +335,13 @@ export default {
                 console.log(error)
                 this.loading = false;
           }
-         
     },
     allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
         this.$post('/head/allmeterage',{tenderId})
         .then((response) => {
-          // console.log('response')
-          // console.log(response)
           this.form.headerList = response.data.meterageHeadList;
+           //此处调用限制选择表头函数参数（清单类型,全部清单列表，全部表头列表） 表头列表返回（limit）属性 
+            this.$excel.limitHeader('meterage', this.meterageList, this.form.headerList); 
         }).catch(e => {
             this.$message({
               type: 'info',
