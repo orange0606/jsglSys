@@ -568,7 +568,7 @@ import XEUtils from 'xe-utils';
                 limitValue : null, //限制值
                 colNum: this.hd[index],
                 trNum:restLen+1,
-                td: null,
+                td: '',
                 tdColspan: 1,
                 tdRowspan: 1,
                 trNum:restLen+1,

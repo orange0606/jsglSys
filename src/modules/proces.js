@@ -534,7 +534,7 @@ excelmodel = {
             hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index][hdobj[r]].td === null  && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
+                if (data[index][hdobj[r]].td === ''  && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
                     num++;
                 }else{
                     if (index === data.length-1) {

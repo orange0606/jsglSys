@@ -127,6 +127,10 @@ export default {
                 url = '/update/row/getone';
                 headkey = 'tUpdateHeadRows';
                 break;
+            case 'totalchange':
+                url = '/totalchange/by/totalchangeid';
+                headkey = 'totalchangeHeadRows';
+                break;
             case 'totalmeterage':
                 url = '/totalmeterage/by/totalmeterageid';
                 headkey = 'tTotalmeterageHeadRows';
@@ -141,6 +145,8 @@ export default {
         if( url === '' ) return false;
         this.$post( url, { id: row.id } )
             .then((response) => {
+            console.log('rowlistkey-----------')
+            console.log(rowlistkey)
             var data = response.data[this.type],
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
             this.PackHeader = XEUtils.clone(header, true); //深拷贝

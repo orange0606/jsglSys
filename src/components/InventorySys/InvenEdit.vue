@@ -413,8 +413,9 @@ export default {
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >1) {  //带选择框的情况
-            if (row[this.hd[columnIndex-2]]) {
-                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
+            let Row = row[this.hd[columnIndex-2]];
+            if (Row) {
+                return [ Row.tdRowspan, Row.tdColspan ]
             }
         }
         return [1, 1]
@@ -448,11 +449,11 @@ export default {
       NewRow = {};
       for (let index = this.hd.length -1; index >= 0; index--) {
           NewRow['seq'] = restLen;
-          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
+          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: '', tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
       }
       console.log('打印一下NewRow 新增的一行')
       console.log(NewRow);
-      this.$refs.elxEditable1.insertAt(NewRow, -1)
+      this.$refs.elxEditable1.insertAt(NewRow, -1);
     },
     Abandon () {  //放弃更改
         // this.$refs.elxEditable1.revert();

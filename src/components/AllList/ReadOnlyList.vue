@@ -1,6 +1,21 @@
 <template>
     <el-collapse-transition>
-    <div v-loading="loading" element-loading-text="飞速加载中">
+    <div v-loading="loading"  element-loading-text="飞速加载中">
+      <div class="typeOption">
+            <template>
+          <span>切换类型：仅用于不接入父组件测试</span>
+          <el-select v-model="type" :disabled="false" size="mini" placeholder="切换类型：仅用于测试">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+      </div>
+       
+
         <h3>{{text}}列表</h3>
         <!-- 主体表格 -->
         <elx-editable
@@ -87,6 +102,11 @@ import XEUtils from 'xe-utils';
       required:false,
       default: () => []
     },
+    totalchangeList:{  //累计变更清单列表
+      type:Array,
+      required:false,
+      default: () => []   
+    },
     totalmeterageList:{  //累计计量清单列表
       type:Array,
       required:false,
@@ -97,6 +117,7 @@ import XEUtils from 'xe-utils';
       required:false,
       default: () => []   
     },
+    
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
@@ -105,7 +126,7 @@ import XEUtils from 'xe-utils';
     type:{  //新清单、累计计量、累计支付的类型
       type: String,
       required: false,
-      default: "update" //"update":新清单，“totalmeterage”:累计计量，totalpay:累计支付          
+      default: "totalchange" //"update":新清单，totalchange:累计变更 “totalmeterage”:累计计量，totalpay:累计支付        
     },
 
 
@@ -128,12 +149,26 @@ import XEUtils from 'xe-utils';
         pageSize: 10,
         totalResult: 0
       },
+      options: [{
+          value: 'update',
+          label: '新清单'
+        }, {
+          value: 'totalchange',
+          label: '累计变更清单'
+        }, {
+          value: 'totalmeterage',
+          label: '累计计量清单'
+        }, {
+          value: 'totalpay',
+          label: '累计支付清单'
+        }],
+      
      
     } 
   },
   created () {
       this.loading = true;
-      this.typeSwitch(this.type);   //判断是哪种清单
+      this.typeSwitch(this.type );   //判断是哪种清单
   },
   watch: {
       type: function ( newVal,oldVal ) {
@@ -161,6 +196,15 @@ import XEUtils from 'xe-utils';
                     this.loading = false;
                 };
                 this.text = '新清单';
+                break;
+            case 'totalchange':
+                if (!this.joinParent) {  //请求累计计量清单列表
+                    this.findList(newVal);
+                }else{
+                    this.list = this.totalchangeList;
+                    this.loading = false;
+                };
+                this.text = '累计变更清单';
                 break;
             case 'totalmeterage':
                 if (!this.joinParent) {  //请求累计计量清单列表
@@ -191,6 +235,10 @@ import XEUtils from 'xe-utils';
             case 'update':
                 url = '/update/all';
                 key = 'updateList';
+                break;
+            case 'totalchange':
+                url = '/totalchange/all';
+                key = 'totalchangeList';
                 break;
             case 'totalmeterage':
                 url = '/totalmeterage/all';
@@ -239,6 +287,7 @@ import XEUtils from 'xe-utils';
         change: '变更清单',
         update: '新清单',
         meterage: '计量清单',
+        totalchange: '累计变更清单',
         totalmeterage: '累计计量清单',	
         pay: '支付清单',
         totalpay: '累计支付清单'
@@ -263,6 +312,12 @@ import XEUtils from 'xe-utils';
 </script>
 
 <style scoped>
+
+.typeOption {
+  text-align: left;
+  font-size: 13px;
+}
+
 .click-table10-oper {
   margin-bottom: 18px;
 }

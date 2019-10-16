@@ -127,7 +127,7 @@ import XEUtils from 'xe-utils'
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:93, name:"清单审批单",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:1048, name:"清单审批单",state: 0}) //state=1为已通过的审批单
     },
      mode:{  //子组件的展示模式
       type: String,

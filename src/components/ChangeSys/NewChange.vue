@@ -463,7 +463,7 @@ export default {
     },
     OneToTalchange () { //请求一个相对应的累计变更清单数据(根据计量清单表头id)
         if (!this.changeHead || !this.changeHead.id) return this.$message({type: 'info',message: '表头错误，请检查，或者重新选择！'});
-        // return this.allRelationOriginal()
+        return this.allRelationOriginal();//不调试累计变更先
         this.$post('/totalchange/by/changeheadid',{ id:this.changeHead.id })
         .then((response) => {
             var data = response.data.totalchange,
@@ -783,8 +783,9 @@ export default {
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >1) {  //带选择框的情况
-            if (row[this.hd[columnIndex-2]]) {
-                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
+            let Row = row[this.hd[columnIndex-2]];
+            if (Row) {
+                return [ Row.tdRowspan, Row.tdColspan ]
             }
         }
         return [1, 1]
