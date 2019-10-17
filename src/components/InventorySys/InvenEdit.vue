@@ -265,6 +265,7 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'original'})
         .then((response) => {
+        this.list.length = this.hd.length = 0;
         var data = response.data.onehead,
         headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
         this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
@@ -284,7 +285,6 @@ export default {
             this.originalHead.tOriginalHeadRows = data.tOriginalHeadRows;
         }
         this.loading = false;
-        this.list.length = this.hd.length = 0;
 
         //调用表格公式解析 存储
         this.formula = this.$excel.FormulaAnaly([...this.col]);
@@ -445,7 +445,8 @@ export default {
         return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
     },
     insertEvent () {
-
+        console.log('this.hd.length')
+        console.log(this.hd.length)
       if (!this.hd.length || this.hd.length===0) return false;
       var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
       restLen = rest.length,

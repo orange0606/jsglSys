@@ -256,8 +256,13 @@ export default {
         this.$post('/head/allpay',{tenderId})
         .then((response) => {
             this.form.headerList = response.data.payHeadList;
+            console.log('this.form.headerList')
+            console.log(this.form.headerList)
+            console.log('this.payList')
+            console.log(this.payList)
             //此处调用限制选择表头函数参数（清单类型,全部清单列表，全部表头列表） 表头列表返回（limit）属性 
-            this.$excel.limitHeader('pay', this.payList, this.form.headerList); 
+            this.$excel.limitHeader('tPay', this.payList, this.form.headerList); 
+
         }).catch(e => {
             this.$message({
               type: 'info',
