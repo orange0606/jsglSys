@@ -15,9 +15,10 @@
       :show-header="showHeader"
       v-if="showHeader"
       :span-method="arraySpanMethod"
-      :edit-config="{ render: 'scroll', renderSize: 80, useDefaultValidTip: true}"
-      :style="{ width: Width + '%' }">
-      <elx-editable-column type="selection" align="center" width="55"></elx-editable-column>
+      :row-style="RowCss"
+      :edit-config="{ render: 'scroll', renderSize: 80, useDefaultValidTip: true}">
+      <!-- <el-table-column type="selection" :selectable="selectableEvent" disabled='true' width="40"></el-table-column> -->
+      <elx-editable-column type="selection" width="55" align="center" ></elx-editable-column>
       <elx-editable-column type="index" align="center" width="80"></elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
       <column v-for="(item,index) in col" :key="index" :col="item" ></column>
@@ -51,7 +52,6 @@ export default {
   },
   data () {
     return {
-      all:null,//原清单全部数据
       showHeader:true,//表头显示以及表格显示强制渲染
       loading: false,
       regionList: [],
@@ -60,26 +60,23 @@ export default {
       PackHeader:null,//表头已组装数据
       list:[],//表格数据
       hd:[],//用作单元格合并
-      Height: 500,
-      Width:99.9
-      
+      Height: 500, 
     }
   },
   created () {
 
-    this.all = this.inventory;
-    if (this.all!=null) {
-      try {
-          let id = this.all.originalHead.id;
-          let type = this.all.type;
-          this.oneHeader(id,type)//调用表头内容请求函数
-      } catch (error) {
-          console.log(error)
+    // var all = this.inventory;
+    // if (all!==null) {
+    //   try {
+    //       this.importfxx(all);
 
-      }
-    }
+    //   } catch (error) {
+    //       console.log(error)
 
-    this.$message.closeAll();
+    //   }
+    // }
+
+    // this.$message.closeAll();
   },
   mounted(){
       this.tViewSize();
@@ -95,10 +92,7 @@ export default {
               try {
                   // console.log('选择表格组件获取到的值')
                   // console.log(newVal)
-                  this.all = newVal;
-                  var type = this.all.type,
-                  id = this.all[type+'Head'].id;
-                  this.oneHeader(id,type)//调用表头内容请求函数
+                  this.importfxx(newVal);
               } catch (error) {
                   console.log(error)
               }
@@ -108,62 +102,79 @@ export default {
   },
   methods: {
     tViewSize () {
-        let obj = this.$getViewportSize();
-        this.Width = 99.99;
+        var obj = this.$getViewportSize();
         this.$nextTick(() => {
             this.Height = obj.height-270;
-            this.Width = 100;
         });
     },
-    handle (list) { //数据处理表格数据等等 数据、列数、行数、
-        if (list.length == 0) {
-            return false
+    selectableEvent (row, index) {
+      console.log('row, index================================')
+      console.log(index)
+      return true;
+    },
+    RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
+        if (row.disabled ) {
+          return 'background:orange'
         }
-        //调用表格组装函数（返回的是个数组对象）
-        let arr = this.$excel.ListAssemble(list);
-        this.hd = Object.keys(arr[0]);
-        this.list = [...arr];
-        this.findList();//开始渲染表格数据
+          // console.log('row, rowIndex')
+          // console.log(row, rowIndex)
+      return '';
+    },
+    importfxx ( All ) {
+      this.startTime = Date.now();
+      this.loading=true;
+      var type = All.type,
+      Head = type+'Head',
+      HeadRow = '';
+      if (type==='update') {
+          HeadRow = 'tUpdateHeadRows';
+      }if (type==='original') {
+          HeadRow = 'tOriginalHeadRows';
+      }
+      //组装表头
+      var headsArr = this.$excel.Package(All[Head][HeadRow],All[Head].refCol,All[Head].refRow);
+      this.PackHeader = [...headsArr];
+      this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
+      this.hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+      this.loading = false;
+      var arr = this.$excel.ListAssemble(All[type+'RowList']); //组装清单表格数据
+      this.list = [...arr];
+
+      //此处调用过滤被选过的数据函数
+      this.filTer( type, this.list, All['filTerCol'], All['filTerList']);
+      this.findList();//开始渲染表格数据
 
     },
-    oneHeader (id,type) {  //请求单个表头 表头id  表头类型
-       this.$post('/head/getone',{id,type})
-        .then((response) => {
-        let data = response.data.onehead;
-        let key = '';
-        if (type == 'original') {
-          key = 'tOriginalHeadRows';
-        }else if (type == 'change'){
-          key = 'tChangeHeadRows';
-        }else if (type == 'update'){
-          key = 'tUpdateHeadRows';
-        }else if (type == 'totalmeterage'){
-          key = 'tTotalmeterageHeadRows';
-        }else if (type == 'meterage'){
-          key = 'tMeterageHeadRows';
-        }else if (type == 'totalpay'){
-          key = 'tTotalpayHeadRows';
-        }else if (type == 'pay'){
-          key = 'tPayHeadRows';
+    filTer (type, list, filTerCol, filTerList ) { //type 此次显示的清单类型 list 此组件显示的表格内容 Head, Row 此组件的父组件的表头所有列和表格内容
+        if (list.length===0 || !filTerCol || filTerList.length===0 ) return false;
+        console.log('type, list, filTerCol, filTerList ---111111111--------')
+        console.log(type, list, filTerCol, filTerList )
+        var Idkey = '',
+        listCol = filTerCol.son,
+        filTerListCol = filTerCol.father;
+        if (type ==='update') {
+            Idkey = 'tUpdateRowId';
+        }else if( type === 'original') {
+            Idkey = 'originalRowId';
         }
-        let headsArr = this.$excel.Package(data[key],data.refCol,data.refRow);
-        this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-        this.col = [];  //新建一个数组存储多级表头嵌套
-        this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-        let list = [];
-        if(type == 'original'){
-            list = this.all.originalRowList;
-        }else if (type == 'update') {
-            list = this.all.updateRowList;
-
-        }else if (type== 'totalmeterage'){
-
+        try {
+            
+            for (let i = filTerList.length-1; i >= 0 ; i--) {
+                for (let index = list.length-1; index >= 0 ; index--) {
+                    var sonItem = list[index];
+                    if(sonItem[listCol].id === filTerList[i][filTerListCol][Idkey]){
+                        sonItem['disabled']=true; //给已被选过的表格行内容添加一个禁用属性
+                        break;  //开始下一个循环
+                    }
+              
+                }
+              
+            }
+            console.log('type, list, filTerCol, filTerList ---2222222222--------')
+            console.log(type, list, filTerCol, filTerList )
+        } catch (error) {
+          
         }
-        
-        // console.log('this.all----------------------------')
-        // console.log(this.all)
-        this.handle(list);; //调用清单数据内容处理函数
-      })
     },
     inner (item ) {  //关闭清单选择层，将选中的数据发回给父组件
         if (item) {
@@ -188,35 +199,27 @@ export default {
     },
     findList () {
         this.loading = true;
-        // let size = Number(this.$route.params.number);
         this.$nextTick(() => {
             this.$refs.elxEditable4.reload([]);
             // setTimeout(() => {
-              let list = this.list;
-            let startTime = Date.now();
+            let list = this.list;
             this.$refs.elxEditable4.reload(list);
             this.loading = false;
-            // this.$nextTick(() => {
-                this.$message({ message: `渲染 ${list.length} 条耗时 ${Date.now() - startTime} ms`, type: 'info', duration: 8000, showClose: true })
-            // })
-            // }, 300)
+            this.$message({ message: `渲染 ${list.length} 条耗时 ${Date.now() - this.startTime} ms`, type: 'info', duration: 6000, showClose: true })
+     
         })
     },
-
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-      if (columnIndex >1) {  //带选择框的情况
-          if (columnIndex <= this.hd.length) {
-              return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
-          }
-      }
-      return [1, 1]
-    }, 
+        if (columnIndex >1) {  //带选择框的情况
+            let Row = row[this.hd[columnIndex-1]];
+            if (Row) {
+                return [Row.tdRowspan, Row.tdColspan]
+            }
+        }
+        return [1, 1]
+    },  
   },
 
-  // beforeRouteUpdate (to, from, next) {
-  //   next();
-  //   this.findList();
-  // }
 }
 </script>
 

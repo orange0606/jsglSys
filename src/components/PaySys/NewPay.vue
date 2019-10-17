@@ -447,10 +447,10 @@ export default {
                                       // console.log('有没有进去这个if判断----------ToPayrow.attribute === "pay-total" -====TocolName +++ colName')
                                       // console.log(TocolName,'   ',colName)
                                       if (TocolName === colName) {  //属性值两对应
-                                          // console.log(TocolName,' 进来值相等了  ',colName)
+                                          console.log(TocolName,' 进来值相等了  ',colName)
                                           this.list[0][row.colNum] = this.totalpayRowList[0][ToPayrow.colNum];
-              
-                                          console.log(Rlist)
+                                          if (!this.list[0][row.colNum].td) this.list[0][row.colNum].td='0';
+                                          console.log(this.totalpayRowList[0][ToPayrow.colNum])
                                           delete this.list[0][row.colNum].id;
                                           break;
                                       }
@@ -462,7 +462,7 @@ export default {
                               console.log(this.totalpayRowList,this.totalpayCol)
                           }else{  //无数据默认为0
                               Rlist.td = 0;
-                              // console.log('进来了totalpay-pay-----Rlist ----为0')
+                              console.log('进来了totalpay-pay-----Rlist ----为0')
                               // console.log(this.totalpayRowList,this.totalpayCol)
                           }
                       } catch (error) {

@@ -509,12 +509,34 @@ export default {
     oneOriginal (id) {  //请求选择可导入原清单内容
         this.$post('/original/row/getone',{ id })
         .then((response) => {
-          this.originalList = response.data.original;
+            var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+            res = response.data.original,
+            obj = null;
+
+            for(let key  in this.lastHeader){
+                let item = this.lastHeader[key];
+                console.log(key + '---')
+                console.log(item)
+                if (item.attribute && item.attribute==='original' && item.attributeValue && item.attributeValue !=='') {
+                    let patt1=/[A-Z+]*/g;
+                    obj = {
+                        father: item.colNum,
+                        son: item.attributeValue.match(patt1)[0]
+                    }
+                    console.log('跳出循环')
+                    console.log(obj)
+                    break;
+                }
+            };
+            res['filTerList'] = list;
+            res['filTerCol'] = obj;
+            this.originalList = res;
       }).catch(e => {
           this.$message({
             type: 'info',
             message: '发生错误！'
           });
+          console.log(e)
       });
     },
     selectOriginal (row, column, cell, event) { //原清单列表数据表格单击事件
