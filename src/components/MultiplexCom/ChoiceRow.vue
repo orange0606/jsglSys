@@ -17,9 +17,10 @@
       :span-method="arraySpanMethod"
       :row-style="RowCss"
       :edit-config="{ render: 'scroll', renderSize: 80, useDefaultValidTip: true}">
-      <!-- <el-table-column type="selection" :selectable="selectableEvent" disabled='true' width="40"></el-table-column> -->
+      <!-- <el-table-column type="selection" :selectable="selectableEvent" width="40"></el-table-column> -->
+      <!-- <el-table-column type="selection" :selectable="selectableEvent" :key="$excel.randomkey()" width="40"></el-table-column> -->
       <elx-editable-column type="selection" width="55" align="center" ></elx-editable-column>
-      <elx-editable-column type="index" align="center" width="80"></elx-editable-column>
+      <el-table-column type="index" align="center" :key="$excel.randomkey()" width="80"></el-table-column>
       <!-- 此处使用多级表头嵌套组件 -->
       <column v-for="(item,index) in col" :key="index" :col="item" ></column>
 
@@ -109,12 +110,17 @@ export default {
     },
     selectableEvent (row, index) {
       console.log('row, index================================')
+      console.log(this.list[index].disabled)
+      if (this.list[index].disabled) {
+          return false;
+      }
       console.log(index)
-      return true;
+      return true
+
     },
     RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
         if (row.disabled ) {
-          return 'background:orange'
+          return 'background:#CCCCCC'
         }
           // console.log('row, rowIndex')
           // console.log(row, rowIndex)
@@ -178,21 +184,23 @@ export default {
     },
     inner (item ) {  //关闭清单选择层，将选中的数据发回给父组件
         if (item) {
-            let rest = this.$refs.elxEditable4.getSelecteds(); //此处应是已选择的表格数据
+            let list = this.$refs.elxEditable4.getSelecteds(); //此处应是已选择的表格数据
+
+            //过滤掉已经被选过的数据
+            let rest = list.filter(item=>(
+                !item.disabled
+            ));
             if (rest.length >0) {
                 this.$emit("update:inventory", [...rest]);
-                this.hd.length = this.list.length = 0; 
+                list.length = this.hd.length = this.list.length = 0; 
                 let boolen = false;
                 this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
             }else{
-                this.$message({
-                type: 'info',
-                message: '请至少选择一条数据！'
-              })
+                this.$message({type: 'info',message: '请至少选择一条数据！'})
             }
         }else{
             let boolen = false;
-            this.hd.length = this.list.length = 0; 
+           list.length = this.hd.length = this.list.length = 0; 
             this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
         }
 
