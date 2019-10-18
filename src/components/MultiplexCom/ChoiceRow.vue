@@ -19,7 +19,7 @@
       :edit-config="{ render: 'scroll', renderSize: 80, useDefaultValidTip: true}">
       <!-- <el-table-column type="selection" :selectable="selectableEvent" width="40"></el-table-column> -->
       <!-- <el-table-column type="selection" :selectable="selectableEvent" :key="$excel.randomkey()" width="40"></el-table-column> -->
-      <elx-editable-column type="selection" width="55" align="center" ></elx-editable-column>
+      <elx-editable-column type="selection" width="40" :key="$excel.randomkey()" align="center" ></elx-editable-column>
       <el-table-column type="index" align="center" :key="$excel.randomkey()" width="80"></el-table-column>
       <!-- 此处使用多级表头嵌套组件 -->
       <column v-for="(item,index) in col" :key="index" :col="item" ></column>
@@ -36,7 +36,6 @@
 
 <script>
 import Column from './Column';
-import XEUtils from 'xe-utils'
 export default {
  name: 'ChoiceRow',
   components: {
@@ -47,9 +46,6 @@ export default {
     },
     innerVisible: {
     }
-    // tender:{
-    //   type: Object,
-    // }
   },
   data () {
     return {
@@ -66,18 +62,6 @@ export default {
   },
   created () {
 
-    // var all = this.inventory;
-    // if (all!==null) {
-    //   try {
-    //       this.importfxx(all);
-
-    //   } catch (error) {
-    //       console.log(error)
-
-    //   }
-    // }
-
-    // this.$message.closeAll();
   },
   mounted(){
       this.tViewSize();
@@ -108,22 +92,10 @@ export default {
             this.Height = obj.height-270;
         });
     },
-    selectableEvent (row, index) {
-      console.log('row, index================================')
-      console.log(this.list[index].disabled)
-      if (this.list[index].disabled) {
-          return false;
-      }
-      console.log(index)
-      return true
-
-    },
     RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
         if (row.disabled ) {
-          return 'background:#CCCCCC'
+          return 'background:#f9ec1217'
         }
-          // console.log('row, rowIndex')
-          // console.log(row, rowIndex)
       return '';
     },
     importfxx ( All ) {
@@ -183,26 +155,55 @@ export default {
         }
     },
     inner (item ) {  //关闭清单选择层，将选中的数据发回给父组件
-        if (item) {
-            let list = this.$refs.elxEditable4.getSelecteds(); //此处应是已选择的表格数据
+        
+              if (item) {
+                  let list = this.$refs.elxEditable4.getSelecteds(); //此处应是已选择的表格数据
+                  var rest = null,
+                  assert = null;  //是否需要过滤
+                  //（检测有无选择到需要过滤的数据） some方法是只要一个成员的返回值是true，则整个some方法的返回值就是true，否则返回false。
+                  assert = list.some(function (elem, index, arr) {
+                      return elem.disabled;
+                  });
+                  if (assert) {
+                      this.$alert('系统已检测到您已选择到有已经导入过的数据，系统将会自动为您过滤数据。', '提示', {
+                        confirmButtonText: '知道了',
+                        callback: action => {
+                            //过滤掉已经被选过的数据
+                            rest = list.filter(item=>(
+                                !item.disabled
+                            ));
+                            if (rest.length >0) {
+                                this.$emit("update:inventory", [...rest]);
+                                list.length = this.hd.length = this.list.length = 0; 
+                                let boolen = false;
+                                this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
+                            }else{
+                                this.$message({type: 'info',message: '请至少选择一条可导入的数据！'})
+                            }
+                        }
+                      });
+                      
+                  }else{
+                      rest = list;
+                      if (rest.length >0) {
+                          this.$emit("update:inventory", [...rest]);
+                          list.length = this.hd.length = this.list.length = 0; 
+                          let boolen = false;
+                          this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
+                      }else{
+                          this.$message({type: 'info',message: '请至少选择一条数据！'})
+                      }
+                  }
+                  
+                  
+              }else{
+                  let boolen = false;
+                  this.hd.length = this.list.length = 0; 
+                  this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
+              }
 
-            //过滤掉已经被选过的数据
-            let rest = list.filter(item=>(
-                !item.disabled
-            ));
-            if (rest.length >0) {
-                this.$emit("update:inventory", [...rest]);
-                list.length = this.hd.length = this.list.length = 0; 
-                let boolen = false;
-                this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
-            }else{
-                this.$message({type: 'info',message: '请至少选择一条数据！'})
-            }
-        }else{
-            let boolen = false;
-           list.length = this.hd.length = this.list.length = 0; 
-            this.$emit("update:innerVisible", boolen);//关闭弹出显示窗口
-        }
+         
+        
 
     },
     findList () {

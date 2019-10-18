@@ -501,6 +501,7 @@ import XEUtils from 'xe-utils';
             }
         },
         impt () { //button 按钮调用input文件选择事件
+            this.$refs.input.value = '';    //清除文件名字
             this.$refs.input.click();
         },
         importfxx () { //表格导入函数

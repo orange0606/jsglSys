@@ -345,6 +345,8 @@ export default {
         })
     },
     impt(){ //button 按钮调用input文件选择事件
+        if (this.hd && this.hd.length ==0) return this.$message({ message: '请先选择表头', type: 'warning', duration: 3000, showClose: true }); 
+        this.$refs.input.value = '';    //清除文件名字
         this.$refs.input.click();
     },
     importfxx() { //导入函数

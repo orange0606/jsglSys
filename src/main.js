@@ -4,7 +4,7 @@
 import Vue from 'vue';
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
   DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification, Tabs, TabPane,
-  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip, Link,} from 'element-ui';
+  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip, Link} from 'element-ui';
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
 import App from './App';
 import router from './router';
@@ -45,6 +45,7 @@ Vue.use(Slider);
 Vue.use(Card);
 Vue.use(Cascader);
 Vue.use(Tooltip);
+Vue.use(Alert);
 
 
 Vue.component(CollapseTransition.name, CollapseTransition)
@@ -66,7 +67,7 @@ Vue.prototype.$notify = Notification;
 Vue.prototype.$loading = Loading.service;
 Vue.prototype.$msgbox = MessageBox;
 Vue.prototype.$confirm = MessageBox.confirm;
-
+Vue.prototype.$alert = MessageBox.alert;
 
 // import axios from "axios"
 // // //将axios挂载到原型上
