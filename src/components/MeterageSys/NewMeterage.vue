@@ -476,6 +476,7 @@ export default {
             }
             this.allRelationUpdate(); //调用请求可导入所有对应的新清单列表
         }).catch(e => {
+            this.allRelationUpdate(); //调用请求可导入所有对应的新清单列表
             this.$message({
               type: 'info',
               message: '请求相对应的累计计量清单数据发生错误！'+e
