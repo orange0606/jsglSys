@@ -253,7 +253,7 @@ export default {
          
     },
     allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
-        this.$post('/head/allpay',{tenderId})
+        this.$post('/head/allpay',{tenderId, judge:0})
         .then((response) => {
             this.form.headerList = response.data.payHeadList;
             console.log('this.form.headerList')

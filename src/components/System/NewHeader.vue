@@ -77,33 +77,33 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'change' || Form.type === 'totalchange'" label="选择表头" prop="tOriginalHeadId">
-                            <el-select v-model="Form.tOriginalHeadId" placeholder="请选择原清单表头" clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in HeadList" :key="i+'a'" :label="val.name" :value="val.id"></el-option>
+                            <el-select value-key="tOriginalHeadId" v-model="Form.tOriginalHeadId" placeholder="请选择原清单表头" clearable size="small" style=" width:100%;">
+                                <el-option v-for="(val,i) in HeadList" :key="i+'a'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'totalchange'" label="选择表头" prop="tChangeHeadId">
-                            <el-select v-model="Form.tChangeHeadId" placeholder="请选择变更清单表头" clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in ChangeHeadList" :key="i+'b'" :label="val.name" :value="val.id"></el-option>
+                            <el-select value-key="tChangeHeadId" v-model="Form.tChangeHeadId" placeholder="请选择变更清单表头" clearable size="small" style=" width:100%;">
+                                <el-option v-for="(val,i) in ChangeHeadList" :key="i+'b'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'meterage' || Form.type === 'totalmeterage'" label="选择新清单表头" prop="tUpdateHeadId">
-                            <el-select v-model="Form.tUpdateHeadId" placeholder="请选择新清单表头" clearable size="small" style=" width:100%;">
-                                <el-option v-for="val in HeadList" :key="val.id+'c'" :label="val.name" :value="val.id"></el-option>
+                            <el-select value-key="tUpdateHeadId" v-model="Form.tUpdateHeadId" placeholder="请选择新清单表头" clearable size="small" style=" width:100%;">
+                                <el-option v-for="val in HeadList" :key="val.id+'cc'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item v-if="Form.type === 'totalmeterage'" label="选择计量表头" prop="tMeterageHeadId">
-                            <el-select  value-key="3a" v-model="Form.tMeterageHeadId" @change="$forceUpdate()" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
-                                <el-option v-for="val in MeterageHeadList" :key="val.id+'d'" :label="val.name" :value="val.id"></el-option>
+                            <el-select value-key="tMeterageHeadId" v-model="Form.tMeterageHeadId" @change="$forceUpdate()" placeholder="请选择计量清单清单表头" size="small" style=" width:100%;">
+                                <el-option v-for="val in MeterageHeadList" :key="val.id+'d'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>                    
-                        <el-form-item v-if="Form.type === 'pay' || Form.type === 'totalpay' " label="选择累计计量表头" prop="tTotalmeterageHeadId">
-                            <el-select v-model="Form.tTotalmeterageHeadId" placeholder="请选择累计计量清单清单表头"  clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in ToMeterageHeadList" :key="i+'e'" :label="val.name" :value="val.id"></el-option>
+                        <el-form-item  v-if="Form.type === 'pay' || Form.type === 'totalpay' " label="选择累计计量表头" prop="tTotalmeterageHeadId">
+                            <el-select value-key="tTotalmeterageHeadId" v-model="Form.tTotalmeterageHeadId" placeholder="请选择累计计量清单清单表头"  clearable size="small" style=" width:100%;">
+                                <el-option v-for="(val,i) in ToMeterageHeadList" :key="i+'e'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
-                       <el-form-item v-if="Form.type === 'totalpay'" label="选择支付表头" prop="tTotalmeterageHeadId">
-                            <el-select v-model="Form.payHeadId" placeholder="请选择支付清单清单表头"  clearable size="small" style=" width:100%;">
-                                <el-option v-for="(val,i) in payHeadList" :key="i+'f'" :label="val.name" :value="val.id"></el-option>
+                       <el-form-item v-if="Form.type === 'totalpay'" label="选择支付表头" prop="payHeadId">
+                            <el-select value-key="payHeadId" v-model="Form.payHeadId" placeholder="请选择支付清单清单表头"  clearable size="small" style=" width:100%;">
+                                <el-option v-for="(val,i) in payHeadList" :key="i+'f'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="表头编号" prop="num">
@@ -727,7 +727,11 @@ import XEUtils from 'xe-utils';
          
         },
         alloriginal () {  //所有该标段的原清单的id和名字
-             this.$post('/head/alloriginal',{tenderId:this.Form.tenderId})
+            var judge = 1;  //1为建变更清单表头  2为建累计变更清单表头 0为建清单
+            if (this.Form.type === 'totalchange') {
+                judge = 2;
+            }
+             this.$post('/head/alloriginal',{tenderId:this.Form.tenderId, judge})
             .then((response) => {
             // console.log('所有原清单的id和名字')
             // console.log(response)
@@ -735,7 +739,11 @@ import XEUtils from 'xe-utils';
           })
         },
         allupdate () {  //所有该标段的新清单表头的id和名字
-             this.$post('/head/allupdate',{tenderId:this.Form.tenderId})
+            var judge = 1;  //1为建计量清单表头  2为建累计计量清单表头
+            if (this.Form.type === 'totalmeterage') {
+                judge = 2;
+            }
+             this.$post('/head/allupdate',{tenderId:this.Form.tenderId, judge})
             .then((response) => {
             // console.log('所有变更后清单的id和名字')
             // console.log(response)
@@ -743,7 +751,8 @@ import XEUtils from 'xe-utils';
           })
         },
         allchange () {  //所有该标段的变更清单的id和名字
-             this.$post('/head/allchange',{tenderId:this.Form.tenderId})
+             //1为建累计变更表头  0为建变更清单
+             this.$post('/head/allchange',{tenderId:this.Form.tenderId, judge:1})
             .then((response) => {
             // console.log('所有原清单的id和名字')
             // console.log(response)
@@ -751,7 +760,9 @@ import XEUtils from 'xe-utils';
           })
         },
         allmeterage () {    //所有计量清单表头的id和名字
-            this.$post('/head/allmeterage',{tenderId:this.Form.tenderId})
+            //1为建累计计量清单表头  0为建计量清单
+
+            this.$post('/head/allmeterage',{tenderId:this.Form.tenderId, judge:1})
             .then((response) => {
                 // console.log('所有计量清单表头的id和名字')
                 // console.log(response)
@@ -760,7 +771,11 @@ import XEUtils from 'xe-utils';
             })
         },
         alltotalmeterage () {  //所有该标段的累计计量清单表头的id和名字
-             this.$post('/head/alltotalmeterage',{tenderId:this.Form.tenderId})
+            var judge = 1;  //1为建支付清单表头  2为建累计支付清单表头
+            if (this.Form.type === 'totalpay') {
+                judge = 2;
+            }
+             this.$post('/head/alltotalmeterage',{tenderId:this.Form.tenderId, judge})
             .then((response) => {
             // console.log('所有累计计量清单表头的id和名字')
             // console.log(response)
@@ -768,7 +783,8 @@ import XEUtils from 'xe-utils';
           })
         },
         allpay () {  //所有该标段的支付表头的id和名字
-             this.$post('/head/allpay',{tenderId:this.Form.tenderId})
+            //1为建累计支付清单表头  0为建支付清单
+             this.$post('/head/allpay',{tenderId:this.Form.tenderId, judge:1})
             .then((response) => {
             // console.log('所有支付清单表头的id和名字')
             // console.log(response)

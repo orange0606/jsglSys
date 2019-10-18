@@ -337,7 +337,7 @@ export default {
           }
     },
     allHeader (tenderId) {  //请求该标段的全部计量清单表头列表
-        this.$post('/head/allmeterage',{tenderId})
+        this.$post('/head/allmeterage',{tenderId, judge:0})
         .then((response) => {
           this.form.headerList = response.data.meterageHeadList;
            //此处调用限制选择表头函数参数（清单类型,全部清单列表，全部表头列表） 表头列表返回（limit）属性 

@@ -67,6 +67,7 @@ Vue.prototype.$notify = Notification;
 Vue.prototype.$loading = Loading.service;
 Vue.prototype.$msgbox = MessageBox;
 Vue.prototype.$confirm = MessageBox.confirm;
+
 Vue.prototype.$alert = MessageBox.alert;
 
 // import axios from "axios"

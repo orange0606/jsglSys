@@ -352,7 +352,7 @@ export default {
          
     },
     allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
-        this.$post('/head/allchange',{tenderId})
+        this.$post('/head/allchange',{tenderId, judge:0})
         .then((response) => {
             this.form.headerList = response.data.changeHeadList;
             //此处调用限制选择表头函数参数（清单类型,全部清单列表，全部表头列表） 表头列表返回（limit）属性 
@@ -466,7 +466,7 @@ export default {
     },
     OneToTalchange () { //请求一个相对应的累计变更清单数据(根据计量清单表头id)
         if (!this.changeHead || !this.changeHead.id) return this.$message({type: 'info',message: '表头错误，请检查，或者重新选择！'});
-        return this.allRelationOriginal();//不调试累计变更先
+        // return this.allRelationOriginal();//不调试累计变更先
         this.$post('/totalchange/by/changeheadid',{ id:this.changeHead.id })
         .then((response) => {
             var data = response.data.totalchange,
@@ -478,25 +478,29 @@ export default {
                 this.tochRowList = arr;
                 return this.$message({type: 'info',message: '暂无查询到有相关累计变更清单信息'});
             }
-            
+            console.log('data.totalchangeRowList-------------------')
+            console.log(data.totalchangeRowList.length)
             if (data.totalchangeRowList && data.totalchangeRowList.length >0 ) {
-                arr = this.$excel.ListAssemble(data.totalchangeRowList);  //组装清单
+                this.tochRowList = this.$excel.ListAssemble(data.totalchangeRowList);  //组装清单
+                console.log('data.totalchangeRowList-------------------')
+                console.log(this.tochRowList)
             }else{
-                 this.allRelationOriginal();//根据一个变更表头id请求原清单列表 
+                this.allRelationOriginal();//根据一个变更表头id请求原清单列表 
                 this.tochRowList = arr;
-                return this.$message({type: 'info',message: '累计变更清单内容为空或者异常'});
+                return this.$message({type: 'info',message: '累计变更清单内容为空或者异常11111111111111'});
             }
             this.tochRowList = arr;
 
-            if (data && data.totalchangeHead && data.totalchangeHead.tTotalchangeHeadRows && data.totalchangeHead.tTotalchangeHeadRows.length >0 ) {
+            var totalHead = data.totalchangeHead;
+            if (data && totalHead && totalHead.totalchangeHeadRows && totalHead.totalchangeHeadRows.length >0 ) {
                 console.log('进来表头组装了')
-                var headsArr = this.$excel.Package(data['totalchangeHead'].tTotalchangeHeadRows,data['totalchangeHead'].refCol,data['totalchangeHead'].refRow),
+                var headsArr = this.$excel.Package(totalHead.totalchangeHeadRows,totalHead.refCol,totalHead.refRow),
                 col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
                 // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                 this.totalchangeCol = this.$excel.BikoFoArr([...col]);
 
             }else{
-                this.$message({type: 'info',message: '累计变更清单表头内容为空或者异常'});
+                this.$message({type: 'info',message: '累计变更清单表头内容为空或者异常222222'});
             }
              this.allRelationOriginal();//根据一个变更表头id请求原清单列表 
         }).catch(e => {
@@ -590,8 +594,10 @@ export default {
             var upRowA = original[index]['A']['trNum'];
             // console.log('original当前的下标index  '+index)
             for (let to = this.tochRowList.length -1; to >=0; to--) {
-                // console.log('this.tochRowList当前的下标to  '+to)
+                console.log('this.tochRowList当前的下标to  '+to)
                 var toRow = this.tochRowList[to];
+                console.log('toRow')
+                console.log(toRow)
                 if (upRowA === toRow['A']['trNum']) {
                     todate[index] = toRow;
                     // console.log('结束最内层的循环，执行下一循环index---to',index,'    ', to )
@@ -599,9 +605,9 @@ export default {
                 }
             }
         }
-        // console.log('最后的结果')
-        // console.log(original)
-        // console.log(todate)
+        console.log('最后的结果')
+        console.log(original)
+        console.log(todate)
 
         this.importfxx(original, todate, orlen);
     },
@@ -701,7 +707,8 @@ export default {
                             }else{
                                 var tochangeHd = null;
                             }
-           
+                            console.log('to,tochangeHd')
+                            console.log(to,tochangeHd)
                             if (to.length===0 || !tochangeHd || tochangeHd.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
