@@ -92,7 +92,7 @@ excelmodel = {
                 arr[i][ABC[j]]=null;
             }  
         }
-        for (let index = 0; index < list.length; index++) {
+        for (let index = list.length-1; index >= 0; index--) {
             if (list[index].trNum && list[index].colNum) {
                 var coll = list[index].colNum,
                 row = list[index].trNum;  //行号
@@ -109,41 +109,6 @@ excelmodel = {
     param arr: 已组装的表格数据(数组对象)
     return : 完整多级嵌套数据(已除去合并行)
     */
-    // Nesting (arr) {
-    //     let arrHd = Object.keys(arr[0]);
-    //     // let ABC = this.$excel.AZ();
-    //     if (arr[0]) {
-    //         var headers = [],
-    //         arrlen =  arr.length -2;
-    //         for (let index = arrlen; index >=0 ; index--) {
-    //             var arrHdlen = arrHd.length;
-    //             for (let i = 0; i < arrHdlen; i++) {  //添加第一层
-    //                   if (index !=0) {
-    //                       if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
-    //                           arr[index-1][arrHd[i]].children =[];
-    //                           for (let e = 0; e < arrHd.length; e++) {
-    //                               if (arr[index][arrHd[e]] && arr[index][arrHd[e]].tdRowspan !=0 && arr[index][arrHd[e]].tdColspan !=0) {
-    //                                   if ((arr[index][arrHd[e]].trNum == arr[index-1][arrHd[i]].trNum+1) && (arr[index][arrHd[e]].colNum == arr[index-1][arrHd[i]].colNum)) {
-    //                                       arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
-    //                                   }else if(arr[index-1][arrHd[i]].tdColspan > 1  && ABC.indexOf(arr[index][arrHd[e]].colNum) > ABC.indexOf(arr[index-1][arrHd[i]].colNum)){
-    //                                       arr[index-1][arrHd[i]].children.push(arr[index][arrHd[e]]) 
-    //                                   }
-    //                               }
-    //                           }
-    //                       }
-    //                   }else{
-    //                       if (arr[index][arrHd[i]] && arr[index][arrHd[i]].tdRowspan !=0 && arr[index][arrHd[i]].tdColspan !=0) {
-    //                         headers.push(arr[index][arrHd[i]])
-    //                       }
-    //                   }
-                    
-    //             }
-    //         }
-    //     arrHd = arr = null;
-    //     return headers;
-    //     }
-        
-    // },
     Nesting (arr) {
         let arrHd = Object.keys(arr[0]);
         // let ABC = this.$excel.AZ();
@@ -233,20 +198,14 @@ excelmodel = {
             row = list[index].trNum;  //行号
             if (col>=0 && coll) {
                 if (!arr[row-1]) {    //判断是否有这个下标,有的话直接添加数据
-                    arr[row-1]= new Object();
+                    arr[row-1]= {};
                     arr[row-1][coll] =list[index];
                 }else{ //无此下标，先创建
                     arr[row-1][coll] =list[index];
                 }
-
                 arr[row-1][coll].edit = 'N'; //加入编辑状态
             }
         };
-        for (let index = arr.length-1; index >= 0; index--) {
-            if (!arr[index]) {
-                arr.splice(index,1)
-            }
-        }
         return arr;
     },
     /*
@@ -676,46 +635,35 @@ excelmodel = {
                 let colTr = AttVal.match(patt1)[0];   //属性值  列号
                 var sumNb = null;
                 switch (type) {
-                    // case 'change':
-                    //     if (Number.isNaN(Number(row[colTr]['td']))) {
-                    //         return Message({ message: '原数量不是有效的数字类型', type: 'warning', duration: 3000, showClose: true });;
-                    //     }
-                    //     sumNb = that.Count(Number(row[colTr]['td'])+ col['td']*1);
-                    //     // console.log('-------console.log(sumNb);',colTr+row[colTr].td);
-                    //     // console.log(sumNb);
-                    //     if (sumNb < 0 ) {
-                    //         Message({ message: '警告 减少的数量不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 3000, showClose: true });
-                    //         col['td'] = 0-row[colTr].td;
-                    //     }
-                    //     break;
-                        case 'change':
-                            Object.keys(lastHeader).forEach(function(key){
-                                let chkeyObj = lastHeader[key],
-                                chAtt = chkeyObj.attribute,
-                                chAttVal = chkeyObj.attributeValue;
-                                // console.log('attributeValue');
-                                // console.log(chAttVal);
-                                if ( chAtt && chAtt==='totalchange-change'  && chAttVal && chAttVal !=='') {
-                                    // console.log('AttVal----------------333333333333333')
-                                    // console.log(chAttVal)
-                                    let chcolTr = chAttVal.match(patt1)[0];   //属性值  列号
-                                    if (chcolTr === col.colNum) {
-                                        sumNb = that.Count(row[chkeyObj.colNum]['td']*1+ col['td']*1);
-                                        // let summmm = (row[colTr]['td']*1)+(sumNb*1);
+                   
+                    case 'change':
+                        Object.keys(lastHeader).forEach(function(key){
+                            let chkeyObj = lastHeader[key],
+                            chAtt = chkeyObj.attribute,
+                            chAttVal = chkeyObj.attributeValue;
+                            // console.log('attributeValue');
+                            // console.log(chAttVal);
+                            if ( chAtt && chAtt==='totalchange-change'  && chAttVal && chAttVal !=='') {
+                                // console.log('AttVal----------------333333333333333')
+                                // console.log(chAttVal)
+                                let chcolTr = chAttVal.match(patt1)[0];   //属性值  列号
+                                if (chcolTr === col.colNum) {
+                                    sumNb = that.Count(row[chkeyObj.colNum]['td']*1+ col['td']*1);
+                                    // let summmm = (row[colTr]['td']*1)+(sumNb*1);
 
-                                            // console.log(row[chkeyObj.colNum]['td']*1,'  row[chkeyObj.colNum]  ', col['td']*1)
-                                            // console.log('row[colTr]------------',row[colTr]['td'])
-                                            // console.log('本期计量和上期计量数量  ：'+sumNb)
-                                            // console.log('原数量  ：'+row[colTr]['td']*1)
-                                            // console.log('本期计量和上期计量数量 + 原数量  ：'+summmm)
-                                        if ( ((row[colTr]['td']*1)+(sumNb*1)) <0 ){
-                                            Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                            col['td'] = 0-(row[colTr].td-row[chkeyObj.colNum]['td']);
-                                        }
+                                        // console.log(row[chkeyObj.colNum]['td']*1,'  row[chkeyObj.colNum]  ', col['td']*1)
+                                        // console.log('row[colTr]------------',row[colTr]['td'])
+                                        // console.log('本期计量和上期计量数量  ：'+sumNb)
+                                        // console.log('原数量  ：'+row[colTr]['td']*1)
+                                        // console.log('本期计量和上期计量数量 + 原数量  ：'+summmm)
+                                    if ( ((row[colTr]['td']*1)+(sumNb*1)) <0 ){
+                                        Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                        col['td'] = 0-(row[colTr].td-row[chkeyObj.colNum]['td']);
                                     }
                                 }
-                            });
-                            break;
+                            }
+                        });
+                        break;
                     case 'meterage':
                         Object.keys(lastHeader).forEach(function(key){
                             let mekeyObj = lastHeader[key],

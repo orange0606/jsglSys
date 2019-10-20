@@ -658,16 +658,26 @@ export default {
                             } else {
                                 // console.log('进来了这里>=0')
                                 for (let index = tochangeHd.length -1; index >= 0; index--){
+                                    // var Totorow = this.totalchangeCol[tochangeHd[index]],
+                                    // Tostr = Totorow.attributeValue,
+                                    // TocolName = str.match(patt1)[0];
+
                                     var Totorow = this.totalchangeCol[tochangeHd[index]],
-                                    Tostr = Totorow.attributeValue,
-                                    TocolName = str.match(patt1)[0];
-                                    if (Totorow.attribute && Tostr && Tostr !=="" && Totorow.attribute === "change-total" ) {
-                                        // console.log('有没有进去这个if判断----------Totorow.attribute === "change-total" -====TocolName +++ colName')
+                                    Tostr = Totorow.attributeValue;
+                                    if (Totorow.attribute!== "change-total") {
+                                        console.log('属性不对')
+                                        continue;
+                                    }
+                                    let TocolName = Tostr.match(patt1)[0];
+                                    if (Tostr && Tostr !=="") {
                                         // console.log(TocolName,'   ',colName)
                                         if (TocolName === colName) {  //属性值两对应
+                                            // console.log('正在设置的列----------------'+row.colNum)
                                             // console.log(TocolName,' 进来值相等了  ',colName)
                                             rest[r][row.colNum] = to[r][Totorow.colNum];
-                                            // console.log('设置上期累计数量  ==='+rest[r][row.colNum].td)
+                                        // console.log('有没有进去这个if判断----------Totorow.attribute === "change-total" -====TocolName +++ colName')
+
+                                        //     console.log('设置上期累计数量  ==='+rest[r][row.colNum].td)
                                             break;
                                         }
                                     }
@@ -676,6 +686,7 @@ export default {
                         } catch (error) {
                             this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
                             console.log('设置上期累计数量报错默认为0'+error)
+                            console.log(error)
                             rest[r][row.colNum].td = 0;
                         }
                     }
@@ -748,11 +759,11 @@ export default {
             //判断是否哪种属性类型允许单元格编辑
             if (this.lastHeader[colName].attribute !== 'fluctuate') {
                 if (row[colName].attribute && row[colName].attribute==='add') {
-                    return {'background':'#99ff005c'} //新增一行的颜色
+                    return {'background':'#99ff005c'}; //新增一行的颜色
                 }
-                return {}
+                return {};
             }
-            return {'background':'#FFFFE0'} //编辑区颜色
+            return {'background':'#FFFFE0'}; //编辑区颜色
         }  
         return {'background':'#FFFFFF'};
     },
@@ -760,7 +771,7 @@ export default {
         if (columnIndex >1) {  //带选择框的情况
             let Row = row[this.hd[columnIndex-2]];
             if (Row) {
-                return [ Row.tdRowspan, Row.tdColspan ]
+                return [ Row.tdRowspan, Row.tdColspan ];
             }
         }
         return [1, 1]
@@ -768,7 +779,7 @@ export default {
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([])
+        this.$refs.elxEditable1.reload([]);
         setTimeout(() => {
             this.$refs.elxEditable1.reload(this.list);
             this.loading = false;

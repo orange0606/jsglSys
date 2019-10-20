@@ -93,6 +93,7 @@
         <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
         <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="Abandon">放弃更改</el-button>
         <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+        <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="consoles">打印一下</el-button>
       </div>
       
     </div>
@@ -291,6 +292,8 @@ export default {
     },
     updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
+          console.log('row-----------------------')
+          console.log(row)
           try {
               var headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
@@ -551,9 +554,9 @@ export default {
     // },
     consoles () {
         let rest = this.$refs.elxEditable1.getRecords();//获取表格的全部数据
-        // console.log('检验一下数据对不对 rest list')
-        // console.log(rest);
-        // console.log(this.list);
+        console.log('检验一下数据对不对 rest list')
+        console.log(rest);
+        console.log(this.list);
     },
     packupdata (update) { //根据已选择的新清单数据选择对应累计计量清单数据
         if (!this.tomeRowList) this.tomeRowList=[];
@@ -594,7 +597,7 @@ export default {
         sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
         listlen === 0? this.list = []: listlen;
         // 先生成一个完整表格数据
-        console.log('this.hd')
+        console.log('this.hd-----------')
         console.log(this.hd)
         for (let index = len -1; index >= 0; index--) {
             rest[index] = {};
@@ -608,44 +611,54 @@ export default {
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "update" || row.attribute === "totalmeterage-meterage") ) {
                 let str = row.attributeValue;
                 let colName = str.match(patt1)[0]; 
+                
                 for (let r = len -1; r >= 0; r--) {
                     // let RowTd = rest[r][row.colNum];
                     if (row.attribute === "update" ) {
                         rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalmeterage-meterage") {
+                        console.log('正在设置哪一列  '+row.colNum)
                         try {
                             if (this.totalmeterageCol) {
                                 var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
                             }else{
                                 var totmheader = null;
                             }
-                           
                             if (to.length===0 || !totmheader || totmheader.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
                             } else {
-                                // console.log('进来了这里>=0')
+                                console.log('进来了这里>=0')
                                 for (let index = totmheader.length -1; index >= 0; index--){
                                     var Totorow = this.totalmeterageCol[totmheader[index]],
-                                    Tostr = Totorow.attributeValue,
-                                    TocolName = str.match(patt1)[0];
-                                    if (Totorow.attribute && Tostr && Tostr !=="" && Totorow.attribute === "meterage-total" ) {
+                                    Tostr = Totorow.attributeValue;
+                                    // console.log('Totorow.attribute')
+                                    // console.log(Totorow.attribute)
+                                    if (Totorow.attribute!== "meterage-total") {
+                                        console.log('属性不对')
+                                        continue;
+                                    }
+                                    let TocolName = Tostr.match(patt1)[0];
+
+                                    if (Tostr && Tostr !=="" ) {
                                         // console.log('有没有进去这个if判断----------Totorow.attribute === "meterage-total" -====TocolName +++ colName')
-                                        // console.log(TocolName,'   ',colName)
+                                        // // console.log(TocolName,'   ',colName)
+                                        // console.log('累计计量的当前列:  '+Totorow.colNum+'  累计计量的当前属性:  '+Totorow.attribute+'  累计计量的当前属性值:  '+Totorow.attributeValue+' 正在设置的当前列:  '+row.colNum+' 正在设置的当前属性:  '+row.attribute+' 正在设置的当前属性值:  '+row.attributeValue)
+                                        // console.log('Totorow.colNum + TocolName', Totorow.colNum,TocolName)
                                         if (TocolName === colName) {  //属性值两对应
                                             // console.log(TocolName,' 进来值相等了  ',colName)
                                             rest[r][row.colNum] = to[r][Totorow.colNum];
-                                            console.log('设置上期累计数量  ==='+rest[r][row.colNum].td)
+                                            // console.log('设置上期累计数量  ==='+rest[r][row.colNum].td)
                                             break;
                                         }
-                
                                     }
                                 }
                             }
                         } catch (error) {
                             this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
                             console.log('设置上期累计数量报错默认为0'+error)
+                            console.log(error)
                             rest[r][row.colNum].td = 0;
                         }
                     }
@@ -667,7 +680,7 @@ export default {
                     this.$refs.elxEditable1.insertAt(rest[index], -1); 
                 }
             })
-            // this.list = this.$refs.elxEditable1.getRecords();
+            this.list = this.$refs.elxEditable1.getRecords();
             // up = to = null;
         } catch (e) {
             console.log('出错了')
@@ -844,6 +857,9 @@ export default {
             meterageRowAddList = [],  //增
             meterageRowDelList = [], //删
             meterageRowAltList = [];  //改
+
+            console.log('header-------------------------')
+            console.log(header)
             //查询上一次修改有无这个集合  ，有的话合并两个数组
             if (this.uplist['meterageRowDelList'] && this.uplist['meterageRowDelList'].length >0) {
                   console.log('已经开始二次修改删除操作 this.RowDelList,   this.uplist[meterageRowDelList]----------')
@@ -856,16 +872,27 @@ export default {
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
-                        var listRows = list[index][header[i]];
+                        let listRows = list[index][header[i]];
+
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
-                            listRows['formula'] = '';
+                            listRows['formula'] = 'wosss';
+                            listRows.colNum = null;
+
+                            listRows.colNum = header[i];
+
                             listRows['trNum'] = index+1;                  
                             // listRows['attribute'] = '';                  
                             listRows['upload'] = 1;    
-                            if (!listRows.id) {  //无id则视为新增，新增到meterageRowAddList
+                            console.log('listRows.colNum--------------'+i+header[i])
+                            console.log(listRows.colNum)
+                            console.log(listRows.formula)
+
+
+                            if (!listRows['id']) {  //无id则视为新增，新增到meterageRowAddList
+                                console.log(listRows)
                                 meterageRowAddList.push(listRows);
-                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {  //有id 与 alter 视为已修改过的数据 新增到meterageRowAddList
+                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {   //有id 与 alter 视为已修改过的数据 新增到meterageRowAltList+
                                 listRows['alter'] = "Y";
                                 meterageRowAltList.push(listRows);
                             }
