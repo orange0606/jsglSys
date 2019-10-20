@@ -40,7 +40,7 @@
       :summary-method="getSummaries" -->
       <!-- :summary-method="getSummaries" -->
             <!-- show-summary
-      :summary-method="getSummaries" -->
+      :summary-method="getSummaries" :span-method="arraySpanMethod"-->
          <!-- :data.sync="list" 
          autoScrollIntoView:true-->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
@@ -53,8 +53,9 @@
           size="mini"
           :show-header="showHeader"
           v-if="showHeader"
-          :span-method="arraySpanMethod"
+          
           @cell-click ="cell_click"
+          :row-style="RowCss"
           show-summary
           :summary-method="getSummaries"
           :edit-config="{render: 'scroll', renderSize: 80, }">
@@ -415,6 +416,12 @@ export default {
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态
         }  
+    },
+    RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
+        if (!row['A'].id ) {
+          return 'background:#f5ffe5'
+        }
+      return '';
     },
     arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
         if (columnIndex >1) {  //带选择框的情况

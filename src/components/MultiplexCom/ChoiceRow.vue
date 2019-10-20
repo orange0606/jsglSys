@@ -5,7 +5,7 @@
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
     <p style="color: red;font-size: 12px;margin:10px 0;">请选择你需要导入的原清单数据</p>
-    <!-- <p style="color: red;font-size: 12px;">兼容性：不兼容动态行高；不支持树结构</p> -->
+    <!-- <p style="color: red;font-size: 12px;">:span-method="arraySpanMethod"兼容性：不兼容动态行高；不支持树结构</p> -->
     <elx-editable
       ref="elxEditable4"
       class="scroll-table4 click-table11"
@@ -14,7 +14,7 @@
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
-      :span-method="arraySpanMethod"
+      
       :row-style="RowCss"
       :edit-config="{ render: 'scroll', renderSize: 80, useDefaultValidTip: true}">
       <!-- <el-table-column type="selection" :selectable="selectableEvent" width="40"></el-table-column> -->

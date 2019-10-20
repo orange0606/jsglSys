@@ -97,7 +97,7 @@
     </div>
     <div :style="{ height: Height+'px' }">
               <!-- show-summary
-          :summary-method="getSummaries" -->
+          :summary-method="getSummaries" :span-method="arraySpanMethod"-->
             <!-- :data.sync="list"   :height="Height"-->
         <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
         <elx-editable
@@ -107,7 +107,7 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
-          :span-method="arraySpanMethod"
+          
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
@@ -702,14 +702,18 @@ export default {
         console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格
-            rest = rest.concat([]);
-            this.$nextTick(() => {
-                for (let index = 0; index < len; index++) {
-                    this.$refs.elxEditable1.insertAt(rest[index], -1); 
-                }
-            })
+            // rest = rest.concat([]);
+            // this.$nextTick(() => {
+            //     for (let index = 0; index < len; index++) {
+            //         this.$refs.elxEditable1.insertAt(rest[index], -1); 
+            //     }
+            // })
             // this.list = this.$refs.elxEditable1.getRecords();
-            // up = to = null;
+
+            rest = rest.concat([]);
+            
+            this.list = this.list.concat(rest);
+            this.findList();
         } catch (e) {
             console.log('出错了')
             console.log(e)
@@ -758,8 +762,12 @@ export default {
 
             //判断是否哪种属性类型允许单元格编辑
             if (this.lastHeader[colName].attribute !== 'fluctuate') {
+                
                 if (row[colName].attribute && row[colName].attribute==='add') {
                     return {'background':'#99ff005c'}; //新增一行的颜色
+                }
+                if (!row[colName].id ) {
+                    return {'background':'#f5ffe5'}; //没有id的颜色
                 }
                 return {};
             }

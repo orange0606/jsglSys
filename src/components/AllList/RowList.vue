@@ -1,4 +1,4 @@
-
+<!--:span-method="arraySpanMethod"-->
 <template>
   <div
     v-loading="loading"
@@ -14,7 +14,7 @@
         size="mini"
         :show-header="showHeader" 
         v-if="showHeader"
-        :span-method="arraySpanMethod"
+        
         show-summary
         :summary-method="getSummaries"
         :edit-config="{render: 'scroll', renderSize: 150}">

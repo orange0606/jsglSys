@@ -100,7 +100,7 @@
           <!-- show-summary
       :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
-           <!-- :cell-style="cellStyle" -->
+           <!-- :cell-style="cellStyle":span-method="arraySpanMethod" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <div :style="{ height: Height+'px' }">
         <elx-editable
@@ -110,7 +110,7 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
-          :span-method="arraySpanMethod"
+          
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
@@ -618,7 +618,7 @@ export default {
                         rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalmeterage-meterage") {
-                        console.log('正在设置哪一列  '+row.colNum)
+                        // console.log('正在设置哪一列  '+row.colNum)
                         try {
                             if (this.totalmeterageCol) {
                                 var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
@@ -629,14 +629,14 @@ export default {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
                             } else {
-                                console.log('进来了这里>=0')
+                                // console.log('进来了这里>=0')
                                 for (let index = totmheader.length -1; index >= 0; index--){
                                     var Totorow = this.totalmeterageCol[totmheader[index]],
                                     Tostr = Totorow.attributeValue;
                                     // console.log('Totorow.attribute')
                                     // console.log(Totorow.attribute)
                                     if (Totorow.attribute!== "meterage-total") {
-                                        console.log('属性不对')
+                                        // console.log('属性不对')
                                         continue;
                                     }
                                     let TocolName = Tostr.match(patt1)[0];
@@ -727,6 +727,9 @@ export default {
                 // if (row[colName].attribute && row[colName].attribute==='add') {
                 //     return {'background':'#99ff005c'} //新增一行的颜色
                 // }
+                if (!row[colName].id ) {
+                    return {'background':'#f5ffe5'}; //没有id的颜色
+                }
                 return {}
             }
             return {'background':'#FFFFE0'} //编辑区颜色
@@ -876,21 +879,11 @@ export default {
 
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
-                            listRows['formula'] = 'wosss';
-                            listRows.colNum = null;
-
-                            listRows.colNum = header[i];
-
+                            listRows['formula'] = '';
                             listRows['trNum'] = index+1;                  
                             // listRows['attribute'] = '';                  
                             listRows['upload'] = 1;    
-                            console.log('listRows.colNum--------------'+i+header[i])
-                            console.log(listRows.colNum)
-                            console.log(listRows.formula)
-
-
                             if (!listRows['id']) {  //无id则视为新增，新增到meterageRowAddList
-                                console.log(listRows)
                                 meterageRowAddList.push(listRows);
                             }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {   //有id 与 alter 视为已修改过的数据 新增到meterageRowAltList+
                                 listRows['alter'] = "Y";
