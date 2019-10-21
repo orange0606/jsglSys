@@ -289,7 +289,15 @@ body .el-table th.gutter{
   font-size:12px;
   border:1px solid transparent;
 }
-
+/* 优化表格滚动渲染 */
+body, html {
+      scroll-snap-type: y proximity;
+}
+.scroll-table4, table {
+  scroll-snap-align: start;
+  /* position: relative; */
+  position: sticky;
+}
 /* 表头错乱 */
 body .el-table th.gutter {
   display: table-cell !important;

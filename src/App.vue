@@ -137,6 +137,17 @@ body, html, #app{
     padding: 0;
 }
 
+/* blink currently has bug that requires declaration on `body` */
+/* 优化表格滚动渲染 */
+body, html {
+      scroll-snap-type: y proximity;
+}
+table {
+  scroll-snap-align: start;
+  /* position: relative; */
+  position: sticky;
+}
+
 /* 清单显示弹出框 */
 .el-dialog__body {
   padding: 0 20px;

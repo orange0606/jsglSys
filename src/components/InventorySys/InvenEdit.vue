@@ -58,7 +58,7 @@
           :row-style="RowCss"
           show-summary
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80, }">
+          :edit-config="{render: 'scroll', renderSize: 100, }">
           
           <elx-editable-column type="selection" align="center" width="55" :key="$excel.randomkey()" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" >
@@ -306,10 +306,6 @@ export default {
 
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
             this.refreshTable(); //刷新表格布局
-            console.log('this.PackHeader---------------')
-            console.log(this.PackHeader)            
-            console.log('this.col----------')
-            console.log(this.col)
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
 
@@ -354,11 +350,11 @@ export default {
         this.loading = true;
         this.startTime = Date.now();
         this.$excel.Imports(data=>{ //数据导入组装函数
-            console.log('导入完成--------')
+
             this.list.length = 0; //归为初始化状态
             try { //先判断表头是否一致
                 // console.log(data);
-                var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+                var hd = this.hd, //用来所需要的所有列(obj)（属性）名
                 datahd = Object.keys(data[0]);
                 if ( datahd.length < hd.length ) {
                     this.loading = false;
@@ -390,7 +386,6 @@ export default {
             try {  //把数据载入表格
                 
                 this.list = [...data];
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
                 for (let index = this.list.length -1; index >=0; index--) {
                     this.list[index]['seq'] = index;
                 }

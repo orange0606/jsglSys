@@ -440,10 +440,17 @@ export default {
                           if (topayheader && topayheader.length>0 && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
                               console.log('有没有进去这个if判断-----------topayheader && topayheader.length>0--------')
                               for (let index = topayheader.length -1; index >= 0; index--){
-                                  var ToPayrow = this.totalpayCol[topayheader[index]],
-                                  Tostr = ToPayrow.attributeValue,
-                                  TocolName = str.match(patt1)[0];
-                                  if (ToPayrow.attribute && Tostr && Tostr !=="" && ToPayrow.attribute === "pay-total" ) {
+                                  // var ToPayrow = this.totalpayCol[topayheader[index]],
+                                  // Tostr = ToPayrow.attributeValue,
+                                  // TocolName = str.match(patt1)[0];
+                                    var ToPayrow = this.totalpayCol[topayheader[index]],
+                                    Tostr = ToPayrow.attributeValue;
+                                    if (ToPayrow.attribute!== "pay-total") {
+                                        console.log('属性不对')
+                                        continue;
+                                    }
+                                    let TocolName = Tostr.match(patt1)[0];
+                                  if (Tostr && Tostr !=="" ) {
                                       // console.log('有没有进去这个if判断----------ToPayrow.attribute === "pay-total" -====TocolName +++ colName')
                                       // console.log(TocolName,'   ',colName)
                                       if (TocolName === colName) {  //属性值两对应
@@ -457,7 +464,7 @@ export default {
               
                                   }
                               }
-                              
+                            
                               console.log('进来了totalpay-pay-----Rlist')
                               console.log(this.totalpayRowList,this.totalpayCol)
                           }else{  //无数据默认为0

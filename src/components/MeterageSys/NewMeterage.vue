@@ -47,8 +47,8 @@
             :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
             <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
-            <elx-editable-column prop="meterageHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="meterageHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="updateHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
+            <elx-editable-column prop="updateHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
             <elx-editable-column prop="num" label="新清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
@@ -116,7 +116,7 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 60}">
+          :edit-config="{render: 'scroll', renderSize: 100}">
           <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
@@ -674,13 +674,17 @@ export default {
         console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格
+            // rest = rest.concat([]);
+            // this.$nextTick(() => {
+            //     for (let index = 0; index < len; index++) {
+            //         this.$refs.elxEditable1.insertAt(rest[index], -1); 
+            //     }
+            // })
+            // this.list = this.$refs.elxEditable1.getRecords();
             rest = rest.concat([]);
-            this.$nextTick(() => {
-                for (let index = 0; index < len; index++) {
-                    this.$refs.elxEditable1.insertAt(rest[index], -1); 
-                }
-            })
-            this.list = this.$refs.elxEditable1.getRecords();
+            
+            this.list = this.list.concat(rest);
+            this.findList();
             // up = to = null;
         } catch (e) {
             console.log('出错了')
@@ -747,19 +751,18 @@ export default {
     }, 
     findList () { //表格滚动渲染函数
         this.loading = true;
-        this.$nextTick(() => {
-          this.$refs.elxEditable1.reload([])
-          setTimeout(() => {
-              this.$refs.elxEditable1.reload(this.list);
-              this.loading = false;
-              this.$nextTick(() => {
-                  this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-              });
-              this.tViewSize();
+         this.$nextTick(() => {
+        this.$refs.elxEditable1.reload([]);
+        setTimeout(() => {
+            this.$refs.elxEditable1.reload(this.list);
+            this.loading = false;
+            this.$nextTick(() => {
+                this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
+            });
+            this.tViewSize();
 
-          }, 300)
-        });
-        this.refreshTable();
+        }, 300)
+      });
     },
     getSummaries (param) {  //合计
         if (!this.$refs.elxEditable1 || !this.showHeader) return [];

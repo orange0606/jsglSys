@@ -20,7 +20,7 @@
       <!-- <el-table-column type="selection" :selectable="selectableEvent" width="40"></el-table-column> -->
       <!-- <el-table-column type="selection" :selectable="selectableEvent" :key="$excel.randomkey()" width="40"></el-table-column> -->
       <elx-editable-column type="selection" width="40" :key="$excel.randomkey()" align="center" ></elx-editable-column>
-      <el-table-column type="index" align="center" :key="$excel.randomkey()" width="80"></el-table-column>
+      <el-table-column type="index" align="center" :key="$excel.randomkey()" width="50" ></el-table-column>
       <!-- 此处使用多级表头嵌套组件 -->
       <column v-for="(item,index) in col" :key="index" :col="item" ></column>
 

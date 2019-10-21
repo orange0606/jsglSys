@@ -113,7 +113,7 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 60}">
+          :edit-config="{render: 'scroll', renderSize: 100}">
           <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
