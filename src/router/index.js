@@ -97,6 +97,14 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
+    },
+    {
+      path: '/AllHead',
+      name: 'AllHead',
+      component: ()=>import('@/components/OptHead/AllHead.vue'),
+      meta:{
+        "requireAuth": true
+      }
     }
   ]
 })

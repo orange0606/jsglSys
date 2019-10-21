@@ -9,12 +9,11 @@
         @close="handleClose">
         <el-submenu index="1">
             <template slot="title">
-            <span>合同管理</span>
+            <span>选择单元格</span>
             </template>
             <!-- <template slot="title">分组一</template> -->
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-menu-item index="1-2">选项2</el-menu-item>
-            <el-menu-item index="1-3">选项3</el-menu-item>
+            <el-menu-item index="1-1"><router-link to="/AllHead" >选择表头，单击单元格</router-link></el-menu-item>
+
         </el-submenu>
         <el-submenu index="2">
             <template slot="title">
