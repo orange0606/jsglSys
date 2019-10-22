@@ -1,89 +1,95 @@
 <template>
-<el-row :gutter="0">
-  <!-- <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"><div class="grid-content bg-purple"></div></el-col> -->
-  <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-    <el-card class="box-card" shadow="never">
+    <div style="min-width:1000px;overflow: hidden;">
+    <el-collapse-transition>
+    <el-card class="box-card" shadow="never" v-if="col.length>0">
         <div slot="header" class="clearfix">
-          <span>已选择的单元格</span>
+          <span>已选择的单元格 {{col.length}} 个</span>
           <el-button style="float: right; padding: 3px 0" type="text">完成</el-button>
         </div>
         <ul class="text item" >
             <li class="ul_li" style="width:40px">#</li>
             <li class="ul_li">表头类型</li>
             <li class="ul_li">表头名称</li>
-            <li class="ul_li">表头标段</li>
-            <li class="ul_li">单元格位置</li>
+            <li class="ul_li" style="width:100px" >表头标段</li>
+            <li class="ul_li" style="width:100px" >单元格位置</li>
             <li class="ul_li" style="width:60px">操作</li>
         </ul>
         <div class="cardbody">
             <!-- <div v-for="o in 10" :key="o" class="text item">
               {{'列表内容 ' + o }}
             </div> -->
-            
-            
-            <ul class="text item" v-for="(val,i) in 10" :key="i" style="overflow:auto">
-                <li class="ul_li" style="width:40px">{{i}}</li>
-                <li class="ul_li">change2222222222222</li>
-                <li class="ul_li">name222222222</li>
-                <li class="ul_li">表标段1</li>
-                <li class="ul_li">A{{i}}</li>
-                <li class="ul_li" style="width:60px"><i class="el-icon-delete"></i></li>
+            <ul class="text item" v-for="(val,i) in col" :key="i" style="overflow:auto">
+                <li class="ul_li" style="width:40px">{{i+1}}</li>
+                <li class="ul_li" v-text="typeName(val.type)" ></li>
+                <li class="ul_li">{{val.name}}</li>
+                <li class="ul_li" style="width:100px" >{{val.tender.name}}</li>
+                <li class="ul_li" style="width:100px" >{{val.key}}</li>
+                <li class="ul_li" style="width:60px" @click="deleCol(i)"><i class="el-icon-delete"></i></li>
             </ul>
         </div>
         
     </el-card>
+    </el-collapse-transition>
     <el-collapse-transition>
     
     <div >
-        <h3 style="text-align:left;margin:15px 0;">请选择相关表头进行选取单元格</h3>
-
-        <elx-editable
-        ref="elxEditable"
-        class="manual-table2"
-        border
-        size="mini"
-        max-height="400"
-        :data.sync="list"
-        :edit-config="{trigger: 'manual', mode: 'row'}"
-        v-loading="loading" 
-        element-loading-text="飞速加载中"
-        style="width: 100%">
-        <elx-editable-column type="index" align="center" width="50"> </elx-editable-column>
-        <!-- <elx-editable-column prop="id" label="ID" width="80"></elx-editable-column> -->
-        <elx-editable-column prop="tender.num" width="120" align="center" show-overflow-tooltip label="标段编号" >
-        </elx-editable-column>
-        <elx-editable-column prop="tender.name" label="标段名称" align="center" show-overflow-tooltip >
-        </elx-editable-column>
-        <elx-editable-column prop="num" label="表头编号" align="center" show-overflow-tooltip></elx-editable-column>
-        <elx-editable-column prop="name" label="表头名称" align="center" show-overflow-tooltip >
-            <template slot-scope="scope">
-                <el-link :underline="true" style="font-size:12px;" type="success" @click="seeTbale(scope.row)" >{{scope.row.name}}</el-link>
-            </template>
-        </elx-editable-column>
-        
-        <elx-editable-column prop="type" label="类别" align="center" show-overflow-tooltip :formatter="formatterType">
-        </elx-editable-column>
-        <elx-editable-column prop="saveEmployee.name" align="center" width="80" label="创建人" >
-        </elx-editable-column>
-        <elx-editable-column prop="saveTime" label="创建时间" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
-        <elx-editable-column prop="updateEmployee.name" align="center" width="80" label="更改人" >
-        </elx-editable-column>
-        <elx-editable-column prop="updateTime" label="更新时间" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
-        
-        <elx-editable-column label="操作" align="center" fixed="right" width="70">
-            <template v-slot="scope">
-                <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="seeTbale(scope.row)"></el-button>
-                </el-tooltip>
-            </template>
-        </elx-editable-column>
-        </elx-editable>
-
+        <div style="text-align:left;font-size:15px;font-weight:bold;color:#909399;">
+            <ul class="" >
+              <li class="ul_li2" style="width:40px">#</li>
+              <li class="ul_li2">标段编号</li>
+              <li class="ul_li2">标段名称</li>
+              <li class="ul_li2">表头编号</li>
+              <li class="ul_li2" style="width:150px">表头名称</li>
+              <li class="ul_li2" style="width:100px">类别</li>
+            </ul>
+        </div>
+        <el-collapse accordion>
+        <el-collapse-item v-for="(item,i) in list" :key="i" >
+          <template slot="title">
+            <ul class="" >
+              <li class="ul_li2" style="width:40px">{{i+1}}</li>
+              <li class="ul_li2">{{item.tender.num}}</li>
+              <li class="ul_li2">{{item.tender.name}}</li>
+              <li class="ul_li2">{{item.num}}</li>
+              <li class="ul_li2" style="width:150px">{{item.name}}</li>
+              <li class="ul_li2" style="width:100px" v-text="typeName(item.type)"></li>
+            </ul>
+          </template>
+          <div>
+                <!-- :span-method="arraySpanMethod"
+                @cell-click ="cell_click"
+                :cell-style ="cell_select" -->
+              <el-table
+                v-loading="loading" 
+                ref="elxEditable2"
+                class="click-table12"
+                border
+                
+                :data.sync="item.RowList"
+                size="small"
+                :span-method="arraySpanMethod"
+                @cell-click ="cell_click"
+                :cell-style ="cell_select"
+                :highlight-current-row="false"
+                >
+                    <el-table-column type="index" width="50" :index="i" align="center" > </el-table-column>
+                    <el-table-column :prop="val+'.td'" :label="item.RowHd[a]" align="center" :index="i" show-overflow-tooltip v-for="(val,a) in item.RowHd" :key="a">
+                        <!-- <template slot-scope="scope" >
+                            <div >
+                                <span :style="{display:'block','text-align':scope.row[val].textAlign}">{{scope.row[val].td}}</span>
+                                <el-badge v-show="scope.row[val].attribute !==null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>
+                                <el-badge v-show="scope.row[val].tLimit !==null" type="success" :value="badge_name[scope.row[val].tLimit]" class="new"></el-badge>
+                            </div>
+                        </template> -->
+                    </el-table-column>
+            </el-table>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
         <!-- 引入建立表头组件 -->
-        <!-- <el-dialog title="表头预览" width="95%" top="4vh" :center="false" :destroy-on-close="false" :visible.sync="editShow">
-            <headeratt :Form="Form" :visible.sync="editShow" ></headeratt>
-        </el-dialog> -->
-
+        
+        <!-- <click-table :col="col" :visible.sync="showTable" ></click-table> -->
+        
         <el-pagination
           class="manual-table4-pagination"
           @size-change="handleSizeChange"
@@ -96,9 +102,7 @@
         </el-pagination>
     </div>
     </el-collapse-transition>
-  </el-col>
-
-</el-row>
+    </div>
 
 </template>
 
@@ -136,19 +140,57 @@ import XEUtils from 'xe-utils'
       loading: false,
       list: [
       ],
+      arr:[],
       tenderList:[],//全部标段
       editShow:false,//显示隐藏修改表头
       pageVO: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 5,
         totalResult: 0
       },
+      col:[],
       isClearActiveFlag: true
     }
   },
   created () {
     this.tenList()  //发起请求所有标段
     this.findList()  //发起请求所有已建表头数据
+    let str = '-original-27-93-AC10-,-original-29-98-A7-,-original-29-98-A6-,-original-29-98-A4-,-original-29-98-AC4-,-original-29-98-A8-,-original-29-98-A2-';
+    console.log('字符串：')
+    console.log(str)
+    let strs = str.split(","); //字符分割 
+    console.log('第一次分割的字符串：')
+    console.log(strs)
+    // this.col = strs.map(function (n,i) { 
+    //     let str2 = n.split("-"); //字符分割
+    //     // console.log('第2次分割的字符串：'+i)
+    //     // console.log(str2)
+    //     let str3 = str2.filter(function (elem) {
+    //         // console.log(i+'比较一下'+elem)
+
+    //         // console.log(elem !== "" && elem !== ",")
+    //         return (elem !== "" && elem !== ","); 
+    //     })
+    //     // console.log('第3次分割的字符串：'+i)
+    //     // console.log(str3)
+    //     let item = {
+    //         name: '噢噢噢噢噢噢噢噢'+i,
+    //         type: str3[0],
+    //         hdId: str3[1],
+    //         rowId: str3[2],
+    //         key: str3[3],
+    //         tender: {
+    //           name:'标段'+i
+    //         }
+    //     }
+    //  return item; 
+    // }); 
+    console.log('打印一下最后结果')
+    console.log(this.col)  //以数组对象的形式
+  },
+  computed: {
+      // 计算属性的 getter
+      
   },
   watch: {
       editShow: function(New, Old){  //监听子组件传来的是否隐藏组件的布尔值
@@ -158,6 +200,25 @@ import XEUtils from 'xe-utils'
       },
   },
   methods: {
+    deleCol(i) {
+        this.col.splice(i, 1); 
+    },
+    Collchange(strname){
+    },
+    typeName (type) {
+      // `this` 指向 vm 实例
+      let obj = {
+      original: '原清单',
+      change: '变更清单',
+      update: '新清单',
+      totalchange: '累计变更清单',
+      meterage: '计量清单',
+      totalmeterage: '累计计量清单',	
+      pay: '支付清单',
+      totalpay: '累计支付清单'
+      }
+      return type ? obj[type ] : '未知'
+    },
     tenList (){   //请求所有标段
         this.$post('/tender/getall',{})
           .then((response) => {
@@ -169,56 +230,183 @@ import XEUtils from 'xe-utils'
         if (!this.joinParent) {
             parameter = {tenderId: this.tenderId, type: this.type, page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}}
         }
-        this.loading = true
+        this.loading = true;
         //发起网络请求
-        this.$post('/head/getall',parameter)
+        this.$post('/head/row/getall',parameter)
         .then((response) => {
-        this.list = response.data.headList.list;
+        var data = response.data.headList.list,
+        that = this;
+        this.list = [];
+        this.list = data.map(function (item, i) { 
+            let key = that.typeRows(item.type)+'HeadRows';
+            item['RowList'] = that.$excel.Package(item[key],item.refCol,item.refRow);
+            item['RowHd'] = Object.keys(item['RowList'][0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            return item; 
+        }); 
+        console.log('打印一下最新的数据呀')
+        console.log(this.list);
+        this.arr = this.list[0];
         this.pageVO.totalResult = response.data.headList.total;
         this.loading = false;
+        data = null;
 
-      })
-
+      }).catch(e => {
+          this.loading = false;
+          console.log('请求可导入的对应的表头列表发生错误')
+          console.log(e)
+          this.$message({
+            type: 'info',
+            message: '请求可导入的对应的表头列表发生错误'
+          });
+      });
+ 
     },
-    seeTbale (row) {
-        let id = row.id;
-        let type = row.type;
-        this.editShow = true;
-        this.$post('/head/getone',{id, type})
-        .then((response) => {
-            console.log('response')
-            console.log(response)
-        let data = response.data.onehead;
-        this.Form = {...data};
-        // let form = response.data.onehead.tOriginalHead
-        let key = '';
+    typeRows (type) { //转换类型
         if (type == 'original') {
-          key = 'tOriginalHeadRows';
+          return 'tOriginal';
         }else if (type == 'change'){
-          key = 'tChangeHeadRows';
+          return 'tChange';
         }else if (type == 'totalchange'){
-          key = 'totalchangeHeadRows';
+          return 'totalchange';
         }else if (type == 'update'){
-          key = 'tUpdateHeadRows';
+          return 'tUpdate';
         }else if (type == 'totalmeterage'){
-          key = 'tTotalmeterageHeadRows';
+          return 'tTotalmeterage';
         }else if (type == 'meterage'){
-          key = 'tMeterageHeadRows';
+          return 'tMeterage';
         }else if (type == 'totalpay'){
-          key = 'tTotalpayHeadRows';
+          return 'tTotalpay';
         }else if (type == 'pay'){
-          key = 'tPayHeadRows';
+          return 'tPay';
         }
-        let headRowList = [];
-        headRowList = [...data[key]];
-
-        delete this.Form[key];
-        this.Form.headRowList = headRowList;
-        this.textShow = '预览表头';
-        
-      })
 
     },
+     cell_click(row, column, cell, event){ //单元格点击编辑事件
+        if (column.property) {
+            var colum =column.property;
+            colum = colum.substr(0,colum.indexOf('.'));
+            var key = `${row[colum].colNum}${row[colum].trNum}`,
+            id = null,
+            succre = {},
+            list = this.list[column.index];
+            // console.log('row[colum]--------------------')
+            // console.log(row[colum])
+            // console.log(list.type)
+            switch (list.type) {
+                case 'original':
+                    id = row[colum].toId;
+                    break;
+                case 'change':
+                    id = row[colum].tcId;
+                    break;
+                case 'totalchange':
+                    id = row[colum].id;
+                    break;
+                case 'update':
+                    id = row[colum].tuId;
+                    break;
+                case 'meterage':
+                    id = row[colum].tmId;
+                    break;
+                case 'totalmeterage':
+                    id = row[colum].ttmId;
+                    break;
+                case 'pay':
+                    id = row[colum].tpId;
+                    break;
+                case 'totalpay':
+                    id = row[colum].ttpId;
+                    break;
+            } 
+            console.log('查看id是什么')
+  
+            succre.id = id;
+            succre.key = key;
+            console.log('单击表格')
+            console.log(succre)
+            var newObj = {
+                name: list.name,
+                type: list.type,
+                hdId: list.id, //表头id
+                rowId: id,
+                key,
+                tender: {
+                    id: list.tender.id,
+                    num: list.tender.num,
+                    name: list.tender.name
+                }
+            };
+
+            console.log(newObj)
+            for (let index = this.col.length-1; index >=0; index--) {
+                var item = this.col[index];
+                if (newObj.hdId === item.hdId && newObj.rowId === item.rowId) { //查询有相同的不添加
+                    this.col.splice(index, 1);
+                    return false;
+                }
+              
+            }
+            this.col.unshift(newObj); //添加新数据到col
+ 
+        }  
+    },
+    cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+        if (column.property) {
+            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            var colum =column.property;
+            colum = colum.substr(0,colum.indexOf('.'));
+            var key = `${row[colum].colNum}${row[colum].trNum}`,
+            id = null,
+            list = this.list[column.index];
+            // console.log('row[colum]--------------------')
+            // console.log(row[colum])
+            // console.log(list.type)
+            switch (list.type) {
+                case 'original':
+                    id = row[colum].toId;
+                    break;
+                case 'change':
+                    id = row[colum].tcId;
+                    break;
+                case 'totalchange':
+                    id = row[colum].id;
+                    break;
+                case 'update':
+                    id = row[colum].tuId;
+                    break;
+                case 'meterage':
+                    id = row[colum].tmId;
+                    break;
+                case 'totalmeterage':
+                    id = row[colum].ttmId;
+                    break;
+                case 'pay':
+                    id = row[colum].tpId;
+                    break;
+                case 'totalpay':
+                    id = row[colum].ttpId;
+                    break;
+            } 
+            for (let index = this.col.length-1; index >=0; index--) {
+                var item = this.col[index];
+                if (item.key === key && item.rowId === id) { //查询有相同的不添加
+                    return {'background':'pink'};
+                }
+              
+            }
+            return {};
+        }  
+        return {};
+    },
+    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+        if (columnIndex >0) {  //带选择框的情况
+            var Row = row[this.list[column.index]['RowHd'][columnIndex-1]];
+            if (Row) {
+                return [Row.tdRowspan, Row.tdColspan]
+            }
+        }
+        return [1, 1]
+    }, 
     searchEvent () {
       this.pageVO.currentPage = 1
       this.findList()
@@ -274,12 +462,16 @@ import XEUtils from 'xe-utils'
     width: 100%;
     text-align: left;
     /* height: 200px; */
-
+}
+div >>> .el-card__header {
+    padding: 7px 20px;
+    border-bottom: 1px solid #EBEEF5;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 .cardbody {
     height: 150px;
-    overflow-y:scroll; 
-
+    overflow-y:auto; 
 }
 .ul_li {
     width: 150px;
@@ -289,6 +481,17 @@ import XEUtils from 'xe-utils'
     font-size: 13px;
     display: inline-block;
 }
+.ul_li2 {
+    width: 100px;
+    padding: 0 0 0 25px;
+
+    overflow: hidden;
+    text-align: center;
+    /* font-size: 13px; */
+    margin-top: 16px;
+    display: inline-block;
+}
+
 .manual-table2-oper {
   margin-bottom: 18px;
   text-align: left;
