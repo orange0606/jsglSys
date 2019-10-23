@@ -4,7 +4,7 @@
     <el-card class="box-card" shadow="never" v-if="col.length>0">
         <div slot="header" class="clearfix">
           <span>已选择的单元格 {{col.length}} 个</span>
-          <el-button style="float: right; padding: 3px 0" type="text">完成</el-button>
+          <el-button style="float: right; padding: 3px 0" type="text" @click="Splicing">控制台打印</el-button>
         </div>
         <ul class="text item" >
             <li class="ul_li" style="width:40px">#</li>
@@ -74,22 +74,12 @@
                 >
                     <el-table-column type="index" width="50" :index="i" align="center" > </el-table-column>
                     <el-table-column :prop="val+'.td'" :label="item.RowHd[a]" align="center" :index="i" show-overflow-tooltip v-for="(val,a) in item.RowHd" :key="a">
-                        <!-- <template slot-scope="scope" >
-                            <div >
-                                <span :style="{display:'block','text-align':scope.row[val].textAlign}">{{scope.row[val].td}}</span>
-                                <el-badge v-show="scope.row[val].attribute !==null" type="warning" :value="badge_name[scope.row[val].attribute]" class="new"></el-badge>
-                                <el-badge v-show="scope.row[val].tLimit !==null" type="success" :value="badge_name[scope.row[val].tLimit]" class="new"></el-badge>
-                            </div>
-                        </template> -->
+                        
                     </el-table-column>
             </el-table>
           </div>
         </el-collapse-item>
       </el-collapse>
-        <!-- 引入建立表头组件 -->
-        
-        <!-- <click-table :col="col" :visible.sync="showTable" ></click-table> -->
-        
         <el-pagination
           class="manual-table4-pagination"
           @size-change="handleSizeChange"
@@ -107,12 +97,8 @@
 </template>
 
 <script>
-import XEUtils from 'xe-utils'
-//引入表头组件
-// import headeratt from './NewHeader'
   export default {
   name: 'AllHead',
-//   components: {headeratt},
   props: {
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
@@ -153,53 +139,79 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
-    this.tenList()  //发起请求所有标段
-    this.findList()  //发起请求所有已建表头数据
-    let str = '-original-27-93-AC10-,-original-29-98-A7-,-original-29-98-A6-,-original-29-98-A4-,-original-29-98-AC4-,-original-29-98-A8-,-original-29-98-A2-';
-    console.log('字符串：')
-    console.log(str)
-    let strs = str.split(","); //字符分割 
-    console.log('第一次分割的字符串：')
-    console.log(strs)
-    // this.col = strs.map(function (n,i) { 
-    //     let str2 = n.split("-"); //字符分割
-    //     // console.log('第2次分割的字符串：'+i)
-    //     // console.log(str2)
-    //     let str3 = str2.filter(function (elem) {
-    //         // console.log(i+'比较一下'+elem)
-
-    //         // console.log(elem !== "" && elem !== ",")
-    //         return (elem !== "" && elem !== ","); 
-    //     })
-    //     // console.log('第3次分割的字符串：'+i)
-    //     // console.log(str3)
-    //     let item = {
-    //         name: '噢噢噢噢噢噢噢噢'+i,
-    //         type: str3[0],
-    //         hdId: str3[1],
-    //         rowId: str3[2],
-    //         key: str3[3],
-    //         tender: {
-    //           name:'标段'+i
-    //         }
-    //     }
-    //  return item; 
-    // }); 
-    console.log('打印一下最后结果')
-    console.log(this.col)  //以数组对象的形式
+      if (!this.joinParent) {
+           this.findList()  //发起请求所有已建表头数据
+      }
+     
   },
   computed: {
       // 计算属性的 getter
       
   },
   watch: {
-      editShow: function(New, Old){  //监听子组件传来的是否隐藏组件的布尔值
-          if(!New){
-              this.findList();  //发起请求所有已建表头数据
+      headRowSelected(New, Old){
+          console.log('有没有进来--------')
+          this.list = this.col = null;
+          this.findList()  //发起请求所有已建表头数据
+          if (New.headRowStr && New.headRowStr.length > 0) {
+              this.strSplit (New.headRowStr)
           }
-      },
+          
+      }
   },
   methods: {
+    Splicing () {
+        
+        // var strArr = [];
+        // for (let index = this.col.length-1; index >= 0; index--) {
+        //     var item = this.col[index];
+        //     strArr.push('-'+item.type+'-'+item.hdId+'-'+item.rowId+'-'+item.key+'-')
+        // }
+        // console.log('打印一下数组strArr')
+        // console.log(strArr)
+        
+        // this.headRowSelected.headRowStr= strArr.join(",");
+        console.log('this.headRowSelected')
+        console.log(this.headRowSelected)
+        console.log('this.col')
+        console.log(this.col)
+    },
+    strSplit (str) {  //解析字符串
+        try {
+            let strs = str.split(","); //字符分割 
+            console.log('第一次分割的字符串：')
+            console.log(strs)
+            this.col = strs.map(function (n,i) { 
+                let str2 = n.split("-"); //字符分割
+                // console.log('第2次分割的字符串：'+i)
+                // console.log(str2)
+                let str3 = str2.filter(function (elem) {
+                    // console.log(i+'比较一下'+elem)
+                    // console.log(elem !== "" && elem !== ",")
+                    return (elem !== "" && elem !== ","); 
+                })
+                // console.log('第3次分割的字符串：'+i)
+                // console.log(str3)
+                let item = {
+                    name: '',
+                    type: str3[0],
+                    hdId: str3[1],
+                    rowId: str3[2],
+                    key: str3[3],
+                    tender: {
+                      name:'标段'+i
+                    }
+                }
+            return item; 
+            }); 
+        } catch (error) {
+            this.$message({
+            type: 'info',
+            message: '解析选择的单元格字符串发生错误！'})
+            console.log('解析选择的单元格字符串发生错误')
+            console.log(error)
+        }
+    },
     deleCol(i) {
         this.col.splice(i, 1); 
     },
@@ -227,7 +239,7 @@ import XEUtils from 'xe-utils'
     },
     findList () {   //请求所有已建表头数据函数
         let parameter = {page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}}
-        if (!this.joinParent) {
+        if (this.joinParent) {
             parameter = {tenderId: this.tenderId, type: this.type, page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}}
         }
         this.loading = true;
@@ -318,12 +330,12 @@ import XEUtils from 'xe-utils'
                     id = row[colum].ttpId;
                     break;
             } 
-            console.log('查看id是什么')
+            // console.log('查看id是什么')
   
             succre.id = id;
             succre.key = key;
-            console.log('单击表格')
-            console.log(succre)
+            // console.log('单击表格')
+            // console.log(succre)
             var newObj = {
                 name: list.name,
                 type: list.type,
@@ -337,17 +349,31 @@ import XEUtils from 'xe-utils'
                 }
             };
 
-            console.log(newObj)
+            var colstrlen = this.headRowSelected.headRowStr.length,
+            strKey = '-'+newObj.type+'-'+newObj.hdId+'-'+newObj.rowId+'-'+newObj.key+'-',
+            sub = this.headRowSelected.headRowStr.indexOf(strKey);
             for (let index = this.col.length-1; index >=0; index--) {
                 var item = this.col[index];
                 if (newObj.hdId === item.hdId && newObj.rowId === item.rowId) { //查询有相同的不添加
+                        // console.log('sub       :  '+sub)
+                    if (sub>0) {  //说明不止一条数据
+                        if (this.headRowSelected.headRowStr[sub-1] === ',') {
+                            this.headRowSelected.headRowStr = this.headRowSelected.headRowStr.replace(','+strKey,"");
+                        }
+                    }else{
+                        this.headRowSelected.headRowStr = this.headRowSelected.headRowStr.replace(strKey,"");
+                    }
                     this.col.splice(index, 1);
                     return false;
                 }
               
             }
             this.col.unshift(newObj); //添加新数据到col
- 
+            if (colstrlen > 0) {
+                this.headRowSelected.headRowStr+=','+strKey;
+            }else{
+                this.headRowSelected.headRowStr += strKey;
+            }
         }  
     },
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
@@ -432,9 +458,7 @@ import XEUtils from 'xe-utils'
       }
       return cellValue ? obj[cellValue] : '未知'
     },
-    formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss')
-    },
+
   }
 }
 </script>
