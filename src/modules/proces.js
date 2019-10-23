@@ -756,7 +756,7 @@ excelmodel = {
         TotalObj = {},
         Total = [],
         listlen = list.length;
-        for (var i = header.length - 1; i >= 0; i--) {
+        for (let i = header.length - 1; i >= 0; i--) {
             var sum = sumArr[0][header[i]];
             if (sum.attribute && sum.attribute === 'sumFormula') {
                 Total.push(sum.colNum);
@@ -817,6 +817,40 @@ excelmodel = {
                 }
             }
         }
+    },
+     /*
+    通过判断 列lable名 进行动态设置宽度
+    param type: 清单（表头类型） str
+    param list: 清单列表 （Array）
+    param hdlist: 可选择的表头列表 （Array）
+    使用引用赋值
+    */
+    Setwidth(name) {
+        // if (name.indexOf('名')!== -1) {
+        //     return '400'
+        // }
+        if (name.indexOf('数量')!== -1) {
+            return '100'
+        }
+        if (name.indexOf('数')!== -1 && name.indexOf('数')!== -1 ) {
+            return '100'
+        }
+        if (name.indexOf('单位')!== -1) {
+            return '70'
+        }
+        if (name.indexOf('计量')!== -1) {
+            return '100'
+        }
+        if (name.indexOf('单价')!== -1) {
+            return '100'
+        }
+        if (name.indexOf('金额')!== -1) {
+            return '100'
+        }
+        if (name.indexOf('号')!== -1) {
+            return '100'
+        }
+        return ''
     }
 
 };

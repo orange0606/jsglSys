@@ -141,11 +141,23 @@ body, html, #app{
 /* 优化表格滚动渲染 */
 body, html {
       scroll-snap-type: y proximity;
+      /* scroll-snap-type: y mandatory; */
 }
 table {
   scroll-snap-align: start;
   /* position: relative; */
-  position: sticky;
+  position: sticky; 
+  position: -webkit-sticky; 
+
+
+}
+/* 表头错乱 */
+body >>> .el-table th.gutter {
+  display: table-cell !important;
+}
+
+body >>> .el-table colgroup.gutter {
+  display: table-cell !important;
 }
 
 /* 清单显示弹出框 */

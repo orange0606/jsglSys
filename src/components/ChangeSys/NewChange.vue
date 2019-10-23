@@ -35,40 +35,36 @@
       append-to-body>
       <div v-if="showList">
           <p style="color: red;font-size: 12px;margin:20px 0 15px 0;text-align:left;">请单击选择你要导入的清单</p>
-          <elx-editable
-            ref="elxEditable"
-            class="click-table2"
+          <el-table
             border
             :height="OrHeight"
             size="small"
-            :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="original"
             @cell-click ="selectOriginal"
-            :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
-            <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
-            <elx-editable-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="originalHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
-            <elx-editable-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
-            <elx-editable-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
+            <el-table-column type="index" width="80" fixed="left" ></el-table-column>
+            <el-table-column prop="originalHead.num" label="原清单表头编号" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="originalHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>     
+            <el-table-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></el-table-column>
+            <el-table-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
               <template slot-scope="scope">
                 <!-- 1已录入 0未录入 其他出错-->
                 <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
                 <i v-if="scope.row.enter ==1" style="color:#67c23a;width:20px;" class="el-icon-circle-check"></i>
                 <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
               </template>
-            </elx-editable-column>
-            <elx-editable-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
-            <elx-editable-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
-            <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
-            <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
-          </elx-editable>
+            </el-table-column>
+            <el-table-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></el-table-column>
+            <el-table-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></el-table-column>
+            <el-table-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></el-table-column>
+            <el-table-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></el-table-column>
+          </el-table>
           <el-pagination
             class="click-table2-pagination"
             @size-change="handleSizeChange"
@@ -114,7 +110,7 @@
           size="mini"
           :summary-method="getSummaries"
           :edit-config="{render: 'scroll', renderSize: 100}">
-          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
+          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="50"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
             <template v-slot:header>
@@ -223,7 +219,7 @@ export default {
   },
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
-    this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
+    // this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
   },
   mounted(){
       this.tViewSize();
@@ -413,7 +409,7 @@ export default {
             var headsArr = this.$excel.Package(data['changeHead'].tChangeHeadRows,data['changeHead'].refCol,data['changeHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            this.refreshTable(); //刷新表格布局
+            // this.refreshTable(); //刷新表格布局
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -787,7 +783,7 @@ export default {
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([]);
+        this.$refs.elxEditable1.reload([])
         setTimeout(() => {
             this.$refs.elxEditable1.reload(this.list);
             this.loading = false;
@@ -795,7 +791,6 @@ export default {
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
             });
             this.tViewSize();
-
         }, 300)
       });
 
@@ -1072,19 +1067,9 @@ export default {
 </script>
 
 <style scope>
-/* blink currently has bug that requires declaration on `body` */
-/* 优化表格滚动渲染 */
-body, html {
-      scroll-snap-type: y proximity;
-}
-table {
-  scroll-snap-align: start;
-  /* position: relative; */
-  position: sticky;
-}
 .click-table11-oper {
   height: 30px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   /* border: 1px solid pink; */
   text-align: left;
   position: relative;
@@ -1113,12 +1098,13 @@ table {
   background-color: #fff6b2;
 }
 .scroll-table4-oper {
-  margin-bottom: 18px;
+  margin-bottom: 15px;
 }
 .scroll-table4.elx-editable .elx-editable-row.new-insert,
 .scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
   background-color: #f0f9eb;
 }
+
 
 /* 合计尾行不显示兼容问题 */
 .el-table{
@@ -1161,11 +1147,11 @@ body .el-table th.gutter{
 }
 
 /* 表头错乱 */
-body .scroll-table4 th.gutter {
+body >>> .el-table th.gutter {
   display: table-cell !important;
 }
 
-body .scroll-table4 colgroup.gutter {
+body >>> .el-table colgroup.gutter {
   display: table-cell !important;
 }
 </style>

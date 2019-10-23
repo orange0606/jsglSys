@@ -3,6 +3,7 @@
     v-loading="loading"
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
+    class="_compbox"
   >
     <div class="click-table11-oper">
       <el-form :inline="true" :model="form" size="mini">
@@ -58,7 +59,7 @@
           :row-style="RowCss"
           show-summary
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 100, }">
+          :edit-config="{render: 'scroll', renderSize: 110, }">
           
           <elx-editable-column type="selection" align="center" width="55" :key="$excel.randomkey()" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" >
@@ -700,6 +701,15 @@ export default {
 </script>
 
 <style scope>
+/* ._compbox {
+    scroll-snap-type: y proximity;
+}
+._compbox >>> table {
+  scroll-snap-align: start;
+
+  position: sticky; 
+  position: -webkit-sticky; 
+} */
 .click-table11-oper {
   height: 30px;
   margin-bottom: 10px;
