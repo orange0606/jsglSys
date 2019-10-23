@@ -172,7 +172,7 @@
         
         // this.headRowSelected.headRowStr= strArr.join(",");
         console.log('this.headRowSelected')
-        console.log(this.headRowSelected)
+        console.log(this.headRowSelected.headRowStr)
         console.log('this.col')
         console.log(this.col)
     },
@@ -213,7 +213,32 @@
         }
     },
     deleCol(i) {
-        this.col.splice(i, 1); 
+            var item = this.col[i],
+            strKey = '-'+item.type+'-'+item.hdId+'-'+item.rowId+'-'+item.key+'-',
+            strlen = strKey.length,
+            AllStr = this.headRowSelected.headRowStr,
+            sub = this.headRowSelected.headRowStr.indexOf(strKey);
+            // console.log('strKey')
+            // console.log(strKey)
+            this.col.splice(i, 1);
+            if (sub>0) {  //说明不止一条数据
+                if (AllStr[sub-1] === ',' && AllStr[sub+strlen] && AllStr[sub+strlen]=== ',' && (!AllStr[sub+strlen+1] || AllStr[sub+strlen+1] !=='-')) {
+                    return this.headRowSelected.headRowStr = AllStr.replace(','+strKey+',',"");
+                }
+                if (AllStr[sub-1] === ',') {
+                    return this.headRowSelected.headRowStr = AllStr.replace(','+strKey,"");
+                }
+                if (AllStr[sub+strlen] && AllStr[sub+strlen]=== ',' && (!AllStr[sub+strlen+1] || AllStr[sub+strlen+1] !=='-') ) {
+                    return this.headRowSelected.headRowStr = AllStr.replace(strKey+',',"");
+                }
+            }else if(sub===0){
+                if (AllStr[sub+strlen] && AllStr[sub+strlen]=== ',') {
+                    return this.headRowSelected.headRowStr = AllStr.replace(strKey+',',"");
+                }
+                return this.headRowSelected.headRowStr = AllStr.replace(strKey,"");
+            }
+               
+         
     },
     Collchange(strname){
     },
@@ -351,20 +376,32 @@
 
             var colstrlen = this.headRowSelected.headRowStr.length,
             strKey = '-'+newObj.type+'-'+newObj.hdId+'-'+newObj.rowId+'-'+newObj.key+'-',
+            strlen = strKey.length,
+            AllStr = this.headRowSelected.headRowStr,
             sub = this.headRowSelected.headRowStr.indexOf(strKey);
+            // console.log('strKey')
+            // console.log(strKey)
             for (let index = this.col.length-1; index >=0; index--) {
                 var item = this.col[index];
                 if (newObj.hdId === item.hdId && newObj.rowId === item.rowId) { //查询有相同的不添加
                         // console.log('sub       :  '+sub)
-                    if (sub>0) {  //说明不止一条数据
-                        if (this.headRowSelected.headRowStr[sub-1] === ',') {
-                            this.headRowSelected.headRowStr = this.headRowSelected.headRowStr.replace(','+strKey,"");
-                        }
-                    }else{
-                        this.headRowSelected.headRowStr = this.headRowSelected.headRowStr.replace(strKey,"");
-                    }
                     this.col.splice(index, 1);
-                    return false;
+                    if (sub>0) {  //说明不止一条数据
+                        if (AllStr[sub-1] === ',' && AllStr[sub+strlen] && AllStr[sub+strlen]=== ',' && (!AllStr[sub+strlen+1] || AllStr[sub+strlen+1] !=='-')) {
+                            return this.headRowSelected.headRowStr = AllStr.replace(','+strKey+',',"");
+                        }
+                        if (AllStr[sub-1] === ',') {
+                            return this.headRowSelected.headRowStr = AllStr.replace(','+strKey,"");
+                        }
+                        if (AllStr[sub+strlen] && AllStr[sub+strlen]=== ',' && (!AllStr[sub+strlen+1] || AllStr[sub+strlen+1] !=='-') ) {
+                            return this.headRowSelected.headRowStr = AllStr.replace(strKey+',',"");
+                        }
+                    }else if(sub===0){
+                        if (AllStr[sub+strlen] && AllStr[sub+strlen]=== ',') {
+                            return this.headRowSelected.headRowStr = AllStr.replace(strKey+',',"");
+                        }
+                        return this.headRowSelected.headRowStr = AllStr.replace(strKey,"");
+                    }
                 }
               
             }
