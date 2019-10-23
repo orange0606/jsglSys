@@ -1072,6 +1072,16 @@ export default {
 </script>
 
 <style scope>
+/* blink currently has bug that requires declaration on `body` */
+/* 优化表格滚动渲染 */
+body, html {
+      scroll-snap-type: y proximity;
+}
+table {
+  scroll-snap-align: start;
+  /* position: relative; */
+  position: sticky;
+}
 .click-table11-oper {
   height: 30px;
   margin-bottom: 5px;
@@ -1151,11 +1161,11 @@ body .el-table th.gutter{
 }
 
 /* 表头错乱 */
-body .el-table th.gutter {
+body .scroll-table4 th.gutter {
   display: table-cell !important;
 }
 
-body .el-table colgroup.gutter {
+body .scroll-table4 colgroup.gutter {
   display: table-cell !important;
 }
 </style>
