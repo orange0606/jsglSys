@@ -1,5 +1,5 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum+ '-'+col.attribute+'='+col.attributeValue" :width="$excel.Setwidth(col.td)" :fit="true" :key="$excel.randomkey()" :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum+ '-'+col.attribute+'='+col.attributeValue" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :fit="true" :key="$excel.randomkey()" :align="col.textAlign">
     <template slot-scope="scope">
       <span>{{scope.row.data[col.colNum].td}}</span>
       <!-- <span>{{scope.row.data}}</span> -->
@@ -7,7 +7,8 @@
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
         :key="index"
-        :col="item">
+        :col="item"
+        :hd="hd">
       </my-column> 
     </template>
   </el-table-column> 
@@ -22,6 +23,7 @@ export default {
     col: {
       type: Object
     },
+    hd: {}
 
   },
   data() {

@@ -133,7 +133,7 @@ import XEUtils from 'xe-utils';
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:1224, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
+      default: () => ({id:1345, name:"计量审批单-计量审批单1",state: 0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,

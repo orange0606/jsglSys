@@ -65,7 +65,7 @@
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" >
           </elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
-          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" ></my-column>
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
         </elx-editable>
         <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
     </div>
@@ -166,7 +166,7 @@ export default {
         this.$nextTick(() => {
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-200;
+              this.Height = obj.height-160;
               this.loading = false;
             },100)
             
@@ -431,6 +431,7 @@ export default {
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {
+
         this.$refs.elxEditable1.reload([])
         setTimeout(() => {
             this.$refs.elxEditable1.reload(this.list);
@@ -701,100 +702,5 @@ export default {
 </script>
 
 <style scope>
-/* ._compbox {
-    scroll-snap-type: y proximity;
-}
-._compbox >>> table {
-  scroll-snap-align: start;
-
-  position: sticky; 
-  position: -webkit-sticky; 
-} */
-.click-table11-oper {
-  height: 30px;
-  margin-bottom: 10px;
-  /* border: 1px solid pink; */
-  text-align: left;
-  position: relative;
-}
-.click-table11-oper .right {
-  position: absolute;
-}
-.click-table11-pagination {
-  margin-top: 18px;
-  text-align: right;
-}
-.click-table11 .drag-btn {
-  font-size: 16px;
-  cursor: move;
-}
-.click-table11.elx-editable .elx-editable-row.new-insert,
-.click-table11.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-.click-table11 .el-table__body tr.hover-row>td,
-.click-table11 .el-table__body .el-table__row:hover>td {
-  background-color: inherit;
-}
-.click-table11.elx-editable .elx-editable-row.sortable-ghost,
-.click-table11.elx-editable .elx-editable-row.sortable-chosen {
-  background-color: #fff6b2;
-}
-.scroll-table4-oper {
-  margin-bottom: 15px;
-}
-.scroll-table4.elx-editable .elx-editable-row.new-insert,
-.scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-
-
-/* 合计尾行不显示兼容问题 */
-.el-table{
-    overflow:visible !important;
-}
-body .el-table th.gutter{
-    display: table-cell!important;
-}
-
-/* 表格行高input等高度设置 */
-.scroll-table4.el-table--mini .elx-editable-column {
-    padding: 0;
-    height: 23px;
-    line-height: 23px;
-}
-/* .elx-editable.el-table--mini .elx-editable-column {
-    padding: 0;
-    height: 22px;
-} */
-.scroll-table4 .cell {
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    white-space: normal;
-    word-break: break-all;
-    line-height: 17px;
-}
-.scroll-table4 .el-input--mini .el-input__inner {
-    margin: 0;
-    height: 22px;
-    line-height: 22px;
-}
-.scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
-
-/* 清单显示弹出框 */
-.el-dialog__body {
-  padding: 0 20px;
-  margin: 0;
-  font-size:12px;
-  border:1px solid transparent;
-}
-
-/* 表头错乱 */
-body .el-table th.gutter {
-  display: table-cell !important;
-}
-
-body .el-table colgroup.gutter {
-  display: table-cell !important;
-}
+@import '../../modules/Tablestyle.css';
 </style>

@@ -360,7 +360,7 @@ export default {
           }
 
           this.totalpayRowList = arr;
-          if (data && data.totalpayHead && data.totalpayHead.tTotalpayHeadRows.length >0 ) {
+          if (data && data.totalpayHead && data.totalpayHead.tTotalpayHeadRows && data.totalpayHead.tTotalpayHeadRows.length >0 ) {
               var headsArr = this.$excel.Package(data['totalpayHead'].tTotalpayHeadRows,data['totalpayHead'].refCol,data['totalpayHead'].refRow),
               Col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
@@ -773,90 +773,5 @@ export default {
 </script>
 
 <style scope>
-.click-table11-oper {
-  height: 30px;
-  margin-bottom: 5px;
-  /* border: 1px solid pink; */
-  text-align: left;
-  position: relative;
-}
-.click-table11-oper .right {
-  position: absolute;
-}
-.click-table11-pagination {
-  margin-top: 18px;
-  text-align: right;
-}
-.click-table11 .drag-btn {
-  font-size: 16px;
-  cursor: move;
-}
-.click-table11.elx-editable .elx-editable-row.new-insert,
-.click-table11.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-.click-table11 .el-table__body tr.hover-row>td,
-.click-table11 .el-table__body .el-table__row:hover>td {
-  background-color: inherit;
-}
-.click-table11.elx-editable .elx-editable-row.sortable-ghost,
-.click-table11.elx-editable .elx-editable-row.sortable-chosen {
-  background-color: #fff6b2;
-}
-.scroll-table4-oper {
-  margin-bottom: 18px;
-}
-.scroll-table4.elx-editable .elx-editable-row.new-insert,
-.scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-
-/* 合计尾行不显示兼容问题 */
-.el-table{
-    overflow:visible !important;
-}
-body .el-table th.gutter{
-    display: table-cell!important;
-}
-
-/* 表格行高input等高度设置 */
-.scroll-table4.el-table--mini .elx-editable-column {
-    padding: 0;
-    height: 23px;
-    line-height: 23px;
-}
-/* .elx-editable.el-table--mini .elx-editable-column {
-    padding: 0;
-    height: 22px;
-} */
-.scroll-table4 .cell {
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    white-space: normal;
-    word-break: break-all;
-    line-height: 17px;
-}
-.scroll-table4 .el-input--mini .el-input__inner {
-    margin: 0;
-    height: 22px;
-    line-height: 22px;
-}
-.scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
-
-/* 清单显示弹出框 */
-.el-dialog__body {
-  padding: 0 20px;
-  margin: 0;
-  font-size:12px;
-  border:1px solid transparent;
-}
-
-/* 表头错乱 */
-body .el-table th.gutter {
-  display: table-cell !important;
-}
-
-body .el-table colgroup.gutter {
-  display: table-cell !important;
-}
+@import '../../modules/Tablestyle.css';
 </style>

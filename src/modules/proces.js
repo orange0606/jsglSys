@@ -823,10 +823,19 @@ excelmodel = {
     param name: 清单（表头类型） str
     使用引用赋值
     */
-    Setwidth(name) {
+    Setwidth(name, hd) {
         // if (name.indexOf('名')!== -1) {
         //     return '400'
         // }
+        if (!hd && name.indexOf('名')!== -1) {
+            console.log('进来了呀')
+            return '350';
+        }if (!hd && name.indexOf('名')=== -1) {
+            return ''
+        }
+        if (hd.length <= 7) {
+            return '';
+        }
         if (name.indexOf('数量')!== -1) {
             return '100'
         }

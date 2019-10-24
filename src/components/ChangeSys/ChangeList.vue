@@ -86,7 +86,7 @@
 
          <!-- 引入新建变更清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog :title="EditTitle" width="97%" top="3vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
               <new-change :tender="tender" :refresh.sync="visibleNew" :changeList="changeList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></new-change>
           </el-dialog>
         </transition>

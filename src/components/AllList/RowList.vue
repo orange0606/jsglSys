@@ -19,9 +19,9 @@
         :summary-method="getSummaries"
         :edit-config="{render: 'scroll', renderSize: 150}">
       
-        <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" ></elx-editable-column>
+        <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center"  ></elx-editable-column>
         <!-- 此处使用多级表头嵌套组件 -->
-        <my-column v-for="(item,index) in col" :key="index" :col="item"></my-column>
+        <my-column v-for="(item,index) in col" :key="index" :col="item" :hd="hd"></my-column>
       </elx-editable>
   </div>
     
@@ -145,15 +145,12 @@ export default {
         if( url === '' ) return false;
         this.$post( url, { id: row.id } )
             .then((response) => {
-            console.log('rowlistkey-----------')
-            console.log(rowlistkey)
-            console.log('response-------------------------')
-            console.log(response)
             var data = response.data[this.type],
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
 
             this.PackHeader = XEUtils.clone(header, true); //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
+            this.hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             console.log('this.col----------- ')
             console.log(this.col)
             this.$nextTick(() => {  //强制重新渲染
@@ -165,7 +162,6 @@ export default {
             this.list = XEUtils.clone(list, true); //深拷贝
             if (this.list.length >0) {
                 this.findList(); //调用滚动渲染数据
-                this.hd = Object.keys(this.list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             }
             
             list = header = null;  //初始化
@@ -223,87 +219,6 @@ export default {
 </script>
 
 <style scope>
-.click-table11-oper {
-  /* margin-bottom: 18px; */
-  text-align: left;
-}
-.click-table11 .drag-btn {
-  font-size: 16px;
-  cursor: move;
-}
-.click-table11.elx-editable .elx-editable-row.new-insert,
-.click-table11.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-.click-table11 .el-table__body tr.hover-row>td,
-.click-table11 .el-table__body .el-table__row:hover>td {
-  background-color: inherit;
-}
-.click-table11.elx-editable .elx-editable-row.sortable-ghost,
-.click-table11.elx-editable .elx-editable-row.sortable-chosen {
-  background-color: #fff6b2;
-}
-.scroll-table4-oper {
-  margin-bottom: 18px;
-}
-.scroll-table4.elx-editable .elx-editable-row.new-insert,
-.scroll-table4.elx-editable .elx-editable-row.new-insert:hover>td {
-  background-color: #f0f9eb;
-}
-/* 合计尾行不显示兼容问题 */
-.el-table{
-    overflow:visible !important;
-}
-body .el-table th.gutter{
-    display: table-cell!important;
-}
+@import '../../modules/Tablestyle.css';
 
-/* 表格行高input等高度设置 */
-.scroll-table4.el-table--mini .elx-editable-column {
-    padding: 0;
-    height: 23px;
-    line-height: 23px;
-}
-/* .elx-editable.el-table--mini .elx-editable-column {
-    padding: 0;
-    height: 22px;
-} */
-.scroll-table4 .cell {
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    white-space: normal;
-    word-break: break-all;
-    line-height: 17px;
-}
-.scroll-table4 .el-input--mini .el-input__inner {
-    margin: 0;
-    height: 22px;
-    line-height: 22px;
-}
-.scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
-
-/* 清单显示弹出框 */
-.el-dialog__body {
-  padding: 0 20px;
-  margin: 0;
-  font-size:12px;
-  border:1px solid transparent;
-}
-/* 优化表格滚动渲染 */
-body, html {
-      scroll-snap-type: y proximity;
-}
-.scroll-table4, table {
-  scroll-snap-align: start;
-  /* position: relative; */
-  position: sticky;
-}
-/* 表头错乱 */
-body .el-table th.gutter {
-  display: table-cell !important;
-}
-
-body .el-table colgroup.gutter {
-  display: table-cell !important;
-}
 </style>

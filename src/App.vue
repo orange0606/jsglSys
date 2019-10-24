@@ -116,64 +116,11 @@ body, html, #app{
     overflow: auto;
 }
 
-/* //滚动条的宽度 */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-thumb {
-    height: 30px;
-    background-color: #E3FBFE;
-    border-radius: 2px;
-}
-::-webkit-scrollbar-track{
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-    background: rgba(0,0,0,0.1);
-} 
-
 *{
     margin: 0;
     padding: 0;
 }
-
-/* blink currently has bug that requires declaration on `body` */
-/* 优化表格滚动渲染 */
-body, html {
-      /* scroll-snap-type: y proximity; */
-      scroll-snap-type: y mandatory;
+html, body { 
+  scroll-behavior:smooth; 
 }
-table {
-  scroll-snap-align: start;
-  position: sticky; 
-  /* position: absolute; */
-}
-/* 表头错乱 */
-body table th.gutter {
-  display: table-cell !important;
-}
-
-body table colgroup.gutter {
-  display: table-cell !important;
-}
-
-/* 清单显示弹出框 */
-.el-dialog__body {
-  padding: 0 20px;
-  margin: 0;
-  font-size:12px;
-  border:1px solid transparent;
-}
-/* 表格边框颜色 */
-.el-table--border, .el-table--group {
-    border: 1px solid #909399;
-}
-.el-table td, .el-table th.is-leaf, .el-table--border th{
-    
-    border-bottom: 0.5px solid #909399;
-}
-.el-table--border td, .el-table--border th {
-    border-right: 0.5px solid #909399;
-}
-
 </style>
