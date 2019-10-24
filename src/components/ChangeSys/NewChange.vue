@@ -109,7 +109,7 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 100}">
+          :edit-config="{render: 'scroll', renderSize: 60}">
           <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="50"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
@@ -219,7 +219,7 @@ export default {
   },
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
-    // this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
+    this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
   },
   mounted(){
       this.tViewSize();
@@ -409,7 +409,7 @@ export default {
             var headsArr = this.$excel.Package(data['changeHead'].tChangeHeadRows,data['changeHead'].refCol,data['changeHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
-            // this.refreshTable(); //刷新表格布局
+            this.refreshTable(); //刷新表格布局
             //调用表格公式解析 存储
             this.formula = this.$excel.FormulaAnaly([...this.col]);
             //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)

@@ -140,23 +140,20 @@ body, html, #app{
 /* blink currently has bug that requires declaration on `body` */
 /* 优化表格滚动渲染 */
 body, html {
-      scroll-snap-type: y proximity;
-      /* scroll-snap-type: y mandatory; */
+      /* scroll-snap-type: y proximity; */
+      scroll-snap-type: y mandatory;
 }
 table {
   scroll-snap-align: start;
-  /* position: relative; */
   position: sticky; 
-  position: -webkit-sticky; 
-
-
+  /* position: absolute; */
 }
 /* 表头错乱 */
-body >>> .el-table th.gutter {
+body table th.gutter {
   display: table-cell !important;
 }
 
-body >>> .el-table colgroup.gutter {
+body table colgroup.gutter {
   display: table-cell !important;
 }
 
