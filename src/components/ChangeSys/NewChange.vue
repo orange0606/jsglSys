@@ -27,9 +27,9 @@
     </div>
     <div class="click-table11-oper">
       <el-dialog
-      width="89%"
+      width="95%"
       title="选择清单"
-      top="6vh"
+      top="5vh"
       :visible.sync="innerVisible"
       
       append-to-body>
@@ -48,7 +48,11 @@
             <el-table-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
             <el-table-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
             <el-table-column prop="num" label="原清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>     
-            <el-table-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="name" label="原清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip >
+                <template slot-scope="scope">
+                    <el-link :underline="true" style="font-size:12px;" type="success" >{{scope.row.name}}</el-link>
+                </template>
+            </el-table-column>
             <el-table-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></el-table-column>
             <el-table-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></el-table-column>
             <el-table-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></el-table-column>
@@ -109,7 +113,7 @@
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 60}">
+          :edit-config="{render: 'scroll', renderSize: 110}">
           <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="50"></elx-editable-column>
         
           <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
@@ -248,7 +252,7 @@ export default {
         this.$nextTick(() => {
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-160;
+              this.Height = obj.height-180;
               this.OrHeight = obj.height-360;
               this.loading = false;
             },100)
@@ -1066,6 +1070,6 @@ export default {
 }
 </script>
 
-<style scope>
+<style scoped>
 @import '../../modules/Tablestyle.css';
 </style>

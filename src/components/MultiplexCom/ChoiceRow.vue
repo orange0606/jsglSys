@@ -99,7 +99,7 @@ export default {
     tViewSize () {
         var obj = this.$getViewportSize();
         this.$nextTick(() => {
-            this.Height = obj.height-270;
+            this.Height = obj.height-250;
         });
     },
     RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
@@ -261,5 +261,5 @@ export default {
 
 
 <style scoped>
-@import '../../modules/Tablestyle.css';
+    @import '../../modules/Tablestyle.css';
 </style>

@@ -120,7 +120,152 @@ body, html, #app{
     margin: 0;
     padding: 0;
 }
-html, body { 
-  scroll-behavior:smooth; 
+
+
+/* ************************各清单表格内容样式开始********************** */
+
+.el-table {
+    /* scroll-snap-align: start; */
+    /* 
+    position: sticky; 
+    position: -webkit-sticky;  */
+    /* scroll-behavior: auto; */
+    /* scroll-behavior: smooth;
+    position: sticky;
+
+    scroll-behavior: -webkit-smooth;
+    position: -webkit-sticky;
+    overflow: hidden; */
+
+    /* -webkit-overflow-y: auto;
+    -moz-overflow-y: auto; */
+    
+    position: relative;
 }
+
+
+.el-table__body, .el-table__footer, .el-table__header {
+    scroll-behavior: smooth;
+    position: sticky;
+}
+/* table.el-table__body tbody{
+    scroll-behavior: smooth;
+    overflow-y: auto;
+} */
+.click-table11-oper {
+    height: 30px;
+    margin-bottom: 10px;
+    /* border: 1px solid pink; */
+    text-align: left;
+    position: relative;
+  }
+  .click-table11-oper .right {
+    position: absolute;
+  }
+  .click-table11-pagination {
+    margin-top: 18px;
+    text-align: right;
+  }
+  .click-table11 .drag-btn {
+    font-size: 16px;
+    cursor: move;
+  }
+
+  .scroll-table4-oper {
+    margin-bottom: 15px;
+  }
+
+
+  /* 合计尾行不显示兼容问题 */
+  .el-table{
+      overflow:visible !important;
+  }
+  body .el-table th.gutter{
+      display: table-cell!important;
+  }
+
+  /* 表格行高input等高度设置 */
+  .scroll-table4.el-table--mini .elx-editable-column {
+      padding: 0;
+      height: 23px;
+      line-height: 23px;
+      min-height: 5px;
+  }
+  /* .elx-editable.el-table--mini .elx-editable-column {
+      padding: 0;
+      height: 22px;
+  } */
+.el-table--border, .el-table--group {
+    border: 1px solid#909399;
+}
+.el-table--border th, .el-table__fixed-right-patch {
+    border-bottom: 1px solid#909399;
+}
+
+.el-table--border td, .el-table--border th, .el-table__body-wrapper .el-table--border.is-scrolling-left ~ .el-table__fixed {
+    border-right: 1px solid #909399;
+}
+.el-table td, .el-table th.is-leaf {
+    border-bottom: 1px solid #909399;
+}
+
+  .scroll-table4 .cell {
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      white-space: normal;
+      word-break: break-all;
+      line-height: 17px;
+  }
+  .scroll-table4 .el-input--mini .el-input__inner {
+      margin: 0;
+      height: 22px;
+      line-height: 22px;
+  }
+  .scroll-table4 th, .scroll-table4 td { padding: 0; margin: 0; line-height: 0%; }
+  
+  /* 清单显示弹出框 */
+  .el-dialog__body {
+    padding: 0 20px;
+    margin: 0;
+    font-size:12px;
+    border:1px solid transparent;
+  }
+  
+  .el-table th > .cell.gutter {
+      display: table-cell !important;
+  }
+  /* 表头错乱 */
+.el-table.el-table--border th.gutter {
+    display: table-cell !important;
+  }
+  
+.el-table.el-table--border colgroup.gutter {
+    display: table-cell !important;
+  }
+
+  /* 清单选择导入按钮 */
+  .btn {
+    text-align: right;
+    margin: 15px 20px 10px 0;
+  }
+  
+  /* //滚动条的宽度 */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    height: 30px;
+    background-color: #E3FBFE;
+    border-radius: 2px;
+    scroll-behavior: auto;
+}
+::-webkit-scrollbar-track{
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    background: rgba(0,0,0,0.1);
+    scroll-behavior: auto;
+} 
+
+/* ************************各清单表格内容样式结束********************** */
 </style>

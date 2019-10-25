@@ -166,7 +166,7 @@ export default {
         this.$nextTick(() => {
             this.Height = this.Height;
             setTimeout(()=>{
-              this.Height = obj.height-160;
+              this.Height = obj.height-180;
               this.loading = false;
             },100)
             
@@ -701,6 +701,6 @@ export default {
 }
 </script>
 
-<style scope>
+<style scoped>
 @import '../../modules/Tablestyle.css';
 </style>

@@ -218,7 +218,6 @@ export default {
 }
 </script>
 
-<style scope>
+<style scoped>
 @import '../../modules/Tablestyle.css';
-
 </style>
