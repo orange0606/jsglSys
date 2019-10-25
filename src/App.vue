@@ -139,14 +139,20 @@ body, html, #app{
 
     /* -webkit-overflow-y: auto;
     -moz-overflow-y: auto; */
-    
-    position: relative;
+    scroll-behavior: smooth;
+    position: sticky;
+    overflow-y: auto; 
 }
 
 
 .el-table__body, .el-table__footer, .el-table__header {
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth;
     position: sticky;
+    position: -webkit-sticky;
+    -moz-scroll-behavior: smooth;
+    -moz-position: sticky;
+    scroll-behavior: smooth;
+    position: sticky; */
 }
 /* table.el-table__body tbody{
     scroll-behavior: smooth;

@@ -83,7 +83,7 @@
         </elx-editable>
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="97%" top="3vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog :title="EditTitle" width="98%" top="3vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
               <new-meterage :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :meterageList="meterageList" :mode="mode" :joinParent="joinParent" ></new-meterage>
           </el-dialog>
         </transition>
