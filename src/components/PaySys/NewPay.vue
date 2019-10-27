@@ -47,17 +47,13 @@
           :show-header="showHeader"
           v-if="showHeader"
           :span-method="arraySpanMethod"
+          :row-key="keyRow"
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           size="small"
           :edit-config="{render: 'scroll', renderSize: 80}">
-          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
-          
-          <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
-            <template v-slot:header>
-              <i class="el-icon-setting" @click="dialogVisible = true"></i>
-            </template>
-          </elx-editable-column>
+          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="pay" :lastHeader="lastHeader"></my-column>
         </elx-editable>
@@ -152,6 +148,10 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    keyRow( row ) {
+        // console.log(row.seq)
+        return row.seq
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 
@@ -208,15 +208,14 @@ export default {
 
           try {
               var headsArr = this.$excel.Package(row.payHead.tPayHeadRows,row.payHead.refCol,row.payHead.refRow);
-              this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-              
+              this.PackHeader = [...headsArr]; //深拷贝
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               this.refreshTable(); //刷新表格布局
               //调用表格公式解析 存储
               this.formula = this.$excel.FormulaAnaly([...this.col]);
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.lastHeader = this.$excel.BikoFoArr([...this.col]);
-                
+              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
           } catch (error) {
               console.log(error)
               this.$message({
@@ -238,10 +237,9 @@ export default {
           }
           this.tTotalmeterageId = row.tTotalmeterageId; //累计计量清单id
           try {
-              var arr = this.$excel.ListAssemble(row.payRowList	); //组装清单表格数据
-              this.list = [...arr];
+              this.list = this.$excel.ListAssemble(row.payRowList	); //组装清单表格数据
               this.findList(); //调用滚动渲染数据
-              this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+              
           } catch (error) {
               this.$message({
                   type: 'info',
@@ -275,7 +273,7 @@ export default {
         .then((response) => {
           var data = response.data.onehead,
           headsArr = this.$excel.Package(data['tPayHeadRows'],data.refCol,data.refRow);
-          this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+          this.PackHeader = [...headsArr]; //拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);

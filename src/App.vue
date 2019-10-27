@@ -145,15 +145,15 @@ body, html, #app{
 }
 
 
-.el-table__body, .el-table__footer, .el-table__header {
-    /* scroll-behavior: smooth;
+/* .el-table__body, .el-table__footer, .el-table__header {
+    scroll-behavior: smooth;
     position: sticky;
     position: -webkit-sticky;
     -moz-scroll-behavior: smooth;
     -moz-position: sticky;
     scroll-behavior: smooth;
-    position: sticky; */
-}
+    position: sticky;
+} */
 /* table.el-table__body tbody{
     scroll-behavior: smooth;
     overflow-y: auto;

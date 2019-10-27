@@ -52,6 +52,7 @@
           border
           height="100%"
           size="mini"
+          :row-key="keyRow"
           :show-header="showHeader"
           v-if="showHeader"
           
@@ -61,9 +62,9 @@
           :summary-method="getSummaries"
           :edit-config="{render: 'scroll', renderSize: 110, }">
           
-          <elx-editable-column type="selection" align="center" width="55" :key="$excel.randomkey()" ></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" >
-          </elx-editable-column>
+          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
+          
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
         </elx-editable>
@@ -75,7 +76,6 @@
 
 <script>
 import MyColumn from './MyColumn';
-import XEUtils from 'xe-utils';
 export default {
   name: 'InvenEdit',
   components: {
@@ -151,6 +151,10 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
+    keyRow( row ) {
+        // console.log(row.seq)
+        return row.seq
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 
@@ -209,7 +213,7 @@ export default {
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
           try {
               var headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
-              this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+              this.PackHeader = [...headsArr]; //拷贝
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               this.refreshTable(); //刷新表格布局
               //调用表格公式解析 存储
@@ -235,8 +239,7 @@ export default {
               this.originalHead.tOriginalHeadRows = row.originalHead.tOriginalHeadRows;
           }
           try {
-              var arr = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
-              this.list = [...arr];
+              this.list = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -270,8 +273,7 @@ export default {
         this.list.length = this.hd.length = 0;
         var data = response.data.onehead,
         headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
-        this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
-        this.col = [];  //新建一个数组存储多级表头嵌套
+        this.PackHeader = [...headsArr]; //拷贝
         this.refreshTable(); //刷新表格布局
         this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
         this.lastHeader = this.$excel.BikoFoArr([...this.col]);
@@ -324,8 +326,7 @@ export default {
               this.originalHead.tOriginalHeadRows = data.originalHead.tOriginalHeadRows;
             }
             this.loading = false;
-            var arr = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
-            this.list = [...arr];
+            this.list = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
             console.log('this.list------------')
             console.log(this.list)
             for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引

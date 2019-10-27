@@ -795,7 +795,7 @@ excelmodel = {
         function S4() {
           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
         }
-        // console.log((S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4()));
+        console.log((S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4()));
         return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
     },
 
@@ -843,7 +843,7 @@ excelmodel = {
             return '100'
         }
         if (name.indexOf('单位')!== -1) {
-            return '70'
+            return '60'
         }
         if (name.indexOf('计量')!== -1) {
             return '100'

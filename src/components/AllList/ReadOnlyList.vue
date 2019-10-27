@@ -75,7 +75,7 @@
         </el-pagination>
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="95%" top="4vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog :title="EditTitle" width="97%" top="3vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
               <div style="width:100%;height:100%;">
                   <!-- 此处引入预览清单组件 -->
                   <row-list :refresh.sync="visibleNew" :uplist="uprow" :type="type"></row-list>
@@ -90,7 +90,6 @@
 
 <script>
 import RowList from './RowList';
-import XEUtils from 'xe-utils';
   export default {
   name: 'ReadOnlyList',
   components: {

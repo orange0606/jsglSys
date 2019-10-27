@@ -14,12 +14,11 @@
         size="mini"
         :show-header="showHeader" 
         v-if="showHeader"
-        
+        :row-key="keyRow"
         show-summary
         :summary-method="getSummaries"
-        :edit-config="{render: 'scroll', renderSize: 150}">
-      
-        <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center"  ></elx-editable-column>
+        :edit-config="{render: 'scroll', renderSize: 80}">
+        <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
         <!-- 此处使用多级表头嵌套组件 -->
         <my-column v-for="(item,index) in col" :key="index" :col="item" :hd="hd"></my-column>
       </elx-editable>
@@ -84,6 +83,10 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
+    keyRow( row ) {
+        // console.log(row.seq)
+        return row.seq
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 
@@ -148,7 +151,7 @@ export default {
             var data = response.data[this.type],
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
 
-            this.PackHeader = XEUtils.clone(header, true); //深拷贝
+            this.PackHeader = [...header]; //深拷贝
             this.col = this.$excel.Nesting(this.PackHeader);   //调用多级表头嵌套组装函数
             this.hd = Object.keys(this.PackHeader[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
             console.log('this.col----------- ')
@@ -158,13 +161,12 @@ export default {
                 this.showHeader = true;
             })
             this.loading = false;
-            var list = this.$excel.ListAssemble( data[rowlistkey] ); //组装清单表格数据
-            this.list = XEUtils.clone(list, true); //深拷贝
+            this.list = this.$excel.ListAssemble( data[rowlistkey] ); //组装清单表格数据
             if (this.list.length >0) {
                 this.findList(); //调用滚动渲染数据
             }
             
-            list = header = null;  //初始化
+            header = null;  //初始化
             console.log('this.list')
             console.log(this.list)
             

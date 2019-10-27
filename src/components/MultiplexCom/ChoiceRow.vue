@@ -14,13 +14,11 @@
       size="mini"
       :show-header="showHeader"
       v-if="showHeader"
-      
+      :row-key="keyRow"
       :row-style="RowCss"
-      :edit-config="{ render: 'scroll', renderSize: 1000}">
-      <!-- <el-table-column type="selection" :selectable="selectableEvent" width="40"></el-table-column> -->
-      <!-- <el-table-column type="selection" :selectable="selectableEvent" :key="$excel.randomkey()" width="40"></el-table-column> -->
-      <elx-editable-column type="selection" width="40" :key="$excel.randomkey()" align="center" ></elx-editable-column>
-      <el-table-column type="index" align="center" :key="$excel.randomkey()" width="50" ></el-table-column>
+      :edit-config="{ render: 'scroll', renderSize: 60}">
+      <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
+      <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
       <!-- 此处使用多级表头嵌套组件 -->
       <column v-for="(item,index) in col" :key="index" :col="item" :hd="hd" ></column>
 
@@ -87,6 +85,10 @@ export default {
       }
   },
   methods: {
+    keyRow( row ) {
+        // console.log(row.seq)
+        return row.seq
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 

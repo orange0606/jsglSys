@@ -30,7 +30,7 @@
       <el-dialog
       width="95%"
       title="选择清单"
-      top="5vh"
+      top="4vh"
       :visible.sync="innerVisible"
       append-to-body>
       <div v-if="showList">
@@ -114,20 +114,15 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
-          
+          :row-key="keyRow"
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 100}">
-          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="55"></elx-editable-column>
-        
-          <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
-            <template v-slot:header>
-              <i class="el-icon-setting" @click="dialogVisible = true"></i>
-            </template>
-          </elx-editable-column>
+          :edit-config="{render: 'scroll', renderSize: 60}">
+          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader" :hd="hd" ></my-column>
         </elx-editable>
@@ -241,6 +236,10 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    keyRow( row ) {
+        // console.log(row.seq)
+        return row.seq
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 

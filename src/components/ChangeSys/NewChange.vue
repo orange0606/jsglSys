@@ -107,22 +107,17 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
-          
+          :row-key="keyRow"
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 110}">
-          <elx-editable-column type="selection" align="center" :key="$excel.randomkey()" width="50"></elx-editable-column>
-        
-          <elx-editable-column type="index" width="60" :key="$excel.randomkey()" align="center" >
-            <template v-slot:header>
-              <i class="el-icon-setting" @click="dialogVisible = true"></i>
-            </template>
-          </elx-editable-column>
+          :edit-config="{render: 'scroll', renderSize: 80}">
+           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
-          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" ></my-column>
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="change" :lastHeader="lastHeader" :hd="hd" ></my-column>
         </elx-editable>
         <p style="color: red;font-size: 12px;margin:10px 0 10px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
       </div>
@@ -237,6 +232,10 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    keyRow( row ) {
+        // console.log(row.seq)
+        return row.seq
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 
@@ -305,7 +304,7 @@ export default {
 
           try {
               var headsArr = this.$excel.Package(row.changeHead.tChangeHeadRows,row.changeHead.refCol,row.changeHead.refRow);
-              this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+              this.PackHeader = [...headsArr]; //拷贝
               
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               this.refreshTable(); //刷新表格布局
@@ -371,7 +370,7 @@ export default {
         .then((response) => {
           var data = response.data.onehead,
           headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
-          this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+          this.PackHeader = [...headsArr]; //拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
           this.refreshTable(); //刷新表格布局
           
