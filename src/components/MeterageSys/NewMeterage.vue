@@ -114,11 +114,11 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
+          size="mini"
 
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
-          size="mini"
           :summary-method="getSummaries"
           :edit-config="{render: 'scroll', renderSize: 60}">
           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>

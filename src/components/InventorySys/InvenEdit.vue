@@ -154,7 +154,7 @@ export default {
     keyRow( row ) {
         // console.log(row.seq)
         // console.log(this.$keys);
-        return this.$keys++;
+        // return this.$keys++;
         return row.seq;
 
     },

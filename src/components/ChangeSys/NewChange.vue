@@ -107,7 +107,6 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
-          :row-key="keyRow"
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
