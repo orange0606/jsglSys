@@ -23,6 +23,7 @@
             <!-- <template slot="title">分组一</template> -->
             <el-menu-item index="2-1"><router-link to="/Originals" >原清单</router-link></el-menu-item>
             <el-menu-item index="2-2"><router-link to="/AllOriginals" >所有原清单</router-link></el-menu-item>
+            <el-menu-item index="2-3"><router-link to="/NewList" >新组件原清单</router-link></el-menu-item>
         </el-submenu>
         <el-submenu index="3">
             <template slot="title">

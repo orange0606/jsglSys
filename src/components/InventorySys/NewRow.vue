@@ -62,8 +62,8 @@
           :summary-method="getSummaries"
           :edit-config="{render: 'scroll', renderSize: 110, }">
           
-          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="selection" align="center" width="45" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" ></elx-editable-column>
           
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>

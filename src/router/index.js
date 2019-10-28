@@ -43,6 +43,14 @@ export default new Router({
       }
     }, 
     {
+      path: '/NewList',
+      name: 'NewList',
+      component: ()=>import('@/components/InventorySys/NewList.vue'),
+      meta:{
+        "requireAuth": true
+      }
+    }, 
+    {
       path: '/ChangeList',
       name: 'ChangeList',
       component: ()=>import('@/components/ChangeSys/ChangeList.vue'),

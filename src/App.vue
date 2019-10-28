@@ -139,11 +139,14 @@ body, html, #app{
 
     /* -webkit-overflow-y: auto;
     -moz-overflow-y: auto; */
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth;
     position: sticky;
-    overflow-y: auto; 
+    overflow-y: auto;  */
 }
-
+.el-table--border th.gutter:last-of-type{
+  	display: table-cell !important; 
+  	width:50px !important; 
+ }
 
 /* .el-table__body, .el-table__footer, .el-table__header {
     scroll-behavior: smooth;
@@ -158,6 +161,11 @@ body, html, #app{
     scroll-behavior: smooth;
     overflow-y: auto;
 } */
+tbody {
+    scroll-behavior: smooth;
+    overflow-y: auto;
+    position: sticky;
+}
 .click-table11-oper {
     height: 30px;
     margin-bottom: 10px;
@@ -183,13 +191,16 @@ body, html, #app{
 
 
   /* 合计尾行不显示兼容问题 */
-  .el-table{
+  /* .el-table{
       overflow:visible !important;
   }
   body .el-table th.gutter{
       display: table-cell!important;
-  }
-
+  } */
+.el-table--border th.gutter:last-of-type{
+  	display: table-cell !important; 
+  	width:50px !important; 
+ }
   /* 表格行高input等高度设置 */
   .scroll-table4.el-table--mini .elx-editable-column {
       padding: 0;

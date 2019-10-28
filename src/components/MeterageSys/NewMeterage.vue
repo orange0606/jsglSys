@@ -96,7 +96,7 @@
         <!-- <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button> -->
         <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
         <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-        <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
+        <!-- <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
         <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="consoles">打印一下</el-button>
       </div>
       
@@ -114,7 +114,7 @@
           height="100%"
           :show-header="showHeader" 
           v-if="showHeader"
-          :row-key="keyRow"
+
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
@@ -622,12 +622,12 @@ export default {
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalmeterage-meterage") {
                         // console.log('正在设置哪一列  '+row.colNum)
-                        try {
+                        // try {
+                            let totmheader = null;
                             if (this.totalmeterageCol) {
-                                let totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
-                            }else{
-                                let totmheader = null;
+                                totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
                             }
+       
                             if (to.length===0 || !totmheader || totmheader.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
@@ -658,12 +658,12 @@ export default {
                                     }
                                 }
                             }
-                        } catch (error) {
-                            this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
-                            console.log('设置上期累计数量报错默认为0'+error)
-                            console.log(error)
-                            rest[r][row.colNum].td = 0;
-                        }
+                        // } catch (error) {
+                        //     this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
+                        //     console.log('设置上期累计数量报错默认为0'+error)
+                        //     console.log(error)
+                        //     rest[r][row.colNum].td = 0;
+                        // }
                     }
                     rest[r][row.colNum]['colNum'] = row['colNum'];
                     rest[r][row.colNum]['trNum'] = r;

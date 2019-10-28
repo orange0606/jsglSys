@@ -72,6 +72,9 @@ Vue.prototype.$confirm = MessageBox.confirm;
 
 Vue.prototype.$alert = MessageBox.alert;
 
+//定义一个全局变量，表格每一行的key;
+Vue.prototype.$keys = 0;
+
 // import axios from "axios"
 // // //将axios挂载到原型上
 // Vue.prototype.$axios = axios;
