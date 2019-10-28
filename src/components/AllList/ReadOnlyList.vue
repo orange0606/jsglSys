@@ -90,6 +90,7 @@
 
 <script>
 import RowList from './RowList';
+import XEUtils from 'xe-utils';
   export default {
   name: 'ReadOnlyList',
   components: {

@@ -207,7 +207,7 @@ export default {
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
 
           try {
-              var headsArr = this.$excel.Package(row.payHead.tPayHeadRows,row.payHead.refCol,row.payHead.refRow);
+              let headsArr = this.$excel.Package(row.payHead.tPayHeadRows,row.payHead.refCol,row.payHead.refRow);
               this.PackHeader = [...headsArr]; //深拷贝
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               this.refreshTable(); //刷新表格布局
@@ -271,7 +271,7 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'pay'})
         .then((response) => {
-          var data = response.data.onehead,
+          let data = response.data.onehead,
           headsArr = this.$excel.Package(data['tPayHeadRows'],data.refCol,data.refRow);
           this.PackHeader = [...headsArr]; //拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
@@ -305,9 +305,9 @@ export default {
         this.$post('/pay/getonerow',{ id })
             .then((response) => {
               console.log(response)
-            var data = response.data.pay;
+            let data = response.data.pay;
             if (!data && !data.payRowList && !data.payHead.tPayHeadRows ) return this.loading = false;
-            var headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow);
+            let headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
             this.refreshTable(); //刷新表格布局
@@ -330,7 +330,7 @@ export default {
             }
             this.tTotalmeterageId = data.tTotalmeterageId; //累计计量清单id
             this.loading = false;
-            var arr = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据
+            let arr = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据
             this.list = [...arr];
             this.findList(); //调用滚动渲染数据
             
@@ -348,7 +348,7 @@ export default {
         .then((response) => {
           console.log('/totalpay/by/payheadid请求关联的一个累计支付清单')
           console.log(response)
-          var data = response.data.totalpay,
+          let data = response.data.totalpay,
           arr = []; 
           if (data && data.totalpayRowList && data.totalpayRowList.length >0 ) {
               arr = this.$excel.ListAssemble(data.totalpayRowList);  //组装清单
@@ -359,7 +359,7 @@ export default {
 
           this.totalpayRowList = arr;
           if (data && data.totalpayHead && data.totalpayHead.tTotalpayHeadRows && data.totalpayHead.tTotalpayHeadRows.length >0 ) {
-              var headsArr = this.$excel.Package(data['totalpayHead'].tTotalpayHeadRows,data['totalpayHead'].refCol,data['totalpayHead'].refRow),
+              let headsArr = this.$excel.Package(data['totalpayHead'].tTotalpayHeadRows,data['totalpayHead'].refCol,data['totalpayHead'].refRow),
               Col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.totalpayCol = this.$excel.BikoFoArr([...Col]);
@@ -380,7 +380,7 @@ export default {
         .then((response) => {
           console.log('/totalmeterage/by/payheadid请求相对应的累计计量清单数据')
           console.log(response)
-          var data = response.data.totalmeterage,
+          let data = response.data.totalmeterage,
           arr = []; 
           if (!data) {
               this.tometerageRowList = arr;
@@ -410,7 +410,7 @@ export default {
         this.startTime = Date.now(); 
         // 先生成一个完整表格数据
         this.list = [];
-        var hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+        let hd = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
         patt1=/[A-Z+]*/g;
         for (let index =0; index < 1; index++) {   //生成一行支付清单
             this.list[index] = {};
@@ -418,13 +418,13 @@ export default {
               this.list[index][hd[i]] = {attribute: null,colNum: hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:index+1,upload: 1 };
             }
         }
-        var cols = [...this.col],
+        let cols = [...this.col],
         sumArr = this.$excel.BikoFoArr(cols); //截取获取表格实际对应所有列最后一层的表头列 object
-        var header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        let header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         for (let index = header.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
-            var row = sumArr[header[index]];
+            let row = sumArr[header[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "totalpay-pay" || row.attribute === "totalmeterage-head-total") ) {
-                var str = row.attributeValue,
+                let str = row.attributeValue,
                 colName = str.match(patt1)[0],
                 Rlist = this.list[0][row.colNum];
              
@@ -434,14 +434,14 @@ export default {
                           // console.log(this.totalpayCol)
                           // console.log(this.totalpayRowList)
                           // this.list[a][row.colNum] = {...data[a][colName]};
-                          var topayheader = Object.keys(this.totalpayCol); //用来所需要的所有列(obj)（属性）名
+                          let topayheader = Object.keys(this.totalpayCol); //用来所需要的所有列(obj)（属性）名
                           if (topayheader && topayheader.length>0 && this.totalpayRowList && this.totalpayRowList.length && this.totalpayRowList.length > 0) {
                               console.log('有没有进去这个if判断-----------topayheader && topayheader.length>0--------')
                               for (let index = topayheader.length -1; index >= 0; index--){
-                                  // var ToPayrow = this.totalpayCol[topayheader[index]],
+                                  // let ToPayrow = this.totalpayCol[topayheader[index]],
                                   // Tostr = ToPayrow.attributeValue,
                                   // TocolName = str.match(patt1)[0];
-                                    var ToPayrow = this.totalpayCol[topayheader[index]],
+                                    let ToPayrow = this.totalpayCol[topayheader[index]],
                                     Tostr = ToPayrow.attributeValue;
                                     if (ToPayrow.attribute!== "pay-total") {
                                         console.log('属性不对')
@@ -482,13 +482,13 @@ export default {
                             //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                             if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
                  
-                                // var number = null;
+                                // let number = null;
                                 // for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
                                 //     number += (this.tometerageRowList[d][colName].td)*1;
                                 //     // number += (this.tometerageRowList[d][colName].td).toFixed(2);
                                 // }
                                 // Rlist.td = number.toFixed(2);
-                                var sumTd = [];
+                                let sumTd = [];
                                 for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
                                     console.log('this.tometerageRowList[d][colName].td')
                                     console.log(this.tometerageRowList[d][colName].td)
@@ -533,7 +533,7 @@ export default {
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            var str = column.property,
+            let str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
             //判断是否哪种属性类型允许单元格编辑
             if (this.lastHeader[colName].attribute !== 'pay') return false;
@@ -544,7 +544,7 @@ export default {
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            var str = column.property,
+            let str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
 
             //判断是否哪种属性类型允许单元格编辑
@@ -592,7 +592,7 @@ export default {
             if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
             this.loading = true;
-            var header = Object.keys(this.lastHeader), //用来所需要的所有列(obj)（属性）名
+            let header = Object.keys(this.lastHeader), //用来所需要的所有列(obj)（属性）名
             payHead = this.payHead, //表头数据
             payRowList = [], //清单内容
             payRowAddList = [],  //增
@@ -611,7 +611,7 @@ export default {
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
-                        var listRows = list[index][header[i]];
+                        let listRows = list[index][header[i]];
 
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
@@ -636,7 +636,7 @@ export default {
                 return this.$message({ type: 'success',message: '存储失败，请联系相关技术人员!' });
             }
             // return false;
-            var obj = { //新建清单的时候需要用
+            let obj = { //新建清单的时候需要用
                 tPayHeadId: this.form.headerId,    //清单表头id
                 processId: this.approval.id,         //审批单流程id
                 sysOrder: '',                   //系统序号  预留，暂不使用
@@ -680,7 +680,7 @@ export default {
                             break;
                         default:  //为 alter模式与 new模式 
                             for (let index = this.payList.length -1; index >=0; index--) {
-                                var ListRow = this.payList[index];
+                                let ListRow = this.payList[index];
                                 if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
                                     ListRow.tPayHeadId = this.form.headerId;
                                     ListRow.payRowList = payRowList;
@@ -704,7 +704,7 @@ export default {
                 }
                 
             }else{    //不接入父组件的情况
-                  var parameter = {
+                  let parameter = {
                       payAddList: [], //增清单
                       payDelList: [],   //删清单
                       payAltList: []  //改清单

@@ -298,7 +298,7 @@ export default {
           console.log('row-----------------------')
           console.log(row)
           try {
-              var headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
+              let headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
               this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
               
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
@@ -327,7 +327,7 @@ export default {
               this.meterageHead.tMeterageHeadRows = row.meterageHead.tMeterageHeadRows;
           }
           try {
-              var arr = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
+              let arr = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
               this.list = [...arr];
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
@@ -360,7 +360,7 @@ export default {
        this.$post('/head/getone',{id,type:'meterage'})
         .then((response) => {
           this.list.length = this.hd.length = 0;
-          var data = response.data.onehead,
+          let data = response.data.onehead,
           headsArr = this.$excel.Package(data['tMeterageHeadRows'],data.refCol,data.refRow);
           this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
           this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
@@ -390,9 +390,9 @@ export default {
         //此处请求一个审批单的一个计量清单
         this.$post('/meterage/getonerow',{ id })
             .then((response) => {
-            var data = response.data.meteragerow;
+            let data = response.data.meteragerow;
             if (!data && !data.meterageRowList) return this.loading = false;
-            var headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
+            let headsArr = this.$excel.Package(data['meterageHead'].tMeterageHeadRows,data['meterageHead'].refCol,data['meterageHead'].refRow);
             this.PackHeader = [...headsArr];
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
             this.refreshTable(); //刷新表格布局
@@ -415,7 +415,7 @@ export default {
 
 
             this.loading = false;
-            var arr = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据
+            let arr = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据
             this.list = [...arr];
             
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
@@ -451,7 +451,7 @@ export default {
         if (!this.meterageHead || !this.meterageHead.id) return this.$message({type: 'info',message: '表头错误，请检查，或者重新选择！'});
         this.$post('/totalmeterage/by/meterageheadid',{ id:this.meterageHead.id })
         .then((response) => {
-            var data = response.data.totalmeterage,
+            let data = response.data.totalmeterage,
             arr = []; 
             console.log('打印一下请求到的相关累计计量清单response')
             console.log(response)
@@ -472,7 +472,7 @@ export default {
 
             if (data && data.totalmeterageHead && data.totalmeterageHead.tTotalmeterageHeadRows && data.totalmeterageHead.tTotalmeterageHeadRows.length >0 ) {
                 console.log('进来表头组装了')
-                var headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
+                let headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
                 col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
                 // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                 this.totalmeterageCol = this.$excel.BikoFoArr([...col]);
@@ -492,7 +492,7 @@ export default {
     oneUpatde (id) {  //请求选择可导入新清单内容
         this.$post('/update/row/getone',{ id })
         .then((response) => {
-            var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+            let list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
             res = response.data.update,
             obj = null;
 
@@ -564,7 +564,7 @@ export default {
     packupdata (update) { //根据已选择的新清单数据选择对应累计计量清单数据
         if (!this.tomeRowList) this.tomeRowList=[];
         this.startTime = Date.now(); 
-        var uplen = update.length,
+        let uplen = update.length,
         tolen = this.tomeRowList.length,
         todate = [];  //用来存储与选择对应的清单数据的累计计量清单数据
         if (!uplen || uplen === 0) return false;
@@ -574,11 +574,11 @@ export default {
         }
         console.log('累计计量有数据')
         for (let index = update.length -1; index >= 0; index--) {
-            var upRowA = update[index]['A']['trNum'];
+            let upRowA = update[index]['A']['trNum'];
             // console.log('update当前的下标index  '+index)
             for (let to = this.tomeRowList.length -1; to >=0; to--) {
                 // console.log('this.tomeRowList当前的下标to  '+to)
-                var toRow = this.tomeRowList[to];
+                let toRow = this.tomeRowList[to];
                 if (upRowA === toRow['A']['trNum']) {
                     todate[index] = toRow;
                     // console.log('结束最内层的循环，执行下一循环index---to',index,'    ', to )
@@ -593,7 +593,7 @@ export default {
         this.importfxx(update, todate, uplen);
     },
     importfxx(up, to, len) { //表头导入函数 up 新清单数据  to 累计计量清单数据 len 本次导入数据的数量
-        var list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+        let list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
         listlen = list.length,
         rest = [],    //存储本次新增清单的数据
         patt1=/[A-Z+]*/g,
@@ -610,7 +610,7 @@ export default {
             }
         }
         for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
-            var row = sumArr[this.hd[index]];
+            let row = sumArr[this.hd[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "update" || row.attribute === "totalmeterage-meterage") ) {
                 let str = row.attributeValue;
                 let colName = str.match(patt1)[0]; 
@@ -624,9 +624,9 @@ export default {
                         // console.log('正在设置哪一列  '+row.colNum)
                         try {
                             if (this.totalmeterageCol) {
-                                var totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
+                                let totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
                             }else{
-                                var totmheader = null;
+                                let totmheader = null;
                             }
                             if (to.length===0 || !totmheader || totmheader.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
@@ -634,7 +634,7 @@ export default {
                             } else {
                                 // console.log('进来了这里>=0')
                                 for (let index = totmheader.length -1; index >= 0; index--){
-                                    var Totorow = this.totalmeterageCol[totmheader[index]],
+                                    let Totorow = this.totalmeterageCol[totmheader[index]],
                                     Tostr = Totorow.attributeValue;
                                     // console.log('Totorow.attribute')
                                     // console.log(Totorow.attribute)
@@ -704,7 +704,7 @@ export default {
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            var str = column.property,
+            let str = column.property,
             colName = str.substr(0,str.indexOf(".td")),
             patt1=/[A-Z+]*/g,
             sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
@@ -715,7 +715,7 @@ export default {
             };
             //现在进行遍历属性把原数量，禁止修改
             for (let c = this.hd.length -1; c >= 0; c--) {
-                var hederRow = sumArr[this.hd[c]];
+                let hederRow = sumArr[this.hd[c]];
                 if (hederRow.attribute && hederRow.attribute === "totalmeterage-meterage" ) {
                     if (hederRow.colNum === colName)  return false;
                 }
@@ -727,7 +727,7 @@ export default {
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            var str = column.property,
+            let str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
             //判断是否哪种属性类型允许单元格编辑
             if (this.lastHeader[colName].attribute !== 'meterage') {
@@ -777,7 +777,7 @@ export default {
     //     console.log('this.hd-----------------p')
     //     console.log(this.hd)
     //     if (!this.hd.length || this.hd.length===0) return false;
-    //     var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+    //     let rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
     //     restLen = rest.length,
     //     NewRow = {},
     //     patt1=/[A-Z+]*/g,
@@ -789,7 +789,7 @@ export default {
     
     //     //现在进行遍历属性把原清单数据加入进去
     //       for (let c = this.hd.length -1; c >= 0; c--) {
-    //           var row = sumArr[this.hd[c]],
+    //           let row = sumArr[this.hd[c]],
     //           str = row.attributeValue;
     //           if (row.attribute && row.attribute === "totalmeterage-meterage" ) {
     //               NewRow[row.colNum].td = 0;
@@ -811,17 +811,17 @@ export default {
     },
     RemoveSelecteds () {  //删除选中
       this.hd = Object.keys(this.lastHeader);
-      var selection = this.$refs.elxEditable1.getSelecteds(),
+      let selection = this.$refs.elxEditable1.getSelecteds(),
       seleLen = selection.length;
       // console.log('seleLen')
       // console.log(selection)
       if (seleLen && seleLen > 0) {
           this.$refs.elxEditable1.removeSelecteds();
-          var number = selection[0]['seq'];; //表格列表的下标
+          let number = selection[0]['seq'];; //表格列表的下标
           this.Rowsort( number );  //调用表格重新排序函数
           for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
               for (let a = this.hd.length-1; a >= 0; a--) {
-                  var item = selection[index][this.hd[a]];
+                  let item = selection[index][this.hd[a]];
                   if (item['id']) this.RowDelList.push(item);
               }
           }
@@ -836,7 +836,7 @@ export default {
                 if (sub > index) break;
                 list[index]['seq']=index;  //更新索引
                 for (let a = this.hd.length -1; a >= 0; a--) {
-                    var item = list[index][this.hd[a]];
+                    let item = list[index][this.hd[a]];
                     item.trNum = index+1;
                     // console.log('item.trNum--'+item.trNum)
                     if (item['id']) list[index]['alter'] = 'Y';   
@@ -860,7 +860,7 @@ export default {
             if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
             this.loading = true;
-            var header = Object.keys(this.lastHeader), //用来所需要的所有列(obj)（属性）名
+            let header = Object.keys(this.lastHeader), //用来所需要的所有列(obj)（属性）名
             meterageHead = this.meterageHead, //表头数据
             meterageRowList = [], //清单内容
             meterageRowAddList = [],  //增
@@ -905,7 +905,7 @@ export default {
                 return this.$message({ type: 'success',message: '存储失败，请联系相关技术人员!' });
             }
             // return false;
-            var obj = { //新建清单的时候需要用
+            let obj = { //新建清单的时候需要用
                 meterageHeadId: this.form.headerId,    //清单表头id
                 processId: this.approval.id,         //审批单流程id
                 sysOrder: '',                   //系统序号  预留，暂不使用
@@ -949,7 +949,7 @@ export default {
                             break;
                         default:  //为 alter模式与 new模式 
                             for (let index = this.meterageList.length -1; index >=0; index--) {
-                                var ListRow = this.meterageList[index];
+                                let ListRow = this.meterageList[index];
                                 if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
                                     ListRow.meterageHeadId = this.form.headerId;
                                     ListRow.meterageRowList = meterageRowList;
@@ -973,7 +973,7 @@ export default {
                 }
                 
             }else{    //不接入父组件的情况
-                  var parameter = {
+                  let parameter = {
                       meterageAddList: [], //增清单
                       meterageDelList: [],   //删清单
                       meterageAltList: []  //改清单

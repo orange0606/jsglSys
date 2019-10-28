@@ -212,7 +212,7 @@ export default {
 
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
           try {
-              var headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
+              let headsArr = this.$excel.Package(row.originalHead.tOriginalHeadRows,row.originalHead.refCol,row.originalHead.refRow);
               this.PackHeader = [...headsArr]; //拷贝
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               this.refreshTable(); //刷新表格布局
@@ -271,7 +271,7 @@ export default {
        this.$post('/head/getone',{id,type:'original'})
         .then((response) => {
         this.list.length = this.hd.length = 0;
-        var data = response.data.onehead,
+        let data = response.data.onehead,
         headsArr = this.$excel.Package(data['tOriginalHeadRows'],data.refCol,data.refRow);
         this.PackHeader = [...headsArr]; //拷贝
         this.refreshTable(); //刷新表格布局
@@ -301,10 +301,10 @@ export default {
             this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
             console.log('response-----------------------------')
             console.log(response)
-            var data = response.data.original;
+            let data = response.data.original;
             // this.list = response.data.originalList.list;
             if (!data && !data.originalRowList) return this.loading = false;
-            var headsArr = this.$excel.Package(data['originalHead'].tOriginalHeadRows,data['originalHead'].refCol,data['originalHead'].refRow);
+            let headsArr = this.$excel.Package(data['originalHead'].tOriginalHeadRows,data['originalHead'].refCol,data['originalHead'].refRow);
             this.PackHeader = [...headsArr];
 
             this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
@@ -356,7 +356,7 @@ export default {
             this.list.length = 0; //归为初始化状态
             try { //先判断表头是否一致
                 // console.log(data);
-                var hd = this.hd, //用来所需要的所有列(obj)（属性）名
+                let hd = this.hd, //用来所需要的所有列(obj)（属性）名
                 datahd = Object.keys(data[0]);
                 if ( datahd.length < hd.length ) {
                     this.loading = false;
@@ -365,12 +365,12 @@ export default {
                 }else{
                     hd.length = datahd.length = 0;
                 }
-                var arr = [...this.PackHeader],
+                let arr = [...this.PackHeader],
                 arrlen = arr.length = arr.length-1,
                 dataSplice = data.splice(0,arrlen), //去掉表头并且用来作判断是否一致
                 ff = arr.some( function( item, index, array ){ //判断导入的清单表头与文件Excel清单表头如果是否相等
-                      var hdsome = hd.some( function( val, i){ 
-                          var headrs = array[index][val];
+                      let hdsome = hd.some( function( val, i){ 
+                          let headrs = array[index][val];
                           Rows = dataSplice[index][val];
                           return headrs.colNum !== Rows.colNum || headrs.td !== Rows.td || headrs.tdRowspan !== Rows.tdRowspan || headrs.tdColspan !== Rows.tdColspan || headrs.trNum !== Rows.trNum;
                       }); 
@@ -408,7 +408,7 @@ export default {
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            var str = column.property,
+            let str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态
@@ -455,7 +455,7 @@ export default {
         console.log('this.hd.length')
         console.log(this.hd.length)
       if (!this.hd.length || this.hd.length===0) return false;
-      var rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+      let rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
       restLen = rest.length,
       NewRow = {};
       for (let index = this.hd.length -1; index >= 0; index--) {
@@ -476,18 +476,18 @@ export default {
 
     },
     RemoveSelecteds () {  //删除选中
-      var selection = this.$refs.elxEditable1.getSelecteds(),
+      let selection = this.$refs.elxEditable1.getSelecteds(),
       seleLen = selection.length;
       console.log('seleLen')
       console.log(selection)
       if (seleLen && seleLen > 0) {
           this.$refs.elxEditable1.removeSelecteds();
-          var number = selection[0]['seq'];; //表格列表的下标
+          let number = selection[0]['seq'];; //表格列表的下标
           this.Rowsort( number );  //调用表格重新排序函数
 
           for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
               for (let a = this.hd.length-1; a >= 0; a--) {
-                  var item = selection[index][this.hd[a]];
+                  let item = selection[index][this.hd[a]];
                   if (item['id']) this.RowDelList.push(item);
               }
           }
@@ -503,7 +503,7 @@ export default {
                 if (sub > index) break;
                 list[index]['seq']=index;  //更新索引
                 for (let a = this.hd.length -1; a >= 0; a--) {
-                    var item = list[index][this.hd[a]];
+                    let item = list[index][this.hd[a]];
                     item.trNum = index+1;
                     // console.log('item.trNum--'+item.trNum)
                     if (item['id']) list[index]['alter'] = 'Y';   
@@ -527,7 +527,7 @@ export default {
             if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
             this.loading = true;
-            var header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
+            let header = Object.keys(this.PackHeader[0]), //用来所需要的所有列(obj)（属性）名
             originalHead = this.originalHead, //表头数据
             originalRowList = [], //清单内容
             originalRowAddList = [],  //增
@@ -546,7 +546,7 @@ export default {
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
-                        var listRows = list[index][header[i]];
+                        let listRows = list[index][header[i]];
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
                             listRows['formula'] = '';
@@ -568,7 +568,7 @@ export default {
                 console.log('保存数据遇到错误  :'+error)
                 return this.$message({ type: 'success',message: '存储失败，请联系相关技术人员!' });
             }
-            var obj = { //新建清单的时候需要用
+            let obj = { //新建清单的时候需要用
                 originalHeadId: this.form.headerId,    //清单表头id
                 processId: this.approval.id,         //审批单流程id
                 sysOrder: '',                   //系统序号  预留，暂不使用
@@ -612,7 +612,7 @@ export default {
                             break;
                         default:  //为 alter模式与 new模式 
                             for (let index = this.originalList.length -1; index >=0; index--) {
-                                var ListRow = this.originalList[index];
+                                let ListRow = this.originalList[index];
                                 if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
                                     ListRow.originalHeadId = this.form.headerId;
                                     ListRow.originalRowList = originalRowList;
@@ -636,7 +636,7 @@ export default {
                 }
                 
             }else{    //不接入父组件的情况
-                  var parameter = {
+                  let parameter = {
                       originalAddList: [], //增清单
                       originalDelList: [],   //删清单
                       originalAltList: []  //改清单

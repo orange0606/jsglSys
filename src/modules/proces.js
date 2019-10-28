@@ -2,30 +2,29 @@ import { MessageBox, Message, Switch } from 'element-ui'
 let patt1=/[A-Z+]*/g,
 patt2=/\d+/g,
 excelmodel = {
-
     //表格读取处理函数============
     Imports(callback){
         // 通过DOM取文件数据
         this.file = event.currentTarget.files[0];
-        var rABS = false, //是否将文件读取为二进制字符串
+        let rABS = false, //是否将文件读取为二进制字符串
         f = this.file,
         reader = new FileReader(),
          _this = this;
         //if (!FileReader.prototype.readAsBinaryString) {
         FileReader.prototype.readAsBinaryString = function(f) {
-            var binary = "",
+            let binary = "",
             rABS = false, //是否将文件读取为二进制字符串
             // pt = this,
             wb, //读取完成的数据
             // outdata,
             reader = new FileReader();
             reader.onload = function(e) {
-                var bytes = new Uint8Array(reader.result),
+                let bytes = new Uint8Array(reader.result),
                 length = bytes.byteLength;
-                for(var i = 0; i < length; i++) {
+                for(let i = 0; i < length; i++) {
                     binary += String.fromCharCode(bytes[i]);
                 }
-                var XLSX = require('xlsx');
+                let XLSX = require('xlsx');
                 if(rABS) {
                     wb = XLSX.read(btoa(fixdata(binary)), { //手动转化
                         type: 'base64'
@@ -35,9 +34,9 @@ excelmodel = {
                         type: 'binary'
                     });
                 }
-                var persons = []   //数组  存储文件内的所有表数据
-                for (var sheet in wb.Sheets) {
-                    var perobj ={}
+                let persons = []   //数组  存储文件内的所有表数据
+                for (let sheet in wb.Sheets) {
+                    let perobj ={}
                     if (wb.Sheets.hasOwnProperty(sheet)) {
                     // console.log('wb.Sheets[sheet]')
                         // perobj.sheets = XLSX.utils.get_formulae(wb.Sheets[sheet]) //添加工作表的数据
@@ -79,13 +78,13 @@ excelmodel = {
     /*
     表头数据组装表格函数
     param list: 所有单元格基本数据(obj)
-    param colLength: 需要组装多少列(string,int)
-    param rowLength: 需要组装多少行(string,int)
+    param colLength: 需要组装多少列(int)
+    param rowLength: 需要组装多少行(int)
     return : 完整表格数据
     */
     Package (list,colLength,rowLength){ 
         // let AZ = this.AZ();
-        var arr = [];
+        let arr = [];
         for (let i = 0; i < parseInt(rowLength); i++) { 
             arr[i]={}
             for (let j = 0; j < parseInt(colLength); j++) {
@@ -94,7 +93,7 @@ excelmodel = {
         }
         for (let index = list.length-1; index >= 0; index--) {
             if (list[index].trNum && list[index].colNum) {
-                var coll = list[index].colNum,
+                let coll = list[index].colNum,
                 row = list[index].trNum;  //行号
                 // let col = ABC.indexOf(list[index].colNum); //列号A
                 arr[row-1][coll] =list[index];
@@ -113,10 +112,10 @@ excelmodel = {
         let arrHd = Object.keys(arr[0]);
         // let ABC = this.$excel.AZ();
         if (arr[0]) {
-            var headers = [],
+            let headers = [],
             arrlen =  arr.length -2;
             for (let index = arrlen; index >=0 ; index--) {
-                var arrHdlen = arrHd.length;
+                let arrHdlen = arrHd.length;
                 for (let i = 0; i < arrHdlen; i++) {  //添加第一层
                       if (index !=0) {
                           if (arr[index-1][arrHd[i]] && arr[index-1][arrHd[i]].tdRowspan !=0 && arr[index-1][arrHd[i]].tdColspan !=0) {
@@ -193,7 +192,7 @@ excelmodel = {
         }
         let arr = [];
         for (let index = list.length-1; index >= 0; index--) {
-            var coll = list[index].colNum,
+            let coll = list[index].colNum,
             col = ABC.indexOf(list[index].colNum), //列号A
             row = list[index].trNum;  //行号
             if (col>=0 && coll) {
@@ -220,10 +219,10 @@ excelmodel = {
     },
     filterStr (str) {  //去除空白以及特殊字符串
         str = str.replace(/\s*/g,"");
-        var pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘； = ”“'。，、？_]"), 
+        let pattern = new RegExp("[`~!@#$^&（）|{}':;',\\[\\]<>?~！@#￥……&——|{}【】‘； = ”“'。，、？_]"), 
         strlen = str.length,
         specialStr = "";  
-        for(var i=0;i<strlen;i++){  
+        for(let i=0;i<strlen;i++){  
             specialStr += str.substr(i, 1).replace(pattern, '');   
         }  
         return specialStr;  
@@ -234,14 +233,14 @@ excelmodel = {
     return : 完整表格解析完成的字符串
     */
     Analysis (str) {  //
-        var patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
+        let patt1= /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
         patt2=/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
         patt3 = /[0-9]/,  //判断是否有数字
         patt4 = /[A-Z]/;
         str = this.filterStr(str);  //去除空格与特殊符号
         let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
         for (let i = 0; i < arr.length; i++) {
-            var key = arr[i].match(patt2),
+            let key = arr[i].match(patt2),
             arrlen = arr[i].length;
             for (let a = 0; a < str.length; a++) {
                 let index = str.indexOf(arr[i],a);
@@ -264,7 +263,7 @@ excelmodel = {
     return : 完整表格解构数据
     */
     Unpack (list) { //表格解构
-        var headRowList = [],
+        let headRowList = [],
         hd = Object.keys(list[0]);   //获取所有的列
         for (let index = list.length -1; index >=0; index--) {
             const hdlen = hd.length;
@@ -287,14 +286,14 @@ excelmodel = {
     },
     //封装遍历表格的所有的列 A-Z AA-AZ ...
     AZ () {
-        var arr = [];
-        for (var i = 0; i < 26; i++) {
+        let arr = [];
+        for (let i = 0; i < 26; i++) {
             arr.push(String.fromCharCode((65 + i)))
             // console.log(String.fromCharCode((65 + i)))  
             // console.log(i)   
         }
         for (let j = 0; j < 26; j++) {
-            for (var c = 0; c < 26; c++) {
+            for (let c = 0; c < 26; c++) {
                 arr.push(arr[j]+String.fromCharCode((65 + c)))  
                 // console.log(arr[j]+String.fromCharCode((65 + c)))
             }  
@@ -305,7 +304,7 @@ excelmodel = {
         // // 引入A-Z的所有列数组
         // index = this.AZ();
         if (!ref)return;
-        var subs = ref.indexOf(':'),
+        let subs = ref.indexOf(':'),
         //先获取开始的列坐标
         
         start_c = ABC.indexOf(ref.substr(0,subs).match(patt1)[0])+1,
@@ -341,7 +340,7 @@ excelmodel = {
     },
 
     Table(arr,callback){    //表格完整数据生成函数
-        var sheet=[]; //储存处理好的数据（二维数组）
+        let sheet=[]; //储存处理好的数据（二维数组）
         // console.log('arr')
         const arrlen = arr.length;
         for (let i = 0; i < arrlen; i++) {
@@ -354,7 +353,7 @@ excelmodel = {
                     if (key !== '!ref' && key!== '!merges' && key !== '!margins' && key !=='!rows' && key != '!autofilter') {
                         try{
                             // console.log(arr[i].sheets[key])
-                            var cos = ABC.indexOf(key.match(patt1)[0]),  //选择所有的大写字母进行查询当作列下标
+                            let cos = ABC.indexOf(key.match(patt1)[0]),  //选择所有的大写字母进行查询当作列下标
                             row = parseInt(key.match(patt2)[0])-1,   //选择所有的数字,当作行下标
                             Td = arr[i].sheets[key].v;
                             
@@ -406,7 +405,7 @@ excelmodel = {
             const arrlen = arr.length;
             for (let i = 0; i<arrlen;i++){
                 //开始位置的列下标
-                var st_c = parseInt(arr[i].s.c),
+                let st_c = parseInt(arr[i].s.c),
 
                 //开始位置的行下标
                 start_r = parseInt(arr[i].s.r),
@@ -470,7 +469,7 @@ excelmodel = {
         let Rnum = 0;
         // 删除多余的行
         for (let index = data.length-1; index >= 0; index--) {
-            var hdobj = Object.keys(data[index]).length;
+            let hdobj = Object.keys(data[index]).length;
             for (let r = 0; r < hdobj; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
                 if (data[index][ABC[r]].td === null && data[index][ABC[r]].tdRowspan === 1 && data[index][ABC[r]].tdColspan === 1) {
@@ -489,7 +488,7 @@ excelmodel = {
         //判断每行最少有几列是多余的,然后统一删除最少列的数量
         let Cnum = 0;
         for (let index = data.length-1; index >= 0; index--) {
-            var num = 0,
+            let num = 0,
             hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
@@ -506,7 +505,7 @@ excelmodel = {
             } 
             hdobj = null; 
         }
-        var dataleng = data.length;
+        let dataleng = data.length;
         for (let index = 0; index < dataleng; index++) {
             let hdobj = Object.keys(data[index]);
             for (let c = 0; c < Cnum; c++) {
@@ -536,21 +535,21 @@ excelmodel = {
     return : 真正显示对应列的数据(object)
     */
     FormulaAnaly ( col ) {    //
-        var patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
+        let patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
         patt2 =/[A-Z+]*/g, //查找所有的大写字母，返回一个数组,
         patt3 = /[0-9]/,  //判断是否有数字
         patt4 = /[A-Z]/,
         Fobj = {},
         sumArr = this.BikoFoArr(col); //截取获取表格实际对应所有列的表头列 object
-        var header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
+        let header = Object.keys(sumArr); //用来所需要的所有列(obj)（属性）名
         for (let index = 0; index < header.length; index++) {
-            var sumRow = sumArr[header[index]];
+            let sumRow = sumArr[header[index]];
             if (sumRow.attribute && sumRow.attribute === "formula" && sumRow.attributeValue && sumRow.attributeValue !="") {
-                var str = sumRow.attributeValue;
+                let str = sumRow.attributeValue;
                 str = this.filterStr(str);  //去除空格与特殊符号
-                var arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
+                let arr = str.match(patt1);  // 这里将会得到一个数组['AAA3', 'A11', 'A111', 'A111']
                 for (let i = 0; i < arr.length; i++) {
-                    var key = arr[i].match(patt2),
+                    let key = arr[i].match(patt2),
                     arrlen = arr[i].length;
                     for (let a = 0; a < str.length; a++) {
                         let index = str.indexOf(arr[i],a);
@@ -577,16 +576,16 @@ excelmodel = {
     使用引用赋值
     */
     Formula (that, list, formula) { //表格载入时进行处理公式计算
-        var formuHd = Object.keys(formula), //用来所需要的所有有公式的列(obj)（属性）名
+        let formuHd = Object.keys(formula), //用来所需要的所有有公式的列(obj)（属性）名
         row = null,
         sum = null,
         evalSum = null,
         fhdlen = formuHd.length;
         try {
-            for (var index = list.length - 1; index >= 0; index--) {  
+            for (let index = list.length - 1; index >= 0; index--) {  
                 row = list[index];
-                for (var a = fhdlen -1; a >= 0; a--) {
-                    var rowTd = row[formuHd[a]].td;
+                for (let a = fhdlen -1; a >= 0; a--) {
+                    let rowTd = row[formuHd[a]].td;
                     if (rowTd !==null && rowTd !== '') break;  //不为空，马上跳出这个循环不进行计算
                     sum = formula[formuHd[a]];
                     evalSum = eval(sum);
@@ -624,7 +623,7 @@ excelmodel = {
         let that = this;
 
         Object.keys(lastHeader).forEach(function(key){
-            var keyObj = lastHeader[key],
+            let keyObj = lastHeader[key],
             Att = keyObj.attribute,
             AttVal = keyObj.attributeValue;
             //  console.log('attributeValue');
@@ -633,7 +632,7 @@ excelmodel = {
                 // console.log('AttVal----------------2222222222222')
                 // console.log(AttVal)
                 let colTr = AttVal.match(patt1)[0];   //属性值  列号
-                var sumNb = null;
+                let sumNb = null;
                 switch (type) {
                    
                     case 'change':
@@ -724,7 +723,7 @@ excelmodel = {
             }
         });
 
-        var Eval = null,
+        let Eval = null,
         fkeyslen = fkeys.length;
         try {
             for (let index = 0; index < fkeyslen; index++) {
@@ -749,7 +748,7 @@ excelmodel = {
     },
     getSummaries (PackHeader, list, param) {  //合计
         // console.log('是不是每次都进来了呀'+Math.random()*100)
-        var { columns, data } = param,
+        let { columns, data } = param,
         sums = [],
         sumArr = PackHeader.slice(-1), //截取合计尾行
         header = Object.keys(PackHeader[0]), //用来所需要的所有列(obj)（属性）名
@@ -757,15 +756,15 @@ excelmodel = {
         Total = [],
         listlen = list.length;
         for (let i = header.length - 1; i >= 0; i--) {
-            var sum = sumArr[0][header[i]];
+            let sum = sumArr[0][header[i]];
             if (sum.attribute && sum.attribute === 'sumFormula') {
                 Total.push(sum.colNum);
             }
         }
-        for (var a = Total.length -1; a >= 0 ; a--) {
-            var num = 0;
+        for (let a = Total.length -1; a >= 0 ; a--) {
+            let num = 0;
             for (let index = listlen - 1; index >= 0; index--) {
-                // var Tdnum =  Number(list[index][Total[a]].td);
+                // let Tdnum =  Number(list[index][Total[a]].td);
                 // num += Number.isNaN(Tdnum)?0:Tdnum;
                 num += list[index][Total[a]].td*1;
             }
@@ -821,12 +820,10 @@ excelmodel = {
      /*
     通过判断 列lable名 进行动态设置宽度
     param name: 清单（表头类型） str
-    使用引用赋值
+    param hd: 清单（表头所有列） Array
+    作用是通过判断列 lable的文字 与表头的列数来给定最小宽度与最大宽度
     */
     Setwidth(name, hd) {
-        // if (name.indexOf('名')!== -1) {
-        //     return '400'
-        // }
         if (!hd && name.indexOf('名')!== -1) {
             console.log('进来了呀')
             return '350';

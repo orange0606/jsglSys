@@ -122,7 +122,7 @@ export default {
         }
     },
     oneList ( row ) {    //读取一个清单
-        var url = '',
+        let url = '',
         headkey = '',
         rowlistkey = '';
         switch(this.type) {
@@ -148,7 +148,7 @@ export default {
         if( url === '' ) return false;
         this.$post( url, { id: row.id } )
             .then((response) => {
-            var data = response.data[this.type],
+            let data = response.data[this.type],
             header = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow );
 
             this.PackHeader = [...header]; //深拷贝
