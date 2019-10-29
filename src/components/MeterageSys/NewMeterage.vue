@@ -101,7 +101,7 @@
           <!-- show-summary
       :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
-           <!-- :cell-style="cellStyle":span-method="arraySpanMethod" -->
+           <!-- :cell-style="cell_select":span-method="arraySpanMethod" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <div :style="{ height: Height+'px' }">
         <elx-editable
@@ -113,10 +113,11 @@
           :show-header="showHeader" 
           v-if="showHeader"
           @cell-click ="cell_click"
-          :cell-style ="cell_select"
+          :header-cell-style="getRowClass"
+          :row-style="RowCss"
           show-summary
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 110}">
+          :edit-config="{render: 'scroll', renderSize: 60}">
           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
@@ -221,6 +222,7 @@ export default {
     // this.rowDrop();//调用表格行拖拽函数/
   },
   mounted(){
+
       this.tViewSize();
       window.onresize = () => {
         return (() => {
@@ -232,6 +234,28 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    getRowClass ({ row, column, rowIndex, columnIndex }) {
+        // console.log('row, column, rowIndex, columnIndex')
+       if (column.property) {
+        // console.log(rowIndex, columnIndex)
+
+            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+            let str = column.property,
+            colName = str.substr(0,str.indexOf(".td"));
+            //判断是否哪种属性类型允许单元格编辑
+            if (this.lastHeader[colName].attribute !== 'meterage') {
+                return {}
+            }
+            return {'background':'#FFFFE0'} //编辑区颜色
+        }  
+        // return {'background':'#FFFFFF'};
+    },
+    RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
+        if (!row['A'].id ) {
+          return 'background:#f5ffe5'
+        }
+      return '';
+    },
     keyRow( row ) {
         // console.log(row.seq)
         return row.seq
@@ -708,22 +732,40 @@ export default {
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
     },
+    // cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+    //     if (column.property) {
+    //         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+    //         let str = column.property,
+    //         colName = str.substr(0,str.indexOf(".td"));
+    //         //判断是否哪种属性类型允许单元格编辑
+    //         if (this.lastHeader[colName].attribute !== 'meterage') {
+    //             // if (row[colName].attribute && row[colName].attribute==='add') {
+    //             //     return {'background':'#99ff005c'} //新增一行的颜色
+    //             // }
+    //             if (!row[colName].id ) {
+    //                 return {'background':'#f5ffe5'}; //没有id的颜色
+    //             }
+    //             return {}
+    //         }
+    //         return {'background':'#FFFFE0'} //编辑区颜色
+    //     }  
+    //     return {'background':'#FFFFFF'};
+    // },
     cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+        if (rowIndex>0 && rowIndex <2) {
+            console.log('row, column, rowIndex, columnIndex')
+            console.log(row, column, rowIndex, columnIndex)
+        }
+        
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
             let str = column.property,
             colName = str.substr(0,str.indexOf(".td"));
             //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'meterage') {
-                // if (row[colName].attribute && row[colName].attribute==='add') {
-                //     return {'background':'#99ff005c'} //新增一行的颜色
-                // }
-                if (!row[colName].id ) {
-                    return {'background':'#f5ffe5'}; //没有id的颜色
-                }
-                return {}
-            }
-            return {'background':'#FFFFE0'} //编辑区颜色
+            // if (this.lastHeader[colName].attribute !== 'meterage') {
+            //     return {}
+            // }
+            // return {'background':'#FFFFE0'} //编辑区颜色
         }  
         return {'background':'#FFFFFF'};
     },
@@ -824,6 +866,9 @@ export default {
                 }
             }
             this.$nextTick(() => {
+
+                // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
+                // this.$refs.elxEditable1.clearSelection();
                 this.$refs.elxEditable1.reload([]);
                 this.$refs.elxEditable1.reload(list);
             })
@@ -1018,4 +1063,14 @@ export default {
 
 <style scoped>
 @import '../../modules/Tablestyle.css';
+.color  {
+      /* color: #67C23A; */
+      width: 100%;
+      height: 100%;
+      color: red;
+      background: #FFEEDD;
+
+      /* line-height: 100%; */
+
+  }
 </style>
