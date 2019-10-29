@@ -842,7 +842,6 @@ export default {
 
     },
     RemoveSelecteds () {  //删除选中
-      this.hd = Object.keys(this.lastHeader);
       let selection = this.$refs.elxEditable1.getSelecteds(),
       seleLen = selection.length;
       // console.log('seleLen')

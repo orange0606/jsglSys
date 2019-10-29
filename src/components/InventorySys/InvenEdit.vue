@@ -479,25 +479,25 @@ export default {
 
     },
     RemoveSelecteds () {  //删除选中
-      let selection = this.$refs.elxEditable1.getSelecteds(),
-      seleLen = selection.length;
-      console.log('seleLen')
-      console.log(selection)
-      if (seleLen && seleLen > 0) {
-          this.$refs.elxEditable1.removeSelecteds();
-          let number = selection[0]['seq'];; //表格列表的下标
-          this.Rowsort( number );  //调用表格重新排序函数
+        let selection = this.$refs.elxEditable1.getSelecteds(),
+        seleLen = selection.length;
+        console.log('seleLen')
+        console.log(selection)
+        if (seleLen && seleLen > 0) {
+            this.$refs.elxEditable1.removeSelecteds();
+            let number = selection[0]['seq'];; //表格列表的下标
+            this.Rowsort( number );  //调用表格重新排序函数
 
-          for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
-              for (let a = this.hd.length-1; a >= 0; a--) {
-                  let item = selection[index][this.hd[a]];
-                  if (item['id']) this.RowDelList.push(item);
-              }
-          }
-          console.log('this.RowDelList')
-          console.log(this.RowDelList)
-      }
-      console.log('获取已选中数据')
+            for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
+                for (let a = this.hd.length-1; a >= 0; a--) {
+                    let item = selection[index][this.hd[a]];
+                    if (item['id']) this.RowDelList.push(item);
+                }
+            }
+            console.log('this.RowDelList')
+            console.log(this.RowDelList)
+        }
+
     },
     Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
         let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;

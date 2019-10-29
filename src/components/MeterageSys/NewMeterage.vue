@@ -1,3 +1,4 @@
+
 <template>
 <div
     v-loading="loading"
@@ -35,44 +36,40 @@
       append-to-body>
       <div v-if="showList">
           <p style="color: red;font-size: 12px;margin:5px 0 10px 0;text-align:left;">请单击选择你要导入的清单</p>
-          <elx-editable
-            ref="elxEditable"
-            class="click-table2"
+          <el-table
             border
             :height="UpHeight"
             size="small"
-            :default-sort="{prop: 'updateTime', order: 'descending'}"
             :data.sync="update"
             @cell-click ="selectupdate"
-            :edit-config="{trigger: 'click', mode: 'row'}"
             style="width: 100%">
-            <elx-editable-column type="index" width="80" fixed="left" ></elx-editable-column>
-            <elx-editable-column prop="updateHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="updateHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="num" label="新清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></elx-editable-column>     
-            <elx-editable-column prop="name" label="新清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip >
+            <el-table-column type="index" width="80" fixed="left" ></el-table-column>
+            <el-table-column prop="updateHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="updateHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="num" label="新清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>     
+            <el-table-column prop="name" label="新清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip >
                 <template slot-scope="scope">
                     <el-link :underline="true" style="font-size:12px;" type="success" >{{scope.row.name}}</el-link>
                 </template>
-            </elx-editable-column>
-            <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-            <elx-editable-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
-            <elx-editable-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
+            </el-table-column>
+            <el-table-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></el-table-column>
+            <el-table-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></el-table-column>
+            <el-table-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
               <template slot-scope="scope">
                 <!-- 1已录入 0未录入 其他出错-->
                 <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
                 <i v-if="scope.row.enter ==1" style="color:#67c23a;width:20px;" class="el-icon-circle-check"></i>
                 <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
               </template>
-            </elx-editable-column>
-            <elx-editable-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></elx-editable-column>
-            <elx-editable-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></elx-editable-column>
-            <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
-            <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
-          </elx-editable>
+            </el-table-column>
+            <el-table-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></el-table-column>
+            <el-table-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></el-table-column>
+            <el-table-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></el-table-column>
+            <el-table-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></el-table-column>
+          </el-table>
           <el-pagination
             class="click-table2-pagination"
             @size-change="handleSizeChange"
@@ -112,15 +109,14 @@
           class="scroll-table4 click-table11"
           border
           height="100%"
+          size="mini"
           :show-header="showHeader" 
           v-if="showHeader"
-          size="mini"
-
           @cell-click ="cell_click"
           :cell-style ="cell_select"
           show-summary
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 60}">
+          :edit-config="{render: 'scroll', renderSize: 110}">
           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
@@ -246,7 +242,7 @@ export default {
           this.showHeader = false;
           setTimeout(()=>{
               this.showHeader = true;
-          },300);
+          },100);
         })
     },
     tViewSize () {  //动态调整表格的高度
@@ -299,7 +295,7 @@ export default {
           console.log(row)
           try {
               let headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
-              this.PackHeader = XEUtils.clone(headsArr, true); //深拷贝
+              this.PackHeader = [...headsArr]; //拷贝
               
               this.col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
               this.refreshTable(); //刷新表格布局
@@ -308,7 +304,6 @@ export default {
               //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
               this.lastHeader = this.$excel.BikoFoArr([...this.col]);
               this.hd = Object.keys(this.lastHeader); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-
           } catch (error) {
               this.$message({
                 type: 'info',
@@ -355,7 +350,6 @@ export default {
             });
         });
     },
-
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'meterage'})
         .then((response) => {
@@ -383,7 +377,6 @@ export default {
           
           //调用表格公式解析 存储
           this.formula = this.$excel.FormulaAnaly([...this.col]);
-
       })
     },
     OneMeterage (id) { //计量清单id
@@ -412,8 +405,6 @@ export default {
                 this.meterageHead.refRow = data.meterageHead.refRow;
                 this.meterageHead.tMeterageHeadRows = data.meterageHead.tMeterageHeadRows;
             };
-
-
             this.loading = false;
             let arr = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据
             this.list = [...arr];
@@ -469,14 +460,12 @@ export default {
                 return this.$message({type: 'info',message: '累计计量清单内容为空或者异常'});
             }
             this.tomeRowList = arr;
-
             if (data && data.totalmeterageHead && data.totalmeterageHead.tTotalmeterageHeadRows && data.totalmeterageHead.tTotalmeterageHeadRows.length >0 ) {
                 console.log('进来表头组装了')
                 let headsArr = this.$excel.Package(data['totalmeterageHead'].tTotalmeterageHeadRows,data['totalmeterageHead'].refCol,data['totalmeterageHead'].refRow),
                 col = this.$excel.Nesting(headsArr);   //调用多级表头嵌套组装函数
                 // //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
                 this.totalmeterageCol = this.$excel.BikoFoArr([...col]);
-
             }else{
                 this.$message({type: 'info',message: '累计计量清单表头内容为空或者异常'});
             }
@@ -495,7 +484,6 @@ export default {
             let list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
             res = response.data.update,
             obj = null;
-
             for(let key  in this.lastHeader){
                 let item = this.lastHeader[key];
                 console.log(key + '---')
@@ -589,7 +577,6 @@ export default {
         // console.log('最后的结果')
         // console.log(update)
         // console.log(todate)
-
         this.importfxx(update, todate, uplen);
     },
     importfxx(up, to, len) { //表头导入函数 up 新清单数据  to 累计计量清单数据 len 本次导入数据的数量
@@ -622,12 +609,11 @@ export default {
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "totalmeterage-meterage") {
                         // console.log('正在设置哪一列  '+row.colNum)
-                        // try {
+                        try {
                             let totmheader = null;
                             if (this.totalmeterageCol) {
                                 totmheader = Object.keys(this.totalmeterageCol); //用来所需要的所有列(obj)（属性）名
                             }
-       
                             if (to.length===0 || !totmheader || totmheader.length===0 ) {
                                 console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;
@@ -643,7 +629,6 @@ export default {
                                         continue;
                                     }
                                     let TocolName = Tostr.match(patt1)[0];
-
                                     if (Tostr && Tostr !=="" ) {
                                         // console.log('有没有进去这个if判断----------Totorow.attribute === "meterage-total" -====TocolName +++ colName')
                                         // // console.log(TocolName,'   ',colName)
@@ -658,12 +643,12 @@ export default {
                                     }
                                 }
                             }
-                        // } catch (error) {
-                        //     this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
-                        //     console.log('设置上期累计数量报错默认为0'+error)
-                        //     console.log(error)
-                        //     rest[r][row.colNum].td = 0;
-                        // }
+                        } catch (error) {
+                            this.$message({ message: '设置上期累计数量报错默认为0', type: 'success', duration: 2000, showClose: true })
+                            console.log('设置上期累计数量报错默认为0'+error)
+                            console.log(error)
+                            rest[r][row.colNum].td = 0;
+                        }
                     }
                     rest[r][row.colNum]['colNum'] = row['colNum'];
                     rest[r][row.colNum]['trNum'] = r;
@@ -699,7 +684,6 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
-
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
@@ -763,7 +747,6 @@ export default {
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
             });
             this.tViewSize();
-
         }, 300)
       });
     },
@@ -798,7 +781,6 @@ export default {
     //     console.log('打印一下NewRow 新增的一行')
     //     console.log(NewRow);
     //     this.$refs.elxEditable1.insertAt(NewRow, -1);
-
   
     // },
     Abandon () {  //放弃更改
@@ -810,7 +792,6 @@ export default {
         })
     },
     RemoveSelecteds () {  //删除选中
-      this.hd = Object.keys(this.lastHeader);
       let selection = this.$refs.elxEditable1.getSelecteds(),
       seleLen = selection.length;
       // console.log('seleLen')
@@ -866,7 +847,6 @@ export default {
             meterageRowAddList = [],  //增
             meterageRowDelList = [], //删
             meterageRowAltList = [];  //改
-
             console.log('header-------------------------')
             console.log(header)
             //查询上一次修改有无这个集合  ，有的话合并两个数组
@@ -882,7 +862,6 @@ export default {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
                         let listRows = list[index][header[i]];
-
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
                             listRows['formula'] = '';
@@ -1039,5 +1018,4 @@ export default {
 
 <style scoped>
 @import '../../modules/Tablestyle.css';
-
 </style>
