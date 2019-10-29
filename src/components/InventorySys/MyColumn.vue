@@ -51,10 +51,11 @@ export default {
       /* color: #67C23A; */
       width: 100%;
       height: 100%;
+      line-height: 100%;
+      text-align:center;
+      display: block;
+      color: red;
       background: #FFEEDD;
-
-      /* line-height: 100%; */
-
   }
   .colornull {
       /* color: #409EFF; */

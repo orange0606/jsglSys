@@ -53,8 +53,8 @@
           :row-style="RowCss"
           size="small"
           :edit-config="{render: 'scroll', renderSize: 80}">
-          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
+          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="pay" :lastHeader="lastHeader"></my-column>
         </elx-editable>

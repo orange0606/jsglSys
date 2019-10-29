@@ -1,5 +1,5 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum+ '-'+col.attribute+'='+col.attributeValue" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :fit="true" :key="$excel.randomkey()" :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td+col.colNum+ '-'+col.attribute+'='+col.attributeValue" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :fit="true" :key="$excel.randomkey(this)" :align="col.textAlign">
     <template slot-scope="scope">
       <span>{{scope.row.data[col.colNum].td}}</span>
       <!-- <span>{{scope.row.data}}</span> -->
@@ -44,10 +44,11 @@ export default {
       /* color: #67C23A; */
       width: 100%;
       height: 100%;
+      line-height: 100%;
+      text-align:center;
+      display: block;
+      color: red;
       background: #FFEEDD;
-
-      /* line-height: 100%; */
-
   }
   .colornull {
       /* color: #409EFF; */

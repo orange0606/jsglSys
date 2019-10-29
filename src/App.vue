@@ -124,30 +124,45 @@ body, html, #app{
 
 /* ************************各清单表格内容样式开始********************** */
 
-.el-table {
-    /* scroll-snap-align: start; */
-    /* 
+/* .el-table {
+     scroll-snap-align: start;
+     
     position: sticky; 
-    position: -webkit-sticky;  */
-    /* scroll-behavior: auto; */
-    /* scroll-behavior: smooth;
+    position: -webkit-sticky; 
+     scroll-behavior: auto;
+     scroll-behavior: smooth;
     position: sticky;
 
     scroll-behavior: -webkit-smooth;
     position: -webkit-sticky;
-    overflow: hidden; */
+    overflow: hidden;
 
-    /* -webkit-overflow-y: auto;
-    -moz-overflow-y: auto; */
-    /* scroll-behavior: smooth;
+     -webkit-overflow-y: auto;
+    -moz-overflow-y: auto;
+     scroll-behavior: smooth;
     position: sticky;
-    overflow-y: auto;  */
-}
+    overflow-y: auto; 
+} */
 .el-table--border th.gutter:last-of-type{
   	display: table-cell !important; 
   	width:50px !important; 
  }
-
+.scroll-table4 .cell {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 17px;
+}
+/* 去除单元格内的内边距 */
+.el-table .cell, .el-table th div, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell {
+    padding: 0px;
+}
+.el-table .cell, .el-table th div {
+    text-overflow: ellipsis;
+    padding: 0px;
+    overflow: hidden;
+}
 /* .el-table__body, .el-table__footer, .el-table__header {
     scroll-behavior: smooth;
     position: sticky;

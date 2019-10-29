@@ -1,5 +1,5 @@
 <template>
-  <el-table-column :prop="col.colNum+'.td'" :label="col.td" :key="$excel.randomkey()" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :fit="true" :align="col.textAlign">
+  <el-table-column :prop="col.colNum+'.td'" :label="col.td" :key="$excel.randomkey(this)" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :fit="true" :align="col.textAlign">
     <template slot-scope="scope">
       <span>{{scope.row.data[col.colNum].td}}</span>
     </template>

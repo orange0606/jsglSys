@@ -72,7 +72,7 @@ Vue.prototype.$confirm = MessageBox.confirm;
 
 Vue.prototype.$alert = MessageBox.alert;
 
-//定义一个全局变量，表格每一行的key;
+//定义一个全局变量，表格el-table-column 的key值 用于表头错乱修正 
 Vue.prototype.$keys = 0;
 
 // import axios from "axios"
