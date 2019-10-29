@@ -108,13 +108,12 @@
           :show-header="showHeader" 
           v-if="showHeader"
           @cell-click ="cell_click"
-          
           :header-cell-style="getRowClass"
           :row-style="RowCss"
           show-summary
           size="mini"
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 80}">
+          :edit-config="{render: 'scroll', renderSize: 65}">
            <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey()" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->

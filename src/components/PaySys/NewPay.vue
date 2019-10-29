@@ -36,7 +36,7 @@
           <!-- show-summary
       :summary-method="getSummaries" -->
          <!-- :data.sync="list" -->
-           <!-- :cell-style="cellStyle" -->
+           <!-- :cell-style ="cell_select" -->
     <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
     <div :style="{ height: Height+'px' }">
         <elx-editable
@@ -49,7 +49,8 @@
           :span-method="arraySpanMethod"
           :row-key="keyRow"
           @cell-click ="cell_click"
-          :cell-style ="cell_select"
+          :header-cell-style="getRowClass"
+          :row-style="RowCss"
           size="small"
           :edit-config="{render: 'scroll', renderSize: 80}">
           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey()" ></elx-editable-column>
@@ -148,9 +149,25 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    keyRow( row ) {
-        // console.log(row.seq)
-        return row.seq
+    getRowClass ({ row, column, rowIndex, columnIndex }) {  //表头样式
+            // console.log('row, column, rowIndex, columnIndex')
+        if (column.property) {
+            // console.log(rowIndex, columnIndex)
+                // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+                let str = column.property,
+                colName = str.substr(0,str.indexOf(".td"));
+                //判断是否哪种属性类型允许单元格编辑
+                if (this.lastHeader[colName].attribute !== 'pay') {
+                    return {}
+                }
+                return {'background':'#FFFFE0'} //编辑区颜色
+            }  
+    },
+    RowCss({row, rowIndex}) {     // 定义RowCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
+        if (!row['A'].id ) {
+            return 'background:#f5ffe5';
+        }
+        return '';
     },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染

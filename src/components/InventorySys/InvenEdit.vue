@@ -52,10 +52,9 @@
           border
           height="100%"
           size="mini"
-
           :show-header="showHeader"
+          :header-cell-style="getRowClass"
           v-if="showHeader"
-          
           @cell-click ="cell_click"
           :row-style="RowCss"
           show-summary
@@ -151,12 +150,10 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
-    keyRow( row ) {
-        // console.log(row.seq)
-        // console.log(this.$keys);
-        // return this.$keys++;
-        return row.seq;
-
+    getRowClass ({ row, column, rowIndex, columnIndex }) {  //表头样式
+        if (column.property) {
+            return {'background':'#FFFFE0'} //编辑区颜色
+        }  
     },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
