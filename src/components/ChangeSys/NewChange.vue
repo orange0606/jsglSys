@@ -651,24 +651,24 @@ export default {
         }
         for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             let row = sumArr[this.hd[index]];
-            if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === 'original' || row.attribute === "totalchange-change") ) {
-                let str = row.attributeValue;
-                let colName = str.match(patt1)[0]; 
+            if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === 'original' || row.attribute === "totalchange-change" || row.attribute === "fluctuate") ) {
+                let str = row.attributeValue,
+                colName = str.match(patt1)[0]; 
                 for (let r = len -1; r >= 0; r--) {
                     // let RowTd = rest[r][row.colNum];
                     if (row.attribute === 'original' ) {
                         // rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
                         rest[r][row.colNum] = or[r][colName];
                         rest[r][row.colNum].originalRowId = rest[r][row.colNum].id;
+                    }else if (row.attribute === "fluctuate"){
+                        console.log('进来了')
+                        rest[r][row.colNum].td = 0;
                     }else if (row.attribute === "totalchange-change") {
                         try {
+                            let tochangeHd = null;
                             if (this.totalchangeCol) {
-                                let tochangeHd = Object.keys(this.totalchangeCol); //用来所需要的所有列(obj)（属性）名
-                            }else{
-                                let tochangeHd = null;
+                                tochangeHd = Object.keys(this.totalchangeCol); //用来所需要的所有列(obj)（属性）名
                             }
-                            // console.log('to,tochangeHd')
-                            // console.log(to,tochangeHd)
                             if (to.length===0 || !tochangeHd || tochangeHd.length===0 ) {
                                 // console.log('to.length设置上期累计数量默认为0');
                                 rest[r][row.colNum]['td'] = 0;

@@ -622,7 +622,7 @@ export default {
         }
         for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             let row = sumArr[this.hd[index]];
-            if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "update" || row.attribute === "totalmeterage-meterage") ) {
+            if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "update" || row.attribute === "totalmeterage-meterage" || row.attribute === "meterage") ) {
                 let str = row.attributeValue;
                 let colName = str.match(patt1)[0]; 
                 
@@ -631,6 +631,8 @@ export default {
                     if (row.attribute === "update" ) {
                         rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
+                    }else if (row.attribute === "meterage") {
+                        rest[r][row.colNum].td =0;
                     }else if (row.attribute === "totalmeterage-meterage") {
                         // console.log('正在设置哪一列  '+row.colNum)
                         try {
