@@ -124,10 +124,10 @@ body, html, #app{
 
 /* ************************各清单表格内容样式开始********************** */
 
-/* .el-table {
+.el-table {
      scroll-snap-align: start;
      
-    position: sticky; 
+    /* position: sticky; 
     position: -webkit-sticky; 
      scroll-behavior: auto;
      scroll-behavior: smooth;
@@ -138,11 +138,11 @@ body, html, #app{
     overflow: hidden;
 
      -webkit-overflow-y: auto;
-    -moz-overflow-y: auto;
+    -moz-overflow-y: auto; */
      scroll-behavior: smooth;
     position: sticky;
     overflow-y: auto; 
-} */
+}
 .el-table--border th.gutter:last-of-type{
   	display: table-cell !important; 
   	width:50px !important; 

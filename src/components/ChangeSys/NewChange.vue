@@ -191,6 +191,7 @@ export default {
       totalchangeCol:null,    //截取获取累计变更实际对应所有列最后一层的表头列 object(用来单元格点击判断)
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
+      totalobj: {},//合计尾行计算结果存储
       Height: 400,
       Width:99.9,
       OrHeight:300,
@@ -211,6 +212,14 @@ export default {
     uplist: function(newVal,oldVal){  //子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
+    },
+    list: { //监听表格数据变化，然后进行合计
+        handler(newValue, oldValue) {
+            console.log('newValue');
+            // console.log('oldValue', oldValue);
+            this.totalobj = this.$excel.Total(newValue, this.PackHeader); //调用合计计算
+        },
+        deep: true
     }
   },
   computed: {
@@ -352,8 +361,7 @@ export default {
               this.changeHead.tChangeHeadRows = row.changeHead.tChangeHeadRows;
           }
           try {
-              let arr = this.$excel.ListAssemble(row.changeRowList); //组装清单表格数据
-              this.list = [...arr];
+              this.list = this.$excel.ListAssemble(row.changeRowList); //组装清单表格数据;
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -449,9 +457,7 @@ export default {
                 this.changeHead.tChangeHeadRows = data.changeHead.tChangeHeadRows;
             }
             this.loading = false;
-            let arr = this.$excel.ListAssemble(data.changeRowList); //组装清单表格数据
-            this.list = [...arr];
-            
+            this.list = this.$excel.ListAssemble(data.changeRowList); //组装清单表格数据;
             for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                 this.list[index]['seq'] = index;
             }
@@ -719,16 +725,7 @@ export default {
         console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格
-            // rest = rest.concat([]);
-            // this.$nextTick(() => {
-            //     for (let index = 0; index < len; index++) {
-            //         this.$refs.elxEditable1.insertAt(rest[index], -1); 
-            //     }
-            // })
-            // this.list = this.$refs.elxEditable1.getRecords();
-
             rest = rest.concat([]);
-            
             this.list = this.list.concat(rest);
             this.findList();
         } catch (e) {
@@ -742,7 +739,7 @@ export default {
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
-        this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
+        this.editRow && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
 
@@ -771,73 +768,80 @@ export default {
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
     },
-    cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-        if (column.property) {
-            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            let str = column.property,
-            colName = str.substr(0,str.indexOf(".td"));
+    // cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+    //     if (column.property) {
+    //         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+    //         let str = column.property,
+    //         colName = str.substr(0,str.indexOf(".td"));
 
-            //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'fluctuate') {
+    //         //判断是否哪种属性类型允许单元格编辑
+    //         if (this.lastHeader[colName].attribute !== 'fluctuate') {
                 
-                if (row[colName].attribute && row[colName].attribute==='add') {
-                    return {'background':'#99ff005c'}; //新增一行的颜色
-                }
-                if (!row[colName].id ) {
-                    return {'background':'#f5ffe5'}; //没有id的颜色
-                }
-                return {};
-            }
-            return {'background':'#FFFFE0'}; //编辑区颜色
-        }  
-        return {'background':'#FFFFFF'};
-    },
-    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >1) {  //带选择框的情况
-            let Row = row[this.hd[columnIndex-2]];
-            if (Row) {
-                return [ Row.tdRowspan, Row.tdColspan ];
-            }
-        }
-        return [1, 1]
-    }, 
+    //             if (row[colName].attribute && row[colName].attribute==='add') {
+    //                 return {'background':'#99ff005c'}; //新增一行的颜色
+    //             }
+    //             if (!row[colName].id ) {
+    //                 return {'background':'#f5ffe5'}; //没有id的颜色
+    //             }
+    //             return {};
+    //         }
+    //         return {'background':'#FFFFE0'}; //编辑区颜色
+    //     }  
+    //     return {'background':'#FFFFFF'};
+    // },
+    // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+    //     if (columnIndex >1) {  //带选择框的情况
+    //         let Row = row[this.hd[columnIndex-2]];
+    //         if (Row) {
+    //             return [ Row.tdRowspan, Row.tdColspan ];
+    //         }
+    //     }
+    //     return [1, 1]
+    // }, 
     findList () { //表格滚动渲染函数
-      this.loading = true;
-      this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([])
-        setTimeout(() => {
-            this.$refs.elxEditable1.reload(this.list);
-            this.loading = false;
-            this.$nextTick(() => {
+        this.loading = true;
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([])
+            setTimeout(() => {
+                this.$refs.elxEditable1.reload(this.list);
+                this.loading = false;
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-            });
-            this.tViewSize();
-        }, 300)
-      });
+                this.tViewSize();
+            }, 300)
+        });
 
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
-        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-        if (this.PackHeader.length ===0 || list.length ===0) return [];
-        return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
+        // if (!this.$refs.elxEditable1 || !this.showHeader) return [];
+        // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        // if (this.PackHeader.length ===0 && list.length ===0) return [];
+        // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+        let { columns, data } = param,
+        sums = [];
+        if (!this.totalobj) return sums;
+        columns.forEach((column, index) => {
+            if (index === 0) {
+                sums[index] = '合计'
+                // return
+            }else if(index >2){
+                sums[index] = this.totalobj[column.property];
+            }
+        })
+        return sums;
     },
-    
     insertEvent () {
-
-      if (!this.hd.length || this.hd.length===0) return false;
-      // console.log('进来了吗')
-      let rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
-      restLen = rest.length,
-      NewRow = {},
-      patt1=/[A-Z+]*/g,
-      sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
-      
-      for (let index = this.hd.length -1; index >= 0; index--) {
-          NewRow['seq'] = restLen;
-          NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
-      }
-
+        if (!this.hd.length || this.hd.length===0) return false;
+        // console.log('进来了吗')
+        let rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+        restLen = rest.length,
+        NewRow = {},
+        patt1=/[A-Z+]*/g,
+        sumArr = this.lastHeader; //截取获取表格实际对应所有列最后一层的表头列 object
+        
+        for (let index = this.hd.length -1; index >= 0; index--) {
+            NewRow['seq'] = restLen;
+            NewRow[this.hd[index]]= {attribute: 'add',colNum: this.hd[index],edit: "N",formula:null,td: null, tdColspan: 1,tdRowspan: 1,trNum:restLen+1,upload: 1 };
+        }
       //现在进行遍历属性把原清单数据加入进去
         for (let c = this.hd.length -1; c >= 0; c--) {
             let row = sumArr[this.hd[c]],
@@ -849,7 +853,12 @@ export default {
         }
       console.log('打印一下NewRow 新增的一行')
       console.log(NewRow);
-      this.$refs.elxEditable1.insertAt(NewRow, -1);
+    //   this.$refs.elxEditable1.insertAt(NewRow, -1);
+        this.list.push(NewRow);
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([]);
+            this.$refs.elxEditable1.reload(this.list);
+        })
     },
     Abandon () {  //放弃更改
         // this.$refs.elxEditable1.revert();
@@ -861,41 +870,41 @@ export default {
 
     },
     RemoveSelecteds () {  //删除选中
-      let selection = this.$refs.elxEditable1.getSelecteds(),
-      seleLen = selection.length;
-      // console.log('seleLen')
-      // console.log(selection)
-      if (seleLen && seleLen > 0) {
-          this.$refs.elxEditable1.removeSelecteds();
-          let number = selection[0]['seq'];; //表格列表的下标
-          this.Rowsort( number );  //调用表格重新排序函数
+        let selection = this.$refs.elxEditable1.getSelecteds(),
+        seleLen = selection.length;
+        // console.log('seleLen')
+        // console.log(selection)
+        if (seleLen && seleLen > 0) {
+            this.$refs.elxEditable1.removeSelecteds();
+            let number = selection[0]['seq'];; //表格列表的下标
+            this.Rowsort( number );  //调用表格重新排序函数
 
-          for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
-              for (let a = this.hd.length-1; a >= 0; a--) {
-                  let item = selection[index][this.hd[a]];
-                  if (item['id']) this.RowDelList.push(item);
-              }
-          }
-      }
+            for (let index = seleLen -1; index >= 0; index--) { //解构已删除的单元格，将有id的单元格放入删除集合中
+                for (let a = this.hd.length-1; a >= 0; a--) {
+                    let item = selection[index][this.hd[a]];
+                    if (item['id']) this.RowDelList.push(item);
+                }
+            }
+        }
       console.log('获取已选中数据'+seleLen,'----',selection)
       console.log(this.RowDelList)
     },
     Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
-        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        this.list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         try {
-            for (let index = list.length -1; index >= 0; index--) {
+            for (let index = this.list.length -1; index >= 0; index--) {
                 if (sub > index) break;
-                list[index]['seq']=index;  //更新索引
+                this.list[index]['seq']=index;  //更新索引
                 for (let a = this.hd.length -1; a >= 0; a--) {
-                    let item = list[index][this.hd[a]];
+                    let item = this.list[index][this.hd[a]];
                     item.trNum = index+1;
                     // console.log('item.trNum--'+item.trNum)
-                    if (item['id']) list[index]['alter'] = 'Y';   
+                    if (item['id']) this.list[index]['alter'] = 'Y';   
                 }
             }
             this.$nextTick(() => {
                 this.$refs.elxEditable1.reload([]);
-                this.$refs.elxEditable1.reload(list);
+                this.$refs.elxEditable1.reload(this.list);
             })
         } catch (error) {
             console.log('删除后重新排序出了问题'+error);

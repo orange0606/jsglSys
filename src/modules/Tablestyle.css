@@ -1,7 +1,7 @@
 /* ************************各清单表格内容样式开始********************** */
 
-/* .el-table {
-     scroll-snap-align: start;
+.el-table {
+     /* scroll-snap-align: start;
      
     position: sticky; 
     position: -webkit-sticky; 
@@ -14,11 +14,11 @@
     overflow: hidden;
 
      -webkit-overflow-y: auto;
-    -moz-overflow-y: auto;
+    -moz-overflow-y: auto; */
      scroll-behavior: smooth;
     position: sticky;
     overflow-y: auto; 
-} */
+}
 .el-table--border th.gutter:last-of-type{
   display: table-cell !important; 
   width:50px !important; 

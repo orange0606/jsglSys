@@ -120,6 +120,7 @@ export default {
       pendingRemoveList:[],
       tTotalmeterageId:null, //累计计量清单id
       RowDelList:[],// 删除集合
+      totalobj: {},//合计尾行计算结果存储
       Height: 400,
       Width:99.9
     }
@@ -558,47 +559,56 @@ export default {
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
     },
-    cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-        if (column.property) {
-            // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-            let str = column.property,
-            colName = str.substr(0,str.indexOf(".td"));
+    // cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
+    //     if (column.property) {
+    //         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+    //         let str = column.property,
+    //         colName = str.substr(0,str.indexOf(".td"));
 
-            //判断是否哪种属性类型允许单元格编辑
-            if (this.lastHeader[colName].attribute !== 'pay') return false;
-            return {'background':'#FFFACD'}
-        }  
-        return {};
-    },
-    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >1) {  //带选择框的情况
-            if (row[this.hd[columnIndex-2]]) {
-                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
-            }
-        }
-        return [1, 1]
-    }, 
+    //         //判断是否哪种属性类型允许单元格编辑
+    //         if (this.lastHeader[colName].attribute !== 'pay') return false;
+    //         return {'background':'#FFFACD'}
+    //     }  
+    //     return {};
+    // },
+    // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+    //     if (columnIndex >1) {  //带选择框的情况
+    //         if (row[this.hd[columnIndex-2]]) {
+    //             return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
+    //         }
+    //     }
+    //     return [1, 1]
+    // }, 
     findList () { //表格滚动渲染函数
-      this.loading = true;
-      this.$nextTick(() => {
-        // this.$refs.elxEditable1.reload([])
-
-        setTimeout(() => {
-            this.$refs.elxEditable1.reload(this.list);
-            this.loading = false;
-            this.$nextTick(() => {
+        this.loading = true;
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([])
+            setTimeout(() => {
+                this.$refs.elxEditable1.reload(this.list);
+                this.loading = false;
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-            });
-            this.tViewSize();
-        }, 300)
-      });
+                this.tViewSize();
+            }, 300)
+        });
 
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
-        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-        if (this.PackHeader.length ===0 && list.length ===0) return [];
-        return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
+        // if (!this.$refs.elxEditable1 || !this.showHeader) return [];
+        // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        // if (this.PackHeader.length ===0 && list.length ===0) return [];
+        // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+        let { columns, data } = param,
+        sums = [];
+        if (!this.totalobj) return sums;
+        columns.forEach((column, index) => {
+            if (index === 0) {
+                sums[index] = '合计'
+                // return
+            }else if(index >2){
+                sums[index] = this.totalobj[column.property];
+            }
+        })
+        return sums;
     },
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {

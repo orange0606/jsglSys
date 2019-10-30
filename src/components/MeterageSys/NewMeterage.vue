@@ -117,7 +117,7 @@
           :row-style="RowCss"
           show-summary
           :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 60}">
+          :edit-config="{render: 'scroll', renderSize: 65}">
           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
           <!-- 此处使用多级表头嵌套组件 -->
@@ -193,6 +193,7 @@ export default {
       totalmeterageCol:null,    //截取获取实际累计计量表头对应所有列最后一层的表头列 object(用来单元格点击判断)
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
+      totalobj: {},//合计尾行计算结果存储
       Height: 400,
       Width:  99.9,
       UpHeight:300,
@@ -212,6 +213,14 @@ export default {
     uplist: function(newVal,oldVal){  //子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
+    },
+    list: { //监听表格数据变化，然后进行合计
+        handler(newValue, oldValue) {
+            console.log('newValue');
+            // console.log('oldValue', oldValue);
+            this.totalobj = this.$excel.Total(newValue, this.PackHeader); //调用合计计算
+        },
+        deep: true
     }
   },
   computed: {
@@ -234,7 +243,7 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
-    getRowClass ({ row, column, rowIndex, columnIndex }) {
+    getRowClass ({ row, column, rowIndex, columnIndex }) { //表头样式
         // console.log('row, column, rowIndex, columnIndex')
        if (column.property) {
         // console.log(rowIndex, columnIndex)
@@ -255,10 +264,6 @@ export default {
           return 'background:#f5ffe5'
         }
       return '';
-    },
-    keyRow( row ) {
-        // console.log(row.seq)
-        return row.seq
     },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
@@ -315,8 +320,6 @@ export default {
     },
     updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
           this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
-          console.log('row-----------------------')
-          console.log(row)
           try {
               let headsArr = this.$excel.Package(row.meterageHead.tMeterageHeadRows,row.meterageHead.refCol,row.meterageHead.refRow);
               this.PackHeader = [...headsArr]; //拷贝
@@ -346,8 +349,7 @@ export default {
               this.meterageHead.tMeterageHeadRows = row.meterageHead.tMeterageHeadRows;
           }
           try {
-              let arr = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
-              this.list = [...arr];
+              this.list = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
               }
@@ -430,9 +432,7 @@ export default {
                 this.meterageHead.tMeterageHeadRows = data.meterageHead.tMeterageHeadRows;
             };
             this.loading = false;
-            let arr = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据
-            this.list = [...arr];
-            
+            this.list = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据;
               for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                   this.list[index]['seq'] = index;
             }
@@ -623,8 +623,8 @@ export default {
         for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             let row = sumArr[this.hd[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "update" || row.attribute === "totalmeterage-meterage" || row.attribute === "meterage") ) {
-                let str = row.attributeValue;
-                let colName = str.match(patt1)[0]; 
+                let str = row.attributeValue,
+                colName = str.match(patt1)[0]; 
                 
                 for (let r = len -1; r >= 0; r--) {
                     // let RowTd = rest[r][row.colNum];
@@ -688,13 +688,6 @@ export default {
         console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格
-            // rest = rest.concat([]);
-            // this.$nextTick(() => {
-            //     for (let index = 0; index < len; index++) {
-            //         this.$refs.elxEditable1.insertAt(rest[index], -1); 
-            //     }
-            // })
-            // this.list = this.$refs.elxEditable1.getRecords();
             rest = rest.concat([]);
             
             this.list = this.list.concat(rest);
@@ -711,7 +704,7 @@ export default {
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
-        this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
+        this.editRow && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
             // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
             let str = column.property,
@@ -731,12 +724,12 @@ export default {
                 }
             }
             this.editRow = row[colName];
-            row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
+            if (this.editRow.edit && this.editRow.edit==='Y') return false;
+            this.editRow.edit = "Y";  //Y为编辑模式N为只读状态     
         }  
     },
     // cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
     //     if (column.property) {
-    //         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
     //         let str = column.property,
     //         colName = str.substr(0,str.indexOf(".td"));
     //         //判断是否哪种属性类型允许单元格编辑
@@ -771,34 +764,46 @@ export default {
         }  
         return {'background':'#FFFFFF'};
     },
-    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >1) {  //带选择框的情况
-            let Row = row[this.hd[columnIndex-2]];
-            if (Row) {
-                return [Row.tdRowspan, Row.tdColspan]
-            }
-        }
-        return [1, 1]
-    }, 
+    // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+    //     if (columnIndex >1) {  //带选择框的情况
+    //         let Row = row[this.hd[columnIndex-2]];
+    //         if (Row) {
+    //             return [Row.tdRowspan, Row.tdColspan]
+    //         }
+    //     }
+    //     return [1, 1]
+    // }, 
     findList () { //表格滚动渲染函数
         this.loading = true;
-         this.$nextTick(() => {
-        this.$refs.elxEditable1.reload([]);
-        setTimeout(() => {
-            this.$refs.elxEditable1.reload(this.list);
-            this.loading = false;
-            this.$nextTick(() => {
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([])
+            setTimeout(() => {
+                this.$refs.elxEditable1.reload(this.list);
+                this.loading = false;
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
-            });
-            this.tViewSize();
-        }, 300)
-      });
+                this.tViewSize();
+            }, 300)
+        });
+
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditable1 || !this.showHeader) return [];
-        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-        if (this.PackHeader.length ===0 || list.length ===0) return [];
-        return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
+        console.log('getSummaries')
+        // if (!this.$refs.elxEditable1 || !this.showHeader) return [];
+        // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        // if (this.PackHeader.length ===0 && list.length ===0) return [];
+        // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+        let { columns, data } = param,
+        sums = [];
+        if (!this.totalobj) return sums;
+        columns.forEach((column, index) => {
+            if (index === 0) {
+                sums[index] = '合计'
+                // return
+            }else if(index >2){
+                sums[index] = this.totalobj[column.property];
+            }
+        })
+        return sums;
     },
     // insertEvent () {
     //     console.log('this.hd-----------------p')
@@ -855,16 +860,16 @@ export default {
       console.log(this.RowDelList)
     },
    Rowsort( sub ) { //删除清单表格单元格行内的时候对清单表格被影响行列号的有id的作修改标记与重新排列
-        let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        this.list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         try {
-            for (let index = list.length -1; index >= 0; index--) {
+            for (let index = this.list.length -1; index >= 0; index--) {
                 if (sub > index) break;
-                list[index]['seq']=index;  //更新索引
+                this.list[index]['seq']=index;  //更新索引
                 for (let a = this.hd.length -1; a >= 0; a--) {
-                    let item = list[index][this.hd[a]];
+                    let item = this.list[index][this.hd[a]];
                     item.trNum = index+1;
                     // console.log('item.trNum--'+item.trNum)
-                    if (item['id']) list[index]['alter'] = 'Y';   
+                    if (item['id']) this.list[index]['alter'] = 'Y';   
                 }
             }
             this.$nextTick(() => {
@@ -872,7 +877,7 @@ export default {
                 // this.$refs.elxEditable1.bodyWrapper.scrollTop =0;
                 // this.$refs.elxEditable1.clearSelection();
                 this.$refs.elxEditable1.reload([]);
-                this.$refs.elxEditable1.reload(list);
+                this.$refs.elxEditable1.reload(this.list );
             })
         } catch (error) {
             console.log('删除后重新排序出了问题'+error);

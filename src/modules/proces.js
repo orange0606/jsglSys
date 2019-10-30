@@ -613,6 +613,7 @@ excelmodel = {
     使用引用赋值
     */
     Calculation (lastHeader, type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
+
         if (col['id']) row['alter'] = 'Y';  //给该行表格内容作个修改过的标记
         if (Number.isNaN(Number(col['td']))) {
             // col['td'] = 0;
@@ -622,7 +623,6 @@ excelmodel = {
         col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
         let that = this,
         ColTd = col['td']*1; //点击修改过的单元格的值
-
         Object.keys(lastHeader).forEach(function(key){  //遍历表头最后一层的属性和列号
             let keyObj = lastHeader[key],   //列号
             Att = keyObj.attribute, //属性
@@ -662,58 +662,58 @@ excelmodel = {
                             }
                         });
                         break;
-                    case 'meterage':
-                        Object.keys(lastHeader).forEach(function(key){
-                            let mekeyObj = lastHeader[key],
-                            meAtt = mekeyObj.attribute,
-                            meAttVal = mekeyObj.attributeValue;
-                            if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
+                    // case 'meterage':
+                    //     Object.keys(lastHeader).forEach(function(key){
+                    //         let mekeyObj = lastHeader[key],
+                    //         meAtt = mekeyObj.attribute,
+                    //         meAttVal = mekeyObj.attributeValue;
+                    //         if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
 
-                                let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
-                                if (mecolTr === col.colNum) {
-                                    sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ ColTd);
-                                        // console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
-                                        // console.log('row[colTr]------------',row[colTr]['td'])
-                                    if (sumNb>currentTd ){
-                                        Message({ message: '警告 上期累计数量与本期数量的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = currentTd-row[mekeyObj.colNum]['td'];
-                                    }
-                                    if (((currentTd)+(sumNb*1)) <0 ){
-                                        Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = 0-(currentTd-row[mekeyObj.colNum]['td']);
-                                    }
-                                }
-                            }
-                        });
-                        break;
+                    //             let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
+                    //             if (mecolTr === col.colNum) {
+                    //                 sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ ColTd);
+                    //                     // console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
+                    //                     // console.log('row[colTr]------------',row[colTr]['td'])
+                    //                 if (sumNb>currentTd ){
+                    //                     Message({ message: '警告 上期累计数量与本期数量的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                    //                     col['td'] = currentTd-row[mekeyObj.colNum]['td'];
+                    //                 }
+                    //                 if (((currentTd)+(sumNb*1)) <0 ){
+                    //                     Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                    //                     col['td'] = 0-(currentTd-row[mekeyObj.colNum]['td']);
+                    //                 }
+                    //             }
+                    //         }
+                    //     });
+                    //     break;
     
-                    case 'pay':
-                        Object.keys(lastHeader).forEach(function(key){
-                            let paykeyObj = lastHeader[key],
-                            payAtt =paykeyObj.attribute,
-                            payAttVal =paykeyObj.attributeValue;
-                            // console.log('attributeValue');
-                            // console.log(payAttVal);
-                            if (payAtt &&payAtt==='totalpay-pay'  &&payAttVal &&payAttVal !=='') {
-                                // console.log('AttVal----------------4444444444444444444')
-                                // console.log(payAttVal)
-                                let paycolTr =payAttVal.match(patt1)[0];   //属性值  列号
-                                if (paycolTr === col.colNum) {
-                                    sumNb = that.Count(row[paykeyObj.colNum]['td']*1+ ColTd);
-                                        // console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
-                                        // console.log('row[colTr]------------',row[colTr]['td'])
-                                    if (sumNb>currentTd ){
-                                        col['td'] = currentTd-row[paykeyObj.colNum]['td'];
-                                        Message({ message: '警告 本期支付金额与上期累计支付金额的和不能超过累计计量金额! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                    }
-                                    if (((currentTd)+(sumNb*1)) <0 ){
-                                        Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = 0-(currentTd-row[paykeyObj.colNum]['td']);
-                                    }
-                                }
-                            }
-                        });
-                        break;
+                    // case 'pay':
+                    //     Object.keys(lastHeader).forEach(function(key){
+                    //         let paykeyObj = lastHeader[key],
+                    //         payAtt =paykeyObj.attribute,
+                    //         payAttVal =paykeyObj.attributeValue;
+                    //         // console.log('attributeValue');
+                    //         // console.log(payAttVal);
+                    //         if (payAtt &&payAtt==='totalpay-pay'  &&payAttVal &&payAttVal !=='') {
+                    //             // console.log('AttVal----------------4444444444444444444')
+                    //             // console.log(payAttVal)
+                    //             let paycolTr =payAttVal.match(patt1)[0];   //属性值  列号
+                    //             if (paycolTr === col.colNum) {
+                    //                 sumNb = that.Count(row[paykeyObj.colNum]['td']*1+ ColTd);
+                    //                     // console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
+                    //                     // console.log('row[colTr]------------',row[colTr]['td'])
+                    //                 if (sumNb>currentTd ){
+                    //                     col['td'] = currentTd-row[paykeyObj.colNum]['td'];
+                    //                     Message({ message: '警告 本期支付金额与上期累计支付金额的和不能超过累计计量金额! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                    //                 }
+                    //                 if (((currentTd)+(sumNb*1)) <0 ){
+                    //                     Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                    //                     col['td'] = 0-(currentTd-row[paykeyObj.colNum]['td']);
+                    //                 }
+                    //             }
+                    //         }
+                    //     });
+                    //     break;
                 }
             }
         });
@@ -738,6 +738,7 @@ excelmodel = {
     },
     getSummaries (PackHeader, list, param) {  //合计
         // console.log('是不是每次都进来了呀'+Math.random()*100)
+
         let { columns, data } = param,
         sums = [],
         sumArr = PackHeader.slice(-1), //截取合计尾行
@@ -772,6 +773,33 @@ excelmodel = {
         sumArr = header = TotalObj = Total = null;
         return sums;
     },
+     /*
+    表格合计尾行计算  （用于在清单内容有修改和展示时调用）
+    param list: 清单列表 （Array）
+    param PackHeader: 表头最后一层（用于遍历合计尾行表头单元格的合计属性）
+    return object 合计每列的结果 {'列号':'结果'}
+    */
+    Total (list, PackHeader) {  
+        let Sumobj = {},
+        that = this,
+        lasthead = PackHeader.slice(-1)[0]; //截取合计尾行
+        Object.keys(lasthead).forEach(function(key){
+            let keyObj = lasthead[key],
+            Att = keyObj.attribute, //表头单元格属性
+            num = 0;
+            if ( Att && Att==='sumFormula') {
+                num = 0;
+                for (let index = list.length-1; index >=0; index--) {
+                    num += list[index][key]['td']*1;
+                }
+                Sumobj[key+'.td']= that.Count(num)*1; //调用小数点精度计算;
+                // console.log(`打印一下 ${key} 的合计结果  ${num}`)
+            }
+        });
+        // console.log(`打印一下Sumobj`)
+        // console.log(Sumobj)
+        return Sumobj;
+    },
     Count (result) {    //js精度计算
         if(result.toString().match(/\.\d\d\d99/) && result.toString().match(/\.\d\d\d99/).length>0){
             result=Math.round(result*1000)/1000;    
@@ -803,7 +831,7 @@ excelmodel = {
             let item = list[index][type+'HeadId'];
             for (let i = hdlist.length-1; i >= 0; i--) {
                 if (item === hdlist[i]['id']) {
-                    hdlist[i].limit=true;
+                    hdlist[i].limit=true;   //加上限制标记
                     break;
                 }
             }

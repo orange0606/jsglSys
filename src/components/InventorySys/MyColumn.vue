@@ -7,7 +7,7 @@
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
         :key="index"
-        :col="item" :Formula="Formula" :type="type" :lastHeader="lastHeader" :hd="hd">
+        :col="item" :Formula="Formula" :type="type" :lastHeader="lastHeader" :hd="hd" >
       </my-column> 
     </template>
   </el-table-column> 
@@ -30,8 +30,7 @@ export default {
     lastHeader: {
     },
     hd: {
-
-    }
+    },
   },
   data() {
     return {

@@ -14,7 +14,6 @@
         size="mini"
         :show-header="showHeader" 
         v-if="showHeader"
-        :row-key="keyRow"
         show-summary
         :summary-method="getSummaries"
         :edit-config="{render: 'scroll', renderSize: 80}">
@@ -53,6 +52,7 @@ export default {
       PackHeader:[],//已组装的表头数据
       list: [
       ], //表格数据
+      totalobj: {},//合计尾行计算结果存储
       Height: 400,
       Width:99.9
     }
@@ -62,7 +62,15 @@ export default {
         console.log('这里进入了吗')
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
-    }
+      },
+      list: { //监听表格数据变化，然后进行合计
+          handler(newValue, oldValue) {
+              console.log('newValue');
+              // console.log('oldValue', oldValue);
+              this.totalobj = this.$excel.Total(newValue, this.PackHeader); //调用合计计算
+          },
+          deep: true
+      }
   },
   computed: {
       
@@ -83,10 +91,6 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
-    keyRow( row ) {
-        // console.log(row.seq)
-        return row.seq
-    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 
@@ -179,37 +183,42 @@ export default {
             });
         })
     },
-    arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        if (columnIndex >1) {  //带选择框的情况
-            if (row[this.hd[columnIndex-2]]) {
-                return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
-            }
-        }
-        return [1, 1]
-    }, 
+    // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
+    //     if (columnIndex >1) {  //带选择框的情况
+    //         if (row[this.hd[columnIndex-2]]) {
+    //             return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
+    //         }
+    //     }
+    //     return [1, 1]
+    // }, 
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {
         this.$refs.elxEditablecom.reload([])
         setTimeout(() => {
-          // let startTime = Date.now()
           this.$refs.elxEditablecom.reload(this.list);
-        //  this.$nextTick(() => {
-          // this.loading = false;
           this.$message({ message: `渲染 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms`, type: 'success', duration: 6000, showClose: true })
-            // })
           this.tViewSize();
         }, 200)
       })
     },
     getSummaries (param) {  //合计
-        if (!this.$refs.elxEditablecom || !this.showHeader) return [];
-        let list = this.$refs.elxEditablecom.getRecords();//获取表格的全部数据;
-        if (this.PackHeader.length ===0 || list.length ===0) return [];
-        return this.$excel.getSummaries(this.PackHeader, list, param);//调用合计尾行。
-    },
-    formatterDate (row, column, cellValue, index) {
-      return XEUtils.toDateString(cellValue, 'yyyy-MM-dd HH:mm:ss');
+        // if (!this.$refs.elxEditable1 || !this.showHeader) return [];
+        // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+        // if (this.PackHeader.length ===0 && list.length ===0) return [];
+        // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+        let { columns, data } = param,
+        sums = [];
+        if (!this.totalobj) return sums;
+        columns.forEach((column, index) => {
+            if (index === 0) {
+                sums[index] = '合计'
+                // return
+            }else if(index >2){
+                sums[index] = this.totalobj[column.property];
+            }
+        })
+        return sums;
     },
     exportCsvEvent () {
       this.$refs.elxEditablecom.exportCsv();
