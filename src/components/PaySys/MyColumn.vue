@@ -3,7 +3,7 @@
     <template slot-scope="scope">
       <!-- <span>{{scope.row.data[col.colNum].td}}</span> -->
       <span v-if="scope.row.data[col.colNum].edit ==='N'" :class="col.attribute==='pay'?'color':''" >{{scope.row.data[col.colNum].td}}</span>
-      <el-input v-if="col.attribute ==='pay' && scope.row.data[col.colNum].edit ==='Y' " style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="$excel.Calculation(lastHeader, type, F, fkeys, scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
+      <el-input v-if="col.attribute ==='pay' && scope.row.data[col.colNum].edit ==='Y' " style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Rowchange(lastHeader, type, F, fkeys, scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
@@ -43,6 +43,11 @@ export default {
       // console.log(this.approval)
   },
   methods:{
+      Rowchange (lastHeader, type, F, fkeys, row,col) {
+          this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+          this.$excel.Calculation(lastHeader, type, F, fkeys, row,col)
+          
+      }
   }
 
 }

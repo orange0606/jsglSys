@@ -25,13 +25,13 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
-      <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
+    <div class="click-table11-oper" >
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <!-- <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button> -->
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
-      <!-- <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
+      <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button> -->
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+      <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -46,8 +46,6 @@
           height="100%"
           :show-header="showHeader"
           v-if="showHeader"
-          :span-method="arraySpanMethod"
-          :row-key="keyRow"
           @cell-click ="cell_click"
           :header-cell-style="getRowClass"
           :row-style="RowCss"
@@ -137,6 +135,7 @@ export default {
   created () {
     this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
+    this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
   },
   mounted(){
       this.tViewSize();
@@ -348,8 +347,7 @@ export default {
             }
             this.tTotalmeterageId = data.tTotalmeterageId; //累计计量清单id
             this.loading = false;
-            let arr = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据
-            this.list = [...arr];
+            this.list = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据;
             this.findList(); //调用滚动渲染数据
             
         }).catch(e => {
@@ -374,7 +372,6 @@ export default {
               this.OneTometerage(id); //调用请求相关累计计量清单内容组装函数
               return this.totalpayRowList = arr;
           }
-
           this.totalpayRowList = arr;
           if (data && data.totalpayHead && data.totalpayHead.tTotalpayHeadRows && data.totalpayHead.tTotalpayHeadRows.length >0 ) {
               let headsArr = this.$excel.Package(data['totalpayHead'].tTotalpayHeadRows,data['totalpayHead'].refCol,data['totalpayHead'].refRow),
@@ -499,17 +496,11 @@ export default {
                             console.log('进来了totalmeterage-head-total')
                             //当属性值等于累计计量对应的计量清单。目的是对应累计计量清单的值，但通过计量清单做对应。此处因查询有无累计计量清单无的话，为0；
                             if (this.tometerageRowList  && this.tometerageRowList.length && this.tometerageRowList.length>0) {
-                 
-                                // let number = null;
-                                // for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
-                                //     number += (this.tometerageRowList[d][colName].td)*1;
-                                //     // number += (this.tometerageRowList[d][colName].td).toFixed(2);
-                                // }
-                                // Rlist.td = number.toFixed(2);
+
                                 let sumTd = [];
                                 for (let d = this.tometerageRowList.length -1; d >= 0; d--) {
-                                    console.log('this.tometerageRowList[d][colName].td')
-                                    console.log(this.tometerageRowList[d][colName].td)
+                                    // console.log('this.tometerageRowList[d][colName].td')
+                                    // console.log(this.tometerageRowList[d][colName].td)
                                     sumTd.push(this.tometerageRowList[d][colName])
                                 }
                                 Rlist.td = XEUtils.sum(sumTd, 'td');
@@ -546,7 +537,7 @@ export default {
         }
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
-        
+        this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow !== null && this.editRow ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {
@@ -561,7 +552,6 @@ export default {
     },
     // cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
     //     if (column.property) {
-    //         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
     //         let str = column.property,
     //         colName = str.substr(0,str.indexOf(".td"));
 
@@ -585,6 +575,8 @@ export default {
             this.$refs.elxEditable1.reload([])
             setTimeout(() => {
                 this.$refs.elxEditable1.reload(this.list);
+                this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+                
                 this.loading = false;
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
                 this.tViewSize();
@@ -597,6 +589,12 @@ export default {
         // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         // if (this.PackHeader.length ===0 && list.length ===0) return [];
         // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+        
+        if (this.$root.state && this.list.length >0) {
+            console.log('调用了合计');
+            this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
+            this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+        }
         let { columns, data } = param,
         sums = [];
         if (!this.totalobj) return sums;

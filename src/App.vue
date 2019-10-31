@@ -141,7 +141,7 @@ body, html, #app{
     -moz-overflow-y: auto; */
      scroll-behavior: smooth;
     position: sticky;
-    overflow-y: auto; 
+    /* overflow-y: auto;  */
 }
 .el-table--border th.gutter:last-of-type{
   	display: table-cell !important; 
@@ -156,11 +156,11 @@ body, html, #app{
 }
 /* 去除单元格内的内边距 */
 .el-table .cell, .el-table th div, .el-table--border td:first-child .cell, .el-table--border th:first-child .cell {
-    padding: 0px;
+    padding-left: 0px;
 }
 .el-table .cell, .el-table th div {
     text-overflow: ellipsis;
-    padding: 0px;
+    padding-right: 0px;
     overflow: hidden;
 }
 /* .el-table__body, .el-table__footer, .el-table__header {
@@ -176,11 +176,11 @@ body, html, #app{
     scroll-behavior: smooth;
     overflow-y: auto;
 } */
-tbody {
+/* tbody {
     scroll-behavior: smooth;
     overflow-y: auto;
     position: sticky;
-}
+} */
 .click-table11-oper {
     height: 30px;
     margin-bottom: 10px;

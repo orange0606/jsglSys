@@ -62,14 +62,6 @@ export default {
         console.log('这里进入了吗')
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
-      },
-      list: { //监听表格数据变化，然后进行合计
-          handler(newValue, oldValue) {
-              console.log('newValue');
-              // console.log('oldValue', oldValue);
-              this.totalobj = this.$excel.Total(newValue, this.PackHeader); //调用合计计算
-          },
-          deep: true
       }
   },
   computed: {
@@ -77,6 +69,7 @@ export default {
   },
   created () {
     this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
+    this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
   },
 
   mounted(){
@@ -197,6 +190,7 @@ export default {
         this.$refs.elxEditablecom.reload([])
         setTimeout(() => {
           this.$refs.elxEditablecom.reload(this.list);
+          this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
           this.$message({ message: `渲染 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms`, type: 'success', duration: 6000, showClose: true })
           this.tViewSize();
         }, 200)
@@ -207,6 +201,12 @@ export default {
         // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
         // if (this.PackHeader.length ===0 && list.length ===0) return [];
         // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+        
+        if (this.$root.state && this.list.length >0) {
+            console.log('调用了合计');
+            this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
+            this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+        }
         let { columns, data } = param,
         sums = [];
         if (!this.totalobj) return sums;

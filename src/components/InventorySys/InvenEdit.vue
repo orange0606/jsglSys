@@ -28,16 +28,15 @@
     </div>
 
     <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-    <div class="click-table11-oper" v-if="joinParent && mode==='show'?false:true" >
-      <el-button :disabled="approval.state === 1?true:false" type="primary" size="mini" @click="impt">导入表格</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="warning" size="mini" @click="submitEvent">完成</el-button>
+    <div class="click-table11-oper" >
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="impt">导入表格</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="con">打印一下啊</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="con">打印一下啊</el-button>
-
-      <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-      <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button>
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -135,14 +134,6 @@ export default {
             //此处可进行判断，然后进行清单导入
             this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
         },
-        list: { //监听表格数据变化，然后进行合计
-            handler(newValue, oldValue) {
-                console.log('newValue');
-                // console.log('oldValue', oldValue);
-                this.totalobj = this.$excel.Total(newValue, this.PackHeader); //调用合计计算
-            },
-            deep: true
-        }
     },
     mounted(){
         this.tViewSize();
@@ -155,6 +146,7 @@ export default {
     created () {
         this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
         this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
+        this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
     },
 
     beforeDestroy () {
@@ -416,6 +408,7 @@ export default {
             })
         },
         cell_click(row, column, cell, event){ //单元格点击编辑事件
+            this.$state = false;
             if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
             this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
             if (column.property) {
@@ -425,6 +418,7 @@ export default {
                 this.editRow = row[colName];
                 if (this.editRow.edit && this.editRow.edit==='Y') return false;
                 this.editRow.edit = "Y";  //Y为编辑模式N为只读状态
+                this.$state = true;
             }  
         },
         RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
@@ -433,21 +427,13 @@ export default {
             }
             return '';
         },
-        // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-        //     if (columnIndex >1) {  //带选择框的情况
-        //         let Row = row[this.hd[columnIndex-2]];
-        //         if (Row) {
-        //             return [ Row.tdRowspan, Row.tdColspan ]
-        //         }
-        //     }
-        //     return [1, 1]
-        // }, 
         findList () { //表格滚动渲染函数
             this.loading = true;
             this.$nextTick(() => {
                 this.$refs.elxEditable1.reload([])
                 setTimeout(() => {
                     this.$refs.elxEditable1.reload(this.list);
+                    this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
                     this.loading = false;
                     this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
                     this.tViewSize();
@@ -460,6 +446,12 @@ export default {
             // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
             // if (this.PackHeader.length ===0 && list.length ===0) return [];
             // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+            
+            if (this.$root.state && this.list.length >0) {
+                console.log('调用了合计');
+                this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
+                this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+            }
             let { columns, data } = param,
             sums = [];
             if (!this.totalobj) return sums;
@@ -473,7 +465,6 @@ export default {
             })
             return sums;
         },
-
         insertEvent () {
             if (!this.hd.length || this.hd.length===0) return false;
             let rest = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
@@ -499,6 +490,7 @@ export default {
                 this.$refs.elxEditable1.reload([]);
                 this.$refs.elxEditable1.reload(this.list);
                 this.RowDelList = []; //放弃更改后  删除数组清空
+                this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
             })
 
         },
@@ -539,6 +531,7 @@ export default {
                 this.$nextTick(() => {
                     this.$refs.elxEditable1.reload([]);
                     this.$refs.elxEditable1.reload(this.list);
+                    this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
                 })
             } catch (error) {
                 console.log('删除后重新排序出了问题'+error);

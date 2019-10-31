@@ -72,8 +72,9 @@ Vue.prototype.$confirm = MessageBox.confirm;
 
 Vue.prototype.$alert = MessageBox.alert;
 
-//定义一个全局变量，表格el-table-column 的key值 用于表头错乱修正 
+//挂载一个原型，表格el-table-column 的key值 用于表头错乱修正 
 Vue.prototype.$keys = 0;
+
 
 // import axios from "axios"
 // // //将axios挂载到原型上
@@ -106,7 +107,7 @@ Vue.prototype.$getViewportSize = function(){
 import store from '@/utils/Store'
 Vue.prototype.$store = store;
 import {post,fetch,patch,put} from '@/utils/request'
-//定义全局变量
+//挂载在原型
 Vue.prototype.$post=post;
 Vue.prototype.$fetch=fetch;
 Vue.prototype.$patch=patch;
@@ -131,6 +132,11 @@ router.beforeEach(function (to, from, next) {
 new Vue({
   el: '#app',
   router,
+  data() {
+    return {
+        state: true,  //定义一个全局变量，作为清单合计尾行是否计算的状态值，true为是
+    };
+  },
   components: { App },
   template: '<App/>'
 })
