@@ -30,7 +30,7 @@
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
       <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button> -->
-      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="$refs.elxEditable1.revert()">放弃更改</el-button>
+                <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
       <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
     </div>
           <!-- show-summary
@@ -119,6 +119,7 @@ export default {
       tTotalmeterageId:null, //累计计量清单id
       RowDelList:[],// 删除集合
       totalobj: {},//合计尾行计算结果存储
+      ResetList: [], //清单初始值（重置数据时用）
       Height: 400,
       Width:99.9
     }
@@ -256,7 +257,7 @@ export default {
           try {
               this.list = this.$excel.ListAssemble(row.payRowList	); //组装清单表格数据
               this.findList(); //调用滚动渲染数据
-              
+              this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
           } catch (error) {
               this.$message({
                   type: 'info',
@@ -349,6 +350,7 @@ export default {
             this.loading = false;
             this.list = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据;
             this.findList(); //调用滚动渲染数据
+            this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
             
         }).catch(e => {
             this.loading = false;
@@ -529,8 +531,9 @@ export default {
             console.log('this.list---------------');
             console.log(this.list);
             this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
-
             this.findList(); //调用滚动渲染数据
+            this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
+
         } catch (e) {
             this.loading =false;
             this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
@@ -607,6 +610,15 @@ export default {
             }
         })
         return sums;
+    },
+    Abandon () {  //放弃更改
+        this.list = XEUtils.clone(this.ResetList, true); //深拷贝
+        this.$nextTick(() => {
+            this.$refs.elxEditable1.reload([]);
+            this.$refs.elxEditable1.reload(this.list);
+            this.RowDelList = []; //放弃更改后  删除数组清空
+            this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+        })
     },
     submitEvent () {
       this.$refs.elxEditable1.validate(valid => {

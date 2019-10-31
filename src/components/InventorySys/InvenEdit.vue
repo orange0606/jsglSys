@@ -64,7 +64,6 @@
           
           <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
           <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
-          
           <!-- 此处使用多级表头嵌套组件 -->
           <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
         </elx-editable>
@@ -76,6 +75,7 @@
 
 <script>
 import MyColumn from './MyColumn';
+import XEUtils from 'xe-utils';
 export default {
   name: 'InvenEdit',
   components: {
@@ -125,6 +125,7 @@ export default {
       RowDelList: [],//记录被删除有id的单元格
       lastHeader: null,
       totalobj: {},//合计尾行计算结果存储
+      ResetList: [], //清单初始值（重置数据时用）
       Height: 400,
       Width:100
     }
@@ -250,6 +251,7 @@ export default {
                     this.list[index]['seq'] = index;
                 }
                 this.findList(); //调用滚动渲染数据
+                this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
             } catch (error) {
                 this.$message({
                     type: 'info',
@@ -339,6 +341,7 @@ export default {
                     this.list[index]['seq'] = index;
                 }
                 this.findList(); //调用滚动渲染数据
+                this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
             }).catch(e => {
                 this.loading = false;
                 console.log(e)
@@ -391,12 +394,15 @@ export default {
                 return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
                 }
                 try {  //把数据载入表格
-                    
+                    let listlen = this.list.length;
                     this.list = [...data];
                     for (let index = this.list.length -1; index >=0; index--) {
                         this.list[index]['seq'] = index;
                     }
                     this.findList(); //调用滚动渲染数据
+                    if (listlen && listlen ===0) {
+                        this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
+                    }
                     // this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
                     data = null; //内存释放
                 } catch (e) {
@@ -485,14 +491,13 @@ export default {
 
         },
         Abandon () {  //放弃更改
-            // this.$refs.elxEditable1.revert();
+            this.list = XEUtils.clone(this.ResetList, true); //深拷贝
             this.$nextTick(() => {
                 this.$refs.elxEditable1.reload([]);
                 this.$refs.elxEditable1.reload(this.list);
                 this.RowDelList = []; //放弃更改后  删除数组清空
                 this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
             })
-
         },
         RemoveSelecteds () {  //删除选中
             let selection = this.$refs.elxEditable1.getSelecteds(),

@@ -185,7 +185,7 @@
 
 import clickTable from './headerAtt/clickTable';
 import inven from '../../modules/newheaderAtt';
-import XEUtils from 'xe-utils';
+// import XEUtils from 'xe-utils';
   export default {
     name: 'NewHeader',
     components: {

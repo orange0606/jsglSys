@@ -192,6 +192,7 @@ export default {
       pendingRemoveList:[],
       RowDelList: [],//记录被删除有id的单元格
       totalobj: {},//合计尾行计算结果存储
+      ResetList: [], //清单初始值（重置数据时用）
       Height: 400,
       Width:99.9,
       OrHeight:300,
@@ -373,6 +374,7 @@ export default {
                   this.list[index]['seq'] = index;
               }
               this.findList(); //调用滚动渲染数据
+              this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
           } catch (error) {
               this.$message({
                   type: 'info',
@@ -469,6 +471,7 @@ export default {
                 this.list[index]['seq'] = index;
             }
             this.findList(); //调用滚动渲染数据
+            this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
             
         }).catch(e => {
             this.loading = false;
@@ -732,9 +735,14 @@ export default {
         console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格
+            let listlen = this.list.length;
             rest = rest.concat([]);
             this.list = this.list.concat(rest);
             this.findList();
+            if (listlen && listlen ===0) {
+                this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
+            }
+            
         } catch (e) {
             console.log('出错了')
             console.log(e)
@@ -772,7 +780,6 @@ export default {
                     if (col === colName)  return false;
                 }
             }
-
             this.editRow = row[colName];
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
@@ -877,13 +884,13 @@ export default {
         })
     },
     Abandon () {  //放弃更改
-        // this.$refs.elxEditable1.revert();
+        this.list = XEUtils.clone(this.ResetList, true); //深拷贝
         this.$nextTick(() => {
             this.$refs.elxEditable1.reload([]);
             this.$refs.elxEditable1.reload(this.list);
             this.RowDelList = []; //放弃更改后  删除数组清空
+            this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
         })
-
     },
     RemoveSelecteds () {  //删除选中
         let selection = this.$refs.elxEditable1.getSelecteds(),
