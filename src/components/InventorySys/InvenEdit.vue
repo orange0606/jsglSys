@@ -35,7 +35,9 @@
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="con">打印一下啊</el-button>
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-      
+      <el-button type="success" size="mini" @click="printDemo">测试打印</el-button>
+      <el-button type="success" size="mini" @click="printTable">预览打印</el-button>
+
       <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
     </div>
           <!-- show-summary
@@ -51,7 +53,7 @@
           ref="elxEditable1"
           class="scroll-table4 click-table11"
           border
-          height="100%"
+          :height="Height+'px'"
           size="mini"
           :show-header="showHeader"
           :header-cell-style="getRowClass"
@@ -69,17 +71,19 @@
         </elx-editable>
         <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
     </div>
-    
+    <printing v-if="showprint" :print="print" :showprint.sync="showprint" ></printing>
   </div>
 </template>
 
 <script>
 import MyColumn from './MyColumn';
+import printing from '../Printing/Printing';
 import XEUtils from 'xe-utils';
 export default {
   name: 'InvenEdit',
   components: {
-    MyColumn
+    MyColumn,
+    printing
   },
   props: {
     uplist:{  //查看和修改清单数据
@@ -116,9 +120,7 @@ export default {
       startTime:null,
       loading: false,
       editRow:null, //单元格编辑的存储上一个已点击单元格数据
-      rest:[],
       formula:{}, //存储表头的公式数据
-      row: null,//公式字符串转代码的全局变量
       col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
       list: [], //表格数据
@@ -127,6 +129,8 @@ export default {
       totalobj: {},//合计尾行计算结果存储
       ResetList: [], //清单初始值（重置数据时用）
       new: false, //判断是否新建清单 默认为否（重置数据时候用来判断是否要存储备用数据）
+      print:null, //预览打印数据
+      showprint:false, //是否显示打印组件
       Height: 400,
       Width:100
     }
@@ -155,6 +159,23 @@ export default {
     // this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
     },
     methods: {
+        printDemo(){
+            // this.$refs.easyPrint.print()
+        },
+        printTable(){
+            if (this.list && this.list.length >0) {
+                this.print = {
+                    list: this.list,  //深拷贝 用来打印预览
+                    col: this.col,
+                    PackHeader: this.PackHeader,
+                    hd: this.hd,
+                    lastHeader: this.lastHeader,
+                }
+                this.showprint = true;
+                console.log('this.print-----------------------------')
+                console.log(this.print);
+            }
+        },
         con(){
             console.log(this.totalobj)
         },
@@ -263,7 +284,6 @@ export default {
                     console.log(error)
                     this.loading = false;
             }
-            
         },
         allHeader (tenderId) {  //请求该标段的全部变更清单表头列表
             this.$post('/head/alloriginal',{tenderId, judge: 0})

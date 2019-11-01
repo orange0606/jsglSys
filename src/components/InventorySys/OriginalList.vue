@@ -101,6 +101,34 @@ import XEUtils from 'xe-utils'
     InvenEdit
   },
   props: {
+          // 针对分页表格模式：末尾空白行插入
+      spaceRow: {
+          type:Boolean,
+          default:false,
+      },
+
+      // 针对分页表格模式：传入的打印数据。
+      tableData:{
+          type:Object,
+          default() {
+              return undefined
+          }
+      },
+      // 是否显示表格
+      tableShow:{
+          type:Boolean,
+          default:false
+      },
+      // 每页多少行
+      onePageRow: {
+          type:Number,
+          default:50,
+      },
+      // // 复制打印页面前调用的钩子
+      // beforeCopy:Function,
+      // // 打印页面前调用的钩子
+      // beforePrint:Function,
+
     originalList:{    //原清单数据列表，这个数据用于返回给父组件
       type: Array,
       required: false,
@@ -134,7 +162,7 @@ import XEUtils from 'xe-utils'
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:1473, name:"清单审批单",state:0}) //state=1为已通过的审批单
+      default: () => ({id:1498, name:"清单审批单",state:0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
