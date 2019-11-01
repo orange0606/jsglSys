@@ -193,6 +193,7 @@ export default {
       RowDelList: [],//记录被删除有id的单元格
       totalobj: {},//合计尾行计算结果存储
       ResetList: [], //清单初始值（重置数据时用）
+      new: false, //判断是否新建清单 默认为否（重置数据时候用来判断是否要存储备用数据）
       Height: 400,
       Width:99.9,
       OrHeight:300,
@@ -306,6 +307,7 @@ export default {
             this.tochRowList = this.totalchangeCol = null;
             console.log('this.mode')
             console.log(this.mode )
+            this.new = false; //不需要在清单导入时备份
             switch(this.mode) {
                 case 'new': //此处为新建模式处理
                     return this.updates(newVal);
@@ -329,6 +331,7 @@ export default {
             this.$nextTick(() => {
                 this.$refs.elxEditable1.reload([]);
             });
+            this.new = true; //需要在清单导入时备份
             return false;
         }
         console.log('啥都没进来')
@@ -403,6 +406,9 @@ export default {
     oneHeader (id) {  //请求单个表头 表头id  表头类型
        this.$post('/head/getone',{id,type:'change'})
         .then((response) => {
+          this.ResetList = null; //更换表头时需清空备份数据
+          this.RowDelList = null; //清空存放删除集合数据
+          this.new = true; //需备份数据
           let data = response.data.onehead,
           headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
           this.PackHeader = [...headsArr]; //拷贝
@@ -739,8 +745,9 @@ export default {
             rest = rest.concat([]);
             this.list = this.list.concat(rest);
             this.findList();
-            if (listlen && listlen ===0) {
+            if (listlen ===0 && this.new) { //需要在新建清单时才需要备份数据
                 this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
+                this.new = false;
             }
             
         } catch (e) {
@@ -834,7 +841,7 @@ export default {
         // if (this.PackHeader.length ===0 && list.length ===0) return [];
         // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
         
-        if (this.$root.state && this.list.length >0) {
+        if (this.$root.state && this.list && this.list.length >0) {
             console.log('调用了合计');
             this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
             this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false

@@ -31,7 +31,7 @@
       <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button> -->
                 <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-      <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
+      <!--  -->
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -120,6 +120,7 @@ export default {
       RowDelList:[],// 删除集合
       totalobj: {},//合计尾行计算结果存储
       ResetList: [], //清单初始值（重置数据时用）
+      new: false, //判断是否新建清单 默认为否（重置数据时候用来判断是否要存储备用数据）
       Height: 400,
       Width:99.9
     }
@@ -198,6 +199,7 @@ export default {
             this.form.name = newVal.name;
             this.form.num = newVal.num;
             this.form.headerId = newVal.payHead.id;
+            this.new = false; //不需要在清单导入时备份
             switch(this.mode) {
                 case 'new': //此处为新建模式处理
                     return this.updates(newVal);
@@ -219,6 +221,7 @@ export default {
             this.$nextTick(() => {
                 this.$refs.elxEditable1.reload([]);
             });
+            this.new = true; //需要在清单导入时备份
         }
     },
     updates (row) {  //新建模式与修改模式的预览修改数据呈现函数
@@ -314,7 +317,9 @@ export default {
           this.list.length = 0;
 
           //调用表格公式解析 存储
-    
+          this.ResetList = null; //更换表头时需清空备份数据
+          this.RowDelList = null; //清空存放删除集合数据
+          this.new = true; //需备份数据
           this.OneToPay( data.id ); // 调用相对应的累计支付清单内容
       })
     },
@@ -532,8 +537,10 @@ export default {
             console.log(this.list);
             this.$excel.Formula(this, this.list, this.formula);  //调用公式计算
             this.findList(); //调用滚动渲染数据
-            this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
-
+            if (this.new) { //需要在新建清单时才需要备份数据
+                this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
+                this.new = false;
+            }
         } catch (e) {
             this.loading =false;
             this.$message({ message: `遇到问题了呀,清单导入失败,请重试。${e}`, type: 'error', duration: 6000, showClose: true })
@@ -593,7 +600,7 @@ export default {
         // if (this.PackHeader.length ===0 && list.length ===0) return [];
         // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
         
-        if (this.$root.state && this.list.length >0) {
+        if (this.$root.state && this.list && this.list.length >0) {
             console.log('调用了合计');
             this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
             this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false

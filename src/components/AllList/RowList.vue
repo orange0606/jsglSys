@@ -202,7 +202,7 @@ export default {
         // if (this.PackHeader.length ===0 && list.length ===0) return [];
         // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
         
-        if (this.$root.state && this.list.length >0) {
+        if (this.$root.state && this.list && this.list.length >0) {
             console.log('调用了合计');
             this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
             this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
