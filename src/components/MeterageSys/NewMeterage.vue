@@ -348,9 +348,6 @@ export default {
           }
           try {
               this.list = this.$excel.ListAssemble(row.meterageRowList); //组装清单表格数据
-              for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
-                  this.list[index]['seq'] = index;
-              }
               this.findList(); //调用滚动渲染数据
               this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
           } catch (error) {
@@ -435,9 +432,6 @@ export default {
             };
             this.loading = false;
             this.list = this.$excel.ListAssemble(data.meterageRowList); //组装清单表格数据;
-              for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
-                  this.list[index]['seq'] = index;
-            }
             this.findList(); //调用滚动渲染数据
             this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
         }).catch(e => {

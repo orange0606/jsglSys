@@ -196,13 +196,16 @@ excelmodel = {
             col = ABC.indexOf(list[index].colNum), //列号A
             row = list[index].trNum;  //行号
             if (col>=0 && coll) {
-                if (!arr[row-1]) {    //判断是否有这个下标,有的话直接添加数据
-                    arr[row-1]= {};
-                    arr[row-1][coll] =list[index];
+                let sub = row-1;
+                if (!arr[sub]) {    //判断是否有这个下标,有的话直接添加数据
+                    arr[sub]= {};
+                    arr[sub][coll] =list[index];
+                    arr[sub]['seq'] = sub;
                 }else{ //无此下标，先创建
-                    arr[row-1][coll] =list[index];
+                    arr[sub][coll] =list[index];
+                    arr[sub]['seq'] = sub;
                 }
-                arr[row-1][coll].edit = 'N'; //加入编辑状态
+                arr[sub][coll].edit = 'N'; //加入编辑状态
             }
         };
         return arr;

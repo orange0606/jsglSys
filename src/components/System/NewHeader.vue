@@ -364,11 +364,12 @@ import inven from '../../modules/newheaderAtt';
             // console.log(New);
             this.loading = true;
             this.list = [];
-            // this.row = {};
-            let arr = this.$excel.ListAssemble([...New]);  //组装表头
-            this.list = arr;
+            this.list = this.$excel.ListAssemble([...New]);  //组装表头
             this.hd = Object.keys(this.list[0]);
-
+            let sub = this.hd.indexOf('seq');
+            if (sub!==-1) {
+                this.hd.splice(sub, 1);
+            }
             this.Form.headRowList.length = 0;
             if (this.hd[0]!=='A') {
                 this.hd.reverse();

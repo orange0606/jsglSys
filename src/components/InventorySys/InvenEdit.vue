@@ -1,4 +1,6 @@
+
 <template>
+
 <div
     v-loading="loading"
     element-loading-text="正在加速处理数据"
@@ -36,7 +38,7 @@
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
       <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
       
-      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+      <el-button type="success" size="mini" @click="exportxlsx">导出</el-button>
     </div>
           <!-- show-summary
       :summary-method="getSummaries" -->
@@ -150,11 +152,10 @@ export default {
         this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
         this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
     },
-
-    beforeDestroy () {
-    // this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
-    },
     methods: {
+        exportxlsx() {
+            LAY_EXCEL.exportExcel([[1, 2, 3]], '表格导出.xlsx', 'xlsx')
+        },
         con(){
             console.log(this.totalobj)
         },
@@ -309,6 +310,7 @@ export default {
             })
         },
         OneOriginal (id) { //原清单id
+            this.loading = true;
             //此处请求一个审批单的一个原清单
             this.$post('/original/row/getone',{ id })
                 .then((response) => {
@@ -343,11 +345,8 @@ export default {
                 this.list = this.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
                 console.log('this.list------------')
                 console.log(this.list)
-                for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
-                    this.list[index]['seq'] = index;
-                }
                 this.findList(); //调用滚动渲染数据
-                this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
+                // this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
             }).catch(e => {
                 this.loading = false;
                 console.log(e)
