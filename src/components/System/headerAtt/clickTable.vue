@@ -193,6 +193,11 @@
                 var arr = this.$excel.ListAssemble(this.Form[key]);  //组装表头
                 this.list= [...arr];
                 this.hd = Object.keys(arr[0]);
+                this.hd = Object.keys(this.list[0]);
+                let sub = this.hd.indexOf('seq');
+                if (sub!==-1) {
+                    this.hd.splice(sub, 1);
+                }
                 if (this.hd[0]!='A') {
                     this.hd.reverse();
                 }
