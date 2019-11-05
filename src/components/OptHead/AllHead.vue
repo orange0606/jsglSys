@@ -1,30 +1,30 @@
 <template>
-    <div style="min-width:1000px;overflow: hidden;">
+    <div style="min-width:700px;overflow: hidden;">
     <el-collapse-transition>
     <el-card class="box-card" shadow="never" v-if="col.length>0">
         <div slot="header" class="clearfix">
-          <span>已选择的单元格 {{col.length}} 个</span>
+          <span>已选择 {{col.length}} 项</span>
           <el-button style="float: right; padding: 3px 0" type="text" @click="Splicing">控制台打印</el-button>
         </div>
-        <ul class="text item" >
-            <li class="ul_li" style="width:40px">#</li>
+        <ul class="text item" style="color:#409EFF" >
+            <li class="ul_li" style="width:35px">#</li>
             <li class="ul_li">表头类型</li>
-            <li class="ul_li">表头名称</li>
+            <li class="ul_li" style="width:180px">表头名称</li>
             <li class="ul_li" style="width:100px" >表头标段</li>
-            <li class="ul_li" style="width:100px" >单元格位置</li>
-            <li class="ul_li" style="width:60px">操作</li>
+            <li class="ul_li" style="width:80px" >单元格位置</li>
+            <li class="ul_li" style="width:40px">操作</li>
         </ul>
         <div class="cardbody">
             <!-- <div v-for="o in 10" :key="o" class="text item">
               {{'列表内容 ' + o }}
             </div> -->
             <ul class="text item" v-for="(val,i) in col" :key="i" style="overflow:auto">
-                <li class="ul_li" style="width:40px">{{i+1}}</li>
+                <li class="ul_li" style="width:35px">{{i+1}}</li>
                 <li class="ul_li" v-text="typeName(val.type)" ></li>
-                <li class="ul_li">{{val.name}}</li>
+                <li class="ul_li" style="width:180px" >{{val.name}}</li>
                 <li class="ul_li" style="width:100px" >{{val.tender.name}}</li>
-                <li class="ul_li" style="width:100px" >{{val.key}}</li>
-                <li class="ul_li" style="width:60px" @click="deleCol(i)"><i class="el-icon-delete"></i></li>
+                <li class="ul_li" style="width:80px" >{{val.key}}</li>
+                <li class="ul_li" style="width:40px" @click="deleCol(i)"><i class="el-icon-delete"></i></li>
             </ul>
         </div>
         
@@ -33,7 +33,7 @@
     <el-collapse-transition>
     
     <div >
-        <div style="text-align:left;font-size:15px;font-weight:bold;color:#909399;">
+        <div style="text-align:left;font-size:15px;font-weight:bold;color:#409EFF;">
             <ul class="" >
               <li class="ul_li2" style="width:40px">#</li>
               <li class="ul_li2">标段编号</li>
@@ -64,7 +64,6 @@
                 ref="elxEditable2"
                 class="click-table12"
                 border
-                
                 :data.sync="item.RowList"
                 size="small"
                 :span-method="arraySpanMethod"
@@ -139,8 +138,11 @@
     }
   },
   created () {
-      if (!this.joinParent) {
+      // if (!this.joinParent) {
            this.findList()  //发起请求所有已建表头数据
+      // }
+      if (this.headRowSelected.headRowStr && this.headRowSelected.headRowStr.length > 0) {
+            this.strSplit (this.headRowSelected.headRowStr)
       }
      
   },
@@ -199,7 +201,7 @@
                     rowId: str3[2],
                     key: str3[3],
                     tender: {
-                      name:'标段'+i
+                      name:''
                     }
                 }
             return item; 
@@ -211,6 +213,7 @@
             console.log('解析选择的单元格字符串发生错误')
             console.log(error)
         }
+        console.log('解析选择的单元格')
     },
     deleCol(i) {
             var item = this.col[i],
@@ -535,8 +538,8 @@ div >>> .el-card__header {
     overflow-y:auto; 
 }
 .ul_li {
-    width: 150px;
-    padding: 0 10px;
+    width: 120px;
+    padding: 0 5px;
     overflow: hidden;
     text-align: center;
     font-size: 13px;
@@ -544,11 +547,11 @@ div >>> .el-card__header {
 }
 .ul_li2 {
     width: 100px;
-    padding: 0 0 0 25px;
+    padding: 0 0 0 10px;
 
     overflow: hidden;
     text-align: center;
-    /* font-size: 13px; */
+    font-size: 13px;
     margin-top: 16px;
     display: inline-block;
 }

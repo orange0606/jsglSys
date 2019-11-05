@@ -552,7 +552,7 @@ export default {
         submitEvent () {
             this.$refs.elxEditable1.validate(valid => {
                 if (valid) {
-                    let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+                    let list = this.list;//获取表格的全部数据;
                     if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
                     //解构数据进行提交
                     this.loading = true;
