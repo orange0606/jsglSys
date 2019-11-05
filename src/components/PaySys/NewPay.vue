@@ -713,6 +713,7 @@ export default {
                             break;
                         default:  //为 alter模式与 new模式    
                             this.payList.push(obj);
+                            this.list.length =0;
                             this.$message({ message: `已为你保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                             return this.saveShow();                      
                     } 
@@ -725,7 +726,7 @@ export default {
                         default:  //为 alter模式与 new模式 
                             for (let index = this.payList.length -1; index >=0; index--) {
                                 let ListRow = this.payList[index];
-                                if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
+                                if((ListRow.saveTime - this.uplist.saveTime) ===0){
                                     ListRow.tPayHeadId = this.form.headerId;
                                     ListRow.payRowList = payRowList;
                                     ListRow.payRowAddList = payRowAddList;  //增
@@ -738,6 +739,7 @@ export default {
                                     if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
                                         ListRow.alter ='Y'; //标记为修改
                                     }
+                                    this.list.length =0;
                                     this.$message({ message: `已为你修改---保存 ${payRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();
                                 }
@@ -758,6 +760,7 @@ export default {
                           case 'show':  //为show模式
                               parameter.payAddList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
+                              this.list.length =0;
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;
@@ -770,6 +773,8 @@ export default {
                               obj.id = this.uplist.id;
                               parameter.payAltList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
+                              this.list.length =0;
+
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;

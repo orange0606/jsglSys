@@ -938,9 +938,11 @@ export default {
 
     },
   submitEvent () {
+      console.log('this.changeList---------------')
+      console.log(this.changeList)
       this.$refs.elxEditable1.validate(valid => {
         if (valid) {
-            let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+            let list = this.list;//获取表格的全部数据;
             if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
             this.loading = true;
@@ -959,8 +961,6 @@ export default {
              }else{
                   changeRowDelList = this.RowDelList;
              }
-
-          
             try {
                 for (let index = list.length -1; index >=0 ; index--) {
                     for (let i = header.length -1; i >=0; i--) {
@@ -1019,6 +1019,7 @@ export default {
                             break;
                         default:  //为 alter模式与 new模式    
                             this.changeList.push(obj);
+                            this.list.length =0;
                             this.$message({ message: `已为你保存 ${changeRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                             return this.saveShow();                      
                     } 
@@ -1031,7 +1032,12 @@ export default {
                         default:  //为 alter模式与 new模式 
                             for (let index = this.changeList.length -1; index >=0; index--) {
                                 let ListRow = this.changeList[index];
-                                if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
+                                // console.log('打印一下this.uplist+ListRow')
+                                // console.log(this.uplist.saveTime+'   saveTime   '+ListRow.saveTime)
+                                // console.log(this.form.name+'   name   '+ListRow.name)
+                                // console.log(this.form.headerId+'   headerId   '+ListRow.changeHeadId)
+                                // console.log(ListRow.saveTime - this.uplist.saveTime)
+                                if((ListRow.saveTime - this.uplist.saveTime) ===0){
                                     ListRow.changeHeadId = this.form.headerId;
                                     ListRow.changeRowList = changeRowList;
                                     ListRow.changeRowAddList = changeRowAddList;  //增
@@ -1044,6 +1050,7 @@ export default {
                                      if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
                                         ListRow.alter ='Y'; //标记为修改
                                     }
+                                    this.list.length =0;
                                     this.$message({ message: `已为你修改---保存 ${changeRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();
                                 }
@@ -1064,6 +1071,7 @@ export default {
                           case 'show':  //为show模式
                               parameter.changeAddList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
+                              this.list.length =0;
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;
@@ -1076,6 +1084,7 @@ export default {
                               obj.id = this.uplist.id;
                               parameter.changeAltList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
+                              this.list.length =0;
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;

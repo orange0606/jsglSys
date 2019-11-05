@@ -635,7 +635,7 @@ excelmodel = {
             if ( Att && ( Att==='fluctuate' || Att==='meterage' || Att==='pay') && AttVal && AttVal !=='') {
                 let colTr = AttVal.match(patt1)[0],   //属性值  列号
                 sumNb = null,   //对应上期和本期属性列的合计
-                currentTd = row[colTr]['td']*1; //本期（变更、计量、支付）数量的值
+                currentTd = row[colTr]['td']*1; //本期（变更、计量、支付）对应原数量的值
                 switch (type) {
                     case 'change':
                         Object.keys(lastHeader).forEach(function(key){
@@ -654,12 +654,14 @@ excelmodel = {
 
                                         // console.log(row[chkeyObj.colNum]['td']*1,'  row[chkeyObj.colNum]  ', ColTd)
                                         // console.log('row[colTr]------------',row[colTr]['td'])
-                                        // console.log('本期计量和上期计量数量  ：'+sumNb)
-                                        // console.log('原数量  ：'+currentTd)
+                                        console.log('本期计量和上期计量数量  ：'+sumNb)
+                                        console.log('原数量  ：'+currentTd)
                                         // console.log('本期计量和上期计量数量 + 原数量  ：'+summmm)
                                     if ( (currentTd+(sumNb*1)) <0 ){
                                         Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = 0-(currentTd-row[chkeyObj.colNum]['td']);
+                                        // col['td'] = currentTd-row[chkeyObj.colNum]['td']*1; //原数量-上期
+                                        col['td'] = 0-(currentTd+row[chkeyObj.colNum]['td']*1); //原数量-上期
+
                                     }
                                 }
                             }

@@ -979,6 +979,7 @@ export default {
                         default:  //为 alter模式与 new模式    
                             this.meterageList.push(obj);
                             this.$message({ message: `已为你保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
+                            this.list.length =0;
                             return this.saveShow();                      
                     } 
                 }else if (this.uplist && (this.uplist.id || this.uplist.saveTime)) {  //当前属于修改清单====
@@ -990,7 +991,7 @@ export default {
                         default:  //为 alter模式与 new模式 
                             for (let index = this.meterageList.length -1; index >=0; index--) {
                                 let ListRow = this.meterageList[index];
-                                if((ListRow.saveTime === this.uplist.saveTime) || (ListRow.id === this.uplist.id)){
+                                if((ListRow.saveTime - this.uplist.saveTime) ===0){
                                     ListRow.meterageHeadId = this.form.headerId;
                                     ListRow.meterageRowList = meterageRowList;
                                     ListRow.meterageRowAddList = meterageRowAddList;  //增
@@ -1003,6 +1004,7 @@ export default {
                                     if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
                                         ListRow.alter ='Y'; //标记为修改
                                     }
+                                    this.list.length =0;
                                     this.$message({ message: `已为你修改---保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();
                                 }
@@ -1023,6 +1025,7 @@ export default {
                           case 'show':  //为show模式
                               parameter.meterageAddList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
+                              this.list.length =0;
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;
@@ -1035,6 +1038,7 @@ export default {
                               obj.id = this.uplist.id;
                               parameter.meterageAltList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
+                              this.list.length =0;
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;
