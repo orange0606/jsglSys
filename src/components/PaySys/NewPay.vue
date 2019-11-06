@@ -697,6 +697,7 @@ export default {
                 saveTime:new Date(),
                 saveEmployee:{name:this.$store.state.username}
             };
+            if (this.uplist.id)obj.saveTime = this.uplist.saveTime; //设置时间
             if (this.mode !=='show') {
                 obj['payHead'] = payHead; //表头数据
                 obj['payRowList'] = payRowList; //清单内容
@@ -726,7 +727,7 @@ export default {
                         default:  //为 alter模式与 new模式 
                             for (let index = this.payList.length -1; index >=0; index--) {
                                 let ListRow = this.payList[index];
-                                if((ListRow.saveTime - this.uplist.saveTime) ===0){
+                                if(ListRow.saveTime === this.uplist.saveTime){
                                     ListRow.tPayHeadId = this.form.headerId;
                                     ListRow.payRowList = payRowList;
                                     ListRow.payRowAddList = payRowAddList;  //增

@@ -1003,6 +1003,7 @@ export default {
                 saveTime:new Date(),
                 saveEmployee:{name:this.$store.state.username}
             };
+            if (this.uplist.id)obj.saveTime = this.uplist.saveTime; //设置时间
             if (this.mode !=='show') {
                 obj['changeHead'] = changeHead; //表头数据
                 obj['changeRowList'] = changeRowList; //清单内容
@@ -1037,7 +1038,7 @@ export default {
                                 // console.log(this.form.name+'   name   '+ListRow.name)
                                 // console.log(this.form.headerId+'   headerId   '+ListRow.changeHeadId)
                                 // console.log(ListRow.saveTime - this.uplist.saveTime)
-                                if((ListRow.saveTime - this.uplist.saveTime) ===0){
+                                if(ListRow.saveTime === this.uplist.saveTime){
                                     ListRow.changeHeadId = this.form.headerId;
                                     ListRow.changeRowList = changeRowList;
                                     ListRow.changeRowAddList = changeRowAddList;  //增

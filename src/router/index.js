@@ -106,6 +106,14 @@ export default new Router({
       meta:{
         "requireAuth": true
       }
-    }
+    },
+    {
+      path: '/ExcelStyle',
+      name: 'ExcelStyle',
+      component: ()=>import('@/components/Excel/exportstyle.vue'),
+      meta:{
+        "requireAuth": false
+      }
+    },
   ]
 })

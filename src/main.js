@@ -59,6 +59,7 @@ import {
 } from 'vue-element-extends'
 import 'vue-element-extends/lib/index.css'
 
+// import XLSX from "xlsx"
 
 Vue.use(Table)
 Vue.use(TableColumn)
@@ -84,6 +85,8 @@ Vue.prototype.$keys = 0;
 // 引入excel 表格导入js处理函数模块
 import excelmodel from './modules/proces';
 Vue.prototype.$excel = excelmodel;
+import xlsxstyle from './modules/xlsxstyle';
+Vue.prototype.$xlsxstyle = xlsxstyle;
 
 /**
  * 获取屏幕宽高

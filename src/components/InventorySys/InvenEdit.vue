@@ -154,7 +154,8 @@ export default {
     },
     methods: {
         exportxlsx() {
-            LAY_EXCEL.exportExcel([[1, 2, 3]], '表格导出.xlsx', 'xlsx')
+            // LAY_EXCEL.exportExcel([[1, 2, 3]], '表格导出.xlsx', 'xlsx')
+            this.$xlsxstyle.downloadExl();
         },
         con(){
             console.log(this.totalobj)
@@ -614,6 +615,7 @@ export default {
                         saveTime:new Date(),
                         saveEmployee:{name:this.$store.state.username}
                     };
+                    if (this.uplist.id)obj.saveTime = this.uplist.saveTime; //设置时间
                     if (this.mode !=='show') {
                         obj['originalHead'] = originalHead; //表头数据
                         obj['originalRowList'] = originalRowList; //清单内容
@@ -643,7 +645,7 @@ export default {
                                 default:  //为 alter模式与 new模式 
                                     for (let index = this.originalList.length -1; index >=0; index--) {
                                         let ListRow = this.originalList[index];
-                                        if((ListRow.saveTime - this.uplist.saveTime) ===0){
+                                        if(ListRow.saveTime === this.uplist.saveTime){
                                             ListRow.originalHeadId = this.form.headerId;
                                             ListRow.originalRowList = originalRowList;
                                             ListRow.originalRowAddList = originalRowAddList;  //增

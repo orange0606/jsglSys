@@ -164,14 +164,6 @@
   methods: {
     Splicing () {
         
-        // var strArr = [];
-        // for (let index = this.col.length-1; index >= 0; index--) {
-        //     var item = this.col[index];
-        //     strArr.push('-'+item.type+'-'+item.hdId+'-'+item.rowId+'-'+item.key+'-')
-        // }
-        // console.log('打印一下数组strArr')
-        // console.log(strArr)
-        
         // this.headRowSelected.headRowStr= strArr.join(",");
         console.log('this.headRowSelected')
         console.log(this.headRowSelected.headRowStr)

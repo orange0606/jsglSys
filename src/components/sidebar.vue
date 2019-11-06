@@ -9,10 +9,12 @@
         @close="handleClose">
         <el-submenu index="1">
             <template slot="title">
-            <span>选择单元格</span>
+            <span>其他功能组件</span>
             </template>
             <!-- <template slot="title">分组一</template> -->
             <el-menu-item index="1-1"><router-link to="/AllHead" >选择表头，单击单元格</router-link></el-menu-item>
+            <el-menu-item index="1-2"><router-link to="/ExcelStyle" >导出xlsx</router-link></el-menu-item>
+
 
         </el-submenu>
         <el-submenu index="2">

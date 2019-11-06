@@ -617,7 +617,9 @@ export default {
                 rest[index][this.hd[i]] = {attribute: null,colNum: this.hd[i],edit: "N",formula:null,td:'',tdColspan: 1,tdRowspan: 1,trNum:listlen+index+1,upload: 1 };
             }
         }
-        for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
+        let hdlenn = this.hd.length;
+        for (let index = 0; index < hdlenn; index++) { //将对应列数据加到空数组数据那里
+        // for (let index = this.hd.length -1; index >= 0; index--) { //将对应列数据加到空数组数据那里
             let row = sumArr[this.hd[index]];
             if (row.attribute && row.attributeValue && row.attributeValue !=="" && (row.attribute === "update" || row.attribute === "totalmeterage-meterage" || row.attribute === "meterage") ) {
                 let str = row.attributeValue,
@@ -629,7 +631,16 @@ export default {
                         rest[r][row.colNum] = XEUtils.clone(up[r][colName], true);
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "meterage") {
-                        rest[r][row.colNum].td =0;
+                        // console.log(rest[r][colName].td)
+                        let td = rest[r][colName].td;
+                        if (td ==='' || td==='0' || td===0 || td===null || td===' ') {
+                           rest[r][row.colNum].td =0; 
+                        }else if (td ==='1' || td===1) {
+                           rest[r][row.colNum].td =1; 
+                        }else {
+                           rest[r][row.colNum].td =2; 
+                        }
+                        
                     }else if (row.attribute === "totalmeterage-meterage") {
                         // console.log('正在设置哪一列  '+row.colNum)
                         try {
@@ -962,12 +973,18 @@ export default {
                 saveTime:new Date(),
                 saveEmployee:{name:this.$store.state.username}
             };
+            if (this.uplist.id)obj.saveTime = this.uplist.saveTime; //设置时间
+
             if (this.mode !=='show') {
                 obj['meterageHead'] = meterageHead; //表头数据
                 obj['meterageRowList'] = meterageRowList; //清单内容
             }
             console.log('打印一下即将提交的参数obj')
             console.log(obj)
+            console.log('this.joinParent')
+            console.log(this.joinParent)
+            console.log('this.mode')
+            console.log(this.mode)
             //此处做个判断，判断是新建还是修改。
             if (this.joinParent) {  //接入父组件的情况
                 if (this.uplist && !this.uplist.id && !this.uplist.saveTime ) {  //当前属于新建清单====
@@ -979,7 +996,7 @@ export default {
                         default:  //为 alter模式与 new模式    
                             this.meterageList.push(obj);
                             this.$message({ message: `已为你保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
-                            this.list.length =0;
+                            
                             return this.saveShow();                      
                     } 
                 }else if (this.uplist && (this.uplist.id || this.uplist.saveTime)) {  //当前属于修改清单====
@@ -991,7 +1008,9 @@ export default {
                         default:  //为 alter模式与 new模式 
                             for (let index = this.meterageList.length -1; index >=0; index--) {
                                 let ListRow = this.meterageList[index];
-                                if((ListRow.saveTime - this.uplist.saveTime) ===0){
+                                console.log('ListRow.saveTime === this.uplist.saveTime')
+                                console.log(ListRow.saveTime+'   <---->  '+this.uplist.saveTime)
+                                if(ListRow.saveTime === this.uplist.saveTime){
                                     ListRow.meterageHeadId = this.form.headerId;
                                     ListRow.meterageRowList = meterageRowList;
                                     ListRow.meterageRowAddList = meterageRowAddList;  //增
@@ -1004,7 +1023,7 @@ export default {
                                     if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
                                         ListRow.alter ='Y'; //标记为修改
                                     }
-                                    this.list.length =0;
+                                    
                                     this.$message({ message: `已为你修改---保存 ${meterageRowList.length} 条数据 `, type: 'success', duration: 3000, showClose: true })
                                     return this.saveShow();
                                 }
@@ -1025,7 +1044,7 @@ export default {
                           case 'show':  //为show模式
                               parameter.meterageAddList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
-                              this.list.length =0;
+                              
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;
@@ -1038,7 +1057,6 @@ export default {
                               obj.id = this.uplist.id;
                               parameter.meterageAltList.push(obj);
                               this.saveOneList( parameter ); //调用网络保存函数
-                              this.list.length =0;
                               break;
                           default:  //为 alter模式与 new模式    
                               this.loading = false;
@@ -1054,11 +1072,12 @@ export default {
         let succre = false;
         this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
         this.loading = false;
-        // this.list.length = this.hd.length = 0;
+        this.list.length = this.hd.length = 0;
         this.showHeader = false;
         this.$nextTick(() => {  //强制重新渲染
             this.showHeader = true;
         })
+        console.log('完成后最终调用了此函数')
     },
     saveOneList ( obj ) {  //保存单个清单 仅show模式 且 this.joinParent=false 时可用
         this.$post('/meterage/update',obj )
