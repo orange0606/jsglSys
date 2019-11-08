@@ -117,6 +117,16 @@ import headeratt from './NewHeader'
       required:false,
       default:false   
     },
+    projectId:{   ////项目id 0或null表示所有项目，>0 为指定项目
+      // type:Array,
+      required:false,
+      default:null   
+    },
+    myPower:{   ////我的权限 0或null表示在全部标段里找，1表示我的权限范围内，即我所属的项目、标段、部门。
+      // type:Array,
+      required:false,
+      default:null   
+    },
 
   },
   data () {

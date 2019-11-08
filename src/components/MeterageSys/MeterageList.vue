@@ -139,7 +139,12 @@ import XEUtils from 'xe-utils';
       type: Object,
       required: false,
       default: () => ({id:37, name:"机电标段"})
-    }
+    },
+    organizationId:{   //部门id
+      // type:Array,
+      required:false,
+      default: 1
+    },
   },
   data () { 
     return {

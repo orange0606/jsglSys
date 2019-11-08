@@ -128,7 +128,6 @@
 import MyColumn from './MyColumn';
 import ChoiceRow from '../MultiplexCom/ChoiceRow';
 import XEUtils from 'xe-utils';
-
 export default {
   name: 'NewChange',
   components: {
@@ -152,6 +151,8 @@ export default {
       type: Array,
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
+    },
+    organizationId:{   //部门id
     },
     refresh:{ //显示此组件的变量
     }
@@ -216,19 +217,12 @@ export default {
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
     },
-    // list: { //监听表格数据变化，然后进行合计
-    //     handler(newValue, oldValue) {
-    //         console.log('newValue');
-    //         console.log(this.$root.state)
-    //         // console.log('oldValue', oldValue);
-    //         if (this.$root.state) {
-    //             console.log('调用了合计');
-    //             this.totalobj = this.$excel.Total(newValue, this.PackHeader); //调用合计计算
-    //             this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
-    //         }
-    //     },
-    //     deep: true
-    // }
+    '$store.state.clientSize': {
+        handler: function() {
+            this.tViewSize();
+        }
+    },
+   
   },
   computed: {
       
@@ -240,11 +234,6 @@ export default {
   },
   mounted(){
       this.tViewSize();
-      window.onresize = () => {
-        return (() => {
-            this.tViewSize();
-        })();
-      }
   },
   beforeDestroy () {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
@@ -283,7 +272,7 @@ export default {
     },
     tViewSize () {  //动态调整表格的高度
         this.loading = true;
-        let obj = this.$getViewportSize();
+        let obj = this.$store.state.clientSize;
         this.$nextTick(() => {
             this.Height = this.Height;
             setTimeout(()=>{
@@ -1001,6 +990,7 @@ export default {
                 enter:list.length>0?1:0,
                 tender:this.tender,
                 saveTime:new Date(),
+                organizationId: this.organizationId,  //部门id
                 saveEmployee:{name:this.$store.state.username}
             };
             if (this.uplist.id)obj.saveTime = this.uplist.saveTime; //设置时间

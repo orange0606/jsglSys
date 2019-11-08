@@ -50,6 +50,19 @@
   import XEUtils from 'xe-utils'
   export default {
   name: 'marks',
+  props: {
+    projectId:{   ////项目id 0或null表示所有项目，>0 为指定项目
+      // type:Array,
+      required:false,
+      default:null   
+    },
+    myPower:{   ////我的权限 0或null表示在全部标段里找，1表示我的权限范围内，即我所属的项目、标段、部门。
+      // type:Array,
+      required:false,
+      default:null   
+    },
+
+  },
   data () {
     return {
       loading: false,
@@ -79,8 +92,9 @@
   methods: {
     findList () {   //请求标段函数
       this.loading = true
+      
         //发起网络请求
-      this.$post('/tender/getall',{})
+      this.$post('/tender/getall',{projectId:this.projectId,myPower:this.myPower})
         .then((response) => {
         console.log(response)
         this.list = response.data.tenderList;

@@ -65,24 +65,24 @@ export default {
   },
   mounted(){
       this.tViewSize();
-      window.onresize = () => {
-        return (() => {
-            this.tViewSize();
-        })();
-      }
   },
   watch: {
-      inventory: function(newVal,oldVal){
-          if (newVal!=null) {
-              try {
-                  // console.log('选择表格组件获取到的值')
-                  // console.log(newVal)
-                  this.importfxx(newVal);
-              } catch (error) {
-                  console.log(error)
-              }
-          }
-      }
+        inventory: function(newVal,oldVal){
+            if (newVal!=null) {
+                try {
+                    // console.log('选择表格组件获取到的值')
+                    // console.log(newVal)
+                    this.importfxx(newVal);
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+        },
+        '$store.state.clientSize': {
+            handler: function() {
+            this.tViewSize();
+            }
+        },
   },
   methods: {
     keyRow( row ) {
@@ -99,7 +99,7 @@ export default {
         })
     },
     tViewSize () {
-        var obj = this.$getViewportSize();
+        let obj = this.$store.state.clientSize;
         this.$nextTick(() => {
             this.Height = obj.height-250;
         });

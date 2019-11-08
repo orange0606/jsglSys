@@ -89,6 +89,8 @@ export default {
     tender:{
       type: Object,
     },
+    organizationId:{   //部门id
+    },
     refresh:{ //显示此组件的变量
     }
   },
@@ -130,7 +132,12 @@ export default {
     uplist: function(newVal,oldVal){  //子组件返回来的数据
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
-    }
+    },
+    '$store.state.clientSize': {
+        handler: function() {
+        this.tViewSize();
+        }
+    },
   },
   computed: {
   },
@@ -141,11 +148,6 @@ export default {
   },
   mounted(){
       this.tViewSize();
-      window.onresize = () => {
-        return (() => {
-            this.tViewSize();
-        })();
-      }
   },
   beforeDestroy () {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
@@ -182,7 +184,7 @@ export default {
     },
     tViewSize () {  //动态调整表格的高度
         this.loading = true;
-        let obj = this.$getViewportSize();
+        let obj = this.$store.state.clientSize;
         this.$nextTick(() => {
             this.Height = this.Height;
             setTimeout(()=>{
@@ -695,6 +697,7 @@ export default {
                 enter:list.length>0?1:0,
                 tender:this.tender,
                 saveTime:new Date(),
+                organizationId: this.organizationId,  //部门id
                 saveEmployee:{name:this.$store.state.username}
             };
             if (this.uplist.id)obj.saveTime = this.uplist.saveTime; //设置时间

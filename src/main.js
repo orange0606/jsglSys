@@ -88,24 +88,33 @@ Vue.prototype.$excel = excelmodel;
 import xlsxstyle from './modules/xlsxstyle';
 Vue.prototype.$xlsxstyle = xlsxstyle;
 
-/**
- * 获取屏幕宽高
- */
-Vue.prototype.$getViewportSize = function(){
-    var clientHeight=0;
-    if(window.innerHeight && document.documentElement.clientHeight)
-    {
-      clientHeight = window.innerHeight > document.documentElement.clientHeight ? window.innerHeight : document.documentElement.clientHeight;
-    }
-    else
-    {
-      clientHeight = window.innerHeight || document.documentElement.clientHeight;
-    }
-    return {
-      width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
-      height: clientHeight
-    };
-};
+//取窗口可视范围的高度
+Vue.prototype.$getClientHeight=function(){
+  var clientHeight=0;
+  if(window.innerHeight && document.documentElement.clientHeight)
+  {
+    clientHeight = window.innerHeight > document.documentElement.clientHeight ? window.innerHeight : document.documentElement.clientHeight;
+  }
+  else
+  {
+    clientHeight = window.innerHeight || document.documentElement.clientHeight;
+  }
+  return clientHeight;
+}
+//取窗口可视范围的宽度
+Vue.prototype.$getClientWidth=function(){
+  var clientWidth=0;
+  if(window.innerWidth && document.documentElement.clientWidth)
+  {
+    clientWidth = window.innerWidth > document.documentElement.clientWidth ? window.innerWidth : document.documentElement.clientWidth;
+  }
+  else
+  {
+    clientWidth = window.innerWidth || document.documentElement.clientWidth;
+  }
+
+  return clientWidth;
+}
 
 // 引入工具类-目录自定义
 import store from '@/utils/Store'
@@ -140,6 +149,15 @@ new Vue({
     return {
         state: true,  //定义一个全局变量，作为清单合计尾行是否计算的状态值，true为是
     };
+  },
+  mounted () {
+    var self= this;
+    self.$store.commit("setClientHeight",self.$getClientHeight());
+    self.$store.commit("setClientWidth",self.$getClientWidth());
+    window.onresize = function(){ 
+      self.$store.commit("setClientHeight",self.$getClientHeight());
+      self.$store.commit("setClientWidth",self.$getClientWidth());
+    }     
   },
   components: { App },
   template: '<App/>'

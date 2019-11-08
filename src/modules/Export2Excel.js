@@ -1,4 +1,3 @@
-
 require('script-loader!file-saver');
 import XLSX from 'xlsx-style';
 import XLSX2 from 'xlsx';
@@ -43,11 +42,35 @@ function sheet_from_array_of_arrays(data, opts) {
         cell.z = XLSX.SSF._table[14];
         cell.v = datenum(cell.v);
       } else cell.t = 's';
- 
       ws[cell_ref] = cell;
     }
   }
   if (range.s.c < 10000000) ws['!ref'] = XLSX.utils.encode_range(range);
+  // let border = {bottom:{style:"thin",color:{rgb: "000000"}},top:{style:"thin",color:{rgb: "000000"}},
+  // left:{style:"thin",color:{rgb: "000000"}},right:{style:"thin",color:{rgb: "000000"}}};
+  // //加粗
+  // let style0 = {border:border, alignment:{horizontal:'center',wrapText: true ,vertical: "center"},font: { sz: 18, bold: true, color: { rgb: "000000" },outline:true }, fill: { bgColor: { indexed: 64 } } };
+  // let style1 = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12, bold: true, color: { rgb: "000000" },outline:true }, fill: { bgColor: { indexed: 64 } } };
+  // //不加粗
+  // let style2 = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12,  color: { rgb: "000000" },outline:true } };
+  // //蓝底加粗
+  // let style3 = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12, bold: true, color: { rgb: "000000" },outline:true }, fill: { fgColor: {rgb: "00BFFF" } } };
+  let border = {bottom:{style:"thin",color:{rgb: "000000"}},top:{style:"thin",color:{rgb: "000000"}},
+  left:{style:"thin",color:{rgb: "000000"}},right:{style:"thin",color:{rgb: "000000"}}};
+  
+  let style = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12,  color: { rgb: "000000" },outline:true } };
+
+
+
+  for(let key  in ws){  //给单元格添加样式
+      // if (key !=="!cols" && key !=="!merges" && key !=="!ref") {
+      try {
+          ws[key].s = style;
+      } catch (error) {
+          // console.log('跳过了吗')
+          break;
+      }
+  }
   console.log('ws')
   console.log(ws)
   return ws;

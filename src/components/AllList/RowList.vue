@@ -62,7 +62,12 @@ export default {
         console.log('这里进入了吗')
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
-      }
+      },
+      '$store.state.clientSize': {
+          handler: function() {
+            this.tViewSize();
+          }
+      },
   },
   computed: {
       
@@ -74,11 +79,7 @@ export default {
 
   mounted(){
       this.tViewSize();
-      window.onresize = () => {
-        return (() => {
-            this.tViewSize();
-        })();
-      }
+
   },
   beforeDestroy () {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
@@ -95,7 +96,7 @@ export default {
     },
     tViewSize () {  //动态调整表格的高度
         this.loading = true;
-        let obj = this.$getViewportSize();
+        let obj = this.$store.state.clientSize;
         this.$nextTick(() => {
             this.Height = this.Height;
             setTimeout(()=>{
@@ -176,14 +177,6 @@ export default {
             });
         })
     },
-    // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-    //     if (columnIndex >1) {  //带选择框的情况
-    //         if (row[this.hd[columnIndex-2]]) {
-    //             return [row[this.hd[columnIndex-2]].tdRowspan, row[this.hd[columnIndex-2]].tdColspan]
-    //         }
-    //     }
-    //     return [1, 1]
-    // }, 
     findList () { //表格滚动渲染函数
       this.loading = true;
       this.$nextTick(() => {

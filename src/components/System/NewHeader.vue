@@ -217,7 +217,11 @@ import inven from '../../modules/newheaderAtt';
             type: Boolean,
             required: false,
             default: false
-        }
+        },
+        projectId:{   ////项目id 0或null表示所有项目，>0 为指定项目
+        },
+        myPower:{   ////我的权限 0或null表示在全部标段里找，1表示我的权限范围内，即我所属的项目、标段、部门。
+        },
     },
     data () {
         return {
@@ -721,7 +725,7 @@ import inven from '../../modules/newheaderAtt';
         //新建表头的表单设置函数
         tenders () {   //请求标段函数
                 //发起网络请求
-            this.$post('/tender/getall',{})
+            this.$post('/tender/getall',{projectId:this.projectId,myPower:this.myPower})
                 .then((response) => {
                 this.tenderList = response.data.tenderList;
             })
