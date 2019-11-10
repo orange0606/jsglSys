@@ -5,6 +5,10 @@
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
+  <div class="click-table11-oper"  >
+        <el-button type="success" size="mini" @click="exportList">导出</el-button>
+        <!-- <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
+  </div>
   <div :style="{ height: Height+'px' }">
         <elx-editable
         ref="elxEditablecom"
@@ -213,8 +217,17 @@ export default {
         })
         return sums;
     },
-    exportCsvEvent () {
-      this.$refs.elxEditablecom.exportCsv();
+    exportList () {
+        /*
+        将清单导出为表格
+        param tableData: 清单内容this.list 
+        param headerData: 表头内容this.PackHeader
+        param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
+        param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
+        param filterVal: 所有列 例如this.hd  
+        param filename: 文件名
+        */
+        this.$excel.exportTable(this.list, this.PackHeader, false, this.lastHeader, this.hd, 'filename')
     },
 
 

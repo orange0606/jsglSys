@@ -8,8 +8,10 @@ function datenum(v, date1904) {
   return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
 }
  
-function sheet_from_array_of_arrays(data, opts) {
-  var ws = {};
+function sheet_from_array_of_arrays(data,Headalign,Listalign) {
+  var ws = {},
+  patt1=/[A-Z+]*/g;
+
   var range = {
     s: {
       c: 10000000,
@@ -57,22 +59,60 @@ function sheet_from_array_of_arrays(data, opts) {
   // let style3 = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12, bold: true, color: { rgb: "000000" },outline:true }, fill: { fgColor: {rgb: "00BFFF" } } };
   let border = {bottom:{style:"thin",color:{rgb: "000000"}},top:{style:"thin",color:{rgb: "000000"}},
   left:{style:"thin",color:{rgb: "000000"}},right:{style:"thin",color:{rgb: "000000"}}};
-  
-  let style = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12,  color: { rgb: "000000" },outline:true } };
+  let center = {border:border, alignment:{horizontal:'center',wrapText: true,vertical: "center"},font: { sz: 12,  color: { rgb: "000000" },outline:true } },
+  left = {border:border, alignment:{horizontal:'left',wrapText: true,vertical: "left"},font: { sz: 12,  color: { rgb: "000000" },outline:true } },
+  right = {border:border, alignment:{horizontal:'right',wrapText: true,vertical: "right"},font: { sz: 12,  color: { rgb: "000000" },outline:true } };
 
 
+  // console.log('Headalign--------------------')
+  // console.log(Headalign)
+  // console.log('Listalign--------------------')
+  // console.log(Listalign)
 
   for(let key  in ws){  //给单元格添加样式
-      // if (key !=="!cols" && key !=="!merges" && key !=="!ref") {
       try {
-          ws[key].s = style;
+        let col = key.match(patt1)[0],
+        colalign = Listalign[col];
+        if (col && colalign) {  
+            if (colalign === 'center') {
+                ws[key].s = center;
+            }else if (colalign === 'left') {
+                ws[key].s = left;
+            }else if (colalign === 'right') {
+                ws[key].s = right;
+            }
+        }else{  //如无设置样式，默认居中
+          ws[key].s = center;
+        }
+        console.log(col)
       } catch (error) {
           // console.log('跳过了吗')
           break;
       }
+      // if (key !=="!cols" && key !=="!merges" && key !=="!ref") {
   }
-  console.log('ws')
-  console.log(ws)
+  for(let key  in Headalign){  //给单元格添加样式
+    try {
+      let colalign = Headalign[key];
+      if (colalign) {  
+          if (colalign === 'center') {
+              ws[key].s = center;
+          }else if (colalign === 'left') {
+              ws[key].s = left;
+          }else if (colalign === 'right') {
+              ws[key].s = right;
+          }
+      }else{  //如无设置样式，默认居中
+        ws[key].s = center;
+      }
+    } catch (error) {
+        // console.log('跳过了吗')
+        break;
+    }
+    // if (key !=="!cols" && key !=="!merges" && key !=="!ref") {
+}
+  // console.log('ws')
+  // console.log(ws)
   return ws;
 }
  
@@ -120,6 +160,8 @@ export function export_json_to_excel({
   multiHeader = [],
   header,
   data,
+  Headalign,
+  Listalign,
   filename,
   merges = [],
   autoWidth = true,
@@ -136,7 +178,7 @@ export function export_json_to_excel({
  
   var ws_name = "SheetJS";
   var wb = new Workbook(),
-    ws = sheet_from_array_of_arrays(data);
+    ws = sheet_from_array_of_arrays(data,Headalign,Listalign);
  
   if (merges.length > 0) {
     if (!ws['!merges']) ws['!merges'] = [];

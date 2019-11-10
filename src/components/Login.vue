@@ -20,8 +20,8 @@ export default {
     data() {
         return {
             form: {
-                username: '',
-                password: '',
+                username: 'abc',
+                password: 888888,
             },
             loading:false,
         }

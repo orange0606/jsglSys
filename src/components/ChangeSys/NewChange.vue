@@ -88,7 +88,7 @@
         <div class="click-table11-oper"  >
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="OneToTalchange" >选择清单</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
-          <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+          <el-button type="success" size="mini" @click="exportList">导出</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
@@ -1111,8 +1111,17 @@ export default {
             });
         })
     },
-    exportCsvEvent () {
-      this.$refs.elxEditable1.exportCsv();
+    exportList () {
+        /*
+        将清单导出为表格
+        param tableData: 清单内容this.list 
+        param headerData: 表头内容this.PackHeader
+        param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
+        param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
+        param filterVal: 所有列 例如this.hd  
+        param filename: 文件名
+        */
+        this.$excel.exportTable(this.list, this.PackHeader, this.totalobj, this.lastHeader, this.hd, 'filename')
     },
 
 
