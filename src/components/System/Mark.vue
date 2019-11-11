@@ -6,7 +6,7 @@
         <div class="manual-table2-oper">
           <el-button type="success" size="mini" @click="insertEvent">新增</el-button>
           <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-          <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+          
         </div>
 
         <elx-editable

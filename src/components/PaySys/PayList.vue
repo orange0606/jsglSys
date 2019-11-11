@@ -9,7 +9,7 @@
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="Console">打印一下增删改集合</el-button>
 
-                <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+                
             </span>
             <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
                 <el-switch
@@ -57,7 +57,7 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" :width="edit?'180':'70'" align="center" >
+        <elx-editable-column label="操作" :width="edit?'170':'70'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
@@ -68,14 +68,17 @@
                 </el-tooltip>
             </template>
             <template v-else>
-                <el-tooltip v-if="edit" content="修改" placement="top" :enterable="false" effect="light">
-                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
+                <el-tooltip v-if="edit && approval.state !== 1" content="修改" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-edit" style="margin: 0 5px;" @click="openActiveRowEvent(scope.row)"></el-link>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
+                    <el-link icon="el-icon-view el-icon--right" style="margin: 0 5px;"  @click="see(scope.row)"></el-link>
                 </el-tooltip>
-                <el-tooltip v-if="edit" content="删除" placement="top" :enterable="false" effect="light">
-                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
+                <el-tooltip content="导出" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-folder-checked" style="margin: 0 5px;" @click="exported(scope.row.id)"></el-link>
+                </el-tooltip>
+                <el-tooltip v-if="edit && approval.state !== 1" content="删除" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-delete" style="margin: 0 5px;" @click="removeEvent(scope.row)"></el-link>
                 </el-tooltip>
             </template>
             </template>
@@ -83,7 +86,7 @@
         </elx-editable>
         <!-- 引入计量清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog :title="EditTitle" width="95%" top="4vh" height="100%" :fullscreen="false" :lock-scroll="false" :visible.sync="visibleNew" :append-to-body="true">
               <new-pay :tender="tender" :refresh.sync="visibleNew" :uplist="uprow" :approval="approval" :payList="payList" :mode="mode" :joinParent="joinParent" ></new-pay>
               <br>
           </el-dialog>
@@ -201,6 +204,42 @@ import XEUtils from 'xe-utils';
     // }
   },
   methods: {
+     exported (id) { //清单id 直接导出无需预览
+        this.loading = true;
+        //此处请求一个审批单的一个原清单
+        this.$post('/pay/getonerow',{ id })
+            .then((response) => {
+            let data = response.data.pay;
+            if (!data && !data.payRowList && !data.payHead.tPayHeadRows ) return this.loading = false;
+            let headsArr = this.$excel.Package(data['payHead'].tPayHeadRows,data['payHead'].refCol,data['payHead'].refRow),
+            PackHeader = [...headsArr],
+            col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
+            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+            lastHeader = this.$excel.BikoFoArr([...col]),
+            hd = Object.keys(lastHeader), //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            list = this.$excel.ListAssemble(data.payRowList), //组装清单表格数据
+            totalobj = this.$excel.Total(list, PackHeader); //调用合计计算
+            this.loading = false;
+             /*
+            将清单导出为表格
+            param tableData: 清单内容this.list 
+            param headerData: 表头内容this.PackHeader
+            param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
+            param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
+            param filterVal: 所有列 例如this.hd  
+            param filename: 文件名
+            */
+            this.$excel.exportTable(list, PackHeader, false, lastHeader, hd, 'filename')
+
+        }).catch(e => {
+            this.loading = false;
+            console.log(e)
+            this.$message({
+                type: 'info',
+                message: '233发生错误！'+e
+            });
+        })
+    },
     watchList (list) {  //监听清单列表 判断增/改 添加到对应增改集合
         this.payAltList.length = this.payAddList.length = 0;
         for (let index = list.length - 1; index >= 0; index--) {

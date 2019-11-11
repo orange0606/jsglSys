@@ -88,6 +88,10 @@ Vue.prototype.$excel = excelmodel;
 import xlsxstyle from './modules/xlsxstyle';
 Vue.prototype.$xlsxstyle = xlsxstyle;
 
+import XLSX from 'xlsx-style';
+import XLSX2 from 'xlsx';
+Vue.use(XLSX)
+Vue.use(XLSX2)
 //取窗口可视范围的高度
 Vue.prototype.$getClientHeight=function(){
   var clientHeight=0;

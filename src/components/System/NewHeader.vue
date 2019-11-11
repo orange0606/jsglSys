@@ -10,7 +10,7 @@
                     <el-button type="info" size="mini" @click="impt">手动创建</el-button>
                     <el-button type="success" size="mini" @click="edit" v-text="btn.stateEdit?'关闭编辑':'开启编辑'"></el-button>
                     <!-- <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button> -->
-                    <!-- <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button> -->
+                    <!--  -->
                     <el-button type="success" size="mini" @click="insertEvent">手动添加合计尾行</el-button>
                     <el-button type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                     <el-button type="info" size="mini" @click="$refs.elxEditable.revert()">放弃更改</el-button>

@@ -1,6 +1,8 @@
 require('script-loader!file-saver');
-import XLSX from 'xlsx-style';
-import XLSX2 from 'xlsx';
+// import XLSX from 'xlsx-style';
+// import XLSX2 from 'xlsx';
+var XLSX = require('xlsx-style'),
+XLSX2 = require('xlsx');
  
 function datenum(v, date1904) {
   if (date1904) v += 1462;
@@ -84,7 +86,7 @@ function sheet_from_array_of_arrays(data,Headalign,Listalign) {
         }else{  //如无设置样式，默认居中
           ws[key].s = center;
         }
-        console.log(col)
+        // console.log(col)
       } catch (error) {
           // console.log('跳过了吗')
           break;
@@ -198,8 +200,13 @@ export function export_json_to_excel({
       }
       /*再判断是否为中文*/
       else if (val.toString().charCodeAt(0) > 255) {
+        if (val.toString().length >25) {
+            return {
+              'wch': val.toString().length-5
+            };
+        }
         return {
-          'wch': val.toString().length * 2
+          'wch': val.toString().length * 1.8
         };
       } else {
         return {

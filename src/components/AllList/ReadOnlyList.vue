@@ -57,7 +57,14 @@
         <elx-editable-column :key="$excel.randomkey(this)" label="操作" fixed="right" width="100" align="center" >
             <template v-slot="scope">
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
+                    <el-link icon="el-icon-view el-icon--right" style="margin: 0 5px;"  @click="see(scope.row)"></el-link>
+                    <!-- <i class="el-icon-view el-icon--right" style="margin: 0 5px;" size="small" @click="see(scope.row)" ></i> -->
+                    <!-- <el-button size="mini"  type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button> -->
+                </el-tooltip>
+                <el-tooltip content="导出" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-folder-checked" style="margin: 0 5px;" @click="exported(scope.row.id)"></el-link>
+                    <!-- <i class="el-icon-folder-checked" style="margin: 0 5px;" @click="exported(scope.row.id)" ></i> -->
+                    <!-- <el-link icon="el-icon-folder-checked" style="margin: 0 5px;" @click="exported(scope.row.id)"></el-link> -->
                 </el-tooltip>
             </template>
         </elx-editable-column>
@@ -75,7 +82,7 @@
         </el-pagination>
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="97%" top="3vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew">
+          <el-dialog :title="EditTitle" width="97%" top="3vh" custom-class="dialogs" :lock-scroll="false" :visible.sync="visibleNew" :append-to-body="true">
               <div style="width:100%;height:100%;">
                   <!-- 此处引入预览清单组件 -->
                   <row-list :refresh.sync="visibleNew" :uplist="uprow" :type="type"></row-list>
@@ -186,6 +193,65 @@ import XEUtils from 'xe-utils';
     // }
   },
   methods: {
+    exported (id) { //清单id 直接导出无需预览
+        this.loading = true;
+        let url = '',
+        headkey = '',
+        rowlistkey = '';
+        switch(this.type) {
+            case 'update':
+                url = '/update/row/getone';
+                headkey = 'tUpdateHeadRows';
+                break;
+            case 'totalchange':
+                url = '/totalchange/by/totalchangeid';
+                headkey = 'totalchangeHeadRows';
+                break;
+            case 'totalmeterage':
+                url = '/totalmeterage/by/totalmeterageid';
+                headkey = 'tTotalmeterageHeadRows';
+                break;
+            case 'totalpay':
+                url = '/totalpay/by/totalpayid';
+                headkey = 'tTotalpayHeadRows';
+                break;
+        };
+        rowlistkey = this.type+'RowList';
+
+        if( url === '' ) return false;
+        this.$post( url, { id } )
+            .then((response) => {
+           let data = response.data[this.type],
+            headsArr = this.$excel.Package( data[this.type+'Head'][headkey],data[this.type+'Head'].refCol,data[this.type+'Head'].refRow ),
+            PackHeader = [...headsArr],
+            col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
+            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+            lastHeader = this.$excel.BikoFoArr([...col]),
+            hd = Object.keys(lastHeader), //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            list = this.$excel.ListAssemble(data[rowlistkey]), //组装清单表格数据
+            totalobj = this.$excel.Total(list, PackHeader); //调用合计计算
+            this.loading = false;
+
+             /*
+            将清单导出为表格
+            param tableData: 清单内容this.list 
+            param headerData: 表头内容this.PackHeader
+            param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
+            param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
+            param filterVal: 所有列 例如this.hd  
+            param filename: 文件名
+            */
+            this.$excel.exportTable(list, PackHeader, totalobj, lastHeader, hd, 'filename')
+
+        }).catch(e => {
+            this.loading = false;
+            console.log(e)
+            this.$message({
+                type: 'info',
+                message: '233发生错误！'+e
+            });
+        })
+    },
     typeSwitch ( newVal ) {    //判断是哪种清单
         switch(newVal) {
             case 'update':

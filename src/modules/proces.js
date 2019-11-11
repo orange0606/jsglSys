@@ -905,8 +905,8 @@ excelmodel = {
                     //记录表头合并情况
                     if (item.tdColspan >1 || item.tdRowspan >1) {   //需要记录合并情况
                         // trNum:i+1, colNum:ABC[j]
-                        let sub = Az.indexOf(colNum),
-                        s = Az[sub+item.tdColspan-1],//合并结束的列
+                        let sub = ABC.indexOf(colNum),
+                        s = ABC[sub+item.tdColspan-1],//合并结束的列
                         r = trNum+item.tdRowspan-1;//合并结束的行号
                         merges.push(`${key}:${s}${r}`);
                     }
@@ -950,8 +950,8 @@ excelmodel = {
                 //记录合并情况
                 if (item.tdColspan >1 ) {   //需要记录最后一层表头内容合并情况  A:
                     // trNum:i+1, colNum:ABC[j]
-                    let sub = Az.indexOf(colNum);
-                    Colmerges[colNum]= Az[sub+item.tdColspan-1];//合并结束的列
+                    let sub = ABC.indexOf(colNum);
+                    Colmerges[colNum]= ABC[sub+item.tdColspan-1];//合并结束的列
                 }
                 //取出每列的文字居中对齐方式 Listalign 对象 {"A":"center"...}
                 Listalign[colNum] = align;

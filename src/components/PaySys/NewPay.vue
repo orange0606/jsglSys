@@ -355,7 +355,7 @@ export default {
             }
             this.tTotalmeterageId = data.tTotalmeterageId; //累计计量清单id
             this.loading = false;
-            this.list = this.$excel.ListAssemble(data.payRowList	); //组装清单表格数据;
+            this.list = this.$excel.ListAssemble(data.payRowList); //组装清单表格数据;
             this.findList(); //调用滚动渲染数据
             this.ResetList = XEUtils.clone(this.list, true); //深拷贝 用来重置使用
             

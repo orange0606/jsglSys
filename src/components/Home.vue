@@ -19,7 +19,7 @@
 
     <p>
       <el-button type="danger" size="mini" @click="pendingRemoveEvent">标记/取消删除</el-button>
-      <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+      
 
       <el-button type="success" size="mini" @click="insertEvent(0)">新增一行</el-button>
       <el-button type="success" size="mini" @click="insertEvent(list[1])">在第二行插入一行</el-button>

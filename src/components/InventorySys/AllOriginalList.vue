@@ -8,7 +8,7 @@
                 <el-button :disabled="approval.state === 1?true:false" type="success" size="mini" @click="see({})" >新增</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="Console">打印一下增删改集合</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
-                <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+                
             </span>
             <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
                 <el-switch
@@ -69,14 +69,17 @@
                 </el-tooltip>
             </template>
             <template v-else>
-                <el-tooltip v-if="edit" content="修改" placement="top" :enterable="false" effect="light">
-                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
+                <el-tooltip v-if="edit && approval.state !== 1" content="修改" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-edit" style="margin: 0 5px;" @click="openActiveRowEvent(scope.row)"></el-link>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
+                    <el-link icon="el-icon-view el-icon--right" style="margin: 0 5px;"  @click="see(scope.row)"></el-link>
                 </el-tooltip>
-                <el-tooltip v-if="edit" content="删除" placement="top" :enterable="false" effect="light">
-                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
+                <el-tooltip content="导出" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-folder-checked" style="margin: 0 5px;" @click="exported(scope.row.id)"></el-link>
+                </el-tooltip>
+                <el-tooltip v-if="edit && approval.state !== 1" content="删除" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-delete" style="margin: 0 5px;" @click="removeEvent(scope.row)"></el-link>
                 </el-tooltip>
             </template>
             </template>
@@ -211,6 +214,43 @@ import XEUtils from 'xe-utils'
     // }
   },
   methods: {
+    exported (id) { //清单id 直接导出无需预览
+        this.loading = true;
+        //此处请求一个审批单的一个原清单
+        this.$post('/original/row/getone',{ id })
+            .then((response) => {
+            let data = response.data.original;
+            if (!data && !data.originalRowList) return this.loading = false;
+            let headsArr = this.$excel.Package(data['originalHead'].tOriginalHeadRows,data['originalHead'].refCol,data['originalHead'].refRow),
+            PackHeader = [...headsArr],
+            col = this.$excel.Nesting(headsArr),   //调用多级表头嵌套组装函数
+            //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+            lastHeader = this.$excel.BikoFoArr([...col]),
+            hd = Object.keys(lastHeader), //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+            list = this.$excel.ListAssemble(data.originalRowList), //组装清单表格数据
+            totalobj = this.$excel.Total(list, PackHeader); //调用合计计算
+            this.loading = false;
+
+             /*
+            将清单导出为表格
+            param tableData: 清单内容this.list 
+            param headerData: 表头内容this.PackHeader
+            param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
+            param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
+            param filterVal: 所有列 例如this.hd  
+            param filename: 文件名
+            */
+            this.$excel.exportTable(list, PackHeader, totalobj, lastHeader, hd, 'filename')
+
+        }).catch(e => {
+            this.loading = false;
+            console.log(e)
+            this.$message({
+                type: 'info',
+                message: '233发生错误！'+e
+            });
+        })
+    },
     searchEvent () {
       this.pageVO.currentPage = 1
       this.findList()
@@ -228,7 +268,6 @@ import XEUtils from 'xe-utils'
         for (let index = list.length - 1; index >= 0; index--) {
             if( !list[index].id ) { //无id的情况（新增清单）
                 this.originalAddList.push(list[index]);
-                
             }if (list[index].id && list[index].alter && list[index].alter==='Y') { //修改清单
                 this.originalAltList.push(list[index]);
             }

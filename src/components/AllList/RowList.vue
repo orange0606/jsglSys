@@ -227,7 +227,7 @@ export default {
         param filterVal: 所有列 例如this.hd  
         param filename: 文件名
         */
-        this.$excel.exportTable(this.list, this.PackHeader, false, this.lastHeader, this.hd, 'filename')
+        this.$excel.exportTable(this.list, this.PackHeader, this.totalobj, this.lastHeader, this.hd, 'filename')
     },
 
 

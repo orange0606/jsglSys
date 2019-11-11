@@ -9,7 +9,7 @@
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="deleteSelectedEvent">删除选中</el-button>
                 <el-button :disabled="approval.state === 1?true:false" type="danger" size="mini" @click="Console">打印一下增删改集合</el-button>
 
-                <el-button type="success" size="mini" @click="exportCsvEvent">导出</el-button>
+                
             </span>
             <span v-if="!joinParent && mode==='show'?true:false" style="position: absolute; right:0;top:10px;">
                 <el-switch
@@ -57,7 +57,7 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" :width="edit?'180':'70'" align="center" >
+        <elx-editable-column label="操作" :width="edit?'170':'70'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">
@@ -68,14 +68,17 @@
                 </el-tooltip>
             </template>
             <template v-else>
-                <el-tooltip v-if="edit" content="修改" placement="top" :enterable="false" effect="light">
-                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="primary" icon="el-icon-edit" @click="openActiveRowEvent(scope.row)" ></el-button>
+                <el-tooltip v-if="edit && approval.state !== 1" content="修改" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-edit" style="margin: 0 5px;" @click="openActiveRowEvent(scope.row)"></el-link>
                 </el-tooltip>
                 <el-tooltip content="查看" placement="top" :enterable="false" effect="light">
-                    <el-button size="mini" type="success" icon="el-icon-monitor" @click="see(scope.row)"></el-button>
+                    <el-link icon="el-icon-view el-icon--right" style="margin: 0 5px;"  @click="see(scope.row)"></el-link>
                 </el-tooltip>
-                <el-tooltip v-if="edit" content="删除" placement="top" :enterable="false" effect="light">
-                    <el-button :disabled="approval.state === 1?true:false" size="mini" type="danger" icon="el-icon-delete" @click="removeEvent(scope.row)"></el-button>
+                <el-tooltip content="导出" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-folder-checked" style="margin: 0 5px;" @click="exported(scope.row.id)"></el-link>
+                </el-tooltip>
+                <el-tooltip v-if="edit && approval.state !== 1" content="删除" placement="top" :enterable="false" effect="light">
+                    <el-link icon="el-icon-delete" style="margin: 0 5px;" @click="removeEvent(scope.row)"></el-link>
                 </el-tooltip>
             </template>
             </template>
