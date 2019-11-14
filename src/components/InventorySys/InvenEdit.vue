@@ -75,7 +75,7 @@
         </div>
     </div>
     <div v-else>
-        <printing :tableData='tableData'></printing>
+        <printing :tableData='tableData' :print_show.sync="print_show" ></printing>
     </div>
     
   </div>

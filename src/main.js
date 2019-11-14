@@ -88,6 +88,11 @@ Vue.prototype.$excel = excelmodel;
 import xlsxstyle from './modules/xlsxstyle';
 Vue.prototype.$xlsxstyle = xlsxstyle;
 
+// import Print from './modules/print'
+// Vue.use(Print) // 注册
+import Print from 'vue-print-nb'
+Vue.use(Print); 
+
 import XLSX from 'xlsx-style';
 import XLSX2 from 'xlsx';
 Vue.use(XLSX)

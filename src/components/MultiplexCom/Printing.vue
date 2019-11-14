@@ -3,13 +3,14 @@
     v-loading="loading"
     element-loading-text="生成数据中，请稍后..."
     element-loading-spinner="el-icon-loading">
-    <el-button type="success" size="mini" @click="printed">预览打印</el-button>
-    <div id="printJS-table" style="margin: 0 auto;">
+    <el-button type="primary" size="mini" @click="printed" v-print="'#printTest'">开始打印</el-button>
+    <div id="printTest" class="a4-endwise" style="margin: 0 auto;border-collapse:collapse;">
         <elx-editable
-        ref="elxEditable4"
-        
+        ref="elxEditable10"
+        id="printJS-table"
         border
-        
+        bordercolor="#000000"
+        class="scroll-table4"
         :data.sync="list"
         size="small"
         :show-header="showHeader"
@@ -28,7 +29,7 @@
 </template>
 
 <script>
-import print from 'print-js'
+
 import Column from './Column';
 export default {
  name: 'printing',
@@ -36,7 +37,8 @@ export default {
     Column
   },
   props: {
-      tableData:{}
+      tableData:{},
+      print_show:{},
   },
   data () {
     return {
@@ -57,8 +59,7 @@ export default {
           this.hd = this.tableData.hd;
           this.PackHeader = this.tableData.PackHeader;
           this.col = this.tableData.col;
-          this.totalobj = this.tableData.totalobj;
-             
+          this.totalobj = this.tableData.totalobj; 
       }
   },
   mounted(){
@@ -71,15 +72,15 @@ export default {
                 this.PackHeader = newVal.PackHeader;
                 this.col = newVal.col;
                 this.totalobj = newVal.totalobj;
-             
             }
        }
   },
   methods: {
     printed () {
-        console.log('没反应吗')
-        console.log(print)
-        print('printJS-table', 'html');
+        Print();
+        
+        this.$emit('update:print_show', true)
+
     },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
@@ -117,5 +118,34 @@ export default {
 
 
 <style scoped>
-    @import '../../modules/Tablestyle.css';
+/* 无边距 */
+    /* 布局纵向 */
+/* .a4-endwise{
+   width: 1150px;
+   height: 1627px;
+   border: 1px #000 solid;
+ } */
+/* 布局横向 */
+/* .a4-broadwise{
+   width: 1627px;
+   height: 1149px;
+   border: 1px #000 solid;
+   
+ } */
+
+ /* 默认 */
+/* 布局纵向 */
+.a4-endwise{
+  width: 1075px;
+  /* height: 1568px; */
+  /* border: 1px #000 solid; */
+}
+/* 布局横向 */
+.a4-broadwise{
+  width: 1569px;
+  /* height: 1075px; */
+  /* border: 1px #000 solid; */
+}
+
+ @import '../../modules/Tablestyle.css';
 </style>
