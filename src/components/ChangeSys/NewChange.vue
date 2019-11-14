@@ -89,6 +89,8 @@
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="OneToTalchange" >选择清单</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
           <el-button type="success" size="mini" @click="exportList">导出</el-button>
+          
+
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
           <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
@@ -128,6 +130,7 @@
 import MyColumn from './MyColumn';
 import ChoiceRow from '../MultiplexCom/ChoiceRow';
 import XEUtils from 'xe-utils';
+
 export default {
   name: 'NewChange',
   components: {
@@ -239,6 +242,19 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+    preview(){
+        // document.getElementsByClassName('tprint')[0]获取需要打印区域的类名，getElementsByClassName获取到的是一个数组，所以此处在后面加上[0]
+        // innerHTML 属性设置或返回表格行的开始和结束标签之间的 HTML。
+        let newstr = this.$refs.elxEditable1.innerHTML;
+        console.log(newstr)
+        window.document.body.innerHTML = newstr;
+        let oldstr = window.document.body.innerHTML;
+        // 实现打印功能
+        window.print();
+        window.location.reload();   //解决打印之后按钮失效的问题
+        window.document.body.innerHTML = oldstr;
+        return false;
+    },
     getRowClass ({ row, column, rowIndex, columnIndex }) {  //表头样式
             // console.log('row, column, rowIndex, columnIndex')
         if (column.property) {

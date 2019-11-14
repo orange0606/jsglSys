@@ -7,75 +7,68 @@
     element-loading-spinner="el-icon-loading"
     class="_compbox"
   >
-    <div v-if="print_show">
-
-    
-        <div class="click-table11-oper">
-        <el-form :inline="true" :model="form" size="mini">
-            <el-form-item label="清单编号">
-            <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
-            </el-form-item>
-            <el-form-item label="清单名称">
-            <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
-            </el-form-item>
-            <el-form-item label="表头">
-            <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
-                <el-option
-                    v-for="item in form.headerList"
-                    :key="item.id"
-                    :disabled="item.limit?true:false"
-                    :label="item.name"
-                    :value="item.id">
-                </el-option>
-            </el-select>
-            </el-form-item>
-        </el-form>
-        </div>
-
-        <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-        <div class="click-table11-oper" >
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="impt">导入表格</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="con">打印一下啊</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-        
-        <el-button type="success" size="mini" @click="exportList">导出</el-button>
-        <el-button type="success" size="mini" @click="preview">预览打印</el-button>
-        </div>
-            <!-- show-summary
-        :summary-method="getSummaries" -->
-        <!-- :summary-method="getSummaries" -->
-                <!-- show-summary
-        :summary-method="getSummaries" :span-method="arraySpanMethod"-->
-            <!-- :data.sync="list" 
-            autoScrollIntoView:true-->
-        <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-        <div :style="{height: Height+'px' }">
-            <elx-editable
-            ref="elxEditable1"
-            class="scroll-table4 click-table11"
-            height="100%"
-            size="mini"
-            :show-header="showHeader"
-            :header-cell-style="getRowClass"
-            v-if="showHeader"
-            @cell-click ="cell_click"
-            :row-style="RowCss"
-            show-summary
-            :summary-method="getSummaries">
-            
-            <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
-            <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
-            <!-- 此处使用多级表头嵌套组件 -->
-            <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
-            </elx-editable>
-            <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
-        </div>
+    <div class="click-table11-oper">
+      <el-form :inline="true" :model="form" size="mini">
+        <el-form-item label="清单编号">
+          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
+        </el-form-item>
+        <el-form-item label="清单名称">
+          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
+        </el-form-item>
+        <el-form-item label="表头">
+          <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+              <el-option
+                v-for="item in form.headerList"
+                :key="item.id"
+                :disabled="item.limit?true:false"
+                :label="item.name"
+                :value="item.id">
+              </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
     </div>
-    <div v-else>
-        <printing :tableData='tableData'></printing>
+
+    <input id="upload" type="file" @change="importfxx()" ref="input" style="display:none;" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+    <div class="click-table11-oper" >
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="impt">导入表格</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="con">打印一下啊</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
+      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
+      
+      <el-button type="success" size="mini" @click="exportList">导出</el-button>
+      <el-button type="success" size="mini" @click="preview">打印</el-button>
+    </div>
+          <!-- show-summary
+      :summary-method="getSummaries" -->
+      <!-- :summary-method="getSummaries" -->
+            <!-- show-summary
+      :summary-method="getSummaries" :span-method="arraySpanMethod"-->
+         <!-- :data.sync="list" 
+         autoScrollIntoView:true-->
+    <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
+    <div :style="{height: Height+'px' }">
+        <elx-editable
+          ref="elxEditable1"
+          class="scroll-table4 click-table11"
+          height="100%"
+          size="mini"
+          :show-header="showHeader"
+          :header-cell-style="getRowClass"
+          v-if="showHeader"
+          @cell-click ="cell_click"
+          :row-style="RowCss"
+          show-summary
+          :summary-method="getSummaries">
+          
+          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
+          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
+          <!-- 此处使用多级表头嵌套组件 -->
+          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
+        </elx-editable>
+        <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
     </div>
     
   </div>
@@ -83,15 +76,13 @@
 
 <script>
 import MyColumn from './MyColumn';
-import printing from '../MultiplexCom/Printing'
 import XEUtils from 'xe-utils';
-
+import print from 'print-js'
 
 export default {
   name: 'InvenEdit',
   components: {
-    MyColumn,
-    printing
+    MyColumn
   },
   props: {
     uplist:{  //查看和修改清单数据
@@ -142,9 +133,7 @@ export default {
       ResetList: [], //清单初始值（重置数据时用）
       new: false, //判断是否新建清单 默认为否（重置数据时候用来判断是否要存储备用数据）
       Height: 400,
-      Width:100,
-      tableData:{},
-      print_show:true,
+      Width:100
     }
   },
     watch: {
@@ -170,27 +159,19 @@ export default {
     },
     methods: {
         preview(){
-            this.print_show = false;
-            this.tableData = {
-                list: this.list,
-                hd: this.hd,
-                PackHeader: this.PackHeader,
-                col: this.col,
-                totalobj: this.totalobj,
-            }
             // print
-            // let myData = [];
-            // for (let index = 0; index < 65; index++) {
-            //     myData.push({'#':index,'prop1':'测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1', 'prop2':'测试打印2', 'prop3':'测试打印3'})
-            // }
-            // print({
-            //     printable: myData,
-            //     type: 'json',
-            //     properties: ['#','prop1', 'prop2', 'prop3'],
-            // 	gridHeaderStyle: 'display: none;',
-            //     gridStyle: 'border: 1px solid #000000;text-align: center;',
-            //     header: '<span class="custom-h3">My custom header</span>',
-            //     });
+            let myData = [];
+            for (let index = 0; index < 65; index++) {
+                myData.push({'#':index,'prop1':'测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1', 'prop2':'测试打印2', 'prop3':'测试打印3'})
+            }
+            print({
+                printable: myData,
+                type: 'json',
+                properties: ['#','prop1', 'prop2', 'prop3'],
+            	gridHeaderStyle: 'display: none;',
+                gridStyle: 'border: 1px solid #000000;text-align: center;',
+                header: '<span class="custom-h3">My custom header</span>',
+                });
         },
         con(){
             console.log(this.totalobj)

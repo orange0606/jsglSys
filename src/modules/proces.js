@@ -985,7 +985,7 @@ excelmodel = {
             console.log('表头标题（不包括表头最后一层与合计尾行）');
             console.log(multiHeader);
 
-        import("@/modules/Export2Excel").then(excel => {
+        import("./Export2Excel").then(excel => {
             // const multiHeader = [ ["变 更1","","","","","","","","","",""] ];
             // const tHeader = ["细目号", "细目名称", "单位", "单价（元）", "原设计 数量", "变更后数量", "上期累计变更数量", "上期累计变更金额", "本期变更数量","本期变更金额","本期累计变更数量"];
             // const filterVal = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K" ];

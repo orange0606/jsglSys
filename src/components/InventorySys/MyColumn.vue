@@ -11,7 +11,6 @@
       </my-column> 
     </template>
   </el-table-column> 
-
 </template>
 
 <script>

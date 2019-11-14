@@ -83,7 +83,7 @@
 
         <!-- 引入建立表头组件 -->
         <el-dialog title="表头预览" width="95%" top="4vh" :center="false" :destroy-on-close="false" :visible.sync="editShow">
-            <headeratt :Form="Form" :visible.sync="editShow" ></headeratt>
+            <headeratt :Form="Form" :projectId="projectId" :myPower="myPower" :visible.sync="editShow" ></headeratt>
         </el-dialog>
 
         <el-pagination

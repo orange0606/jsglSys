@@ -144,7 +144,6 @@
    },
     computed: {
       // 计算属性的 getter
-
         typeName () {
             // `this` 指向 vm 实例
             let obj = {

@@ -88,6 +88,7 @@
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
           <el-dialog :title="EditTitle" width="95%" top="3vh"  :lock-scroll="false" :visible.sync="visibleNew">
+              <!-- <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></inven-edit> -->
               <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent" ></inven-edit>
           </el-dialog>
         </transition>

@@ -195,14 +195,14 @@ export function export_json_to_excel({
       /*先判断是否为null/undefined*/
       if (val == null) {
         return {
-          'wch': 10
+          'wch': 12
         };
       }
       /*再判断是否为中文*/
       else if (val.toString().charCodeAt(0) > 255) {
         if (val.toString().length >25) {
             return {
-              'wch': val.toString().length-5
+              'wch': val.toString().length-10
             };
         }
         return {
@@ -219,7 +219,7 @@ export function export_json_to_excel({
     for (let i = 1; i < colWidth.length; i++) {
       for (let j = 0; j < colWidth[i].length; j++) {
         if (result[j]['wch'] < colWidth[i][j]['wch']) {
-          result[j]['wch'] = colWidth[i][j]['wch'];
+           result[j]['wch'] = colWidth[i][j]['wch'];
         }
       }
     }
