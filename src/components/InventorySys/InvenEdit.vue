@@ -8,8 +8,6 @@
     class="_compbox"
   >
     <div v-if="print_show">
-
-    
         <div class="click-table11-oper">
         <el-form :inline="true" :model="form" size="mini">
             <el-form-item label="清单编号">
@@ -144,11 +142,12 @@ export default {
       Height: 400,
       Width:100,
       tableData:{},
-      print_show:true,
+      print_show:true,  // false则显示打印预览组件
     }
   },
     watch: {
         uplist: function(newVal,oldVal){  //子组件返回来的数据
+            this.print_show = true;
             //此处可进行判断，然后进行清单导入
             this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
         },
@@ -156,12 +155,15 @@ export default {
             handler: function() {
                 this.tViewSize();
             }
+        },
+        print_show: function(newVal,oldVal) {    //监听显示预览组件为true时则重新加载清单
+            if (newVal) {
+                this.findList();
+            }
         }
     },
     mounted(){
         this.tViewSize();
-        console.log('this.$store.state.clientSize--------2222')
-        console.log(this.$store.state.clientSize)
     },
     created () {
         this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
@@ -169,7 +171,19 @@ export default {
         this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
     },
     methods: {
-        preview(){
+        preview(){  //打印预览
+            if (this.list.length > 500) {
+                return this.$confirm('暂不支持在线打印超过 500 行的数据，请导出excel 文件再进行打印。此操作将导出文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                    }).then(() => {
+                        return this.exportList();
+                    }).catch(() => {
+                        return false
+                });
+                
+            }
             this.print_show = false;
             this.tableData = {
                 list: this.list,

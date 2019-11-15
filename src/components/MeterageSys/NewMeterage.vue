@@ -634,14 +634,15 @@ export default {
                         rest[r][row.colNum].tUpdateRowId = rest[r][row.colNum].id;
                     }else if (row.attribute === "meterage") {
                         // console.log(rest[r][colName].td)
-                        let td = rest[r][colName].td;
-                        if (td ==='' || td==='0' || td===0 || td===null || td===' ') {
-                           rest[r][row.colNum].td =0; 
-                        }else if (td ==='1' || td===1) {
-                           rest[r][row.colNum].td =1; 
-                        }else {
-                           rest[r][row.colNum].td =2; 
-                        }
+                        // let td = rest[r][colName].td;
+                        // if (td ==='' || td==='0' || td===0 || td===null || td===' ') {
+                        //    rest[r][row.colNum].td =0; 
+                        // }else if (td ==='1' || td===1) {
+                        //    rest[r][row.colNum].td =1; 
+                        // }else {
+                        //    rest[r][row.colNum].td =2; 
+                        // }
+                        rest[r][row.colNum].td =0; 
                         
                     }else if (row.attribute === "totalmeterage-meterage") {
                         // console.log('正在设置哪一列  '+row.colNum)

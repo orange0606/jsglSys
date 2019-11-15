@@ -5,7 +5,7 @@
 import Vue from 'vue';
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
   DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification, Tabs, TabPane,
-  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip, Link,Collapse,CollapseItem} from 'element-ui';
+  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip, Link,Collapse,CollapseItem, PageHeader, Drawer } from 'element-ui';
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
 import App from './App';
 import router from './router';
@@ -49,6 +49,9 @@ Vue.use(Tooltip);
 Vue.use(Alert);
 Vue.use(Collapse);
 Vue.use(CollapseItem);
+Vue.use(PageHeader);
+Vue.use(Drawer);
+
 
 
 Vue.component(CollapseTransition.name, CollapseTransition)
@@ -88,8 +91,6 @@ Vue.prototype.$excel = excelmodel;
 import xlsxstyle from './modules/xlsxstyle';
 Vue.prototype.$xlsxstyle = xlsxstyle;
 
-// import Print from './modules/print'
-// Vue.use(Print) // 注册
 import Print from 'vue-print-nb'
 Vue.use(Print); 
 
