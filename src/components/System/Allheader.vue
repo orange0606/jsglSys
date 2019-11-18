@@ -266,7 +266,7 @@ import headeratt from './NewHeader'
     findList () {   //请求所有已建表头数据函数
       this.loading = true
         //发起网络请求
-      this.$post('/head/getall',{page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}})
+      this.$post('/head/getall',{page:{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize}, projectId: this.projectId, myPower: this.myPower})
         .then((response) => {
         this.list = response.data.headList.list;
         this.pageVO.totalResult = response.data.headList.total;
