@@ -5,7 +5,7 @@
 import Vue from 'vue';
 import { Button, Select,Row,Col,Menu,Submenu,MenuItem,MenuItemGroup,Input,Checkbox,Radio,Switch,
   DatePicker,TimePicker,Form,FormItem,Option,OptionGroup,Message,MessageBox,Notification, Tabs, TabPane,
-  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip, Link,Collapse,CollapseItem, PageHeader, Drawer, Backtop } from 'element-ui';
+  Popover,Dialog,Table,TableColumn,Alert,Pagination,Loading,Tag, Slider, Card, Cascader,Badge,Tooltip, Link,Collapse,CollapseItem, PageHeader, Drawer} from 'element-ui';
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
 import App from './App';
 import router from './router';
@@ -13,7 +13,6 @@ import router from './router';
 Vue.config.productionTip = false;
 // Vue.use(Loading);
 
-Vue.use(Backtop);
 
 Vue.use(Tabs);
 Vue.use(TabPane);

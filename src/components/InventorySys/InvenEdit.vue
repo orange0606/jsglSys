@@ -443,7 +443,7 @@ export default {
                     for (let index = listlen -1; index >=0; index--) {
                         this.list[index]['seq'] = index;
                     }
-                    
+                    this.findList();
                     data = null; //内存释放
                 } catch (e) {
                     data = this.list = null;

@@ -127,7 +127,6 @@
                         <el-form-item v-for="(val,i) in Attribute" :key="i+'bb'" v-show="row.attribute && row.attribute!==null && val.value === row.attribute && val.input && row.attribute !=='sumText'" label="属性值(点击左边表格的单元格选择值)" >
                             <el-input ref="attValue" v-model="row.attributeValue" :disabled="setState && setState === 'limit'" @focus="attValueFocus">
                                 <el-button slot="append" :style="setState !==null && setState !== 'limit' && row.attributeValue ?[c]:[]" type="primary" @click="attValBtn(row.attributeValue)" >确定</el-button>
-                                <!-- <button slot="append" @click="attValBtn(row.attributeValue)" >确定</button> -->
                             </el-input>
                         </el-form-item>
                         <el-form-item  v-show ="row.attribute =='sumText'" label="合计尾行单元格内容" >
@@ -136,9 +135,7 @@
                         </el-form-item>
                         <el-form-item v-show ="Limit.length >0" label="限制单元格大小值">
                             <el-select v-model="row.tLimit" placeholder="请选择限制类型" @change="LimitChange" clearable size="small" style=" width:100%;">
-                                <!-- <el-option v-for="(val,i) in Limit" :key="i+'cc'" :label="val.name" :value="val.value"></el-option> -->
                                 <el-option  :key="'c33c'" :label="'敬请期待'" :value="null"></el-option>
-
                             </el-select>
                         </el-form-item>
                         <el-form-item v-show ="row.tLimit && row.tLimit!==null && row.tLimit!=='null'" label="限制值" >
@@ -329,7 +326,8 @@ import inven from '../../modules/newheaderAtt';
                 totalmeteragenull:'累计计量清单(无)',
                 max:'max', //max
                 increaseMax:'增加MAX',  //increaseMax
-                decreaseMax:'减少MAX' //decreaseMax
+                decreaseMax:'减少MAX', //decreaseMax
+                oldVal: '上期旧值',
             }
       }
     },
@@ -443,22 +441,32 @@ import inven from '../../modules/newheaderAtt';
             console.log(New)
             if (New && New.id && New.key && this.setState) {
                 if (this.setState === 'relation') {
-                    this.row.attributeValue = New.key;
-                    this.row.attributeValueId = New.id;
+                    this.$set(this.row,'attributeValue',New.key)
+                    this.$set(this.row,'attributeValueId',New.id)
+                    // this.row.attributeValue = New.key;
+                    // this.row.attributeValueId = New.id;
                 }else if (this.setState === 'limit') {
-                    this.row.limitValue = New.key;
-                    this.row.limitId = New.id;
+                    // this.row.limitValue = New.key;
+                    // this.row.limitId = New.id;
+                    this.$set(this.row,'limitValue',New.key)
+                    this.$set(this.row,'limitId',New.id)
                 }else if (this.setState === 'change-total' && this.Form.type === 'totalchange') {
                     console.log('有无进来这里change-total')
-                    console.log(this.row.attributeValue, this.row.attributeChangeHeadId)
-                    this.row.attributeValue = New.key;
-                    this.row.attributeChangeHeadId = New.id;
+                    // console.log(this.row.attributeValue, this.row.attributeChangeHeadId)
+                    // this.row.attributeValue = New.key;
+                    // this.row.attributeChangeHeadId = New.id;
+                    this.$set(this.row,'attributeValue',New.key)
+                    this.$set(this.row,'attributeChangeHeadId',New.id)
                 }else if (this.setState === 'meterage-total' && this.Form.type === 'totalmeterage') {
-                    this.row.attributeValue = New.key;
-                    this.row.attributeMeterageHeadId = New.id;
+                    // this.row.attributeValue = New.key;
+                    // this.row.attributeMeterageHeadId = New.id;
+                    this.$set(this.row,'attributeValue',New.key)
+                    this.$set(this.row,'attributeMeterageHeadId',New.id)
                 }else if (this.setState === 'pay' && this.Form.type === 'totalpay') {
-                    this.row.attributeValue = New.key;
-                    this.row.attributePayHeadRowId = New.id;
+                    // this.row.attributeValue = New.key;
+                    // this.row.attributePayHeadRowId = New.id;
+                    this.$set(this.row,'attributeValue',New.key)
+                    this.$set(this.row,'attributePayHeadRowId',New.id)
                 }
             }
         },
@@ -832,7 +840,6 @@ import inven from '../../modules/newheaderAtt';
                 //从单击单元格获取单元格的数据
                 var colum =column.property;
                 colum = colum.substr(0,colum.indexOf('.'));
-
                 // 点击显示单元格边框变色
                 this.cellStyle.row = row[colum].trNum;
                 this.cellStyle.col = column.id;
@@ -844,6 +851,7 @@ import inven from '../../modules/newheaderAtt';
                 this.$forceUpdate(); // 强制刷新
                 if (this.setState === null) {
                     //赋值传到属性设置子组件中
+    
                     this.row = row[colum];
                     if ( !this.row.tLimit ) {
                         this.row['tLimit']='';
@@ -964,7 +972,15 @@ import inven from '../../modules/newheaderAtt';
             this.typeAttState(type);  //调用属性值设置状态
         },
         attValueFocus (e) { //属性值输入框获取焦点时触发的函数
+            if (this.row && !this.row.attributeValue) {
+                this.$nextTick(function () {
+                    this.$set(this.row,'attributeValue','')
+                })
+            }
             // if (this.setState) {   //当属性值状态为null时,判断设定属性值设置状态
+            this.$nextTick(function () {
+                this.$set(this.row,'attributeValue',this.row.attributeValue+='')
+            })
             var type = this.row.attribute;
             this.typeAttState(type);  //调用属性值设置状态
         },

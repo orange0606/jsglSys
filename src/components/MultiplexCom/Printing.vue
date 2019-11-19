@@ -7,7 +7,7 @@
     <el-page-header @back="outPrint" content="打印预览">
     </el-page-header>
 
-    <h5>为保证打印质量，确定打印之前可拖拽表头调整表格的列宽为适宜。</h5>
+    <h5 style="text-align:cenetr;">为保证打印质量，确定打印之前可拖拽表头调整表格的列宽为适宜。</h5>
     <div id="printTest"  :style="{'width':width, margin:'0 auto;'} ">
         <elx-editable
         ref="elxEditable10"
@@ -70,25 +70,8 @@
             <el-button type="primary" class="backup_item" icon="el-icon-arrow-up" ></el-button>
         </el-tooltip>
       </div>
-
-      <el-backtop target=".container">
-          <div
-              style="{
-                  height: 100%;
-                  width: 100%;
-                  background-color: #f2f5f6;
-                  box-shadow: 0 0 6px rgba(0,0,0, .12);
-                  text-align: center;
-                  line-height: 40px;
-                  color: #1989fa;
-              }"
-              >
-              UP
-          </div>
-      </el-backtop>
-      
   </div>
-</template>
+</template> 
 
 <script>
 

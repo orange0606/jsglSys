@@ -32,7 +32,9 @@ let data = {
         totalchange:[    //累计变更清单
             { value: 'original', name: '“original”原清单', input: true },
             { value: 'totalchangenull', name: '“totalchangenull”累计变更清单（无对应）', input: false },
-            { value: 'change-total', name: '"change-total"对应变更清单项的累加', input: true }
+            { value: 'change-total', name: '"change-total"对应变更清单项的累加', input: true },
+            { value: 'oldVal', name: '"oldVal"上期旧值', input: true },
+
         ],
         meterage:[    //计量清单
             { value: 'update', name: '“update”新清单', input: true },
@@ -44,6 +46,8 @@ let data = {
             { value: 'update', name: '“update”新清单', input: true },
             { value: 'totalmeteragenull', name: '“totalmeteragenull”累计计量清单（无对应）', input: false },
             { value: 'meterage-total', name: '"meterage-total"对应计量清单项的累计', input: true },
+            { value: 'oldVal', name: '"oldVal"上期旧值', input: true },
+
         ],   
         pay:[    //支付清单
             { value: 'pay', name: '“pay”支付清单', input: true },   //支付清单的数量（编辑区域）
@@ -57,7 +61,8 @@ let data = {
             { value: 'totalmeterage-head-total', name: '"totalmeterage-head-total"累计计量表头合计内容', input: true },
             { value: 'pay', name: '"pay"支付清单', input: true },
             { value: 'pay-total', name: '"pay-total"对应支付清单项的累计相加', input: true }, //对应支付清单的本期
-
+            { value: 'oldVal', name: '"oldVal"上期旧值', input: true },
+            
         ] 
     }
 }

@@ -60,7 +60,6 @@ excelmodel = {
                     callback(data);
                 })
                 persons = null;
-                perobj = null;
                 reader = wb = null;
             //  console.log('表格导入的未经任何处理的原始数据')
             //  console.log(wb.Sheets[wb.SheetNames[0]]) //  为转换的原始数据，可作为提交或者另外处理
@@ -160,18 +159,18 @@ excelmodel = {
             arr[index] = {};
             for (let i = 0; i < listhdlen; i++) {
                 let arrObj = arr[index][listhd[i]] = list[index][listhd[i]];
-                arrObj.name = null; //名称
+                arrObj.name = ''; //名称
                 arrObj.col_width = 120; //列宽（注意上行与下行的列宽要相等）
                 arrObj.colWdthProportion = null;//列宽比例
                 arrObj.trHigh = 35; // 行高
                 arrObj.trHighproportion = null;//行高比例
-                arrObj.attribute = null; //属性
-                arrObj.attributeValue = null; //属性值
+                arrObj.attribute = ''; //属性
+                arrObj.attributeValue = ''; //属性值
                 arrObj.textAlign = 'center'; //文本对齐对齐方式
                 arrObj.attributeValueId = null; //属性值内容ID
                 arrObj.limitId = null; //限制属性值内容ID
-                arrObj.tLimit = null;    //限制值类型 
-                arrObj.limitValue = null; //限制值
+                arrObj.tLimit = '';    //限制值类型 
+                arrObj.limitValue = ''; //限制值
                 // arrObj.attributeMeterageHeadId = null;                                    //id
                 // arrObj.limitMeterageHeadId = null;
                 // arrObj.attributePayHeadRowId = null;    //支付表头内容的id
