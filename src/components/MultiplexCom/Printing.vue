@@ -7,7 +7,7 @@
     <el-page-header @back="outPrint" content="打印预览">
     </el-page-header>
 
-    <h5 style="text-align:cenetr;">为保证打印质量，确定打印之前可拖拽表头调整表格的列宽为适宜。</h5>
+    <h5 style="margin:0 auto;text-align: center;" >为保证打印质量，确定打印之前可拖拽表头调整表格的列宽为适宜。</h5>
     <div id="printTest"  :style="{'width':width, margin:'0 auto;'} ">
         <elx-editable
         ref="elxEditable10"
@@ -274,6 +274,7 @@ destroyed () {
 }
 .container {
     background: none;
+    padding-bottom: 300px; 
     /* position:relative; */
     /* display: flex;
     justify-content: center; */
@@ -289,7 +290,7 @@ destroyed () {
   top: 50px;
   bottom: 0;
   margin:auto; */
-  margin: 0 auto 200px auto;
+  margin: 0 auto;
   min-height: 500px;
 }
 

@@ -221,6 +221,7 @@ export default {
         }
     },
     uplist: function(newVal,oldVal){  //子组件返回来的数据
+        this.print_show = true;
         //此处可进行判断，然后进行清单导入
         this.upif( newVal );//此处调用父组件传来的清单数据判断处理函数
     },
@@ -808,36 +809,6 @@ export default {
             row[colName].edit = "Y";  //Y为编辑模式N为只读状态     
         }  
     },
-    // cell_select ({row, column, rowIndex, columnIndex}){ //单元格样式
-    //     if (column.property) {
-    //         // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
-    //         let str = column.property,
-    //         colName = str.substr(0,str.indexOf(".td"));
-
-    //         //判断是否哪种属性类型允许单元格编辑
-    //         if (this.lastHeader[colName].attribute !== 'fluctuate') {
-                
-    //             if (row[colName].attribute && row[colName].attribute==='add') {
-    //                 return {'background':'#99ff005c'}; //新增一行的颜色
-    //             }
-    //             if (!row[colName].id ) {
-    //                 return {'background':'#f5ffe5'}; //没有id的颜色
-    //             }
-    //             return {};
-    //         }
-    //         return {'background':'#FFFFE0'}; //编辑区颜色
-    //     }  
-    //     return {'background':'#FFFFFF'};
-    // },
-    // arraySpanMethod({ row, column, rowIndex, columnIndex }) {   //单元格合并处理
-    //     if (columnIndex >1) {  //带选择框的情况
-    //         let Row = row[this.hd[columnIndex-2]];
-    //         if (Row) {
-    //             return [ Row.tdRowspan, Row.tdColspan ];
-    //         }
-    //     }
-    //     return [1, 1]
-    // }, 
     findList () { //表格滚动渲染函数
         this.loading = true;
         this.$nextTick(() => {
