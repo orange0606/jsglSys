@@ -5,38 +5,46 @@
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
-  <div class="click-table11-oper"  >
-        <el-button type="success" size="mini" @click="exportList">导出</el-button>
-        <!-- <el-button :disabled="approval.state === 1?true:false" type="info" size="mini" @click="$refs.elxEditable1.clear()">清空表格</el-button> -->
-  </div>
-  <div :style="{ height: Height+'px' }">
-        <elx-editable
-        ref="elxEditablecom"
-        class="scroll-table4"
-        border
-        height="100%"
-        size="mini"
-        :show-header="showHeader" 
-        v-if="showHeader"
-        show-summary
-        :summary-method="getSummaries"
-        :edit-config="{render: 'scroll', renderSize: 80}">
-        <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
-        <!-- 此处使用多级表头嵌套组件 -->
-        <my-column v-for="(item,index) in col" :key="index" :col="item" :hd="hd"></my-column>
-      </elx-editable>
-  </div>
-    
+      <div v-if="print_show">
+          <div class="click-table11-oper"  >
+                <el-button type="success" size="mini" @click="exportList">导出</el-button>
+                <el-button type="success" size="mini" @click="preview">预览打印</el-button>
+                
+          </div>
+          <div :style="{ height: Height+'px' }">
+                <elx-editable
+                ref="elxEditablecom"
+                class="scroll-table4"
+                border
+                height="100%"
+                size="mini"
+                :show-header="showHeader" 
+                v-if="showHeader"
+                show-summary
+                :summary-method="getSummaries"
+                :edit-config="{render: 'scroll', renderSize: 80}">
+                <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
+                <!-- 此处使用多级表头嵌套组件 -->
+                <my-column v-for="(item,index) in col" :key="index" :col="item" :hd="hd"></my-column>
+              </elx-editable>
+          </div>
+      </div>
+      <div v-else>
+          <printing :tableData='tableData' :print_show.sync="print_show" ></printing>
+      </div> 
   </div>
 </template>
 
 <script>
 import MyColumn from './MyColumn';
+import printing from '../MultiplexCom/Printing'
+
 import XEUtils from 'xe-utils';
 export default {
   name: 'RowList',
   components: {
-    MyColumn
+    MyColumn,
+    printing
   },
   props: {
     uplist:{  //查看和修改清单数据
@@ -58,7 +66,9 @@ export default {
       ], //表格数据
       totalobj: {},//合计尾行计算结果存储
       Height: 400,
-      Width:99.9
+      Width:99.9,
+      tableData:{},
+      print_show:true,  // false则显示打印预览组件
     }
   },
  watch: {
@@ -72,6 +82,11 @@ export default {
             this.tViewSize();
           }
       },
+      print_show: function(newVal,oldVal) {    //监听显示预览组件为true时则重新加载清单
+          if (newVal) {
+              this.findList();
+          }
+      }
   },
   computed: {
       
@@ -89,6 +104,28 @@ export default {
     this.hd.length = this.col.length = this.PackHeader.length = this.list.length = 0;
   },
   methods: {
+    preview(){  //打印预览
+        if (this.list.length > 500) {
+            return this.$confirm('暂不支持在线打印超过 500 行的数据，请导出excel 文件再进行打印。此操作将导出文件, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+                }).then(() => {
+                    return this.exportList();
+                }).catch(() => {
+                    return false
+            });
+            
+        }
+        this.print_show = false;
+        this.tableData = {
+            list: this.list,
+            hd: this.hd,
+            PackHeader: this.PackHeader,
+            col: this.col,
+            totalobj: this.totalobj,
+        }
+    },
     refreshTable () {  //刷新表格布局
         this.$nextTick(() => {  //强制重新渲染
           this.startTime = Date.now(); 

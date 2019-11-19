@@ -4,72 +4,74 @@
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
-    <div class="click-table11-oper">
-      <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
-        <el-form-item label="清单编号">
-          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
-        </el-form-item>
-        <el-form-item label="清单名称">
-          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
-        </el-form-item>
-        <el-form-item label="表头">
-          <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
-              <el-option
-                v-for="item in form.headerList"
-                :key="item.id"
-                :disabled="item.limit?true:false"
-                :label="item.name"
-                :value="item.id">
-              </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-    </div>
-    <div class="click-table11-oper" >
-      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
-      <el-button type="success" size="mini" @click="exportList">导出</el-button>
-      <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
-      <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="$refs.elxEditable1.removeSelecteds()">删除选中</el-button> -->
+    <div v-if="print_show">
+        <div class="click-table11-oper">
+            <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
+                <el-form-item label="清单编号">
+                <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
+                </el-form-item>
+                <el-form-item label="清单名称">
+                <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
+                </el-form-item>
+                <el-form-item label="表头">
+                <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+                    <el-option
+                        v-for="item in form.headerList"
+                        :key="item.id"
+                        :disabled="item.limit?true:false"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+                </el-form-item>
+            </el-form>
+            </div>
+            <div class="click-table11-oper" >
+                <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
                 <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-      <!--  -->
-    </div>
-          <!-- show-summary
-      :summary-method="getSummaries" -->
-         <!-- :data.sync="list" -->
-           <!-- :cell-style ="cell_select" -->
-    <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <div :style="{ height: Height+'px' }">
-        <elx-editable
-          ref="elxEditable1"
-          class="scroll-table4 click-table11"
-          border
-          height="100%"
-          :show-header="showHeader"
-          v-if="showHeader"
-          @cell-click ="cell_click"
-          :header-cell-style="getRowClass"
-          :row-style="RowCss"
-          size="small"
-          :edit-config="{render: 'scroll', renderSize: 80}">
-          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
-          <!-- 此处使用多级表头嵌套组件 -->
-          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="pay" :lastHeader="lastHeader"></my-column>
-        </elx-editable>
-          <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
-    </div>
+                <el-button type="success" size="mini" @click="exportList">导出</el-button>
+                <el-button type="success" size="mini" @click="preview">预览打印</el-button>
+            
+            </div>
+
+            <div :style="{ height: Height+'px' }">
+                <elx-editable
+                ref="elxEditable1"
+                class="scroll-table4 click-table11"
+                border
+                height="100%"
+                :show-header="showHeader"
+                v-if="showHeader"
+                @cell-click ="cell_click"
+                :header-cell-style="getRowClass"
+                :row-style="RowCss"
+                size="small"
+                :edit-config="{render: 'scroll', renderSize: 80}">
+                <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
+                <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
+                <!-- 此处使用多级表头嵌套组件 -->
+                <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="pay" :lastHeader="lastHeader"></my-column>
+                </elx-editable>
+                <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为可编辑区域</p>
+            </div>
+        </div>
+        <div v-else>
+            <printing :tableData='tableData' :print_show.sync="print_show" ></printing>
+        </div>
   </div>
 </template>
 
 <script>
 import MyColumn from './MyColumn';
+import printing from '../MultiplexCom/Printing';
 import XEUtils from 'xe-utils';
 
 
 export default {
   name: 'NewPay',
   components: {
-    MyColumn
+    MyColumn,
+    printing
   },
   props: {
     uplist:{  //查看和修改清单数据
@@ -124,7 +126,9 @@ export default {
       ResetList: [], //清单初始值（重置数据时用）
       new: false, //判断是否新建清单 默认为否（重置数据时候用来判断是否要存储备用数据）
       Height: 400,
-      Width:99.9
+      Width:99.9,
+      tableData:{},
+      print_show:true,  // false则显示打印预览组件
     }
   },
 
@@ -138,6 +142,11 @@ export default {
         this.tViewSize();
         }
     },
+    print_show: function(newVal,oldVal) {    //监听显示预览组件为true时则重新加载清单
+        if (newVal) {
+            this.findList();
+        }
+    }
   },
   computed: {
   },
@@ -153,6 +162,28 @@ export default {
       this.list.length = this.hd.length = this.col.length = this.PackHeader.length = 0;
   },
   methods: {
+     preview(){  //打印预览
+        if (this.list.length > 500) {
+            return this.$confirm('暂不支持在线打印超过 500 行的数据，请导出excel 文件再进行打印。此操作将导出文件, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+                }).then(() => {
+                    return this.exportList();
+                }).catch(() => {
+                    return false
+            });
+            
+        }
+        this.print_show = false;
+        this.tableData = {
+            list: this.list,
+            hd: this.hd,
+            PackHeader: this.PackHeader,
+            col: this.col,
+            totalobj: this.totalobj,
+        }
+    },
     getRowClass ({ row, column, rowIndex, columnIndex }) {  //表头样式
             // console.log('row, column, rowIndex, columnIndex')
         if (column.property) {

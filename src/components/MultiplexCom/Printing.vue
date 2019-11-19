@@ -7,27 +7,24 @@
     <el-page-header @back="outPrint" content="打印预览">
     </el-page-header>
 
-
-    <h5>鼠标点击表格区域展开打印设置。为保证打印质量，确定打印之前请先调整表格的列宽为适宜。</h5>
-    
-
-    <div id="printTest"  :style="{'max-width':width,margin:'0 auto;'} ">
+    <h5>为保证打印质量，确定打印之前可拖拽表头调整表格的列宽为适宜。</h5>
+    <div id="printTest"  :style="{'width':width, margin:'0 auto;'} ">
         <elx-editable
         ref="elxEditable10"
         border
-        class="table"
+        class="Print_table_a4"
         :data.sync="list"
         size="mini"
         :show-header="showHeader"
         v-if="showHeader"
         show-summary
-        :summary-method="getSummaries" :style="{'width':width}">
+        :summary-method="getSummaries">
 
         <column v-for="(item,index) in col" :key="index" :col="item" :hd="hd" ></column>
 
         </elx-editable>
 
-    </div> -->
+    </div>
     <el-drawer
         title="打印预览设置"
         :before-close="handleClose"
@@ -70,7 +67,7 @@
           <el-button type="primary" class="backup_item" icon="el-icon-printer" @click.stop="setprint" ></el-button>
         </el-tooltip>
         <el-tooltip v-if="btnFlag" content="回到顶部" placement="top" :enterable="false" effect="light">
-            <el-button type="primary" class="backup_item" icon="el-icon-arrow-up" @click="backTop"></el-button>
+            <el-button type="primary" class="backup_item" icon="el-icon-arrow-up" ></el-button>
         </el-tooltip>
       </div>
 
@@ -164,10 +161,13 @@ export default {
        }
   },
   mounted () {
-  window.addEventListener('scroll', this.scrollToTop, true)
+  let that = this;
+  window.addEventListener('scroll', that.scrollToTop, true)
 },
 destroyed () {
-  window.removeEventListener('scroll', this.scrollToTop, true)
+  let that = this;
+
+  window.removeEventListener('scroll', that.scrollToTop, true)
 },
 
   methods: {
@@ -243,7 +243,7 @@ destroyed () {
       const that = this
       let timer = setInterval(() => {
         let ispeed = Math.floor(-that.scrollTop / 5)
-        document.documentElement.scrollTop = document.body.scrollTop = that.scrollTop + ispeed
+        window.scrollTop = document.body.scrollTop = that.scrollTop + ispeed
         if (that.scrollTop === 0) {
           clearInterval(timer)
         }
@@ -252,36 +252,26 @@ destroyed () {
  
   // 为了计算距离顶部的高度，当高度大于60显示回顶部图标，小于60则隐藏
   scrollToTop () {
-      // console.log(document.documentElement.scrollTop);//代表目前滚动条和最上方的距离多长
-                // console.log(document.documentElement.scrollHeight);//代表整个滚动条多长
-                // console.log(document.documentElement.clientHeight);
-                // console.log(document.documentElement.scrollHeight-document.documentElement.scrollTop-document.documentElement.clientHeight);
-    const that = this
-    // let scrollTop = window.pageYOffset || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-    
-    console.log('scrollTop-----------------')
-    console.log(scrollTop)
-    that.scrollTop = scrollTop
-    if (that.scrollTop > 60) {
+      const that = this
+
+      that.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;  
+          
+      if(document.body.scrollTop)
+          {
+          that.scrollTop= document.body.scrollTop;
+          }
+          else{
+          that.scrollTop= document.documentElement.scrollTop
+          }
+    // let scrollTop = window.scrollTop || window.pageYOffset || document.body.scrollTop || 0;
+    // that.scrollTop = scrollTop
+    if (that.scrollTop >= 0) {
       that.btnFlag = true
     } else {
       that.btnFlag = false
     }
   },
-    /**
-   * 获取滚动条距离顶端的距离
-   * @return {}支持IE6
-   */  
-  getScrollTop() {  
-          var scrollPos;  
-          if (window.pageYOffset) {  
-          scrollPos = window.pageYOffset; }  
-          else if (document.compatMode && document.compatMode != 'BackCompat')  
-          { scrollPos = document.documentElement.scrollTop; }  
-          else if (document.body) { scrollPos = document.body.scrollTop; }   
-          return scrollPos;   
-  }  
+  
 
 
 
@@ -293,24 +283,37 @@ destroyed () {
 
 
 <style scoped>
-.container {
-    /* background: orange; */
-    /* position:relative; */
 
-}
 /* 确认打印按钮水平居中 */
 .demo-drawer__footer{ 
   display: flex;
   justify-content: center;
 }
+.container {
+    background: none;
+    /* position:relative; */
+    /* display: flex;
+    justify-content: center; */
+    /* flex-direction: column; */
+    /* align-items: center; */
+    /* flex-wrap:wrap; */
+
+}
 #printTest {
-  margin: 0 auto;
+  /* position:absolute;
+  left: 0;
+  right: 0;
+  top: 50px;
+  bottom: 0;
+  margin:auto; */
+  margin: 0 auto 200px auto;
+  min-height: 500px;
 }
 
 .backup {
-  width: 100px;
+  width: 80px;
   height: 250px;
-  background: pink;
+  /* background: pink; */
   position: fixed;
   display: flex;
   flex-direction:column;
@@ -344,7 +347,7 @@ destroyed () {
 /* 布局纵向 */
 .a4-endwise-Default{
   width: 190mm;
-  overflow-x: auto;
+  /* overflow-x: auto; */
   /* width: 1075px; */
   /* height: 1568px; */
   /* border: 1px #000 solid; */
@@ -354,7 +357,7 @@ destroyed () {
 .a4-broadwise-Default{
   /* width: 1560px; */
   width: 277mm;
-  overflow-x: auto;
+  /* overflow-x: auto; */
   /* height: 1075px; */
   /* border: 1px #000 solid; */
 }

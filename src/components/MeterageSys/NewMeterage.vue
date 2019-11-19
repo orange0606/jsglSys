@@ -5,138 +5,143 @@
     element-loading-text="正在加速处理数据"
     element-loading-spinner="el-icon-loading"
   >
-    <div class="click-table11-oper">
-      <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
-        <el-form-item label="清单编号">
-          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
-        </el-form-item>
-        <el-form-item label="清单名称">
-          <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
-        </el-form-item>
-        <el-form-item label="表头">
-          <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
-              <el-option
-                v-for="item in form.headerList"
-                :key="item.id"
-                :disabled="item.limit?true:false"
-                :label="item.name"
-                :value="item.id">
-              </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-    </div>
+        <div v-if="print_show">
+            <div class="click-table11-oper">
+            <el-form :inline="true" :model="form" size="mini" class="demo-form-inline">
+                <el-form-item label="清单编号">
+                <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.num" placeholder="请输入清单编号"></el-input>
+                </el-form-item>
+                <el-form-item label="清单名称">
+                <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
+                </el-form-item>
+                <el-form-item label="表头">
+                <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+                    <el-option
+                        v-for="item in form.headerList"
+                        :key="item.id"
+                        :disabled="item.limit?true:false"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+                </el-form-item>
+            </el-form>
+            </div>
 
-    <div class="click-table11-oper">
-      <el-dialog
-      width="95%"
-      title="选择清单"
-      top="4vh"
-      :visible.sync="innerVisible"
-      append-to-body>
-      <div v-if="showList">
-          <p style="color: red;font-size: 12px;margin:5px 0 10px 0;text-align:left;">请单击选择你要导入的清单</p>
-          <el-table
-            border
-            :height="UpHeight"
-            size="small"
-            :data.sync="update"
-            @cell-click ="selectupdate"
-            style="width: 100%">
-            <el-table-column type="index" width="80" fixed="left" ></el-table-column>
-            <el-table-column prop="updateHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></el-table-column>
-            <el-table-column prop="updateHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></el-table-column>
-            <el-table-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
-            <el-table-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
-            <el-table-column prop="num" label="新清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>     
-            <el-table-column prop="name" label="新清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip >
-                <template slot-scope="scope">
-                    <el-link :underline="true" style="font-size:12px;" type="success" >{{scope.row.name}}</el-link>
-                </template>
-            </el-table-column>
-            <el-table-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></el-table-column>
-            <el-table-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></el-table-column>
-            <el-table-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></el-table-column>
-            <el-table-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
-              <template slot-scope="scope">
-                <!-- 1已录入 0未录入 其他出错-->
-                <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
-                <i v-if="scope.row.enter ==1" style="color:#67c23a;width:20px;" class="el-icon-circle-check"></i>
-                <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
-              </template>
-            </el-table-column>
-            <el-table-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></el-table-column>
-            <el-table-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></el-table-column>
-            <el-table-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></el-table-column>
-            <el-table-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></el-table-column>
-          </el-table>
-          <el-pagination
-            class="click-table2-pagination"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="pageVO.currentPage"
-            :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
-            :page-size="pageVO.pageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="pageVO.totalResult">
-          </el-pagination>
+            <div class="click-table11-oper">
+            <el-dialog
+            width="95%"
+            title="选择清单"
+            top="4vh"
+            :visible.sync="innerVisible"
+            append-to-body>
+            <div v-if="showList">
+                <p style="color: red;font-size: 12px;margin:5px 0 10px 0;text-align:left;">请单击选择你要导入的清单</p>
+                <el-table
+                    border
+                    :height="UpHeight"
+                    size="small"
+                    :data.sync="update"
+                    @cell-click ="selectupdate"
+                    style="width: 100%">
+                    <el-table-column type="index" width="80" fixed="left" ></el-table-column>
+                    <el-table-column prop="updateHead.num" label="新清单表头编号" align="center" show-overflow-tooltip ></el-table-column>
+                    <el-table-column prop="updateHead.name" min-width="110" label="表头名称" align="center" show-overflow-tooltip ></el-table-column>
+                    <el-table-column prop="process.num" label="审批单编号" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
+                    <el-table-column prop="process.name" label="审批单名称" align="center" min-width="110" show-overflow-tooltip ></el-table-column>
+                    <el-table-column prop="num" label="新清单编号" min-width="110" align="center" fixed="left" show-overflow-tooltip ></el-table-column>     
+                    <el-table-column prop="name" label="新清单名称" min-width="110" align="center" fixed="left" show-overflow-tooltip >
+                        <template slot-scope="scope">
+                            <el-link :underline="true" style="font-size:12px;" type="success" >{{scope.row.name}}</el-link>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></el-table-column>
+                    <el-table-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></el-table-column>
+                    <el-table-column prop="type" label="审批单类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></el-table-column>
+                    <el-table-column prop="enter" label="录入状态" align="center" show-overflow-tooltip >
+                    <template slot-scope="scope">
+                        <!-- 1已录入 0未录入 其他出错-->
+                        <i v-if="scope.row.enter ==0" style="color:orange;width:20px;" class="el-icon-circle-close"></i>
+                        <i v-if="scope.row.enter ==1" style="color:#67c23a;width:20px;" class="el-icon-circle-check"></i>
+                        <i v-if="scope.row.enter ==2" style="color:red;width:20px;" class="el-icon-warning-outline"></i>
+                    </template>
+                    </el-table-column>
+                    <el-table-column prop="saveEmployee.name" width="90" label="创建人" align="center" ></el-table-column>
+                    <el-table-column prop="saveTime" label="创建时间" min-width="150" align="center" show-overflow-tooltip sortable :formatter="formatterDate" ></el-table-column>
+                    <el-table-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></el-table-column>
+                    <el-table-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></el-table-column>
+                </el-table>
+                <el-pagination
+                    class="click-table2-pagination"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="pageVO.currentPage"
+                    :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
+                    :page-size="pageVO.pageSize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="pageVO.totalResult">
+                </el-pagination>
+                </div>
+
+                <!-- 此处引入新清单数据选择组件（最终返回集合，选中的数据列表） -->
+                <choice-row v-else :inventory.sync="updateList" :innerVisible.sync="innerVisible" ></Choice-row>
+
+            </el-dialog>
+            <div class="click-table11-oper">
+                <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="OneToTalmeterage" >选择清单</el-button>
+                <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
+                <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
+                <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
+                <el-button type="success" size="mini" @click="exportList">导出</el-button>
+                <el-button type="success" size="mini" @click="preview">预览打印</el-button>
+            </div>
+            
+            </div>
+                <!-- show-summary
+            :summary-method="getSummaries" -->
+                <!-- :data.sync="list" -->
+                <!-- :cell-style="cell_select":span-method="arraySpanMethod" -->
+            <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
+            <div :style="{ height: Height+'px' }">
+                <elx-editable
+                ref="elxEditable1"
+                class="scroll-table4 click-table11"
+                border
+                height="100%"
+                size="mini"
+                :show-header="showHeader" 
+                v-if="showHeader"
+                @cell-click ="cell_click"
+                :header-cell-style="getRowClass"
+                :row-style="RowCss"
+                show-summary
+                :summary-method="getSummaries"
+                :edit-config="{render: 'scroll', renderSize: 65}">
+                <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
+                <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
+                <!-- 此处使用多级表头嵌套组件 -->
+                <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader" :hd="hd" ></my-column>
+                </elx-editable>
+                <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
+            </div>
         </div>
-
-        <!-- 此处引入新清单数据选择组件（最终返回集合，选中的数据列表） -->
-        <choice-row v-else :inventory.sync="updateList" :innerVisible.sync="innerVisible" ></Choice-row>
-
-    </el-dialog>
-    <div class="click-table11-oper">
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="OneToTalmeterage" >选择清单</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
-        <el-button type="success" size="mini" @click="exportList">导出</el-button>
-        <!-- <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button> -->
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
-        <!--  -->
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="consoles">打印一下</el-button>
-      </div>
-      
+        <div v-else>
+            <printing :tableData='tableData' :print_show.sync="print_show" ></printing>
+        </div>
     </div>
-          <!-- show-summary
-      :summary-method="getSummaries" -->
-         <!-- :data.sync="list" -->
-           <!-- :cell-style="cell_select":span-method="arraySpanMethod" -->
-    <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-    <div :style="{ height: Height+'px' }">
-        <elx-editable
-          ref="elxEditable1"
-          class="scroll-table4 click-table11"
-          border
-          height="100%"
-          size="mini"
-          :show-header="showHeader" 
-          v-if="showHeader"
-          @cell-click ="cell_click"
-          :header-cell-style="getRowClass"
-          :row-style="RowCss"
-          show-summary
-          :summary-method="getSummaries"
-          :edit-config="{render: 'scroll', renderSize: 65}">
-          <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
-          <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
-          <!-- 此处使用多级表头嵌套组件 -->
-          <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="meterage" :lastHeader="lastHeader" :hd="hd" ></my-column>
-        </elx-editable>
-        <p style="color: red;font-size: 12px;margin:18px 0 0px 0;text-align:left;">注意：淡黄色区为编辑区请输入相关数字。</p>
-      </div>
-  </div>
 </template>
 
 <script>
 import MyColumn from './MyColumn';
 import ChoiceRow from '../MultiplexCom/ChoiceRow';
+import printing from '../MultiplexCom/Printing';
 import XEUtils from 'xe-utils';
 export default {
   name: 'NewMeterage',
   components: {
     MyColumn,
-    ChoiceRow
+    ChoiceRow,
+    printing
   },
   props: {
     uplist:{  //查看和修改清单数据
@@ -201,6 +206,8 @@ export default {
       Height: 400,
       Width:  99.9,
       UpHeight:300,
+      tableData:{},
+      print_show:true,  // false则显示打印预览组件
     }
   },
  watch: {
@@ -223,6 +230,11 @@ export default {
         this.tViewSize();
         }
     },
+    print_show: function(newVal,oldVal) {    //监听显示预览组件为true时则重新加载清单
+        if (newVal) {
+            this.findList();
+        }
+    }
   },
   computed: {
   },
@@ -240,6 +252,28 @@ export default {
       this.ResetList = this.tomeRowList = this.RowDelList = null;
   },
   methods: {
+    preview(){  //打印预览
+        if (this.list.length > 500) {
+            return this.$confirm('暂不支持在线打印超过 500 行的数据，请导出excel 文件再进行打印。此操作将导出文件, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+                }).then(() => {
+                    return this.exportList();
+                }).catch(() => {
+                    return false
+            });
+            
+        }
+        this.print_show = false;
+        this.tableData = {
+            list: this.list,
+            hd: this.hd,
+            PackHeader: this.PackHeader,
+            col: this.col,
+            totalobj: this.totalobj,
+        }
+    },
     getRowClass ({ row, column, rowIndex, columnIndex }) { //表头样式
         // console.log('row, column, rowIndex, columnIndex')
        if (column.property) {

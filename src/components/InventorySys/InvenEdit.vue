@@ -81,7 +81,7 @@
 
 <script>
 import MyColumn from './MyColumn';
-import printing from '../MultiplexCom/Printing'
+import printing from '../MultiplexCom/Printing';
 import XEUtils from 'xe-utils';
 
 
@@ -192,19 +192,6 @@ export default {
                 col: this.col,
                 totalobj: this.totalobj,
             }
-            // print
-            // let myData = [];
-            // for (let index = 0; index < 65; index++) {
-            //     myData.push({'#':index,'prop1':'测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1测试打印1', 'prop2':'测试打印2', 'prop3':'测试打印3'})
-            // }
-            // print({
-            //     printable: myData,
-            //     type: 'json',
-            //     properties: ['#','prop1', 'prop2', 'prop3'],
-            // 	gridHeaderStyle: 'display: none;',
-            //     gridStyle: 'border: 1px solid #000000;text-align: center;',
-            //     header: '<span class="custom-h3">My custom header</span>',
-            //     });
         },
         con(){
             console.log(this.totalobj)
@@ -408,7 +395,7 @@ export default {
                     message: '233发生错误！'+e
                 });
             })
-        },
+        }, 
         impt(){ //button 按钮调用input文件选择事件
             if (this.hd && this.hd.length ==0) return this.$message({ message: '请先选择表头', type: 'warning', duration: 3000, showClose: true }); 
             this.$refs.input.value = '';    //清除文件名字

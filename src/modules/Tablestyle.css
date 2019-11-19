@@ -176,4 +176,42 @@ body .el-table th.gutter{
  scroll-behavior: auto;
 } 
 
+
+/* 打印表格样式开始 */
+.Print_table_a4 .cell {
+   -webkit-box-sizing: border-box;
+   box-sizing: border-box;
+   white-space: normal;
+   word-break: break-all;
+   line-height: 17px;
+   color: #000;
+   font-size: 12pt;
+  }
+  /* 表格行高设置 */
+  .Print_table_a4.el-table--mini .elx-editable-column {
+     padding: 0 2px;
+     height: 17px;
+     line-height: 17px;
+     min-height: 5px;
+  }
+  .Print_table_a4.el-table--border, .Print_table_a4.el-table--group {
+   border: 1px solid#000;
+  }
+  .Print_table_a4.el-table--border th, .Print_table_a4.el-table__fixed-right-patch {
+   border-bottom: 1px solid#000;
+  }
+  
+  .Print_table_a4.el-table--border td, .Print_table_a4.el-table--border th, .el-table__body-wrapper .el-table--border.is-scrolling-left ~ .el-table__fixed {
+   border-right: 1px solid #000;
+  }
+  .Print_table_a4.el-table td, .Print_table_a4.el-table th.is-leaf {
+   border-bottom: 1px solid #000;
+  }
+  
+  .Print_table_a4 .el-table__footer-wrapper td {
+      border-top: 1px solid #24262b;
+  }
+  @page {
+      size: A4 landscape;
+  }
 /* ************************各清单表格内容样式结束********************** */
