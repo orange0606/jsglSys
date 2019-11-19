@@ -220,10 +220,14 @@ body .el-table th.gutter{
 /* 表格行高input等高度设置 */
 .scroll-table4.el-table--mini .elx-editable-column {
    padding: 0;
-   height: 23px;
+   height: 23px !important;
    line-height: 23px;
    min-height: 5px;
 }
+/* 修复在其他项目中的显示问题 */
+/* .elx-editable.el-table--mini .elx-editable-column {
+   height: 23px;
+} */
 /* .elx-editable.el-table--mini .elx-editable-column {
    padding: 0;
    height: 22px;
@@ -307,16 +311,16 @@ body .el-table th.gutter{
    box-sizing: border-box;
    white-space: normal;
    word-break: break-all;
-   line-height: 17px;
+   line-height: 17px !important;
    color: #000;
-   font-size: 10pt;
-   font-family: 'SimSun';
+   font-size: 10pt !important;
+   font-family: 'SimSun' !important;
   }
   /* 表格行高设置 */
   .Print_table_a4.el-table--mini .elx-editable-column {
    padding: 0;
-   height: 17px;
-   line-height: 17px;
+   height: 17px !important;
+   line-height: 17px !important;
    min-height: 5px;
   }
   .Print_table_a4.el-table--mini td, .Print_table_a4.el-table--mini th {
