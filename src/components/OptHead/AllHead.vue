@@ -9,7 +9,7 @@
         <ul class="text item" style="color:#409EFF" >
             <li class="ul_li" style="width:35px">#</li>
             <li class="ul_li">表头类型</li>
-            <li class="ul_li" style="width:180px">表头名称</li>
+            <li class="ul_li" style="width:200px">表头名称</li>
             <li class="ul_li" style="width:100px" >表头标段</li>
             <li class="ul_li" style="width:80px" >单元格位置</li>
             <li class="ul_li" style="width:40px">操作</li>
@@ -21,7 +21,7 @@
             <ul class="text item" v-for="(val,i) in col" :key="i" style="overflow:auto">
                 <li class="ul_li" style="width:35px">{{i+1}}</li>
                 <li class="ul_li" v-text="typeName(val.type)" ></li>
-                <li class="ul_li" style="width:180px" >{{val.name}}</li>
+                <li class="ul_li" style="width:200px" >{{val.name}}</li>
                 <li class="ul_li" style="width:100px" >{{val.tender.name}}</li>
                 <li class="ul_li" style="width:80px" >{{val.key}}</li>
                 <li class="ul_li" style="width:40px" @click="deleCol(i)"><i class="el-icon-delete"></i></li>
@@ -38,8 +38,8 @@
               <li class="ul_li2" style="width:40px">#</li>
               <li class="ul_li2">标段编号</li>
               <li class="ul_li2">标段名称</li>
-              <li class="ul_li2">表头编号</li>
-              <li class="ul_li2" style="width:150px">表头名称</li>
+              <li class="ul_li2" style="width:200px" >表头编号</li>
+              <li class="ul_li2" style="width:200px" >表头名称</li>
               <li class="ul_li2" style="width:100px">类别</li>
             </ul>
         </div>
@@ -50,8 +50,8 @@
               <li class="ul_li2" style="width:40px">{{i+1}}</li>
               <li class="ul_li2">{{item.tender.num}}</li>
               <li class="ul_li2">{{item.tender.name}}</li>
-              <li class="ul_li2">{{item.num}}</li>
-              <li class="ul_li2" style="width:150px">{{item.name}}</li>
+              <li class="ul_li2" style="width:200px" >{{item.num}}</li>
+              <li class="ul_li2" style="width:200px">{{item.name}}</li>
               <li class="ul_li2" style="width:100px" v-text="typeName(item.type)"></li>
             </ul>
           </template>
@@ -530,22 +530,23 @@ div >>> .el-card__header {
     overflow-y:auto; 
 }
 .ul_li {
-    width: 120px;
+    width: 150px;
     padding: 0 5px;
     overflow: hidden;
     text-align: center;
     font-size: 13px;
     display: inline-block;
+    white-space:nowrap;
 }
 .ul_li2 {
-    width: 100px;
+    width: 130px;
     padding: 0 0 0 10px;
-
     overflow: hidden;
     text-align: center;
     font-size: 13px;
     margin-top: 16px;
     display: inline-block;
+    white-space:nowrap;
 }
 
 .manual-table2-oper {

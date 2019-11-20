@@ -142,7 +142,7 @@ import XEUtils from 'xe-utils'
     tender:{
       type: Object,
       required: false,
-      default: () => ({id:37, name:"机电标段"})
+      default: () => ({id:154, name:"机电标段"})
     },
     organizationId:{   //部门id
       // type:Array,

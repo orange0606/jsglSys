@@ -821,7 +821,6 @@ export default {
                 this.tViewSize();
             }, 300)
         });
-
     },
     getSummaries (param) {  //合计
         // if (!this.$refs.elxEditable1 || !this.showHeader) return [];

@@ -40,8 +40,11 @@
                 class="scroll-table4 click-table11"
                 border
                 height="100%"
+                :data.sync="table"
                 :show-header="showHeader"
                 v-if="showHeader"
+                show-summary
+                :summary-method="getSummaries"
                 @cell-click ="cell_click"
                 :header-cell-style="getRowClass"
                 :row-style="RowCss"
@@ -116,6 +119,7 @@ export default {
       col: [],//已对PackHeader再次组装的多级表头数据.
       PackHeader:[],//已组装的表头数据
       list: [], //支付清单表格数据
+      table:[],
       tometerageRowList: [], //累计计量清单内容
       totalpayRowList: [], //累计支付清单内容已组装好的数据
       totalpayCol:'', //累计支付表头内关联支付表头的属性值
@@ -616,11 +620,13 @@ export default {
     findList () { //表格滚动渲染函数
         this.loading = true;
         this.$nextTick(() => {
-            this.$refs.elxEditable1.reload([])
+            this.table = [];
+            // this.$refs.elxEditable1.reload([])
             setTimeout(() => {
-                this.$refs.elxEditable1.reload(this.list);
+                this.table = this.list;
+
+                // this.$refs.elxEditable1.reload(this.list);
                 this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
-                
                 this.loading = false;
                 this.$message({ message: `成功导入 ${this.list.length} 条数据 耗时 ${Date.now() - this.startTime} ms `, type: 'success', duration: 6000, showClose: true })
                 this.tViewSize();
