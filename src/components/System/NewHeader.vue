@@ -366,16 +366,25 @@ import inven from '../../modules/newheaderAtt';
             // console.log(New);
             this.loading = true;
             this.list = [];
-            this.list = this.$excel.ListAssemble([...New]);  //组装表头
+            this.list = this.$excel.Package(New,this.Form.refCol,this.Form.refRow);  //组装表头
+            
             this.hd = Object.keys(this.list[0]);
-            let sub = this.hd.indexOf('seq');
-            if (sub!==-1) {
-                this.hd.splice(sub, 1);
-            }
+            // console.log('this.list1')
+            // console.log(this.list)
+            // console.log('this.hd1')
+            // console.log(this.hd)
+            // let sub = this.hd.indexOf('seq');
+            // if (sub!==-1) {
+            //     this.hd.splice(sub, 1);
+            // }
             this.Form.headRowList.length = 0;
             if (this.hd[0]!=='A') {
                 this.hd.reverse();
             }
+            // console.log('this.list21')
+            // console.log(this.list)
+            // console.log('this.hd21')
+            // console.log(this.hd)
             this.findList();    //渲染表格
 
             if(this.Form.type =='update') return false; //新清单不需要修改
@@ -697,6 +706,7 @@ import inven from '../../modules/newheaderAtt';
             this.Form.headRowList = this.$excel.Unpack(rest);
             var url = '';
             this.Form.id ? url = '/head/update' : url = '/head/add'
+
             var params = {...this.Form};
             params.refCol = this.hd.length;
             params.refRow = rest.length;
