@@ -1,88 +1,96 @@
 <template>
     <div style="min-width:700px;overflow: hidden;">
-    <P style="text-align:left; margin: 0 0 5px 0;">已选择 {{col.length}} 项</P>
     <el-collapse-transition>
-      <elx-editable
-          ref="elxEditable2"
-          class="scroll-table4"
-          size="mini"
-          v-if="col.length>0"
-          border
-          :header-cell-style="header_style_a"
-          height="150"
-          :data.sync="col"
-          style="width: 100%">
-          <elx-editable-column type="index" width="50" align="center" > </elx-editable-column> 
-          <elx-editable-column prop="name" label="表头名称" min-width="120" align="center" show-overflow-tooltip ></elx-editable-column>
-          <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-          <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-          <elx-editable-column prop="type" label="表头类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
-          <elx-editable-column prop="key" label="单元格位置" min-width="70" align="center" show-overflow-tooltip ></elx-editable-column>     
-          <elx-editable-column label="操作" width="70" align="center" >
-            <template v-slot="scope">  
-                <el-tooltip content="删除" placement="top" :enterable="false" effect="light">
-                    <i class="el-icon-delete" @click="deleCol(scope.$index)" ></i>
-                    <!-- <el-button size="mini" type="success" icon="el-icon-delete" @click="deleCol(scope.$index)" ></el-button> -->
-                </el-tooltip>
-            </template>
-        </elx-editable-column>
-        </elx-editable>
+    <el-card class="box-card" shadow="never" v-if="col.length>0">
+        <div slot="header" class="clearfix">
+          <span>已选择 {{col.length}} 项</span>
+          <el-button style="float: right; padding: 3px 0" type="text" @click="Splicing">控制台打印</el-button>
+        </div>
+        <ul class="text item" style="color:#409EFF" >
+            <li class="ul_li" style="width:35px">#</li>
+            <li class="ul_li">表头类型</li>
+            <li class="ul_li" style="width:200px">表头名称</li>
+            <li class="ul_li" style="width:100px" >表头标段</li>
+            <li class="ul_li" style="width:80px" >单元格位置</li>
+            <li class="ul_li" style="width:40px">操作</li>
+        </ul>
+        <div class="cardbody">
+            <!-- <div v-for="o in 10" :key="o" class="text item">
+              {{'列表内容 ' + o }}
+            </div> -->
+            <ul class="text item" v-for="(val,i) in col" :key="i" style="overflow:auto">
+                <li class="ul_li" style="width:35px">{{i+1}}</li>
+                <li class="ul_li" v-text="typeName(val.type)" ></li>
+                <li class="ul_li" style="width:200px" >{{val.name}}</li>
+                <li class="ul_li" style="width:100px" >{{val.tender.name}}</li>
+                <li class="ul_li" style="width:80px" >{{val.key}}</li>
+                <li class="ul_li" style="width:40px" @click="deleCol(i)"><i class="el-icon-delete"></i></li>
+            </ul>
+        </div>
+        
+    </el-card>
     </el-collapse-transition>
-    <br>
     <el-collapse-transition>
-    <template>
-        <elx-editable
-          ref="elxEditable"
-          class="manual-table2"
-          size="mini"
-          border
-          :header-cell-style="header_style_b"
-          :data.sync="list"
-          style="width: 100%">
-          <el-table-column type="expand">
-            <template slot-scope="props">
-                <el-table
-                  v-loading="loading" 
-                  ref="elxEditable2"
-                  class="click-table12"
-                  border
-                  :data.sync="props.row.data.RowList"
-                  size="mini"
-                  :header-cell-style="header_style_c"
-                  :span-method="arraySpanMethod"
-                  @cell-click ="cell_click"
-                  :cell-style ="cell_select"
-                  :highlight-current-row="false"
-                  >
-                      <el-table-column type="index" width="50" :index="props.$index" align="center" > </el-table-column>
-                      <el-table-column :prop="val+'.td'" :label="props.row.data.RowHd[a]" align="center" :index="props.$index" show-overflow-tooltip v-for="(val,a) in props.row.data.RowHd" :key="a">
-                          
-                      </el-table-column>
-              </el-table>
-            </template>
-          </el-table-column>
-          <elx-editable-column type="index" width="50" align="center" > </elx-editable-column>
-          <elx-editable-column prop="num" label="表头编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>     
-        <elx-editable-column prop="name" label="表头名称" min-width="120" align="center" show-overflow-tooltip >
-        </elx-editable-column>
-        <elx-editable-column prop="tender.num" label="标段编号" min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="tender.name" label="标段名称"  min-width="110" align="center" show-overflow-tooltip ></elx-editable-column>
-        <elx-editable-column prop="type" label="表头类别" min-width="110" align="center" show-overflow-tooltip :formatter="formatterType" ></elx-editable-column>
-          
-        </elx-editable>
-
-    </template>
+    
+    <div >
+        <div style="text-align:left;font-size:15px;font-weight:bold;color:#409EFF;">
+            <ul class="" >
+              <li class="ul_li2" style="width:40px">#</li>
+              <li class="ul_li2">标段编号</li>
+              <li class="ul_li2">标段名称</li>
+              <li class="ul_li2" style="width:200px" >表头编号</li>
+              <li class="ul_li2" style="width:200px" >表头名称</li>
+              <li class="ul_li2" style="width:100px">类别</li>
+            </ul>
+        </div>
+        <el-collapse accordion>
+        <el-collapse-item v-for="(item,i) in list" :key="i" >
+          <template slot="title">
+            <ul class="" >
+              <li class="ul_li2" style="width:40px">{{i+1}}</li>
+              <li class="ul_li2">{{item.tender.num}}</li>
+              <li class="ul_li2">{{item.tender.name}}</li>
+              <li class="ul_li2" style="width:200px" >{{item.num}}</li>
+              <li class="ul_li2" style="width:200px">{{item.name}}</li>
+              <li class="ul_li2" style="width:100px" v-text="typeName(item.type)"></li>
+            </ul>
+          </template>
+          <div>
+                <!-- :span-method="arraySpanMethod"
+                @cell-click ="cell_click"
+                :cell-style ="cell_select" -->
+              <el-table
+                v-loading="loading" 
+                ref="elxEditable2"
+                class="click-table12"
+                border
+                :data.sync="item.RowList"
+                size="small"
+                :span-method="arraySpanMethod"
+                @cell-click ="cell_click"
+                :cell-style ="cell_select"
+                :highlight-current-row="false"
+                >
+                    <el-table-column type="index" width="50" :index="i" align="center" > </el-table-column>
+                    <el-table-column :prop="val+'.td'" :label="item.RowHd[a]" align="center" :index="i" show-overflow-tooltip v-for="(val,a) in item.RowHd" :key="a">
+                        
+                    </el-table-column>
+            </el-table>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+        <el-pagination
+          class="manual-table4-pagination"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageVO.currentPage"
+          :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
+          :page-size="pageVO.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="pageVO.totalResult">
+        </el-pagination>
+    </div>
     </el-collapse-transition>
-       <el-pagination
-            class="manual-table4-pagination"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="pageVO.currentPage"
-            :page-sizes="[5, 10, 15, 20, 50, 100, 150, 200]"
-            :page-size="pageVO.pageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="pageVO.totalResult">
-      </el-pagination>
     </div>
 
 </template>
@@ -117,6 +125,7 @@
       loading: false,
       list: [
       ],
+      arr:[],
       tenderList:[],//全部标段
       editShow:false,//显示隐藏修改表头
       pageVO: {
@@ -125,19 +134,7 @@
         totalResult: 0
       },
       col:[],
-      isClearActiveFlag: true,
-      header_style_a: {
-          'background-color': '#fafafa',
-          'color': 'rgb(103, 194, 58)',
-      },
-      header_style_b: {
-          'background-color': '#fafafa',
-          'color': 'rgb(103, 194, 58)',
-      },
-      header_style_c: {
-          'background-color': '#fafafa',
-          'color': 'rgb(103, 194, 58)',
-      },
+      isClearActiveFlag: true
     }
   },
   created () {
@@ -280,6 +277,7 @@
         }); 
         console.log('打印一下最新的数据呀')
         console.log(this.list);
+        this.arr = this.list[0];
         this.pageVO.totalResult = response.data.headList.total;
         this.loading = false;
         data = null;

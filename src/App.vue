@@ -233,17 +233,17 @@ body .el-table th.gutter{
    height: 22px;
 } */
 .el-table--border, .el-table--group {
- border: 1px solid#909399;
+ border: 1px solid#909399 !important;
 }
 .el-table--border th, .el-table__fixed-right-patch {
- border-bottom: 1px solid#909399;
+ border-bottom: 1px solid#909399 !important;
 }
 
 .el-table--border td, .el-table--border th, .el-table__body-wrapper .el-table--border.is-scrolling-left ~ .el-table__fixed {
- border-right: 1px solid #909399;
+ border-right: 1px solid #909399 !important;
 }
 .el-table td, .el-table th.is-leaf {
- border-bottom: 1px solid #909399;
+ border-bottom: 1px solid #909399 !important;
 }
 
 .scroll-table4 .cell {
@@ -327,21 +327,21 @@ body .el-table th.gutter{
     padding: 2px 0;
 }
   .Print_table_a4.el-table--border, .Print_table_a4.el-table--group {
-   border: 1px solid#000;
+   border: 1px solid#000 !important;
   }
   .Print_table_a4.el-table--border th, .Print_table_a4.el-table__fixed-right-patch {
-   border-bottom: 1px solid#000;
+   border-bottom: 1px solid#000 !important;
   }
   
   .Print_table_a4.el-table--border td, .Print_table_a4.el-table--border th, .el-table__body-wrapper .el-table--border.is-scrolling-left ~ .el-table__fixed {
-   border-right: 1px solid #000;
+   border-right: 1px solid #000 !important;
   }
   .Print_table_a4.el-table td, .Print_table_a4.el-table th.is-leaf {
-   border-bottom: 1px solid #000;
+   border-bottom: 1px solid #000 !important;
   }
   
   .Print_table_a4 .el-table__footer-wrapper td {
-      border-top: 1px solid #24262b;
+      border-top: 1px solid #24262b !important;
   }
 
 /* ************************各清单表格内容样式结束********************** */

@@ -105,7 +105,7 @@
             <div :style="{ height: Height+'px' }">
                 <elx-editable
                 ref="elxEditable1"
-                class="scroll-table4 click-table11"
+                class="scroll-table4"
                 border
                 height="100%"
                 size="mini"

@@ -58,7 +58,7 @@
         <elx-editable-column prop="updateEmployee.name" width="90" label="更改人" align="center" ></elx-editable-column>
         <elx-editable-column prop="updateTime" label="更新时间" min-width="150" align="center" show-overflow-tooltip sortable  :formatter="formatterDate"></elx-editable-column>
         
-        <elx-editable-column label="操作" :width="edit?'190':'70'" align="center" >
+        <elx-editable-column label="操作" :width="edit?'140':'60'" align="center" >
             <template v-slot="scope">
             <template v-if="$refs.elxEditable.hasActiveRow(scope.row)">
                 <el-tooltip v-if="edit" content="保存" placement="top" :enterable="false" effect="light">

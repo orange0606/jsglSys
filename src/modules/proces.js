@@ -185,7 +185,7 @@ excelmodel = {
     param list: 所有单元格基本数据(obj)
     return : 完整表格数据
     */
-    ListAssemble (list){ 
+    ListAssemble (list, type){ 
         if (list == null || list.length ==0) {
             return [];
         }
@@ -205,6 +205,9 @@ excelmodel = {
                     arr[sub]['seq'] = sub;
                 }
                 arr[sub][coll].edit = 'N'; //加入编辑状态
+                if (type && type ==='original') {
+                    arr[sub][coll]['Att_edit'] = 'N'; //加入属性编辑状态   
+                }
             }
         };
         return arr;
