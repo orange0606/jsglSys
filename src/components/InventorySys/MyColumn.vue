@@ -1,7 +1,7 @@
 <template>
   <el-table-column :prop="col.colNum+'.td'" :label="col.td" :fit="true" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :align="col.textAlign">
     <template slot-scope="scope">
-      <span v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='N'" class="span" @click.right="rightEvent(scope.row.data[col.colNum])" >{{scope.row.data[col.colNum].td}}</span>
+      <span v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='N'" class="" >{{scope.row.data[col.colNum].td}}</span>
       <el-input v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='Y'" style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Rowchange(lastHeader, type, F, fkeys, scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
     </template>
     <template v-if="col.children">

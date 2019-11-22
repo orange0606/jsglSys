@@ -42,15 +42,8 @@
         <el-button type="success" size="mini" @click="exportList">导出</el-button>
         <el-button type="success" size="mini" @click="preview">预览打印</el-button>
         </div>
-            <!-- show-summary
-        :summary-method="getSummaries" -->
-        <!-- :summary-method="getSummaries" -->
-                <!-- show-summary
-        :summary-method="getSummaries" :span-method="arraySpanMethod"-->
-            <!-- :data.sync="list" 
-            autoScrollIntoView:true-->
-        <!-- :edit-config="{trigger: 'click', mode: 'cell', render: 'scroll', renderSize: 80, useDefaultValidTip: true}" -->
-        <div :style="{height: Height+'px' }">
+           
+        <div :style="{height: Height+'px'}" class="table_box">
             <elx-editable
             ref="elxEditable1"
             class="scroll-table4 click-table11"
@@ -60,6 +53,7 @@
             :header-cell-style="getRowClass"
             v-if="showHeader"
             @cell-click ="cell_click"
+            @row-contextmenu="rightClick"
             :row-style="RowCss"
             show-summary
             :summary-method="getSummaries">
@@ -69,6 +63,14 @@
             <!-- 此处使用多级表头嵌套组件 -->
             <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
             </elx-editable>
+            <div v-show="menuVisible">
+                <ul id="menu" class="menu">
+                        <li class="menu__item">新增</li>
+                        <li class="menu__item">重命名</li>
+                        <li class="menu__item">删除</li>
+                </ul>
+            </div>
+
             <p style="color: red;font-size: 12px;margin:10px 0 0px 0;text-align:left;">注意：审批单通过后不许再做任何修改！</p>
         </div>
     </div>
@@ -143,6 +145,7 @@ export default {
       Width:100,
       tableData:{},
       print_show:true,  // false则显示打印预览组件
+      menuVisible:false,
     }
   },
     watch: {
@@ -170,7 +173,30 @@ export default {
         this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
         this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
     },
+    beforeDestroy () {
+        // this.foo();//清除监听鼠标右键事件
+    },
     methods: {
+        rightClick(row, column, event) {
+            event.preventDefault();//阻止系统默认事件
+            this.menuVisible = false // 先把模态框关死，目的是 第二次或者第n次右键鼠标的时候 它默认的是true
+            this.menuVisible = true // 显示模态窗口，跳出自定义菜单栏
+            var menu = document.querySelector('#menu')
+            console.log(event)
+            // console.log('left')
+            // console.log(event.clientX -200 + 'px')
+            // console.log('top')
+
+            // console.log(event.clientY - 200 + 'px')
+            menu.style.left = event.clientX -60 + 'px'
+            document.addEventListener('click', this.foo) // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
+            menu.style.top = event.clientY - 165 + 'px'
+        },
+        foo() { // 取消鼠标监听事件 菜单栏
+            this.menuVisible = false;
+            document.removeEventListener('click', this.foo); // 要及时关掉监听，不关掉的是一个坑，不信你试试，虽然前台显示的时候没有啥毛病，加一个alert你就知道了
+        },
+
         preview(){  //打印预览
             if (this.list.length > 500) {
                 return this.$confirm('暂不支持在线打印超过 500 行的数据，请导出excel 文件再进行打印。此操作将导出文件, 是否继续?', '提示', {
@@ -782,5 +808,29 @@ export default {
 </script>
 
 <style scoped>
+.table_box {
+    position: relative;
+}
+.menu__item {
+		display: block;
+		line-height: 20px;
+		text-align: center;
+		margin-top: 10px;
+}
+
+.menu {
+		height: 130px;
+		width: 110px;
+		position: absolute;
+		border-radius: 2px;
+		border: 1px solid #999999;
+		background-color: #f4f4f4;
+}
+
+li:hover {
+		background-color: #1790ff;
+		color: white;
+}
+
 @import '../../modules/Tablestyle.css';
 </style>
