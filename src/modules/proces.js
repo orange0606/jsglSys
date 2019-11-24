@@ -137,7 +137,6 @@ excelmodel = {
                                 headers.push(arr[index][arrHd[i]])
                           }
                       }
-                    
                 }
             }
         arrHd = arr = null;
@@ -205,9 +204,9 @@ excelmodel = {
                     arr[sub]['seq'] = sub;
                 }
                 arr[sub][coll].edit = 'N'; //加入编辑状态
-                if (type && type ==='original') {
-                    arr[sub][coll]['Att_edit'] = 'N'; //加入属性编辑状态   
-                }
+                // if (type && type ==='original') {
+                //     arr[sub][coll]['Att_edit'] = 'N'; //加入属性编辑状态   
+                // }
             }
         };
         return arr;

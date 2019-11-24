@@ -779,7 +779,6 @@ export default {
     },
     cell_click(row, column, cell, event){ //单元格点击编辑事件
         this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
-        // this.$state = false;
         if(this.approval.state === 1 && this.uplist.id )return false; //审批单已通过，并且不是新建清单的话不许做修改。
         this.editRow && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
         if (column.property) {

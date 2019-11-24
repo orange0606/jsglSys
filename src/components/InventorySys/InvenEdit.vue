@@ -64,9 +64,9 @@
             <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
             </elx-editable>
             <div v-show="menuVisible">
-                <ul id="menu" class="menu">
+                <ul id="menu" class="menu" ref="menu">
                         <li class="menu__item">新增</li>
-                        <li class="menu__item">重命名</li>
+                        <li class="menu__item"  @click="setAtt()">属性设置</li>
                         <li class="menu__item">删除</li>
                 </ul>
             </div>
@@ -77,12 +77,33 @@
     <div v-else>
         <printing :tableData='tableData' :print_show.sync="print_show" ></printing>
     </div>
+
+    <el-drawer
+        title="请选择相关表头单元格"
+        :before-close="handleClose"
+        :visible.sync="show_Drawer"
+        direction="ltr"
+        size="50%"
+        custom-class="demo-drawer"
+        ref="drawer"
+        >
+        <div class="demo-drawer__content">
+            <p>{{editRow && editRow.td?editRow.td:''}}</p>
+
+            <allhead :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="'original'" ></allhead>
+            <div class="demo-drawer__footer">
+            <el-button @click="show_Drawer = false">取 消</el-button>
+            <el-button type="primary" @click="$refs.drawer.closeDrawer()" :loading="loading">{{ loading ? '提交中 ...' : '确 定' }}</el-button>
+            </div>
+        </div>
+    </el-drawer>
     
   </div>
 </template>
 
 <script>
 import MyColumn from './MyColumn';
+import allhead from '../OptHead/AllHead';
 import printing from '../MultiplexCom/Printing';
 import XEUtils from 'xe-utils';
 
@@ -91,6 +112,7 @@ export default {
   name: 'InvenEdit',
   components: {
     MyColumn,
+    allhead,
     printing
   },
   props: {
@@ -146,6 +168,11 @@ export default {
       tableData:{},
       print_show:true,  // false则显示打印预览组件
       menuVisible:false,
+      headRowSelected:{ //属性存储
+          headRowStr:'',
+          refresh: true,
+      },
+      show_Drawer: false, //是否显示抽屉选择表头单元格组件
     }
   },
     watch: {
@@ -163,10 +190,22 @@ export default {
             if (newVal) {
                 this.findList();
             }
+        },
+        'headRowSelected.headRowStr': function(newVal, oldVal) {    //用于原清单属性设置
+     
+            if (this.editRow) {
+                this.$set(this.editRow, 'formula', newVal)
+                this.$set(this.editRow, 'alter', 'Y')
+                // console.log('newVal ： '+newVal)
+                // console.log('已经修改过了formula ： '+this.editRow.formula)
+                // console.log('已经修改过了alter ： '+this.editRow.alter)
+                
+            }
         }
     },
     mounted(){
         this.tViewSize();
+        // document.getElementById('menu').addEventListener(eventType, fn, false) 
     },
     created () {
         this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
@@ -177,20 +216,52 @@ export default {
         // this.foo();//清除监听鼠标右键事件
     },
     methods: {
+        handleClose(done) {
+            done();
+        },
+        setAtt () {
+            if (this.editRow) {
+                if (!this.editRow.formula) {
+                    this.$set(this.editRow, 'formula', '');
+                }
+            }else {
+                return false;
+            }
+            //展开抽屉组件 显示表头单元格选择组件
+
+            console.log('this.editRow.formula  : '+this.editRow.formula)
+            console.log('this.editRow')
+            console.log(this.editRow)
+            this.show_Drawer = true;
+            this.$nextTick(() => {
+                this.$set(this.headRowSelected, 'headRowStr', this.editRow.formula)
+                this.$set(this.headRowSelected, 'refresh', true)
+
+            })
+            console.log('this.headRowSelected.headRowStr  : '+this.headRowSelected.headRowStr)
+        },
         rightClick(row, column, event) {
             event.preventDefault();//阻止系统默认事件
-            this.menuVisible = false // 先把模态框关死，目的是 第二次或者第n次右键鼠标的时候 它默认的是true
-            this.menuVisible = true // 显示模态窗口，跳出自定义菜单栏
+            if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
+            this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
             var menu = document.querySelector('#menu')
-            console.log(event)
-            // console.log('left')
-            // console.log(event.clientX -200 + 'px')
-            // console.log('top')
-
-            // console.log(event.clientY - 200 + 'px')
+            console.log(this.$refs.menu)
+            
             menu.style.left = event.clientX -60 + 'px'
             document.addEventListener('click', this.foo) // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
             menu.style.top = event.clientY - 165 + 'px'
+            this.menuVisible = false // 先把模态框关死，目的是 第二次或者第n次右键鼠标的时候 它默认的是true
+            this.$nextTick(() => {
+                this.menuVisible = true // 显示模态窗口，跳出自定义菜单栏
+            })
+            if (column.property) {
+                // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
+                let str = column.property,
+                colName = str.substr(0,str.indexOf(".td"));
+                this.editRow = row[colName];
+            }  
+           
+            
         },
         foo() { // 取消鼠标监听事件 菜单栏
             this.menuVisible = false;
@@ -480,7 +551,7 @@ export default {
             })
         },
         cell_click(row, column, cell, event){ //单元格点击编辑事件
-            this.$state = false;
+            
             if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
             this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
             if (column.property) {
@@ -490,7 +561,7 @@ export default {
                 this.editRow = row[colName];
                 if (this.editRow.edit && this.editRow.edit==='Y') return false;
                 this.editRow.edit = "Y";  //Y为编辑模式N为只读状态
-                this.$state = true;
+                
             }  
         },
         RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
@@ -639,9 +710,13 @@ export default {
                                 let listRows = list[index][header[i]];
                                 if (listRows && listRows.colNum) {
                                     // delete listRows.edit;
-                                    listRows['formula'] = '';
+                                    if (!listRows['formula']) {
+                                        listRows['formula'] = '';
+                                    }
                                     listRows['trNum'] = index+1;                  
-                                    listRows['attribute'] = '';                  
+                                    if (!listRows['attribute']) {
+                                        listRows['attribute'] = '';
+                                    }              
                                     listRows['upload'] = 1;    
                                     if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
                                         originalRowAddList.push(listRows);

@@ -36,6 +36,7 @@
           class="manual-table2"
           size="mini"
           border
+          v-if="showHeader"
           :header-cell-style="header_style_b"
           :data.sync="list"
           style="width: 100%">
@@ -109,7 +110,7 @@
     headRowSelected:{ //选定的单元格
       type: Object,
       required: false,
-      default: () => ({headRowStr:''}) //记录多个表头，如“-original-27-93-AC10-,-change-29-98-AC10-”。
+      default: () => ({headRowStr:'', refresh:true}) //记录多个表头，如“-original-27-93-AC10-,-change-29-98-AC10-”。
     },
   },
   data () {
@@ -124,6 +125,7 @@
         pageSize: 5,
         totalResult: 0
       },
+      showHeader:true,  //是否显示表头以及表格强制渲染
       col:[],
       isClearActiveFlag: true,
       header_style_a: {
@@ -144,9 +146,18 @@
       // if (!this.joinParent) {
            this.findList()  //发起请求所有已建表头数据
       // }
-      if (this.headRowSelected.headRowStr && this.headRowSelected.headRowStr.length > 0) {
-            this.strSplit (this.headRowSelected.headRowStr)
-      }
+
+        // if (this.headRowSelected.refresh) {
+        //     console.log('New1111111111111111111111')
+        //     console.log(this.headRowSelected.refresh)
+
+        //     this.$nextTick(() => {
+        //         this.strSplit (this.headRowSelected.headRowStr);
+        //         this.$set(this.headRowSelected, 'refresh', false)
+
+        //     })
+        // }
+
      
   },
   computed: {
@@ -154,17 +165,41 @@
       
   },
   watch: {
-      headRowSelected(New, Old){
-          console.log('有没有进来--------')
-          this.list = this.col = null;
-          this.findList()  //发起请求所有已建表头数据
-          if (New.headRowStr && New.headRowStr.length > 0) {
-              this.strSplit (New.headRowStr)
-          }
+      'headRowSelected.headRowStr': function(New, Old) {
+            console.log('this.col')
+            console.log(this.col)
+            console.log(this.headRowSelected.refresh)
+            console.log('有没有进来watch--------')
+            // this.col = [];
+            // this.findList()  //发起请求所有已建表头数据
+            // if (New && New.length > 0) {
+                if (this.headRowSelected.refresh) {
+                    console.log('New22222222222222222222222222')
+                    console.log(New)
+                    this.$nextTick(() => {
+                        this.strSplit (this.headRowSelected.headRowStr);
+                        
+                        this.$set(this.headRowSelected, 'refresh', false)
+
+                    })
+                }
+
+
+            // }
+   
+    }
+
           
-      }
   },
   methods: {
+    refreshTable () {  //刷新表格布局
+        this.$nextTick(() => {  //强制重新渲染
+          this.showHeader = false;
+          setTimeout(()=>{
+              this.showHeader = true;
+          },100);
+        })
+    },
     Splicing () {
         
         // this.headRowSelected.headRowStr= strArr.join(",");
@@ -174,11 +209,21 @@
         console.log(this.col)
     },
     strSplit (str) {  //解析字符串
+        let arr = [];
+        console.log('str  : '+str)
+        if (!str) {
+            this.$nextTick(() => {
+                this.col = arr;
+            })
+            return false
+        }
+        console.log('到这里了吗')
         try {
+            
             let strs = str.split(","); //字符分割 
-            console.log('第一次分割的字符串：')
-            console.log(strs)
-            this.col = strs.map(function (n,i) { 
+            // console.log('第一次分割的字符串：')
+            // console.log(strs)
+            arr = strs.map(function (n,i) { 
                 let str2 = n.split("-"); //字符分割
                 // console.log('第2次分割的字符串：'+i)
                 // console.log(str2)
@@ -208,7 +253,12 @@
             console.log('解析选择的单元格字符串发生错误')
             console.log(error)
         }
-        console.log('解析选择的单元格')
+        
+        this.$nextTick(() => {
+            this.col = arr;
+        })
+        this.refreshTable(); //刷新表格布局
+        // console.log('解析选择的单元格')
     },
     deleCol(i) {
             var item = this.col[i],
@@ -380,9 +430,16 @@
             // console.log(strKey)
             for (let index = this.col.length-1; index >=0; index--) {
                 var item = this.col[index];
-                if (newObj.hdId === item.hdId && newObj.rowId === item.rowId) { //查询有相同的不添加
+                // console.log('newObj.hdId === item.hdId && newObj.rowId === item.rowId')
+                // console.log(newObj.hdId,'=='+item.hdId,'=='+newObj.rowId,'=='+item.rowId)
+
+                if (newObj.hdId*1 === item.hdId*1 && newObj.rowId*1 === item.rowId*1) { //查询有相同的不添加
                         // console.log('sub       :  '+sub)
-                    this.col.splice(index, 1);
+                        // console.log('查询有相同的不添加')
+          
+                    this.$nextTick(() => {
+                        this.col.splice(index, 1);
+                    })
                     if (sub>0) {  //说明不止一条数据
                         if (AllStr[sub-1] === ',' && AllStr[sub+strlen] && AllStr[sub+strlen]=== ',' && (!AllStr[sub+strlen+1] || AllStr[sub+strlen+1] !=='-')) {
                             return this.headRowSelected.headRowStr = AllStr.replace(','+strKey+',',"");
@@ -402,7 +459,9 @@
                 }
               
             }
-            this.col.unshift(newObj); //添加新数据到col
+            this.$nextTick(() => {
+                this.col.unshift(newObj); //添加新数据到col
+            })
             if (colstrlen > 0) {
                 this.headRowSelected.headRowStr+=','+strKey;
             }else{
@@ -449,7 +508,10 @@
             } 
             for (let index = this.col.length-1; index >=0; index--) {
                 var item = this.col[index];
-                if (item.key === key && item.rowId === id) { //查询有相同的不添加
+                // console.log('item.key === key && item.rowId === id')
+                // console.log(item.key +'==='+ key +'&&'+ item.rowId*1 +'==='+ id*1)
+                if (item.key === key && item.rowId*1 === id*1) { //查询有相同的不添加
+                    // console.log('进来了嘛')
                     return {'background':'pink'};
                 }
               
