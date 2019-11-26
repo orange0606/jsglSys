@@ -36,7 +36,7 @@
           class="manual-table2"
           size="mini"
           border
-          v-if="showHeader"
+          
           :header-cell-style="header_style_b"
           :data.sync="list"
           style="width: 100%">
@@ -166,16 +166,16 @@
   },
   watch: {
       'headRowSelected.headRowStr': function(New, Old) {
-            console.log('this.col')
-            console.log(this.col)
-            console.log(this.headRowSelected.refresh)
-            console.log('有没有进来watch--------')
+            // console.log('this.col')
+            // console.log(this.col)
+            // console.log(this.headRowSelected.refresh)
+            // console.log('有没有进来watch--------')
             // this.col = [];
             // this.findList()  //发起请求所有已建表头数据
             // if (New && New.length > 0) {
                 if (this.headRowSelected.refresh) {
-                    console.log('New22222222222222222222222222')
-                    console.log(New)
+                    // console.log('New22222222222222222222222222')
+                    // console.log(New)
                     this.$nextTick(() => {
                         this.strSplit (this.headRowSelected.headRowStr);
                         
@@ -217,7 +217,7 @@
             })
             return false
         }
-        console.log('到这里了吗')
+        // console.log('到这里了吗')
         try {
             
             let strs = str.split(","); //字符分割 

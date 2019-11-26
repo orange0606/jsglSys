@@ -127,27 +127,27 @@ import XEUtils from 'xe-utils'
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "show"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
       required:false,
-      default: false
+      default: true
     },
     approval:{
       type: Object,
       required: false,
-      default: () => ({id:1511, name:"清单审批单",state:0}) //state=1为已通过的审批单
+      default: () => ({id:110, name:"清单审批单",state:0}) //state=1为已通过的审批单
     },
     tender:{
       type: Object,
       required: false,
-      default: () => ({id:154, name:"机电标段"})
+      default: () => ({id:34, name:"机电标段"})
     },
     organizationId:{   //部门id
       // type:Array,
       required:false,
-      default: 1
+      default: 35
     },
   },
   data () {

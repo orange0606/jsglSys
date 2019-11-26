@@ -56,7 +56,8 @@
             @row-contextmenu="rightClick"
             :row-style="RowCss"
             show-summary
-            :summary-method="getSummaries">
+            :summary-method="getSummaries"
+            :edit-config="{render: 'scroll', renderSize: 65}">
             
             <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
             <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
@@ -83,17 +84,35 @@
         :before-close="handleClose"
         :visible.sync="show_Drawer"
         direction="ltr"
-        size="50%"
+        size="80%"
         custom-class="demo-drawer"
         ref="drawer"
         >
-        <div class="demo-drawer__content">
-            <p>{{editRow && editRow.td?editRow.td:''}}</p>
-
-            <allhead :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="'original'" ></allhead>
+        <div v-if="editRow" class="demo-drawer__content" style="margin: 0 50px;">
+            <p style="margin:10px 0 10px 0">{{editRow && editRow.td?editRow.td:''}}</p>
+            <p style="margin:10px 0 10px 0">当前位置 : {{editRow.colNum+editRow.trNum}}</p>
+            <div style="margin:10px 0 20px 0">
+            <el-select v-model="editRow.attribute" clearable @change="colattChange(editRow.attribute)" placeholder="请选择属性">
+                <el-option label="原清单的合计" value="auto_original_sum"></el-option>
+                <el-option label="变更（本期全部表）的合计" value="auto_change_sum"></el-option>
+                <el-option label="累计变更的合计" value="auto_totalchange_sum"></el-option>
+                <el-option label="新清单的合计" value="auto_update_sum"></el-option>
+                <el-option label="计量（本期全部表）的合计" value="auto_meterage_sum"></el-option>
+                <el-option label="累计计量的合计" value="auto_totalmeterage_sum"></el-option>
+                <el-option label="支付（本期全部表）的合计" value="auto_pay_sum"></el-option>
+                <el-option label="累计支付的合计" value="auto_totalpay_sum"></el-option>
+                <el-option label="公式" value="formula"></el-option>
+            </el-select>
+            </div>
+            <el-input
+                placeholder="请输入公式"
+                v-model="editRow.formula"
+                clearable>
+            </el-input>
+            <allhead v-if="editRow.attribute" :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="'original'" ></allhead>
             <div class="demo-drawer__footer">
             <el-button @click="show_Drawer = false">取 消</el-button>
-            <el-button type="primary" @click="$refs.drawer.closeDrawer()" :loading="loading">{{ loading ? '提交中 ...' : '确 定' }}</el-button>
+            <el-button type="primary" @click="$refs.drawer.closeDrawer()">确 定</el-button>
             </div>
         </div>
     </el-drawer>
@@ -211,6 +230,7 @@ export default {
         this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
         this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
         this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+
     },
     beforeDestroy () {
         // this.foo();//清除监听鼠标右键事件
@@ -219,28 +239,32 @@ export default {
         handleClose(done) {
             done();
         },
-        setAtt () {
-            if (this.editRow) {
-                if (!this.editRow.formula) {
-                    this.$set(this.editRow, 'formula', '');
-                }
-            }else {
-                return false;
-            }
+        colattChange (New) {    //单元格属性选择框chang事件
+            this.$nextTick(() => {
+                this.$set(this.editRow, 'formula', '');//属性切换后 属性值formula得清空
+            })
+        },
+        setAtt () { //单元格鼠标右键后显示的菜单栏 设置属性
+            // if (this.editRow) {
+            //     if (!this.editRow.formula) {
+            //         this.$set(this.editRow, 'formula', '');
+            //     }
+            // }else {
+            //     return false;
+            // }
             //展开抽屉组件 显示表头单元格选择组件
 
-            console.log('this.editRow.formula  : '+this.editRow.formula)
-            console.log('this.editRow')
-            console.log(this.editRow)
-            this.show_Drawer = true;
+            // console.log('this.editRow.formula  : '+this.editRow.formula)
+            // console.log('this.editRow')
+            // console.log(this.editRow)
+            this.show_Drawer = true;    //显示组件
             this.$nextTick(() => {
-                this.$set(this.headRowSelected, 'headRowStr', this.editRow.formula)
-                this.$set(this.headRowSelected, 'refresh', true)
+                this.$set(this.headRowSelected, 'headRowStr', this.editRow.formula); //把内容传入组件
+                this.$set(this.headRowSelected, 'refresh', true); //组件刷新（因不同的单元格属性值 字符串需要重新解析）
 
             })
-            console.log('this.headRowSelected.headRowStr  : '+this.headRowSelected.headRowStr)
         },
-        rightClick(row, column, event) {
+        rightClick(row, column, event) {    //表格内容鼠标右键显示菜单栏
             event.preventDefault();//阻止系统默认事件
             if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
             this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
@@ -323,6 +347,7 @@ export default {
         },
         upif ( newVal ) {   //处理父组件传来的值
             this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
+            this.RowDelList = []; //清空删除数组
             if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
                 this.loading = true;
                 this.form.name = newVal.name;
@@ -387,7 +412,10 @@ export default {
                 this.originalHead.tOriginalHeadRows = row.originalHead.tOriginalHeadRows;
             }
             try {
+                 
                 this.list = this.$excel.ListAssemble(row.originalRowList); //组装清单表格数据
+                // return console.log(this.list)
+
                 for (let index = this.list.length -1; index >=0; index--) { //给行数据加上索引
                     this.list[index]['seq'] = index;
                 }
@@ -422,8 +450,8 @@ export default {
         oneHeader (id) {  //请求单个表头 表头id  表头类型
             this.$post('/head/getone',{id,type:'original'})
                 .then((response) => {
-                this.ResetList = null; //更换表头时需清空备份数据
-                this.RowDelList = null; //清空存放删除集合数据
+                this.ResetList = []; //更换表头时需清空备份数据
+                this.RowDelList = []; //清空存放删除集合数据
                 this.new = true; //需备份数据
                 this.list.length = this.hd.length = 0;
                 let data = response.data.onehead,
@@ -684,7 +712,11 @@ export default {
         submitEvent () {
             this.$refs.elxEditable1.validate(valid => {
                 if (valid) {
-                    let list = this.list;//获取表格的全部数据;
+                    // let list = this.list;//获取表格的全部数据;
+                    let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+
+                    // console.log(list)
+                    // return false
                     if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
                     //解构数据进行提交
                     this.loading = true;
@@ -694,6 +726,8 @@ export default {
                     originalRowAddList = [],  //增
                     originalRowDelList = [], //删
                     originalRowAltList = [];  //改
+                    console.log('this.RowDelList')
+                    console.log(this.RowDelList)
 
                     //查询上一次修改有无这个集合  ，有的话合并两个数组
                     if (this.uplist['originalRowDelList'] && this.uplist['originalRowDelList'].length >0) {
@@ -709,18 +743,26 @@ export default {
                             for (let i = header.length -1; i >=0; i--) {
                                 let listRows = list[index][header[i]];
                                 if (listRows && listRows.colNum) {
-                                    // delete listRows.edit;
-                                    if (!listRows['formula']) {
-                                        listRows['formula'] = '';
-                                    }
-                                    listRows['trNum'] = index+1;                  
-                                    if (!listRows['attribute']) {
-                                        listRows['attribute'] = '';
-                                    }              
-                                    listRows['upload'] = 1;    
+                                    // delete listRows.edit;                                
+                                    listRows['trNum'] = index+1;      
+                                    // listRows.attribute = ''; //加入属性
+                                    // listRows.formula = ''; //加入公式                  
+                                    listRows['upload'] = 1; 
+                                    // if (list[index]['alter'] || listRows['alter']) {
+                                    //      console.log('jjjjjjjjjjjj')
+                                    //     console.log(listRows)
+                                    // }
+                                    //     console.log('list[index]')
+                                    //     console.log(index)
+
+                                    //     console.log(list[index])
+
+                                    // console.log()   
                                     if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
                                         originalRowAddList.push(listRows);
                                     }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {    //有id 与 alter 视为已修改过的数据 新增到originalRowAddList
+                                        console.log('jjjjjjjjjjjj')
+                                        console.log(listRows)
                                         listRows['alter'] = "Y";
                                         originalRowAltList.push(listRows);
                                     }
@@ -747,7 +789,7 @@ export default {
                         originalRowAltList,  //改
                         enter:this.list.length>0?1:0,
                         tender:this.tender,
-                        saveTime:new Date(),
+                        saveTime: new Date(),
                         organizationId: this.organizationId,  //部门id
                         saveEmployee:{name:this.$store.state.username}
                     };
@@ -758,6 +800,34 @@ export default {
                     }
                     console.log('打印一下即将提交的参数obj')
                     console.log(obj)
+                    console.log('this.joinParent')
+                    console.log(this.joinParent)
+                    console.log('this.mode')
+                    console.log(this.mode)
+
+                    console.log('删除集合------------------')
+                    for (let index = 0; index < obj.originalRowDelList.length; index++) {
+                        const element = obj.originalRowDelList[index];
+                        // console.log(element.colNum)
+                        console.log(element.trNum)
+                    
+                    }
+                    console.log('修改集合------------------')
+
+                    for (let index = 0; index < obj.originalRowAltList.length; index++) {
+                        const element = obj.originalRowAltList[index];
+                        // console.log(element.colNum)
+                        console.log(element.trNum)
+                    
+                    }
+                     console.log('新增集合------------------')
+
+                    for (let index = 0; index < obj.originalRowAddList.length; index++) {
+                        const element = obj.originalRowAddList[index];
+                        // console.log(element.colNum)
+                        console.log(element.trNum)
+                    
+                    }
                     //此处做个判断，判断是新建还是修改。
                     if (this.joinParent) {  //接入父组件的情况
                         if (this.uplist && !this.uplist.id && !this.uplist.saveTime ) {  //当前属于新建清单====
@@ -781,7 +851,8 @@ export default {
                                 default:  //为 alter模式与 new模式 
                                     for (let index = this.originalList.length -1; index >=0; index--) {
                                         let ListRow = this.originalList[index];
-                                        if(ListRow.saveTime === this.uplist.saveTime){
+                                        if(  (ListRow.id && this.uplist.id && ListRow.id === this.uplist.id) || (!ListRow.id && !this.uplist.id && ListRow.saveTime === this.uplist.saveTime)){
+                                        // if(  (ListRow.id && this.uplist.id && ListRow.id === this.uplist.id) || (!ListRow.id && !this.uplist.id && ListRow.saveTime === this.uplist.saveTime)){
                                             ListRow.originalHeadId = this.form.headerId;
                                             ListRow.originalRowList = originalRowList;
                                             ListRow.originalRowAddList = originalRowAddList;  //增

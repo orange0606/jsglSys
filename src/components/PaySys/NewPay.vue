@@ -768,7 +768,7 @@ export default {
                         default:  //为 alter模式与 new模式 
                             for (let index = this.payList.length -1; index >=0; index--) {
                                 let ListRow = this.payList[index];
-                                if(ListRow.saveTime === this.uplist.saveTime){
+                                if(  (ListRow.id && this.uplist.id && ListRow.id === this.uplist.id) || (!ListRow.id && !this.uplist.id && ListRow.saveTime === this.uplist.saveTime)){
                                     ListRow.tPayHeadId = this.form.headerId;
                                     ListRow.payRowList = payRowList;
                                     ListRow.payRowAddList = payRowAddList;  //增

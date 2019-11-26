@@ -197,16 +197,20 @@ excelmodel = {
                 let sub = row-1;
                 if (!arr[sub]) {    //判断是否有这个下标,有的话直接添加数据
                     arr[sub]= {};
-                    arr[sub][coll] =list[index];
-                    arr[sub]['seq'] = sub;
-                }else{ //无此下标，先创建
-                    arr[sub][coll] =list[index];
-                    arr[sub]['seq'] = sub;
                 }
-                arr[sub][coll].edit = 'N'; //加入编辑状态
-                // if (type && type ==='original') {
-                //     arr[sub][coll]['Att_edit'] = 'N'; //加入属性编辑状态   
+                arr[sub][coll] =list[index];
+                arr[sub]['seq'] = sub;
+                // if (arr[sub][coll].td !=="" && !arr[sub][coll].td) {
+                //     console.log(arr[sub][coll].td)
                 // }
+                // console.log(arr[sub][coll].trNum)
+                arr[sub][coll].edit = 'N'; //加入编辑状态
+                if (!arr[sub][coll].attribute) {
+                    arr[sub][coll].attribute = ''; //加入属性
+                }
+                if (!arr[sub][coll].formula) {
+                    arr[sub][coll].formula = ''; //加入公式
+                }
             }
         };
         return arr;
@@ -618,7 +622,14 @@ excelmodel = {
     */
     Calculation (lastHeader, type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
 
-        if (col['id']) row['alter'] = 'Y';  //给该行表格内容作个修改过的标记
+        if (col['id']) {
+            row['alter'] = 'Y';  //给该行表格内容作个修改过的标记
+            console.log('进来了')
+        }
+        console.log('row')
+        console.log(row['alter'])
+        console.log('col')
+        console.log(col)
         if (Number.isNaN(Number(col['td']))) {
             // col['td'] = 0;
             col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
@@ -793,11 +804,34 @@ excelmodel = {
             let keyObj = lasthead[key],
             Att = keyObj.attribute, //表头单元格属性
             num = 0;
+            // console.log('key-----------------');
+            // console.log(key);
             if ( Att && Att==='sumFormula') {
                 num = 0;
-                for (let index = list.length-1; index >=0; index--) {
-                    num += list[index][key]['td']*1;
+                try {
+                    
+                    for (let index = list.length-1; index >=0; index--) {
+                        // console.log('key  : '+key)
+                        // console.log('index  : '+index)
+                        // if (index===4) {
+                        //     console.log(list)
+                            
+                        // }
+
+
+                        let td = list[index][key]['td'];
+
+                        if (!td) {
+                            num += 0; 
+                        }
+                        num += td*1;
+                    }
+                } catch (error) {
+                    Sumobj[key+'.td']= '出错'; //调用小数点精度计算;
+                    console.log('error-----------------')
+                    console.log(error)
                 }
+               
                 Sumobj[key+'.td']= that.Count(num)*1; //调用小数点精度计算;
                 // console.log(`打印一下 ${key} 的合计结果  ${num}`)
             }

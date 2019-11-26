@@ -319,6 +319,7 @@ export default {
         });
     },
      upif ( newVal ) {   //处理父组件传来的值
+        this.RowDelList = []; //清空删除数组
         this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
         if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
 
@@ -748,7 +749,7 @@ export default {
                         }
                     }
                     rest[r][row.colNum]['colNum'] = row['colNum'];
-                    rest[r][row.colNum]['trNum'] = r;
+                    rest[r][row.colNum]['trNum'] = listlen+r+1;
                     rest[r][row.colNum]['tdColspan'] = rest[r][row.colNum]['tdRowspan'] = 1;
                     delete rest[r][row.colNum]['id'];
                 }
@@ -934,7 +935,7 @@ export default {
       console.log(this.changeList)
       this.$refs.elxEditable1.validate(valid => {
         if (valid) {
-            let list = this.list;//获取表格的全部数据;
+            let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
             if (list.length === 0) return this.$message({ type: 'success',message: '请先导入数据!' });
             //解构数据进行提交
             this.loading = true;
@@ -959,8 +960,8 @@ export default {
                         let listRows = list[index][header[i]];
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
-                            listRows['formula'] = '';
-                            listRows['trNum'] = index+1;                  
+                            // listRows['formula'] = '';
+                            // listRows['trNum'] = index+1;                  
                             // listRows['attribute'] = '';                  
                             listRows['upload'] = 1;    
                             if (!listRows['id']) {  //无id则视为新增，新增到changeRowAddList
@@ -1003,6 +1004,22 @@ export default {
             }
             console.log('打印一下即将提交的参数obj')
             console.log(obj)
+            console.log('删除集合------------------')
+            for (let index = 0; index < obj.changeRowDelList.length; index++) {
+                const element = obj.changeRowDelList[index];
+                // console.log(element.colNum)
+                console.log(element.trNum)
+             
+            }
+            console.log('修改集合------------------')
+
+            for (let index = 0; index < obj.changeRowAltList.length; index++) {
+                const element = obj.changeRowAltList[index];
+                // console.log(element.colNum)
+                console.log(element.trNum)
+             
+            }
+
             //此处做个判断，判断是新建还是修改。
             if (this.joinParent) {  //接入父组件的情况
                 if (this.uplist && !this.uplist.id && !this.uplist.saveTime ) {  //当前属于新建清单====
@@ -1031,7 +1048,7 @@ export default {
                                 // console.log(this.form.name+'   name   '+ListRow.name)
                                 // console.log(this.form.headerId+'   headerId   '+ListRow.changeHeadId)
                                 // console.log(ListRow.saveTime - this.uplist.saveTime)
-                                if(ListRow.saveTime === this.uplist.saveTime){
+                                if(  (ListRow.id && this.uplist.id && ListRow.id === this.uplist.id) || (!ListRow.id && !this.uplist.id && ListRow.saveTime === this.uplist.saveTime)){
                                     ListRow.changeHeadId = this.form.headerId;
                                     ListRow.changeRowList = changeRowList;
                                     ListRow.changeRowAddList = changeRowAddList;  //增
