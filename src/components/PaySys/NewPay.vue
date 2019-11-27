@@ -356,7 +356,7 @@ export default {
 
           //调用表格公式解析 存储
           this.ResetList = null; //更换表头时需清空备份数据
-          this.RowDelList = null; //清空存放删除集合数据
+          this.RowDelList = []; //清空存放删除集合数据
           this.new = true; //需备份数据
           this.OneToPay( data.id ); // 调用相对应的累计支付清单内容
       })
@@ -706,7 +706,7 @@ export default {
                             if (!listRows.id) {  //无id则视为新增，新增到payRowAddList
   
                                 payRowAddList.push(listRows);
-                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {   //有id 与 alter 视为已修改过的数据 新增到payRowAddList
+                            }else if ( (list[index]['alter'] || listRows['alter']) && listRows['id'] ) {   //有id 与 alter 视为已修改过的数据 新增到payRowAddList
                                 listRows['alter'] = "Y";
                                 payRowAltList.push(listRows);
                             }

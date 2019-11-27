@@ -429,7 +429,7 @@ export default {
        this.$post('/head/getone',{id,type:'change'})
         .then((response) => {
           this.ResetList = null; //更换表头时需清空备份数据
-          this.RowDelList = null; //清空存放删除集合数据
+          this.RowDelList = []; //清空存放删除集合数据
           this.new = true; //需备份数据
           let data = response.data.onehead,
           headsArr = this.$excel.Package(data['tChangeHeadRows'],data.refCol,data.refRow);
@@ -966,7 +966,7 @@ export default {
                             listRows['upload'] = 1;    
                             if (!listRows['id']) {  //无id则视为新增，新增到changeRowAddList
                                 changeRowAddList.push(listRows);
-                            }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {   //有id 与 alter 视为已修改过的数据 新增到changeRowAltList+
+                            }else if ( (list[index]['alter'] || listRows['alter']) && listRows['id'] ) {   //有id 与 alter 视为已修改过的数据 新增到changeRowAltList+
                                 listRows['alter'] = "Y";
                                 changeRowAltList.push(listRows);
                             }
@@ -1005,20 +1005,20 @@ export default {
             console.log('打印一下即将提交的参数obj')
             console.log(obj)
             console.log('删除集合------------------')
-            for (let index = 0; index < obj.changeRowDelList.length; index++) {
-                const element = obj.changeRowDelList[index];
-                // console.log(element.colNum)
-                console.log(element.trNum)
+            // for (let index = 0; index < obj.changeRowDelList.length; index++) {
+            //     const element = obj.changeRowDelList[index];
+            //     // console.log(element.colNum)
+            //     console.log(element.trNum)
              
-            }
-            console.log('修改集合------------------')
+            // }
+            // console.log('修改集合------------------')
 
-            for (let index = 0; index < obj.changeRowAltList.length; index++) {
-                const element = obj.changeRowAltList[index];
-                // console.log(element.colNum)
-                console.log(element.trNum)
+            // for (let index = 0; index < obj.changeRowAltList.length; index++) {
+            //     const element = obj.changeRowAltList[index];
+            //     // console.log(element.colNum)
+            //     console.log(element.trNum)
              
-            }
+            // }
 
             //此处做个判断，判断是新建还是修改。
             if (this.joinParent) {  //接入父组件的情况

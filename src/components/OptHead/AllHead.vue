@@ -108,9 +108,11 @@
     },
 
     headRowSelected:{ //选定的单元格
-      type: Object,
-      required: false,
-      default: () => ({headRowStr:'', refresh:true}) //记录多个表头，如“-original-27-93-AC10-,-change-29-98-AC10-”。
+        type: Object,
+        required: false,
+        default: () => ({
+            headRowStr:'',//记录多个表头，如“-original-27-93-AC10-,-change-29-98-AC10-”。
+            refresh:true}) //每次切换单元格记录表头，需设置为true
     },
   },
   data () {

@@ -613,10 +613,8 @@ export default {
 
         },
         getSummaries (param) {  //合计
-            // if (!this.$refs.elxEditable1 || !this.showHeader) return [];
-            // let list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
-            // if (this.PackHeader.length ===0 && list.length ===0) return [];
-            // return this.$excel.getSummaries(this.PackHeader, list, param,this.totalobj);//调用合计尾行。
+            console.log('this.$root.state11111111111')
+            console.log(this.$root.state)
             if (this.$root.state && this.list && this.list.length >0) {
                 console.log('调用了合计');
                 this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
@@ -748,21 +746,13 @@ export default {
                                     // listRows.attribute = ''; //加入属性
                                     // listRows.formula = ''; //加入公式                  
                                     listRows['upload'] = 1; 
-                                    // if (list[index]['alter'] || listRows['alter']) {
-                                    //      console.log('jjjjjjjjjjjj')
-                                    //     console.log(listRows)
-                                    // }
-                                    //     console.log('list[index]')
-                                    //     console.log(index)
-
-                                    //     console.log(list[index])
-
-                                    // console.log()   
+       
                                     if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
                                         originalRowAddList.push(listRows);
-                                    }else if ( listRows['id'] && (list[index]['alter'] || listRows['alter']) ) {    //有id 与 alter 视为已修改过的数据 新增到originalRowAddList
-                                        console.log('jjjjjjjjjjjj')
-                                        console.log(listRows)
+                                        
+                                    }else if ( (list[index]['alter'] || listRows['alter']) && listRows['id'] ) {    //有id 与 alter 视为已修改过的数据 新增到originalRowAddList
+                                        // console.log('jjjjjjjjjjjj')
+                                        // console.log(listRows)
                                         listRows['alter'] = "Y";
                                         originalRowAltList.push(listRows);
                                     }
