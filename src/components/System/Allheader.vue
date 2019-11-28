@@ -153,6 +153,7 @@ import headeratt from './NewHeader'
           refCol:null,   //多少列
           refRow:null,   //多少行
           headRowList:[],           //表头单元格内容
+          collect:0  //表头标志 0为普通表头1为汇总表头
       },
       editShow:false,//显示隐藏修改表头
       textShow:'新建表头',
@@ -201,6 +202,7 @@ import headeratt from './NewHeader'
           refCol:null,   //多少列
           refRow:null,   //多少行
           headRowList:[],           //表头单元格内容
+          collect:0  //表头标志 0为普通表头1为汇总表头
       }
       this.editShow = true; //显示表头组件
       this.textShow = '新建表头';

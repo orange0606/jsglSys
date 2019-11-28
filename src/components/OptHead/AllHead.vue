@@ -185,12 +185,11 @@
 
                     })
                 }
-
-
-            // }
-   
+    },
+    type: function(New, Old) {
+        if (New === Old)  return false;
+        this.findList()  //发起请求所有已建表头数据
     }
-
           
   },
   methods: {
@@ -422,7 +421,10 @@
                     name: list.tender.name
                 }
             };
-
+            console.log('this.headRowSelected.headRowStr');
+            console.log(this.headRowSelected.headRowStr);
+            console.log('this.headRowSelected.headRowStr.length');
+            console.log(this.headRowSelected.headRowStr.length);
             var colstrlen = this.headRowSelected.headRowStr.length,
             strKey = '-'+newObj.type+'-'+newObj.hdId+'-'+newObj.rowId+'-'+newObj.key+'-',
             strlen = strKey.length,

@@ -92,7 +92,7 @@
             <p style="margin:10px 0 10px 0">{{editRow && editRow.td?editRow.td:''}}</p>
             <p style="margin:10px 0 10px 0">当前位置 : {{editRow.colNum+editRow.trNum}}</p>
             <div style="margin:10px 0 20px 0">
-            <el-select v-model="editRow.attribute" clearable @change="colattChange(editRow.attribute)" placeholder="请选择属性">
+            <el-select size="mini" v-model="editRow.attribute" clearable @change="colattChange(editRow.attribute)" placeholder="请选择属性">
                 <el-option label="原清单的合计" value="auto_original_sum"></el-option>
                 <el-option label="变更（本期全部表）的合计" value="auto_change_sum"></el-option>
                 <el-option label="累计变更的合计" value="auto_totalchange_sum"></el-option>
@@ -101,18 +101,15 @@
                 <el-option label="累计计量的合计" value="auto_totalmeterage_sum"></el-option>
                 <el-option label="支付（本期全部表）的合计" value="auto_pay_sum"></el-option>
                 <el-option label="累计支付的合计" value="auto_totalpay_sum"></el-option>
-                <el-option label="公式" value="formula"></el-option>
+                <el-option label="公式(自动填写 (A3-B3)*3C )" value="auto"></el-option>
+                <el-option label="公式(手动填写 SUM(A3:B6) )" value="manual"></el-option>
             </el-select>
             </div>
-            <el-input
-                placeholder="请输入公式"
-                v-model="editRow.formula"
-                clearable>
-            </el-input>
-            <allhead v-if="editRow.attribute" :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="'original'" ></allhead>
+            <el-input style="margin:10px 0 20px 0" size="mini" placeholder="请输入公式" v-model="editRow.formula" clearable></el-input>
+            <allhead v-if="editRow.attribute && editRow.attribute !=='auto' && editRow.attribute !=='manual' " :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="AllHeaderType" ></allhead>
             <div class="demo-drawer__footer">
-            <el-button @click="show_Drawer = false">取 消</el-button>
-            <el-button type="primary" @click="$refs.drawer.closeDrawer()">确 定</el-button>
+            <el-button @click="show_Drawer = false" size="mini" >取 消</el-button>
+            <el-button type="primary" @click="$refs.drawer.closeDrawer()" size="mini" >确 定</el-button>
             </div>
         </div>
     </el-drawer>
@@ -194,6 +191,42 @@ export default {
       show_Drawer: false, //是否显示抽屉选择表头单元格组件
     }
   },
+    computed:{
+        AllHeaderType:function(){
+            let type = 'original';
+            if (this.editRow && this.editRow.attribute) {
+                switch (this.editRow.attribute) {
+                    case 'auto_original_sum':
+                        type = 'original';
+                        break;   
+                    case 'auto_change_sum':
+                        type = 'change';
+                        break;
+                     case 'auto_totalchange_sum':
+                        type = 'totalchange';
+                        break;
+                    case 'auto_update_sum':
+                        type = 'update';
+                        break;
+                    case 'auto_meterage_sum':
+                        type = 'meterage';
+                        break;
+                    case 'auto_totalmeterage_sum':
+                        type = 'totalmeterage';
+                        break;
+                    case 'auto_pay_sum':
+                        type = 'pay';
+                        break;                    
+                    case 'auto_totalpay_sum':
+                        type = 'totalpay';
+                        break;
+                }
+                console.log(type)
+                return type;
+            }
+            return type
+        }
+    },
     watch: {
         uplist: function(newVal,oldVal){  //子组件返回来的数据
             this.print_show = true;
@@ -230,7 +263,6 @@ export default {
         this.allHeader( this.tender.id );//调用请求一个标段的所有变更表头
         this.upif( this.uplist );//此处调用父组件传来的清单数据判断处理函数
         this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
-
     },
     beforeDestroy () {
         // this.foo();//清除监听鼠标右键事件
@@ -245,13 +277,14 @@ export default {
             })
         },
         setAtt () { //单元格鼠标右键后显示的菜单栏 设置属性
-            // if (this.editRow) {
-            //     if (!this.editRow.formula) {
-            //         this.$set(this.editRow, 'formula', '');
-            //     }
-            // }else {
-            //     return false;
-            // }
+            if (this.editRow) {
+                if (!this.editRow.formula) {
+                    this.$set(this.editRow, 'formula', '');
+                    this.$set(this.editRow, 'attribute', '');
+                }
+            }else {
+                return false;
+            }
             //展开抽屉组件 显示表头单元格选择组件
 
             // console.log('this.editRow.formula  : '+this.editRow.formula)
@@ -746,7 +779,9 @@ export default {
                                     // listRows.attribute = ''; //加入属性
                                     // listRows.formula = ''; //加入公式                  
                                     listRows['upload'] = 1; 
-       
+                                    if (!listRows.attribute) listRows.attribute = ''; //加入属性
+                                    if (!listRows.formula) listRows.formula = ''; //加入公式
+                                    
                                     if (!listRows['id']) {  //无id则视为新增，新增到originalRowAddList
                                         originalRowAddList.push(listRows);
                                         

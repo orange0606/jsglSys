@@ -205,12 +205,7 @@ excelmodel = {
                 // }
                 // console.log(arr[sub][coll].trNum)
                 arr[sub][coll].edit = 'N'; //加入编辑状态
-                if (!arr[sub][coll].attribute) {
-                    arr[sub][coll].attribute = ''; //加入属性
-                }
-                if (!arr[sub][coll].formula) {
-                    arr[sub][coll].formula = ''; //加入公式
-                }
+                
             }
         };
         return arr;

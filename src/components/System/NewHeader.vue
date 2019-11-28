@@ -106,6 +106,12 @@
                                 <el-option v-for="(val,i) in payHeadList" :key="i+'f'" :disabled="val.selected?true:false" :label="val.name" :value="val.id"></el-option>
                             </el-select>
                         </el-form-item>
+                        <el-form-item  label="表头标志" prop="collect">
+                            <el-select value-key="collect" v-model="Form.collect" placeholder="请选择支付清单清单表头"  clearable size="small" style=" width:100%;">
+                                <el-option label="普通表头" :value="0"></el-option>
+                                <el-option  label="汇总表头" :value="1"></el-option>
+                            </el-select>
+                        </el-form-item>
                         <el-form-item label="表头编号" prop="num">
                             <el-input v-model="Form.num" @blur="queryHeader" ></el-input>
                         </el-form-item>
@@ -208,6 +214,7 @@ import inven from '../../modules/newheaderAtt';
                 refCol:null,   //多少列
                 refRow:null,   //多少行
                 headRowList:[],           //表头单元格内容
+                collect:0  //表头标志 0为普通表头1为汇总表头
             })
         },
         visible:{   //是否显示修改表头
@@ -290,6 +297,9 @@ import inven from '../../modules/newheaderAtt';
                 ],
                 payHeadId: [
                     { required: true, message: '请选择支付表头', trigger: 'change' }
+                ],
+                collect: [
+                    { required: true, message: '请选择标志', trigger: 'change' }
                 ],
 
             },
