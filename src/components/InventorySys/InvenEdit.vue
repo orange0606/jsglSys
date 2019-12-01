@@ -17,15 +17,21 @@
             <el-input :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.name" placeholder="请输入清单名称"></el-input>
             </el-form-item>
             <el-form-item label="表头">
-            <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
-                <el-option
-                    v-for="item in form.headerList"
-                    :key="item.id"
-                    :disabled="item.limit?true:false"
-                    :label="item.name"
-                    :value="item.id">
-                </el-option>
-            </el-select>
+                <el-select :disabled="approval.state === 1 || (joinParent && mode==='show')?true:false" v-model="form.headerId" @change="oneHeader" placeholder="请选择表头">
+                    <el-option
+                        v-for="item in form.headerList"
+                        :key="item.id"
+                        :disabled="item.limit?true:false"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="表头标志">
+                <el-select :disabled="true" v-model="form.collect" @change="oneHeader" placeholder="请选择表头">
+                    <el-option label="普通表头" value="0"></el-option>
+                    <el-option label="汇总表头" value="1"></el-option>
+                </el-select>
             </el-form-item>
         </el-form>
         </div>
@@ -35,7 +41,7 @@
         <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="primary" size="mini" @click="impt">导入表格</el-button>
         <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="warning" size="mini" @click="submitEvent">完成</el-button>
         <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="insertEvent">新增</el-button>
-        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="con">打印一下啊</el-button>
+        <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="success" size="mini" @click="cccconslo">打印一下啊</el-button>
         <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="danger" size="mini" @click="RemoveSelecteds">删除选中</el-button>
         <el-button v-if="joinParent && mode==='show' || (approval.state === 1)?false:true" type="info" size="mini" @click="Abandon">放弃更改</el-button>
         
@@ -62,13 +68,13 @@
             <elx-editable-column type="selection" align="center" width="45" :key="$excel.randomkey(this)" ></elx-editable-column>
             <elx-editable-column type="index" width="60" align="center" :key="$excel.randomkey(this)" ></elx-editable-column>
             <!-- 此处使用多级表头嵌套组件 -->
-            <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd'></my-column>
+            <my-column v-for="(item,index) in col" :key="index" :col="item" :Formula="formula" type="original" :lastHeader="lastHeader" :hd='hd' :list="list" :collect="form.collect" ></my-column>
             </elx-editable>
             <div v-show="menuVisible">
                 <ul id="menu" class="menu" ref="menu">
-                        <li class="menu__item">新增</li>
-                        <li class="menu__item"  @click="setAtt()">属性设置</li>
-                        <li class="menu__item">删除</li>
+                    <li class="menu__item"  @click="setAtt()">属性设置</li>
+                    <li class="menu__item" @click="setAtt('auto')" >公式(自动填写)</li>
+                    <li class="menu__item" @click="setAtt('manual')">公式(手动填写)</li>
                 </ul>
             </div>
 
@@ -78,7 +84,7 @@
     <div v-else>
         <printing :tableData='tableData' :print_show.sync="print_show" ></printing>
     </div>
-
+    <!-- 单元格内属性设置 -->
     <el-drawer
         title="请选择相关表头单元格"
         :before-close="handleClose"
@@ -88,7 +94,7 @@
         custom-class="demo-drawer"
         ref="drawer"
         >
-        <div v-if="editRow" class="demo-drawer__content" style="margin: 0 50px;">
+        <div v-if="editRow && editRow.attribute !=='auto' && editRow.attribute !=='manual'" class="demo-drawer__content" style="margin: 0 50px;">
             <p style="margin:10px 0 10px 0">{{editRow && editRow.td?editRow.td:''}}</p>
             <p style="margin:10px 0 10px 0">当前位置 : {{editRow.colNum+editRow.trNum}}</p>
             <div style="margin:10px 0 20px 0">
@@ -101,8 +107,6 @@
                 <el-option label="累计计量的合计" value="auto_totalmeterage_sum"></el-option>
                 <el-option label="支付（本期全部表）的合计" value="auto_pay_sum"></el-option>
                 <el-option label="累计支付的合计" value="auto_totalpay_sum"></el-option>
-                <el-option label="公式(自动填写 (A3-B3)*3C )" value="auto"></el-option>
-                <el-option label="公式(手动填写 SUM(A3:B6) )" value="manual"></el-option>
             </el-select>
             </div>
             <el-input style="margin:10px 0 20px 0" size="mini" placeholder="请输入公式" v-model="editRow.formula" clearable></el-input>
@@ -113,6 +117,21 @@
             </div>
         </div>
     </el-drawer>
+    <!-- 单元格内公式设置 -->
+    <div class="formula" v-if="formula_state">
+        <p style="margin:10px 0 10px 0;text-align:left;">单元格内容 : {{editRow && editRow.td?editRow.td:''}}</p>
+        <p style="margin:10px 0 10px 0;text-align:left;">当前位置 : {{editRow.colNum+editRow.trNum}}</p>
+        <div >
+            <el-input placeholder="请输入公式" v-model="editRow.formula" ref="inputRef" class="input-with-select" size="mini">
+                <el-select v-model="editRow.attribute" slot="prepend" placeholder="请选择" @change="editRow.formula=''">
+                    <el-option label="公式(自动填写 (A3-B3)*3C )" value="auto"></el-option>
+                    <el-option label="公式(手动填写 SUM(A3:B6) )" value="manual"></el-option>
+                </el-select>
+                 <el-button slot="append" type="primary" @click="addFormula(editRow.formula)" >完 成</el-button>
+            </el-input>
+            <!-- <el-button  size="mini" >取 消</el-button> -->
+        </div>
+    </div>
     
   </div>
 </template>
@@ -160,6 +179,7 @@ export default {
         name:'',
         num:'',
         headerId:'',
+        collect:'0',
         headerList:[],//表头列表
       },
       showHeader:true,
@@ -189,6 +209,7 @@ export default {
           refresh: true,
       },
       show_Drawer: false, //是否显示抽屉选择表头单元格组件
+      formula_state: false, // 公式输入状态
     }
   },
     computed:{
@@ -268,6 +289,32 @@ export default {
         // this.foo();//清除监听鼠标右键事件
     },
     methods: {
+        cccconslo () {
+            console.log('----------打印一下this.list--------')
+            console.log(this.list)
+        },
+        addFormula (formula) {  //添加公式并计算按钮
+            this.formula_state = false;
+            if (formula) {
+                let list = this.list; // 配合公式解析用
+                try {
+                    let td = eval(this.$excel.Summary_Formula_analysis(formula));//此处调用公式解析
+                    this.$set(this.editRow, 'td', td?td:0); 
+                    // this.editRow.td = td?td:0;
+                } catch (error) {
+                    this.$message({
+                    type: 'info',
+                    message: `发生错误！ 请检查修改或者公式，位置 :  ${this.editRow.colNum+this.editRow.trNum}`
+                    });
+                    console.log(error)
+                    // this.editRow.td = 0;
+                    this.$set(this.editRow, 'td', 0); 
+                }
+                this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+
+            }
+        },
+        
         handleClose(done) {
             done();
         },
@@ -276,11 +323,25 @@ export default {
                 this.$set(this.editRow, 'formula', '');//属性切换后 属性值formula得清空
             })
         },
-        setAtt () { //单元格鼠标右键后显示的菜单栏 设置属性
+        setAtt ( str ) { //单元格鼠标右键后显示的菜单栏 设置属性
+            let mode = str?str:'';
             if (this.editRow) {
                 if (!this.editRow.formula) {
                     this.$set(this.editRow, 'formula', '');
-                    this.$set(this.editRow, 'attribute', '');
+                    this.$set(this.editRow, 'attribute', mode); 
+                }else{
+                    if (mode) {
+                        this.$set(this.editRow, 'attribute', mode); 
+                        this.formula_state = true;
+                    }else{
+                        if (this.editRow.attribute && (this.editRow.attribute==='auto' || this.editRow.attribute==='manual')) {
+                            this.$set(this.editRow, 'attribute', '');
+                            this.$set(this.editRow, 'formula', '');
+                        }else{
+                            this.$set(this.editRow, 'formula', '');
+                            this.$set(this.editRow, 'attribute', mode);
+                        }
+                    }
                 }
             }else {
                 return false;
@@ -290,20 +351,25 @@ export default {
             // console.log('this.editRow.formula  : '+this.editRow.formula)
             // console.log('this.editRow')
             // console.log(this.editRow)
-            this.show_Drawer = true;    //显示组件
-            this.$nextTick(() => {
-                this.$set(this.headRowSelected, 'headRowStr', this.editRow.formula); //把内容传入组件
-                this.$set(this.headRowSelected, 'refresh', true); //组件刷新（因不同的单元格属性值 字符串需要重新解析）
+            if (!mode) {
+                this.show_Drawer = true;    //显示组件
+                this.$nextTick(() => {
+                    this.$set(this.headRowSelected, 'headRowStr', this.editRow.formula); //把内容传入组件
+                    this.$set(this.headRowSelected, 'refresh', true); //组件刷新（因不同的单元格属性值 字符串需要重新解析）
 
-            })
+                })
+            }else{
+                this.formula_state = true;
+            }
+            
         },
         rightClick(row, column, event) {    //表格内容鼠标右键显示菜单栏
             event.preventDefault();//阻止系统默认事件
             if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
+            if (this.formula_state) return false; //当前正在输入公式，不能切换单元格
+
             this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
             var menu = document.querySelector('#menu')
-            console.log(this.$refs.menu)
-            
             menu.style.left = event.clientX -60 + 'px'
             document.addEventListener('click', this.foo) // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
             menu.style.top = event.clientY - 165 + 'px'
@@ -322,6 +388,7 @@ export default {
         },
         foo() { // 取消鼠标监听事件 菜单栏
             this.menuVisible = false;
+            this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
             document.removeEventListener('click', this.foo); // 要及时关掉监听，不关掉的是一个坑，不信你试试，虽然前台显示的时候没有啥毛病，加一个alert你就知道了
         },
 
@@ -381,11 +448,16 @@ export default {
         upif ( newVal ) {   //处理父组件传来的值
             this.allHeader(this.tender.id); //请求该标段的全部计量清单表头列表
             this.RowDelList = []; //清空删除数组
+            this.formula_state = false; //单元格公式输入框隐藏
             if (newVal && (newVal.id || newVal.saveTime) ) {  //此处为预览修改
                 this.loading = true;
                 this.form.name = newVal.name;
                 this.form.num = newVal.num;
                 this.form.headerId = newVal.originalHead.id;
+                if ('collect' in newVal) {
+                    this.form.collect = newVal.collect
+                }
+                
                 this.new = false; //不需要在清单导入时备份
                 switch(this.mode) {
                     case 'new': //此处为新建模式处理
@@ -595,6 +667,24 @@ export default {
                 this.loading = false;
                 return this.$message({ message: '您导入的excel数据表头与清单表头不一致，请确认修改后再导入', type: 'warning', duration: 6000, showClose: true });
                 }
+
+                //此处需要将去掉表头的剩余表格内容的行号更新为最新
+                let collect = this.form.collect;
+                console.log('collect')
+                console.log(collect)
+                if (collect==='0' || collect===0) {
+                    console.log('1111111111111111')
+
+                    for (let a = data.length-1; a >= 0; a--) {
+                        console.log('1111111111111111')
+
+                        for (let b = this.hd.length-1; b >= 0; b--) {
+                            data[a][this.hd[b]].trNum = a+1;
+                        }
+                        
+                    }
+                }
+
                 try {  //把数据载入表格
                     let listlen = this.list.length;
                     this.list = [...data];
@@ -614,6 +704,19 @@ export default {
         cell_click(row, column, cell, event){ //单元格点击编辑事件
             
             if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
+            if (this.formula_state) {   //公式输入框开启后
+                if (column.property) {
+                    let str = column.property,
+                    colName = str.substr(0,str.indexOf(".td"));
+                    let td = row[colName];
+                    this.editRow.formula += td.colNum+td.trNum; //返回一个 单元格位置
+                } 
+                this.$nextTick(() => {
+                    this.$refs.inputRef.focus()
+                })
+                return false; //当前正在输入公式，不能切换单元格
+            }
+
             this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
             if (column.property) {
                 // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
@@ -622,7 +725,7 @@ export default {
                 this.editRow = row[colName];
                 if (this.editRow.edit && this.editRow.edit==='Y') return false;
                 this.editRow.edit = "Y";  //Y为编辑模式N为只读状态
-                
+                // document.addEventListener('click', this.foo) // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
             }  
         },
         RowCss({row, rowIndex}) {     // 定义changeCss函数，这样当表格中的相应行满足自己设定的条件是就可以将该行css样式改变
@@ -632,6 +735,7 @@ export default {
             return '';
         },
         findList () { //表格滚动渲染函数
+            this.formula_state = false; //单元格公式输入框隐藏
             this.loading = true;
             this.$nextTick(() => {
                 this.$refs.elxEditable1.reload([])
@@ -646,8 +750,8 @@ export default {
 
         },
         getSummaries (param) {  //合计
-            console.log('this.$root.state11111111111')
-            console.log(this.$root.state)
+            // console.log('this.$root.state11111111111')
+            // console.log(this.$root.state)
             if (this.$root.state && this.list && this.list.length >0) {
                 console.log('调用了合计');
                 this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
@@ -1003,5 +1107,18 @@ li:hover {
 		color: white;
 }
 
+.formula {
+    width: 400px;
+    height: 100px;
+    padding: 0 5px;
+    /* background: #E6A23C; */
+    background-color:rgba(220,38,38,0.2);
+    position: fixed;
+    top: 50px;
+    right: 100px;
+    border: 1px solid #DCDFE6;
+    
+
+}
 @import '../../modules/Tablestyle.css';
 </style>

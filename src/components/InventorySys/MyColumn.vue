@@ -1,19 +1,21 @@
 <template>
   <el-table-column :prop="col.colNum+'.td'" :label="col.td" :fit="true" :min-width="$excel.Setwidth(col.td)" :width="$excel.Setwidth(col.td, hd)" :align="col.textAlign">
     <template slot-scope="scope">
+          
+
       <el-tooltip v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='N' && scope.row.data[col.colNum].formula " class="item" effect="light" :content="scope.row.data[col.colNum].formula" placement="top">
           <span class="color" >{{scope.row.data[col.colNum].td}}</span>
       </el-tooltip>
       
       <span v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='N' && !scope.row.data[col.colNum].formula" class="" >{{scope.row.data[col.colNum].td}}</span>
-      <el-input v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='Y'" style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Rowchange(lastHeader, type, F, fkeys, scope.row.data,scope.row.data[col.colNum])" :autofocus="true" size="mini" ></el-input>
+      <el-input v-if="scope.row.data[col.colNum].edit && scope.row.data[col.colNum].edit ==='Y'" style="margin: 0; width:100%; height:100%;" v-model="scope.row.data[col.colNum].td" @change="Rowchange(lastHeader, type, F, fkeys, scope.row.data,scope.row.data[col.colNum], list, hd, collect)" :autofocus="true" size="mini" ></el-input> 
      
       <!-- <span class="" >{{scope.row.data[col.colNum].td}}</span> -->
     </template>
     <template v-if="col.children">
       <my-column  v-for="(item, index) in col.children"
         :key="index"
-        :col="item" :Formula="Formula" :type="type" :lastHeader="lastHeader" :hd="hd" >
+        :col="item" :Formula="Formula" :type="type" :lastHeader="lastHeader" :hd="hd" :list="list" :collect="collect">
       </my-column> 
     </template>
   </el-table-column> 
@@ -36,6 +38,9 @@ export default {
     },
     hd: {
     },
+    list: {},
+    collect: {}
+
   },
   data() {
     return {
@@ -46,14 +51,10 @@ export default {
   created (){
   },
   methods:{
-      Rowchange (lastHeader, type, F, fkeys, row,col) {
+      Rowchange (lastHeader, type, F, fkeys, row,col, list, hd, collect) {
           this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
-          this.$excel.Calculation(lastHeader, type, F, fkeys, row,col)
+          this.$excel.Calculation(lastHeader, type, F, fkeys, row,col, list, hd, collect)
           
-      },
-      rightEvent ( col ) {
-          console.log('点击了右键')
-          console.log(col)
       }
 
   }

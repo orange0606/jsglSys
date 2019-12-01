@@ -1,4 +1,5 @@
 import { MessageBox, Message, Switch } from 'element-ui'
+let HHH = 1;
 let patt1=/[A-Z+]*/g,
 patt2=/\d+/g,
 excelmodel = {
@@ -368,6 +369,7 @@ excelmodel = {
                         }
                         catch (e) {
                             Message({ message: `出错了啦啦啦${e}`, type: 'info', duration: 3000, showClose: true })
+                            console.log(e)
                         }
                         // data[row][cos].value = arr[i].sheets[key].w;    
 
@@ -533,7 +535,7 @@ excelmodel = {
         return obj;
     },
     /*
-    公式解析(新建清单和预览清单时用)
+    表头公式解析(新建清单和预览清单时用)
     param col: 多级嵌套表头的数据   Array[ object ]
     return : 真正显示对应列的数据(object)
     */
@@ -570,6 +572,43 @@ excelmodel = {
             }      
         }
         return Fobj;
+    },
+     /*
+    单元格公式解析
+    param formula: 公式例如（A3+D3+F4+G4）   string
+    return : 解析后的公式 例如 A3会转换成 list[2]['A].td*1 使用前需声明表格数据变量为 let list = this.list;
+    */
+    Summary_Formula_analysis ( formula ) {
+        let str = formula,
+        patt1 = /([A-Z]+)[A-Za-z0-9]*[0-9]+/g,
+        patt2 =/[A-Z+]*/g, //所有的大写字母
+        patt3 = /[0-9]/,  //判断是否有数字
+        patt4 = /[A-Z]/,
+        patt5 = /[^0-9]/ig;  //判断是否有数字
+        str = this.filterStr(str);  //去除空格与特殊符号
+        let arr = str.match(patt1);
+        for (let i = arr.length - 1; i >= 0; i--) {
+            let item = arr[i],
+            col = item.match(patt2)[0],//查找列
+            num = item.replace(/[^0-9]/ig,"")-1,//查找行 -1 是因为数组的下标是从0开始
+            arrlen = item.length;
+            console.log(` 列号 ：${col}  行号： ${num}`)
+            for (let a = 0; a < str.length; a++) {
+                let index = str.indexOf(item,a);
+                if ((str.length - index) < arrlen) break;
+                if (index !== -1) {
+                    if (index === 0 && !patt3.test(str[index+arrlen])) {
+                        str = str.slice(0, index)+`(list[${num}]['${col}'].td)*1`+str.slice(index+arrlen);
+                    }else if (index >= 1 && !patt4.test(str[index-1]) && !patt3.test(str[index+arrlen])) { //下标大于1时
+                        str = str.slice(0, index)+`(list[${num}]['${col}'].td)*1`+str.slice(index+arrlen);
+                    }
+                }
+            }
+
+        }
+        console.log(formula)
+        console.log(str)
+        return str;
     },
     /*
     对数据进行公式计算(导入表格（与清单）时使用)
@@ -615,16 +654,11 @@ excelmodel = {
     param F: 存储相应列的eval 的字符串公式  object
     使用引用赋值
     */
-    Calculation (lastHeader, type, F, fkeys, row, col) { //单元格值发生改变后进行行公式计算
+    Calculation (lastHeader, type, F, fkeys, row, col, list, hd, collect) { //单元格值发生改变后进行行公式计算
+        console.log('单元格内发生了改变')
+        console.log(list)
+        if (col['id']) row['alter'] = 'Y';  //给该行表格内容作个修改过的标记}
 
-        if (col['id']) {
-            row['alter'] = 'Y';  //给该行表格内容作个修改过的标记
-            console.log('进来了')
-        }
-        console.log('row')
-        console.log(row['alter'])
-        console.log('col')
-        console.log(col)
         if (Number.isNaN(Number(col['td']))) {
             // col['td'] = 0;
             col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
@@ -746,7 +780,39 @@ excelmodel = {
             console.log(error);
             return Message({ message: '这边出现了点问题，貌似是公式错误，请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
         }
+
+        if (collect==='0' || collect===0) {
+            console.log("没进来吗")
+            let listlen = list.length,
+            hdlen = hd.length;
+            console.log('  list '+list.length+'   hd  '+hd.length)
+
+            for (let a = 0; a < listlen; a++) {
+                for (let b = 0; b < hdlen; b++) {
+                    let item = list[a][hd[b]];
+                    if (item.attribute && item.attribute==='auto' && item.formula) {
+                        try {
+                            let num = eval(that.Summary_Formula_analysis(item.formula));//此处调用公式解析
+                            num = that.Count(num);//js精度
+                            item.td = num?num:0;
+                        } catch (error) {
+                            Message({
+                                type: 'info',
+                                message: `发生错误！ 请检查修改或者公式，位置 :  ${item.colNum+item.trNum}`
+                                });
+                                console.log(error)
+                                item.td = 0;
+                        }
+                        
+                    }
+                    
+                }
+                
+            }
+        }
+
         F = fkeys = row = col = Eval = null;
+
     },
     getSummaries (PackHeader, list, param) {  //合计
         // console.log('是不是每次都进来了呀'+Math.random()*100)
@@ -806,14 +872,6 @@ excelmodel = {
                 try {
                     
                     for (let index = list.length-1; index >=0; index--) {
-                        // console.log('key  : '+key)
-                        // console.log('index  : '+index)
-                        // if (index===4) {
-                        //     console.log(list)
-                            
-                        // }
-
-
                         let td = list[index][key]['td'];
 
                         if (!td) {
