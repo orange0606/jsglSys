@@ -87,7 +87,7 @@
         </elx-editable>
          <!-- 引入新建原清单组件 -->
         <transition name="el-fade-in">
-          <el-dialog :title="EditTitle" width="97%" top="3vh"  :lock-scroll="false" :visible.sync="visibleNew" :append-to-body="true">
+          <el-dialog :title="EditTitle" width="97%" top="3vh"  lock-scroll :visible.sync="visibleNew" :append-to-body="true">
               <inven-edit :tender="tender" :refresh.sync="visibleNew" :originalList="originalList" :uplist="uprow" :approval="approval" :mode="mode" :joinParent="joinParent"  ></inven-edit>
           </el-dialog>
         </transition>
@@ -127,7 +127,7 @@ import XEUtils from 'xe-utils'
     mode:{  //子组件的展示模式
       type: String,
       required: false,
-      default: "alter"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
+      default: "new"  //new:新建模式 ，show:展示模式   ，alter:更改模式      
     },
     joinParent:{   //接入父组件标记，当joinParent标记为true时表示连接到父组件并接受父组件的参数；当joinParent为false时组件独立调试使用。
       // type:Array,
@@ -188,7 +188,7 @@ import XEUtils from 'xe-utils'
                     this.findList();  //请求该审批id的所有清单
                     this.edit = true;
                 }
-            }else{
+            }else{   
                 this.edit = true;
                 this.$nextTick(() => {
                     this.list = this.originalList;
@@ -222,13 +222,13 @@ import XEUtils from 'xe-utils'
             this.loading = false;
 
              /*
-            将清单导出为表格
-            param tableData: 清单内容this.list 
-            param headerData: 表头内容this.PackHeader
-            param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
-            param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
-            param filterVal: 所有列 例如this.hd  
-            param filename: 文件名
+              将清单导出为表格
+              param tableData: 清单内容this.list 
+              param headerData: 表头内容this.PackHeader
+              param totalobj: 例如this.totalobj,  合计尾行计算结果若无则 传false
+              param lastHeader: 例如this.lastHeader, 表头最后一层 对象嵌套对象{A:{}}
+              param filterVal: 所有列 例如this.hd  
+              param filename: 文件名
             */
             this.$excel.exportTable(list, PackHeader, totalobj, lastHeader, hd, 'filename')
 

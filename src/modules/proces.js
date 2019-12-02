@@ -780,13 +780,15 @@ excelmodel = {
             console.log(error);
             return Message({ message: '这边出现了点问题，貌似是公式错误，请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
         }
-
-        if (collect==='0' || collect===0) {
+        // console.log('打印一下list : ')
+        // console.log(list)
+        // console.log('打印一下collect : ')
+        // console.log(collect)
+        if (collect==='1' || collect===1) {
             console.log("没进来吗")
             let listlen = list.length,
             hdlen = hd.length;
             console.log('  list '+list.length+'   hd  '+hd.length)
-
             for (let a = 0; a < listlen; a++) {
                 for (let b = 0; b < hdlen; b++) {
                     let item = list[a][hd[b]];
@@ -798,16 +800,13 @@ excelmodel = {
                         } catch (error) {
                             Message({
                                 type: 'info',
-                                message: `发生错误！ 请检查修改或者公式，位置 :  ${item.colNum+item.trNum}`
+                                message: `发生错误！ 请检查或者修改公式，位置 :  ${item.colNum+item.trNum}`
                                 });
                                 console.log(error)
                                 item.td = 0;
                         }
-                        
-                    }
-                    
+                    } 
                 }
-                
             }
         }
 
