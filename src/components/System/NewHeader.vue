@@ -131,7 +131,7 @@
                             </el-select>
                         </el-form-item>
                         <el-form-item v-for="(val,i) in Attribute" :key="i+'bb'" v-show="row.attribute && row.attribute!==null && val.value === row.attribute && val.input && row.attribute !=='sumText'" label="属性值(点击左边表格的单元格选择值)" >
-                            <el-input ref="attValue" v-model="row.attributeValue" :disabled="setState && setState === 'limit'" @focus="attValueFocus">
+                            <el-input ref="inputRef" @input="$forceUpdate();" v-model="row.attributeValue" :disabled="setState && setState === 'limit'" @focus="attValueFocus">
                                 <el-button slot="append" :style="setState !==null && setState !== 'limit' && row.attributeValue ?[c]:[]" type="primary" @click="attValBtn(row.attributeValue)" >确定</el-button>
                             </el-input>
                         </el-form-item>
@@ -487,6 +487,12 @@ import inven from '../../modules/newheaderAtt';
                     this.$set(this.row,'attributeValue',New.key)
                     this.$set(this.row,'attributePayHeadRowId',New.id)
                 }
+                this.$nextTick(() => {
+                    this.$forceUpdate(); //强制视图层刷新
+                    for (let index = 0; index < this.$refs.inputRef.length; index++) {
+                        this.$refs.inputRef[index].focus();
+                    }
+                })
             }
         },
 
@@ -866,9 +872,12 @@ import inven from '../../modules/newheaderAtt';
 
                     //点击单元格获取 和key（位置）
                 var key = `${row[colum].colNum}${row[colum].trNum}`;
-                // console.log('key.......................................')
-                // console.log(key)
-                this.$forceUpdate(); // 强制刷新
+                this.$nextTick(() => {
+                    this.$forceUpdate(); //强制视图层刷新
+                    for (let index = 0; index < this.$refs.inputRef.length; index++) {
+                        this.$refs.inputRef[index].focus();
+                    }
+                })
                 if (this.setState === null) {
                     //赋值传到属性设置子组件中
     

@@ -344,5 +344,12 @@ body .el-table th.gutter{
       border-top: 1px solid #24262b !important;
   }
 
+
 /* ************************各清单表格内容样式结束********************** */
+.el-drawer.ltr, .el-drawer.rtl, .el-drawer__container {
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    overflow-y: auto !important;
+}
 </style>

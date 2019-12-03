@@ -96,7 +96,7 @@
         >
         <div v-if="editRow && editRow.attribute !=='auto' && editRow.attribute !=='manual'" class="demo-drawer__content" style="margin: 0 50px;">
             <p style="margin:10px 0 10px 0">{{editRow && editRow.td?editRow.td:''}}</p>
-            <p style="margin:10px 0 10px 0">当前位置 : {{editRow.colNum+editRow.trNum}}</p>
+            <p style="margin:10px 0 10px 0">当前单元格内容 : {{editRow.td?editRow.td:''}}    当前位置 : {{editRow.colNum+editRow.trNum}}  </p>
             <div style="margin:10px 0 20px 0">
             <el-select size="mini" v-model="editRow.attribute" clearable @change="colattChange(editRow.attribute)" placeholder="请选择属性">
                 <el-option label="原清单的合计" value="auto_original_sum"></el-option>
@@ -109,9 +109,8 @@
                 <el-option label="累计支付的合计" value="auto_totalpay_sum"></el-option>
             </el-select>
             </div>
-            <el-input style="margin:10px 0 20px 0" size="mini" placeholder="请输入公式" v-model="editRow.formula" clearable></el-input>
             <allhead v-if="editRow.attribute && editRow.attribute !=='auto' && editRow.attribute !=='manual' " :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="AllHeaderType" ></allhead>
-            <div class="demo-drawer__footer">
+            <div class="demo-drawer__footer" style="margin: 0 0 50px 0;">
             <el-button @click="show_Drawer = false" size="mini" >取 消</el-button>
             <el-button type="primary" @click="addAttrbute(editRow.formula)" size="mini" >确 定</el-button>
             </div>
@@ -122,8 +121,8 @@
         <p style="margin:10px 0 10px 0;text-align:left;">单元格内容 : {{editRow && editRow.td?editRow.td:''}}</p>
         <p style="margin:10px 0 10px 0;text-align:left;">当前位置 : {{editRow.colNum+editRow.trNum}}</p>
         <div >
-            <el-input placeholder="请输入公式" v-model="editRow.formula" ref="inputRef" class="input-with-select" size="mini">
-                <el-select v-model="editRow.attribute" slot="prepend" placeholder="请选择" @change="editRow.formula=''">
+            <el-input placeholder="请输入公式" v-model="editRow.formula" ref="inputRef" @input="$forceUpdate();" class="input-with-select" size="mini">
+                <el-select v-model="editRow.attribute" slot="prepend" placeholder="请选择" @change="colattChange(editRow.formula)">
                     <el-option label="公式(自动填写 (A3-B3)*3C )" value="auto"></el-option>
                     <el-option label="公式(手动填写 SUM(A3:B6) )" value="manual"></el-option>
                 </el-select>
@@ -294,11 +293,103 @@ export default {
          
         },
         addAttrbute (formula) { //添加合计属性并计算按钮
+            let str = formula,
+            patt2 =/[A-Z+]*/g, //所有的大写字母
+            arr = []; // 用于存储已解析好的
             this.$refs.drawer.closeDrawer(); //关闭合计属性 抽屉 组件
             console.log('打印一下_formula :  '+formula);
             console.log('打印一下全部集合')
             console.log(this.originalList)
+            arr = this.$excel.strSplit (str); //解析字符串为数组
+            console.log('打印一下已经解析为的数组')
+            console.log(arr)
+            //
+            if (!str || this.originalList.length===0 || arr.length ===0) {
+                return this.$nextTick(() => {
+                    this.$set(this.editRow, 'td', 0);
+                });
+            }
+            this.$nextTick(() => {
+                this.$set(this.editRow, 'td', 0);
+            });
+            for (let i = this.originalList.length -1; i >= 0; i--) {
+                const Iitem = this.originalList[i];
+                for (let a = arr.length -1; a >= 0; a--) {
+                    const Aitem = arr[a];
+                    if ((Iitem.originalHeadId*1 === Aitem.hdId*1) || (Iitem.originalHead.id*1 === Aitem.hdId*1)) {   //判断表头id是否相等
+                        console.log('表头id相等')
+                        if (Iitem.totalobj) {   //判断清单的合计尾行存值对象是否存在
+                            console.log('合计尾行存值对象存在');
+                            let colnum = Aitem.key.match(patt2)[0]; //取出列号
+                            console.log('colnum+td :  '+colnum+'td')
+                            if (colnum+'.td' in Iitem.totalobj) {
+                                console.log('有这个合计尾行')
+                                this.$nextTick(() => {
+                                    this.$set(this.editRow, 'td', this.editRow.td*1+Iitem.totalobj[colnum+'.td']*1);
+                                });
+                            }else{
+                                console.log('没有这个合计尾行')
+                                this.$message({
+                                type: 'info',
+                                message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${this.editRow.colNum+this.editRow.trNum}`
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            this.All_Formula(); //调用全部公式计算
+        },
+        All_Attrbute () { //重新对汇总清单全部内容取值
+            let patt2 =/[A-Z+]*/g; //所有的大写字母
+            console.log('打印一下全部集合')
+            console.log(this.originalList)
+            for (let p = this.originalList.length -1; p >= 0 ; p--) {//1.遍历全部清单查找有无汇总表
+                let pitem = this.originalList[p];
+                if (pitem.originalHead.collect*1 === 1) {   //是汇总清单时
+                    for (let h = pitem.originalRowList.length -1; h >= 0; h--) { //遍历汇总清单内容
+                        let hitem = pitem.originalRowList[h];
+                        if (hitem.formula && hitem.attribute && hitem.attribute ==='auto_original_sum') {   //判断有原清单合计尾行属性时
+                            let arr = []; // 用于存储已解析好的公式 ——对象
+                            arr = this.$excel.strSplit (hitem.formula); //解析字符串为数组
+                            hitem.td = 0; //将数据归0重新计算
+                            for (let i = this.originalList.length -1; i >= 0; i--) { //2.遍历全部清单
+                                const Iitem = this.originalList[i];
+                                for (let a = arr.length -1; a >= 0; a--) { //遍历全部解析好的属性公式
+                                    const Aitem = arr[a];
+                                    if ((Iitem.originalHeadId*1 === Aitem.hdId*1) || (Iitem.originalHead.id*1 === Aitem.hdId*1)) {   //判断表头id是否相等
+                                        // console.log('表头id相等')
+                                        if (Iitem.totalobj) {   //判断清单的合计尾行存值对象是否存在
+                                            // console.log('合计尾行存值对象存在');
+                                            let colnum = Aitem.key.match(patt2)[0]; //取出列号
+                                            // console.log('colnum+td :  '+colnum+'td')
+                                            if (colnum+'.td' in Iitem.totalobj) {
+                                                // console.log('有这个合计尾行')
+                                                hitem.td = hitem.td+Iitem.totalobj[colnum+'.td']*1;
+                                            }else{
+                                                console.log('没有这个合计尾行')
+                                                console.log('Iitem.totalobj')
+                                                console.log(Iitem.totalobj)
+                                                console.log('colnum.td')
+                                                console.log(colnum+'.td')
+                                                // console.log('Iitem.totalobj')
+                                                // console.log(Iitem.totalobj)
+                                                this.$message({
+                                                type: 'info',
+                                                message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${hitem.colNum+hitem.trNum}`
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
+                        }
+                    }
+                }
+                
+            }
+   
         },
         addFormula (formula) {  //添加公式并计算按钮
             this.formula_state = false;
@@ -320,31 +411,71 @@ export default {
                 this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
             }
         },
+        All_Formula () {    //当汇总表属性重新取值后需要执行的全部公式计算
+            console.log("++++++++++++++++++++")
+            let hd = this.hd,
+            list = this.list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
+            listlen = list.length,
+            hdlen = this.hd.length;
+            console.log('  list '+list.length+'   hd  '+hd.length)
+            for (let a = 0; a < listlen; a++) {
+                for (let b = 0; b < hdlen; b++) {
+                    let item = list[a][hd[b]];
+                    if (item.attribute && item.attribute==='auto' && item.formula) {
+                        try {
+                            let num = eval(this.$excel.Summary_Formula_analysis(item.formula));//此处调用公式解析
+                            num = this.$excel.Count(num);//js精度
+                            item.td = num?num:0;
+                        } catch (error) {
+                            this.$message({
+                                type: 'info',
+                                message: `发生错误！ 请检查或者修改公式，位置 :  ${item.colNum+item.trNum}`
+                                });
+                                console.log(error)
+                                item.td = 0;
+                        }
+                    } 
+                }
+            
+            }
+        },
         handleClose(done) {
             done();
         },
         colattChange (New) {    //单元格属性选择框chang事件
+            this.$forceUpdate(); //强制视图层刷新
+            if(!New) return false;
             this.$nextTick(() => {
                 this.$set(this.editRow, 'formula', '');//属性切换后 属性值formula得清空
             })
         },
         setAtt ( str ) { //单元格鼠标右键后显示的菜单栏 设置属性
-            let mode = str?str:'';
+            let mode = str?str:'',
+            att = this.editRow.attribute;
             if (this.editRow) {
+                console.log(this.editRow);
                 if (!this.editRow.formula) {
-                    this.$set(this.editRow, 'formula', '');
-                    this.$set(this.editRow, 'attribute', mode); 
-                }else{
-                    if (mode) {
+                    this.$nextTick(() => {
+                        this.$set(this.editRow, 'formula', '');
                         this.$set(this.editRow, 'attribute', mode); 
-                        this.formula_state = true;
+                    });
+                }else{
+                    if (mode) { 
+                         if (att && (att !=='auto' && att !=='manual')) {   //当选择了公式属性后需判断之前的属性是否是公式
+                            this.$nextTick(() => {
+                                this.$set(this.editRow, 'formula', '');
+                            });
+                        }
+                        this.$nextTick(() => {
+                            this.$set(this.editRow, 'attribute', mode); 
+                            this.formula_state = true;
+                        });
                     }else{
-                        if (this.editRow.attribute && (this.editRow.attribute==='auto' || this.editRow.attribute==='manual')) {
-                            this.$set(this.editRow, 'attribute', '');
-                            this.$set(this.editRow, 'formula', '');
-                        }else{
-                            this.$set(this.editRow, 'formula', '');
-                            this.$set(this.editRow, 'attribute', mode);
+                        if (att && (att==='auto' || att==='manual')) {  //当选择了属性后需判断之前的属性是否是公式
+                            this.$nextTick(() => {
+                                this.$set(this.editRow, 'attribute', mode);
+                                this.$set(this.editRow, 'formula', '');
+                            });
                         }
                     }
                 }
@@ -353,9 +484,9 @@ export default {
             }
             //展开抽屉组件 显示表头单元格选择组件
 
-            // console.log('this.editRow.formula  : '+this.editRow.formula)
-            // console.log('this.editRow')
-            // console.log(this.editRow)
+            console.log('this.editRow.formula  : '+this.editRow.formula)
+            console.log('this.editRow')
+            console.log(this.editRow)
             if (!mode) {
                 this.show_Drawer = true;    //显示组件
                 this.$nextTick(() => {
@@ -364,7 +495,7 @@ export default {
 
                 })
             }else{
-                this.formula_state = true;
+                this.formula_state = true;  //开启为公式输入状态
             }
             
         },
@@ -727,7 +858,9 @@ export default {
                     let td = row[colName];
                     this.editRow.formula += td.colNum+td.trNum; //返回一个 单元格位置
                 } 
+
                 this.$nextTick(() => {
+                    this.$forceUpdate(); //强制视图层刷新
                     this.$refs.inputRef.focus()
                 })
                 return false; //当前正在输入公式，不能切换单元格
@@ -1005,7 +1138,7 @@ export default {
                                             ListRow.originalRowAltList = originalRowAltList;  //改
                                             ListRow.name = this.form.name;
                                             ListRow.num = this.form.num;
-                                            ListRow.totalobj = this.totalobj;
+                                            ListRow.totalobj = this.totalobj;   //保存合计尾行信息
                                             ListRow.originalHead = originalHead;
                                             ListRow.updateTime = new Date();
                                             if (ListRow.id && ListRow.id === this.uplist.id && this.mode === 'alter') { //此时要把修改后的有id的清单放入修改清单列表
@@ -1059,6 +1192,11 @@ export default {
             })
         },
         saveShow () {
+            if (this.form.collect*1 !==1 && this.mode !=='show') { //-----------非汇总做出修改后对汇总表的属性重新取值
+                console.log('---------------------开始取值了！------------------------')
+                this.All_Attrbute(); 
+                console.log('---------------------结束取值了！------------------------')
+            }
             let succre = false;
             this.$emit("update:refresh", succre)  //关闭新建变更清单子组件
             this.loading = false;
@@ -1137,5 +1275,6 @@ li:hover {
     
 
 }
+
 @import '../../modules/Tablestyle.css';
 </style>

@@ -965,6 +965,56 @@ excelmodel = {
         return ''
     },
     /*
+    解析字符串为数组对象
+    param str: 清单（表头类型） str如“-original-27-93-AC10-,-change-29-98-AC10-”。
+    */
+    strSplit (str) {  //解析字符串
+        let arr = [];
+        console.log('str  : '+str)
+        if (!str) {
+            return arr
+        }
+        // console.log('到这里了吗')
+        try {
+            
+            let strs = str.split(","); //字符分割 
+            // console.log('第一次分割的字符串：')
+            // console.log(strs)
+            arr = strs.map(function (n,i) { 
+                let str2 = n.split("-"); //字符分割
+                // console.log('第2次分割的字符串：'+i)
+                // console.log(str2)
+                let str3 = str2.filter(function (elem) {
+                    // console.log(i+'比较一下'+elem)
+                    // console.log(elem !== "" && elem !== ",")
+                    return (elem !== "" && elem !== ","); 
+                })
+                // console.log('第3次分割的字符串：'+i)
+                // console.log(str3)
+                let item = {
+                    name: '',
+                    type: str3[0],
+                    hdId: str3[1],
+                    rowId: str3[2],
+                    key: str3[3],
+                    tender: {
+                      name:''
+                    }
+                }
+            return item; 
+            }); 
+        } catch (error) {
+            this.$message({
+            type: 'info',
+            message: '解析选择的单元格字符串发生错误！'})
+            console.log('解析选择的单元格字符串发生错误')
+            console.log(error)
+        }
+        return arr;
+
+        // console.log('解析选择的单元格')
+    },
+    /*
     将清单导出为表格
     param tableData: 清单内容this.list 
     param headerData: 表头内容this.PackHeader
