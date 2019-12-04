@@ -187,8 +187,11 @@
                 }
     },
     type: function(New, Old) {
+        console.log(New)
         if (New === Old)  return false;
         this.findList()  //发起请求所有已建表头数据
+        console.log('调用了')
+
     }
           
   },

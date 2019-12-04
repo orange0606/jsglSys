@@ -661,7 +661,7 @@ excelmodel = {
 
         if (Number.isNaN(Number(col['td']))) {
             // col['td'] = 0;
-            col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
+            // col['td'] = this.filterStr(col['td']); //去除多余特殊字符串
             return false;
         }
         col['td'] = this.Count(col['td']);   //调用精度计算小数点处理

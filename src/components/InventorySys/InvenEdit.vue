@@ -109,7 +109,7 @@
                 <el-option label="累计支付的合计" value="auto_totalpay_sum"></el-option>
             </el-select>
             </div>
-            <allhead v-if="editRow.attribute && editRow.attribute !=='auto' && editRow.attribute !=='manual' " :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="AllHeaderType" ></allhead>
+            <allhead v-if="editRow.attribute && editRow.attribute !=='auto' && editRow.attribute !=='manual' " :headRowSelected='headRowSelected' :joinParent="true" :tenderId="tender.id" :type="HeaderType" ></allhead>
             <div class="demo-drawer__footer" style="margin: 0 0 50px 0;">
             <el-button @click="show_Drawer = false" size="mini" >取 消</el-button>
             <el-button type="primary" @click="addAttrbute(editRow.formula)" size="mini" >确 定</el-button>
@@ -208,44 +208,48 @@ export default {
       },
       show_Drawer: false, //是否显示抽屉选择表头单元格组件
       formula_state: false, // 公式输入状态
+      HeaderType:'original', //汇总表时的属性组件默认的请求表头列表类型
     }
   },
-    computed:{
-        AllHeaderType:function(){
-            let type = 'original';
-            if (this.editRow && this.editRow.attribute) {
-                switch (this.editRow.attribute) {
-                    case 'auto_original_sum':
-                        type = 'original';
-                        break;   
-                    case 'auto_change_sum':
-                        type = 'change';
-                        break;
-                     case 'auto_totalchange_sum':
-                        type = 'totalchange';
-                        break;
-                    case 'auto_update_sum':
-                        type = 'update';
-                        break;
-                    case 'auto_meterage_sum':
-                        type = 'meterage';
-                        break;
-                    case 'auto_totalmeterage_sum':
-                        type = 'totalmeterage';
-                        break;
-                    case 'auto_pay_sum':
-                        type = 'pay';
-                        break;                    
-                    case 'auto_totalpay_sum':
-                        type = 'totalpay';
-                        break;
-                }
-                console.log(type)
-                return type;
-            }
-            return type
-        }
-    },
+    // computed:{
+    //     AllHeaderType:function(){
+    //         let type = 'original';
+    //         console.log('change进来了type判断')
+    //         if (this.editRow && this.editRow.attribute) {
+    //             switch (this.editRow.attribute) {
+    //                 case 'auto_original_sum':
+    //                     type = 'original';
+    //                     break;   
+    //                 case 'auto_change_sum':
+    //                     type = 'change';
+    //                     break;
+    //                  case 'auto_totalchange_sum':
+    //                     type = 'totalchange';
+    //                     break;
+    //                 case 'auto_update_sum':
+    //                     type = 'update';
+    //                     break;
+    //                 case 'auto_meterage_sum':
+    //                     type = 'meterage';
+    //                     break;
+    //                 case 'auto_totalmeterage_sum':
+    //                     type = 'totalmeterage';
+    //                     break;
+    //                 case 'auto_pay_sum':
+    //                     type = 'pay';
+    //                     break;                    
+    //                 case 'auto_totalpay_sum':
+    //                     type = 'totalpay';
+    //                     break;
+    //             }
+    //             console.log('  type  :  '+type)
+    //             return type;
+    //         }
+    //             console.log(' 默认 type  :  '+type)
+
+    //         return type
+    //     }
+    // },
     watch: {
         uplist: function(newVal,oldVal){  //子组件返回来的数据
             this.print_show = true;
@@ -292,6 +296,7 @@ export default {
             console.log(this.list)
          
         },
+        
         addAttrbute (formula) { //添加合计属性并计算按钮
             let str = formula,
             patt2 =/[A-Z+]*/g, //所有的大写字母
@@ -340,9 +345,11 @@ export default {
                                     });
                                 }else{
                                     console.log('没有这个合计尾行')
-                                    this.$message({
-                                    type: 'info',
-                                    message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${this.editRow.colNum+this.editRow.trNum}`
+                                     this.$notify({
+                                        title: '提示',
+                                        type: 'error',
+                                        message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${this.editRow.colNum+this.editRow.trNum}`,
+                                        duration: 0
                                     });
                                 }
                             }
@@ -418,8 +425,8 @@ export default {
                     // console.log(fffff)
                     
                     pitem.originalRowList = pitem.originalRowAddList = this.All_Formula(pitem.originalRowList) //调用全部公式重新计算
-                    console.log('+++++++++++++++++++++pitem++++++++++++++++')
-                    console.log(pitem)
+                    // console.log('+++++++++++++++++++++pitem++++++++++++++++')
+                    // console.log(pitem)
                 }
                 
             }
@@ -435,9 +442,11 @@ export default {
                     this.$set(this.editRow, 'td', td?td:0); 
                     // this.editRow.td = td?td:0;
                 } catch (error) {
-                    this.$message({
-                    type: 'info',
-                    message: `发生错误！ 请检查修改或者公式，位置 :  ${this.editRow.colNum+this.editRow.trNum}`
+                    this.$notify({
+                        title: '提示',
+                        type: 'error',
+                        message: `发生错误！ 请检查修改或者公式，位置 :  ${this.editRow.colNum+this.editRow.trNum}`,
+                        duration: 0
                     });
                     console.log(error)
                     // this.editRow.td = 0;
@@ -486,10 +495,12 @@ export default {
                             item.td = num?num:0;
                             // console.log(num)
                         } catch (error) {
-                            this.$message({
-                                type: 'info',
-                                message: `发生错误！ 请检查汇总表清单属性或者修改公式，位置 :  ${item.colNum+item.trNum}`
-                                });
+                            this.$notify({
+                                title: '提示',
+                                type: 'error',
+                                message: `发生错误！ 请检查汇总表清单属性或者修改公式，位置 :  ${item.colNum+item.trNum}`,
+                                duration: 0
+                            });
                                 console.log(error)
                                 item.td = 0;
                         }
@@ -526,9 +537,49 @@ export default {
         handleClose(done) {
             done();
         },
+        AllHeaderType ( str ) {
+            let type = str?str:'original';
+            console.log('change进来了type判断')
+            if (this.editRow && this.editRow.attribute) {
+                switch (this.editRow.attribute) {
+                    case 'auto_original_sum':
+                        type = 'original';
+                        break;   
+                    case 'auto_change_sum':
+                        type = 'change';
+                        break;
+                     case 'auto_totalchange_sum':
+                        type = 'totalchange';
+                        break;
+                    case 'auto_update_sum':
+                        type = 'update';
+                        break;
+                    case 'auto_meterage_sum':
+                        type = 'meterage';
+                        break;
+                    case 'auto_totalmeterage_sum':
+                        type = 'totalmeterage';
+                        break;
+                    case 'auto_pay_sum':
+                        type = 'pay';
+                        break;                    
+                    case 'auto_totalpay_sum':
+                        type = 'totalpay';
+                        break;
+                }
+                console.log('  type  :  '+type)
+                return type;
+            }
+                console.log(' 默认 type  :  '+type)
+
+            return type
+        },
         colattChange (New) {    //单元格属性选择框chang事件
+            console.log(New)
+            
             this.$forceUpdate(); //强制视图层刷新
             if(!New) return false;
+            this.HeaderType = this.AllHeaderType(New); // 设置请求的表头列表
             this.$nextTick(() => {
                 this.$set(this.editRow, 'formula', '');//属性切换后 属性值formula得清空
             })
@@ -573,6 +624,7 @@ export default {
             console.log(this.editRow)
             if (!mode) {
                 this.show_Drawer = true;    //显示组件
+                this.HeaderType = 'original'; // 设置默认请求的表头列表
                 this.$nextTick(() => {
                     this.$set(this.headRowSelected, 'headRowStr', this.editRow.formula); //把内容传入组件
                     this.$set(this.headRowSelected, 'refresh', true); //组件刷新（因不同的单元格属性值 字符串需要重新解析）
@@ -1362,7 +1414,7 @@ li:hover {
     height: 100px;
     padding: 0 5px;
     /* background: #E6A23C; */
-    background-color:rgba(220,38,38,0.2);
+    background-color:rgba(255, 255, 255, 0.4);
     position: fixed;
     top: 50px;
     right: 100px;
