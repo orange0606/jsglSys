@@ -312,33 +312,55 @@ export default {
             this.$nextTick(() => {
                 this.$set(this.editRow, 'td', 0);
             });
+            try {
+                
+            } catch (error) {
+                
+            }
             for (let i = this.originalList.length -1; i >= 0; i--) {
                 const Iitem = this.originalList[i];
                 for (let a = arr.length -1; a >= 0; a--) {
                     const Aitem = arr[a];
                     if ((Iitem.originalHeadId*1 === Aitem.hdId*1) || (Iitem.originalHead.id*1 === Aitem.hdId*1)) {   //判断表头id是否相等
                         console.log('表头id相等')
-                        if (Iitem.totalobj) {   //判断清单的合计尾行存值对象是否存在
-                            console.log('合计尾行存值对象存在');
-                            let colnum = Aitem.key.match(patt2)[0]; //取出列号
-                            console.log('colnum+td :  '+colnum+'td')
-                            if (colnum+'.td' in Iitem.totalobj) {
-                                console.log('有这个合计尾行')
-                                this.$nextTick(() => {
-                                    this.$set(this.editRow, 'td', this.editRow.td*1+Iitem.totalobj[colnum+'.td']*1);
-                                });
-                            }else{
-                                console.log('没有这个合计尾行')
-                                this.$message({
-                                type: 'info',
-                                message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${this.editRow.colNum+this.editRow.trNum}`
-                                });
+                        try {
+                            if (Iitem.totalobj) {   //判断清单的合计尾行存值对象是否存在
+                                console.log('合计尾行存值对象存在');
+                                let colnum = Aitem.key.match(patt2)[0]; //取出列号
+                                console.log('colnum+td :  '+colnum+'td')
+                                if (colnum+'.td' in Iitem.totalobj) {
+                                    console.log('有这个合计尾行')
+                                    this.$nextTick(() => {
+                                        this.$set(this.editRow, 'td', this.editRow.td*1+Iitem.totalobj[colnum+'.td']*1);
+                                        // this.$set(this.list[this.editRow.trNum*1-1][this.editRow.colNum], 'td', this.editRow.td);
+                                        // this.list[this.editRow.trNum*1-1][this.editRow.colNum].td = this.editRow.td;
+                                        // // this.$forceUpdate(); //强制视图层刷新/
+                                        // console.log('this.editRow.td',this.editRow.trNum*1-1)
+                                        console.log(this.editRow.td)
+                                    });
+                                }else{
+                                    console.log('没有这个合计尾行')
+                                    this.$message({
+                                    type: 'info',
+                                    message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${this.editRow.colNum+this.editRow.trNum}`
+                                    });
+                                }
                             }
+                        } catch (error) {
+                            console.log(error)
                         }
+                        
                     }
                 }
             }
-            this.All_Formula(); //调用全部公式计算
+            //  let AAA = this.$refs.elxEditable1.getRecords();
+            // console.log("AAA")
+
+            // console.log(AAA[0]['D'].td+'  ,  ',AAA[1]['D'].td+'  ,  ',AAA[2]['D'].td)
+            setTimeout(() => {
+                this.All_Formula(); //调用全部公式计算
+            },300)
+            
         },
         All_Attrbute () { //重新对汇总清单全部内容取值
             let patt2 =/[A-Z+]*/g; //所有的大写字母
@@ -346,6 +368,7 @@ export default {
             console.log(this.originalList)
             for (let p = this.originalList.length -1; p >= 0 ; p--) {//1.遍历全部清单查找有无汇总表
                 let pitem = this.originalList[p];
+                
                 if (pitem.originalHead.collect*1 === 1) {   //是汇总清单时
                     for (let h = pitem.originalRowList.length -1; h >= 0; h--) { //遍历汇总清单内容
                         let hitem = pitem.originalRowList[h];
@@ -359,26 +382,30 @@ export default {
                                     const Aitem = arr[a];
                                     if ((Iitem.originalHeadId*1 === Aitem.hdId*1) || (Iitem.originalHead.id*1 === Aitem.hdId*1)) {   //判断表头id是否相等
                                         // console.log('表头id相等')
-                                        if (Iitem.totalobj) {   //判断清单的合计尾行存值对象是否存在
-                                            // console.log('合计尾行存值对象存在');
-                                            let colnum = Aitem.key.match(patt2)[0]; //取出列号
-                                            // console.log('colnum+td :  '+colnum+'td')
-                                            if (colnum+'.td' in Iitem.totalobj) {
-                                                // console.log('有这个合计尾行')
-                                                hitem.td = hitem.td+Iitem.totalobj[colnum+'.td']*1;
-                                            }else{
-                                                console.log('没有这个合计尾行')
-                                                console.log('Iitem.totalobj')
-                                                console.log(Iitem.totalobj)
-                                                console.log('colnum.td')
-                                                console.log(colnum+'.td')
-                                                // console.log('Iitem.totalobj')
-                                                // console.log(Iitem.totalobj)
-                                                this.$message({
-                                                type: 'info',
-                                                message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${hitem.colNum+hitem.trNum}`
-                                                });
+                                        try {
+                                            if (Iitem.totalobj) {   //判断清单的合计尾行存值对象是否存在
+                                                // console.log('合计尾行存值对象存在');
+                                                let colnum = Aitem.key.match(patt2)[0]; //取出列号
+                                                // console.log('colnum+td :  '+colnum+'td')
+                                                if (colnum+'.td' in Iitem.totalobj) {
+                                                    // console.log('有这个合计尾行')
+                                                    hitem.td = hitem.td+Iitem.totalobj[colnum+'.td']*1;
+                                                }else{
+                                                    console.log('没有这个合计尾行')
+                                                    console.log('Iitem.totalobj')
+                                                    console.log(Iitem.totalobj)
+                                                    console.log('colnum.td')
+                                                    console.log(colnum+'.td')
+                                                    // console.log('Iitem.totalobj')
+                                                    // console.log(Iitem.totalobj)
+                                                    this.$message({
+                                                    type: 'info',
+                                                    message: `发生错误！ 当前属性选择的表头内容没有设置 ${colnum} 列合计尾行属性，请检查修改合计属性，位置 :  ${hitem.colNum+hitem.trNum}`
+                                                    });
+                                                }
                                             }
+                                        } catch (error) {
+                                            console.log(error)
                                         }
                                     }
                                 }
@@ -386,9 +413,17 @@ export default {
 
                         }
                     }
+                    // let fffff = this.All_Formula(pitem.originalRowList) //调用全部公式重新计算
+                    // console.log('+++++++++++++++++++fffff++++++++++++++++++++++')
+                    // console.log(fffff)
+                    
+                    pitem.originalRowList = pitem.originalRowAddList = this.All_Formula(pitem.originalRowList) //调用全部公式重新计算
+                    console.log('+++++++++++++++++++++pitem++++++++++++++++')
+                    console.log(pitem)
                 }
                 
             }
+            
    
         },
         addFormula (formula) {  //添加公式并计算按钮
@@ -408,15 +443,38 @@ export default {
                     // this.editRow.td = 0;
                     this.$set(this.editRow, 'td', 0); 
                 }
-                this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+                this.All_Formula(); //调用全部公式计算
+                
             }
         },
-        All_Formula () {    //当汇总表属性重新取值后需要执行的全部公式计算
-            console.log("++++++++++++++++++++")
-            let hd = this.hd,
-            list = this.list = this.$refs.elxEditable1.getRecords(),//获取表格的全部数据;
-            listlen = list.length,
-            hdlen = this.hd.length;
+        /*
+            参数rest 是为了区分是当前是汇总清单还是其他，当前是则不需传，否的话就需要传值（未组装的清单数据）
+        */
+        All_Formula (rest) {    //当汇总表属性重新取值后需要执行的全部公式计算
+            let hd = [],
+            list = [];
+            if (!rest) {
+                this.list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
+                hd = this.hd;
+                list = this.list;
+            }else{
+                list = this.$excel.ListAssemble(rest); //组装清单表格数据
+                hd = Object.keys(list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
+                console.log('-----------hd-----------')
+                console.log(hd.toString())
+                // console.log(hd)
+                let sub = hd.indexOf('seq');
+                if (sub!==-1) {
+                    hd.splice(sub, 1);
+                }
+                // console.log(hd)
+
+                // // return false;
+
+            }
+            
+            let listlen = list.length,
+            hdlen = hd.length;
             console.log('  list '+list.length+'   hd  '+hd.length)
             for (let a = 0; a < listlen; a++) {
                 for (let b = 0; b < hdlen; b++) {
@@ -426,10 +484,11 @@ export default {
                             let num = eval(this.$excel.Summary_Formula_analysis(item.formula));//此处调用公式解析
                             num = this.$excel.Count(num);//js精度
                             item.td = num?num:0;
+                            // console.log(num)
                         } catch (error) {
                             this.$message({
                                 type: 'info',
-                                message: `发生错误！ 请检查或者修改公式，位置 :  ${item.colNum+item.trNum}`
+                                message: `发生错误！ 请检查汇总表清单属性或者修改公式，位置 :  ${item.colNum+item.trNum}`
                                 });
                                 console.log(error)
                                 item.td = 0;
@@ -438,6 +497,31 @@ export default {
                 }
             
             }
+            if (!rest) {
+                this.$refs.elxEditable1.reload(this.list);
+                this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
+            }else{  //解构数据返回给调用此函数
+                let RowList = [];
+                for (let index = list.length -1; index >=0 ; index--) {
+                    for (let i = hd.length -1; i >=0; i--) {
+                        let listRows = list[index][hd[i]];
+                        if (listRows && listRows.colNum) {
+                            // // delete listRows.edit;                                
+                            // listRows['trNum'] = index+1;      
+                            // // listRows.attribute = ''; //加入属性
+                            // // listRows.formula = ''; //加入公式                  
+                            // listRows['upload'] = 1; 
+                            // if (!listRows.attribute) listRows.attribute = ''; //加入属性
+                            // if (!listRows.formula) listRows.formula = ''; //加入公式
+                           
+                            RowList.push(listRows);
+                        }
+                    }
+                }
+                return RowList;
+            }
+            
+
         },
         handleClose(done) {
             done();
@@ -902,7 +986,18 @@ export default {
             // console.log('this.$root.state11111111111')
             // console.log(this.$root.state)
             if (this.$root.state && this.list && this.list.length >0) {
+                // this.list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
                 console.log('调用了合计');
+                
+            // console.log("++++++++++++++++++++")
+            // console.log("this.list")
+
+            // console.log(this.list[0]['D'].td+'  ,  ',this.list[1]['D'].td+'  ,  ',this.list[2]['D'].td)
+            // let AAA = this.$refs.elxEditable1.getRecords();
+            // console.log("AAA")
+
+            // console.log(AAA[0]['D'].td+'  ,  ',AAA[1]['D'].td+'  ,  ',AAA[2]['D'].td)
+
                 this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
                 this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
             }
