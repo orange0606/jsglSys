@@ -246,7 +246,6 @@ import XEUtils from 'xe-utils'
         for (let index = list.length - 1; index >= 0; index--) {
             if( !list[index].id ) { //无id的情况（新增清单）
                 this.originalAddList.push(list[index]);
-                
             }if (list[index].id && list[index].alter && list[index].alter==='Y') { //修改清单
                 this.originalAltList.push(list[index]);
             }
@@ -292,6 +291,14 @@ import XEUtils from 'xe-utils'
             case 'alter': //此处为修改模式处理
                 break;
         } 
+    },
+    All_request ( list ) {
+        let rest =  [];
+        for (let index = 0; index < array.length; index++) {
+            const element = array[index];
+          
+        }
+
     },
     findList () {
         // 发起网络请求

@@ -592,7 +592,7 @@ excelmodel = {
             col = item.match(patt2)[0],//查找列
             num = item.replace(/[^0-9]/ig,"")-1,//查找行 -1 是因为数组的下标是从0开始
             arrlen = item.length;
-            console.log(` 列号 ：${col}  行号： ${num}`)
+            // console.log(` 列号 ：${col}  行号： ${num}`)
             for (let a = 0; a < str.length; a++) {
                 let index = str.indexOf(item,a);
                 if ((str.length - index) < arrlen) break;
@@ -606,13 +606,13 @@ excelmodel = {
             }
 
         }
-        console.log(formula)
-        console.log(str)
+        // console.log(formula)
+        // console.log(str)
         return str;
     },
     /*
     对数据进行公式计算(导入表格（与清单）时使用)
-    param that: this指向组件内
+    param that: this指向组件内(为null 时是汇总清单计算)
     param list: 清单数据   Array[ object ]
     param formula: 存储相应列的eval 的字符串公式  object
     使用引用赋值
@@ -627,15 +627,26 @@ excelmodel = {
             for (let index = list.length - 1; index >= 0; index--) {  
                 row = list[index];
                 for (let a = fhdlen -1; a >= 0; a--) {
+                    if (row[formuHd[a]].attribute)  continue; // 当单元格内容有属性与公式时，将不再使用表头公式
                     let rowTd = row[formuHd[a]].td;
-                    if (rowTd !==null && rowTd !== '') break;  //不为空，马上跳出这个循环不进行计算
+                    // if (rowTd !==null && rowTd !== '') continue;  //不为空，马上跳出这个循环不进行计算
+
                     sum = formula[formuHd[a]];
                     evalSum = eval(sum);
-                    if (evalSum) {
-                        that.$set(row[formuHd[a]],'td',this.Count(evalSum));  //this.Count小数点精度计算 
+                    if (that) {
+                        if (evalSum) {
+                            that.$set(row[formuHd[a]],'td',this.Count(evalSum));  //this.Count小数点精度计算 
+                        }else{
+                            that.$set(row[formuHd[a]],'td',0);
+                        }
                     }else{
-                        that.$set(row[formuHd[a]],'td',0);
+                        if (evalSum) {
+                            row[formuHd[a]]['td'] = this.Count(evalSum);  //this.Count小数点精度计算 
+                        }else{
+                            row[formuHd[a]]['td'] = 0;
+                        }
                     }
+                    
                 }
                 index === 0 ?Message({ message: `系统已为你计算完成`, type: 'success', duration: 3000, showClose: true }): index;
             }
@@ -667,102 +678,106 @@ excelmodel = {
         col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
         let that = this,
         ColTd = col['td']*1; //点击修改过的单元格的值
-        Object.keys(lastHeader).forEach(function(key){  //遍历表头最后一层的属性和列号
-            let keyObj = lastHeader[key],   //列号
-            Att = keyObj.attribute, //属性
-            AttVal = keyObj.attributeValue; //属性值
-            //  console.log('attributeValue');
-            //  console.log(AttVal);
-            if ( Att && ( Att==='fluctuate' || Att==='meterage' || Att==='pay') && AttVal && AttVal !=='') {
-                let colTr = AttVal.match(patt1)[0],   //属性值  列号
-                sumNb = null,   //对应上期和本期属性列的合计
-                currentTd = row[colTr]['td']*1; //本期（变更、计量、支付）对应原数量的值
-                switch (type) {
-                    case 'change':
-                        Object.keys(lastHeader).forEach(function(key){
-                            let chkeyObj = lastHeader[key],
-                            chAtt = chkeyObj.attribute,
-                            chAttVal = chkeyObj.attributeValue;
-                            // console.log('attributeValue');
-                            // console.log(chAttVal);
-                            if ( chAtt && chAtt==='totalchange-change'  && chAttVal && chAttVal !=='') {
-                                // console.log('AttVal----------------333333333333333')
-                                // console.log(chAttVal)
-                                let chcolTr = chAttVal.match(patt1)[0];   //属性值  列号
-                                if (chcolTr === col.colNum) {
-                                    sumNb = that.Count(row[chkeyObj.colNum]['td']*1+ ColTd);
-                                    // let summmm = (currentTd)+(sumNb*1);
-
-                                        // console.log(row[chkeyObj.colNum]['td']*1,'  row[chkeyObj.colNum]  ', ColTd)
-                                        // console.log('row[colTr]------------',row[colTr]['td'])
-                                        console.log('本期计量和上期计量数量  ：'+sumNb)
-                                        console.log('原数量  ：'+currentTd)
-                                        // console.log('本期计量和上期计量数量 + 原数量  ：'+summmm)
-                                    if ( (currentTd+(sumNb*1)) <0 ){
-                                        Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        // col['td'] = currentTd-row[chkeyObj.colNum]['td']*1; //原数量-上期
-                                        col['td'] = 0-(currentTd+row[chkeyObj.colNum]['td']*1); //原数量-上期
-
-                                    }
-                                }
-                            }
-                        });
-                        break;
-                    case 'meterage':
-                        Object.keys(lastHeader).forEach(function(key){
-                            let mekeyObj = lastHeader[key],
-                            meAtt = mekeyObj.attribute,
-                            meAttVal = mekeyObj.attributeValue;
-                            if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
-
-                                let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
-                                if (mecolTr === col.colNum) {
-                                    sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ ColTd);
-                                        // console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
-                                        // console.log('row[colTr]------------',row[colTr]['td'])
-                                    if (sumNb>currentTd ){
-                                        Message({ message: '警告 上期累计数量与本期数量的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = currentTd-row[mekeyObj.colNum]['td'];
-                                    }
-                                    if (((currentTd)+(sumNb*1)) <0 ){
-                                        Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = 0-(currentTd-row[mekeyObj.colNum]['td']);
-                                    }
-                                }
-                            }
-                        });
-                        break;
+        if (!row[fkeys].attribute && lastHeader[fkeys].attribute && lastHeader[fkeys].attribute === 'formula') {    //有内容属性或者公式不执行表头公式
+            console.log('mei内容公式本次应该计算')
+            Object.keys(lastHeader).forEach(function(key){  //遍历表头最后一层的属性和列号
+                let keyObj = lastHeader[key],   //列号
+                Att = keyObj.attribute, //属性
+                AttVal = keyObj.attributeValue; //属性值
+                //  console.log('attributeValue');
+                //  console.log(AttVal);
+                if ( Att && ( Att==='fluctuate' || Att==='meterage' || Att==='pay') && AttVal && AttVal !=='') {
+                    let colTr = AttVal.match(patt1)[0],   //属性值  列号
+                    sumNb = null,   //对应上期和本期属性列的合计
+                    currentTd = row[colTr]['td']*1; //本期（变更、计量、支付）对应原数量的值
+                    switch (type) {
+                        case 'change':
+                            Object.keys(lastHeader).forEach(function(key){
+                                let chkeyObj = lastHeader[key],
+                                chAtt = chkeyObj.attribute,
+                                chAttVal = chkeyObj.attributeValue;
+                                // console.log('attributeValue');
+                                // console.log(chAttVal);
+                                if ( chAtt && chAtt==='totalchange-change'  && chAttVal && chAttVal !=='') {
+                                    // console.log('AttVal----------------333333333333333')
+                                    // console.log(chAttVal)
+                                    let chcolTr = chAttVal.match(patt1)[0];   //属性值  列号
+                                    if (chcolTr === col.colNum) {
+                                        sumNb = that.Count(row[chkeyObj.colNum]['td']*1+ ColTd);
+                                        // let summmm = (currentTd)+(sumNb*1);
     
-                    case 'pay':
-                        Object.keys(lastHeader).forEach(function(key){
-                            let paykeyObj = lastHeader[key],
-                            payAtt =paykeyObj.attribute,
-                            payAttVal =paykeyObj.attributeValue;
-                            // console.log('attributeValue');
-                            // console.log(payAttVal);
-                            if (payAtt &&payAtt==='totalpay-pay'  &&payAttVal &&payAttVal !=='') {
-                                // console.log('AttVal----------------4444444444444444444')
-                                // console.log(payAttVal)
-                                let paycolTr =payAttVal.match(patt1)[0];   //属性值  列号
-                                if (paycolTr === col.colNum) {
-                                    sumNb = that.Count(row[paykeyObj.colNum]['td']*1+ ColTd);
-                                        // console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
-                                        // console.log('row[colTr]------------',row[colTr]['td'])
-                                    if (sumNb>currentTd ){
-                                        col['td'] = currentTd-row[paykeyObj.colNum]['td'];
-                                        Message({ message: '警告 本期支付金额与上期累计支付金额的和不能超过累计计量金额! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                    }
-                                    if (((currentTd)+(sumNb*1)) <0 ){
-                                        Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
-                                        col['td'] = 0-(currentTd-row[paykeyObj.colNum]['td']);
+                                            // console.log(row[chkeyObj.colNum]['td']*1,'  row[chkeyObj.colNum]  ', ColTd)
+                                            // console.log('row[colTr]------------',row[colTr]['td'])
+                                            console.log('本期计量和上期计量数量  ：'+sumNb)
+                                            console.log('原数量  ：'+currentTd)
+                                            // console.log('本期计量和上期计量数量 + 原数量  ：'+summmm)
+                                        if ( (currentTd+(sumNb*1)) <0 ){
+                                            Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                            // col['td'] = currentTd-row[chkeyObj.colNum]['td']*1; //原数量-上期
+                                            col['td'] = 0-(currentTd+row[chkeyObj.colNum]['td']*1); //原数量-上期
+    
+                                        }
                                     }
                                 }
-                            }
-                        });
-                        break;
+                            });
+                            break;
+                        case 'meterage':
+                            Object.keys(lastHeader).forEach(function(key){
+                                let mekeyObj = lastHeader[key],
+                                meAtt = mekeyObj.attribute,
+                                meAttVal = mekeyObj.attributeValue;
+                                if ( meAtt && meAtt==='totalmeterage-meterage'  && meAttVal && meAttVal !=='') {
+    
+                                    let mecolTr = meAttVal.match(patt1)[0];   //属性值  列号
+                                    if (mecolTr === col.colNum) {
+                                        sumNb = that.Count(row[mekeyObj.colNum]['td']*1+ ColTd);
+                                            // console.log(row[mekeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
+                                            // console.log('row[colTr]------------',row[colTr]['td'])
+                                        if (sumNb>currentTd ){
+                                            Message({ message: '警告 上期累计数量与本期数量的和不能超过原数量! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                            col['td'] = currentTd-row[mekeyObj.colNum]['td'];
+                                        }
+                                        if (((currentTd)+(sumNb*1)) <0 ){
+                                            Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                            col['td'] = 0-(currentTd-row[mekeyObj.colNum]['td']);
+                                        }
+                                    }
+                                }
+                            });
+                            break;
+        
+                        case 'pay':
+                            Object.keys(lastHeader).forEach(function(key){
+                                let paykeyObj = lastHeader[key],
+                                payAtt =paykeyObj.attribute,
+                                payAttVal =paykeyObj.attributeValue;
+                                // console.log('attributeValue');
+                                // console.log(payAttVal);
+                                if (payAtt &&payAtt==='totalpay-pay'  &&payAttVal &&payAttVal !=='') {
+                                    // console.log('AttVal----------------4444444444444444444')
+                                    // console.log(payAttVal)
+                                    let paycolTr =payAttVal.match(patt1)[0];   //属性值  列号
+                                    if (paycolTr === col.colNum) {
+                                        sumNb = that.Count(row[paykeyObj.colNum]['td']*1+ ColTd);
+                                            // console.log(row[paykeyObj.colNum]['td']*1,'  row[mekeyObj.colNum]  ', ColTd)
+                                            // console.log('row[colTr]------------',row[colTr]['td'])
+                                        if (sumNb>currentTd ){
+                                            col['td'] = currentTd-row[paykeyObj.colNum]['td'];
+                                            Message({ message: '警告 本期支付金额与上期累计支付金额的和不能超过累计计量金额! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                        }
+                                        if (((currentTd)+(sumNb*1)) <0 ){
+                                            Message({ message: '警告 总数量不能低于0! 已为您重新调整，您可以再次修改。', type: 'warning', duration: 4000, showClose: true });
+                                            col['td'] = 0-(currentTd-row[paykeyObj.colNum]['td']);
+                                        }
+                                    }
+                                }
+                            });
+                            break;
+                    }
                 }
-            }
-        });
+            });
+        }
+        
 
         let Eval = null,
         fkeyslen = fkeys.length;
@@ -770,6 +785,13 @@ excelmodel = {
             for (let index = 0; index < fkeyslen; index++) {    //先看公式解析函数
                 let item = fkeys[index];
                 Eval = eval(F[item]);
+                if ( row[fkeys].attribute && row[fkeys].colNum === fkeys[index]) { //有内容属性或者公式不执行表头公式
+                    // console.log('有内容公式不执行')
+                    continue; // 当单元格内容有属性与公式时，将不再使用表头公式
+                }
+                console.log('fkeys')
+                console.log(fkeys)
+                console.log(F)
                 if (Eval) {
                     row[item].td = this.Count(Eval);   //调用精度计算小数点处理
                 }else{
@@ -788,6 +810,8 @@ excelmodel = {
             console.log("没进来吗")
             let listlen = list.length,
             hdlen = hd.length;
+            let formula_obj = {}; //用来提取存储好的数据 A1:{colnum:A, trnum:1,td:0}
+
             console.log('  list '+list.length+'   hd  '+hd.length)
             for (let a = 0; a < listlen; a++) {
                 for (let b = 0; b < hdlen; b++) {
@@ -797,6 +821,12 @@ excelmodel = {
                             let num = eval(that.Summary_Formula_analysis(item.formula));//此处调用公式解析
                             num = that.Count(num);//js精度
                             item.td = num?num:0;
+                            formula_obj[ `${item.colNum+item.trNum}`] = {
+                                colnum: item.colNum,
+                                trnum: item.trNum,
+                                td: item.td,
+                                formula: item.formula
+                            }
                         } catch (error) {
                             Message({
                                 type: 'info',
@@ -808,6 +838,30 @@ excelmodel = {
                     } 
                 }
             }
+            function summary ( obj ) {
+                console.log('调用了此函数')
+                let state = true; // 状态值
+                for(var i in obj) {
+                    let num = eval(that.Summary_Formula_analysis(obj[i].formula));//此处调用公式解析
+                    num = that.Count(num);//js精度
+                    if (num*1 !== obj[i].td*1) {
+                        console.log('与上一次的值不相等需要再计算一遍 new --- old  ',num*1 ,'  --  ',obj[i].td*1)
+                        state = false; //需要再计算一遍
+                    }
+                    console.log(`上一次的值:   ${obj[i].td }  新值:   ${num } 单元格位置 ；${obj[i].colnum+obj[i].trnum} 单元格公式 ；${obj[i].formula}`)
+                    list[obj[i].trnum*1-1][obj[i].colnum].td = num?num:0;
+                    obj[i].td = num?num:0;
+     
+                }
+                if (!state) {
+                    // console.log(formula_obj)
+                    console.log('打印一下 formula_obj + obj')
+                    console.log(formula_obj)
+                    console.log(obj)
+                    summary (obj) //再次调用
+                }
+            }
+            summary ( formula_obj )
         }
 
         F = fkeys = row = col = Eval = null;

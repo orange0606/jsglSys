@@ -319,6 +319,8 @@ import XEUtils from 'xe-utils'
         // 发起网络请求
         this.$post('/original/all',{current:this.pageVO.currentPage,pageSize:this.pageVO.pageSize})
             .then((response) => {
+            console.log('response-------------打印一下请求到的数据')
+            console.log(response)
             this.list = response.data.originalList.list;
             this.pageVO.totalResult = response.data.originalList.total;
             this.loading = false;

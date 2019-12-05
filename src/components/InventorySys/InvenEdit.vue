@@ -211,45 +211,6 @@ export default {
       HeaderType:'original', //汇总表时的属性组件默认的请求表头列表类型
     }
   },
-    // computed:{
-    //     AllHeaderType:function(){
-    //         let type = 'original';
-    //         console.log('change进来了type判断')
-    //         if (this.editRow && this.editRow.attribute) {
-    //             switch (this.editRow.attribute) {
-    //                 case 'auto_original_sum':
-    //                     type = 'original';
-    //                     break;   
-    //                 case 'auto_change_sum':
-    //                     type = 'change';
-    //                     break;
-    //                  case 'auto_totalchange_sum':
-    //                     type = 'totalchange';
-    //                     break;
-    //                 case 'auto_update_sum':
-    //                     type = 'update';
-    //                     break;
-    //                 case 'auto_meterage_sum':
-    //                     type = 'meterage';
-    //                     break;
-    //                 case 'auto_totalmeterage_sum':
-    //                     type = 'totalmeterage';
-    //                     break;
-    //                 case 'auto_pay_sum':
-    //                     type = 'pay';
-    //                     break;                    
-    //                 case 'auto_totalpay_sum':
-    //                     type = 'totalpay';
-    //                     break;
-    //             }
-    //             console.log('  type  :  '+type)
-    //             return type;
-    //         }
-    //             console.log(' 默认 type  :  '+type)
-
-    //         return type
-    //     }
-    // },
     watch: {
         uplist: function(newVal,oldVal){  //子组件返回来的数据
             this.print_show = true;
@@ -423,8 +384,13 @@ export default {
                     // let fffff = this.All_Formula(pitem.originalRowList) //调用全部公式重新计算
                     // console.log('+++++++++++++++++++fffff++++++++++++++++++++++')
                     // console.log(fffff)
+                    if (pitem.id) {
+                        pitem.originalRowList = pitem.originalRowAltList = this.All_Formula(pitem.originalRowList,pitem.originalHead.tOriginalHeadRows, pitem.originalHead.refCol, pitem.originalHead.refRow) //调用全部公式重新计算
+                    }else{
+                        pitem.originalRowList = pitem.originalRowAddList = this.All_Formula(pitem.originalRowList,pitem.originalHead.tOriginalHeadRows, pitem.originalHead.refCol, pitem.originalHead.refRow) //调用全部公式重新计算
+                    }
                     
-                    pitem.originalRowList = pitem.originalRowAddList = this.All_Formula(pitem.originalRowList) //调用全部公式重新计算
+                    
                     // console.log('+++++++++++++++++++++pitem++++++++++++++++')
                     // console.log(pitem)
                 }
@@ -436,22 +402,22 @@ export default {
         addFormula (formula) {  //添加公式并计算按钮
             this.formula_state = false;
             if (formula) {
-                let list = this.list; // 配合公式解析用
-                try {
-                    let td = eval(this.$excel.Summary_Formula_analysis(formula));//此处调用公式解析
-                    this.$set(this.editRow, 'td', td?td:0); 
-                    // this.editRow.td = td?td:0;
-                } catch (error) {
-                    this.$notify({
-                        title: '提示',
-                        type: 'error',
-                        message: `发生错误！ 请检查修改或者公式，位置 :  ${this.editRow.colNum+this.editRow.trNum}`,
-                        duration: 0
-                    });
-                    console.log(error)
-                    // this.editRow.td = 0;
-                    this.$set(this.editRow, 'td', 0); 
-                }
+                // let list = this.list; // 配合公式解析用
+                // try {
+                //     let td = eval(this.$excel.Summary_Formula_analysis(formula));//此处调用公式解析
+                //     this.$set(this.editRow, 'td', td?td:0); 
+                //     // this.editRow.td = td?td:0;
+                // } catch (error) {
+                //     this.$notify({
+                //         title: '提示',
+                //         type: 'error',
+                //         message: `发生错误！ 请检查修改或者公式，位置 :  ${this.editRow.colNum+this.editRow.trNum}`,
+                //         duration: 0
+                //     });
+                //     console.log(error)
+                //     // this.editRow.td = 0;
+                //     this.$set(this.editRow, 'td', 0); 
+                // }
                 this.All_Formula(); //调用全部公式计算
                 
             }
@@ -459,7 +425,7 @@ export default {
         /*
             参数rest 是为了区分是当前是汇总清单还是其他，当前是则不需传，否的话就需要传值（未组装的清单数据）
         */
-        All_Formula (rest) {    //当汇总表属性重新取值后需要执行的全部公式计算
+        All_Formula (rest,HeadRows, refCol, refRow) {    //当汇总表属性重新取值后需要执行的全部公式计算
             let hd = [],
             list = [];
             if (!rest) {
@@ -469,22 +435,20 @@ export default {
             }else{
                 list = this.$excel.ListAssemble(rest); //组装清单表格数据
                 hd = Object.keys(list[0]); //用来所需要的所有列(obj)（属性）名（合并单元格所需要）
-                console.log('-----------hd-----------')
-                console.log(hd.toString())
+                // console.log('-----------hd-----------')
+                // console.log(hd.toString())
                 // console.log(hd)
                 let sub = hd.indexOf('seq');
                 if (sub!==-1) {
                     hd.splice(sub, 1);
                 }
-                // console.log(hd)
-
-                // // return false;
-
             }
             
             let listlen = list.length,
             hdlen = hd.length;
-            console.log('  list '+list.length+'   hd  '+hd.length)
+
+            let formula_obj = {}; //用来提取存储好的数据 A1:{colnum:A, trnum:1,td:0}
+            // console.log('  list '+list.length+'   hd  '+hd.length)
             for (let a = 0; a < listlen; a++) {
                 for (let b = 0; b < hdlen; b++) {
                     let item = list[a][hd[b]];
@@ -493,6 +457,12 @@ export default {
                             let num = eval(this.$excel.Summary_Formula_analysis(item.formula));//此处调用公式解析
                             num = this.$excel.Count(num);//js精度
                             item.td = num?num:0;
+                            formula_obj[ `${item.colNum+item.trNum}`] = {
+                                colnum: item.colNum,
+                                trnum: item.trNum,
+                                td: item.td,
+                                formula: item.formula
+                            }
                             // console.log(num)
                         } catch (error) {
                             this.$notify({
@@ -504,10 +474,57 @@ export default {
                                 console.log(error)
                                 item.td = 0;
                         }
+                        // 先把公式提取出来 与第一轮计算结果取出来
                     } 
                 }
-            
             }
+
+            // console.log('打印一下   存储的对象')
+            // console.log(formula_obj)
+            let that = this;
+            function summary ( obj ) {
+                console.log('调用了此函数')
+                let state = true; // 状态值
+                for(var i in obj) {
+                    let num = eval(that.$excel.Summary_Formula_analysis(obj[i].formula));//此处调用公式解析
+                    num = that.$excel.Count(num);//js精度
+                    if (num*1 !== obj[i].td*1) {
+                        console.log('与上一次的值不相等需要再计算一遍 new --- old  ',num*1 ,'  --  ',obj[i].td*1)
+                        state = false; //需要再计算一遍
+                    }
+                    console.log(`上一次的值:   ${obj[i].td }  新值:   ${num } 单元格位置 ；${obj[i].colnum+obj[i].trnum} 单元格公式 ；${obj[i].formula}`)
+                    list[obj[i].trnum*1-1][obj[i].colnum].td = num?num:0;
+                    obj[i].td = num?num:0;
+     
+                }
+                if (!state) {
+                    // console.log(formula_obj)
+                    console.log('打印一下 formula_obj + obj')
+                    console.log(formula_obj)
+                    console.log(obj)
+                    summary (obj) //再次调用
+                }
+            }
+            summary ( formula_obj )
+            //表头公式计算 
+            // console.log(HeadRows)
+            if (rest) {
+                console.log('进入了吗1-----------------------------------------')
+                console.log("refCol,'---',refRow")
+                console.log(refCol,'---',refRow)
+                console.log("HeadRows")
+                console.log(HeadRows)
+                let headsArr = this.$excel.Package(HeadRows,refCol,refRow),
+                col = this.$excel.Nesting(headsArr),  //调用多级表头嵌套组装函数
+                //调用表格公式解析 存储
+                formula = this.$excel.FormulaAnaly([col]);
+                this.$excel.Formula(null, list, formula);  //调用表头公式计算
+            }else{
+                console.log('进入了吗-----------------------------------------')
+                this.$excel.Formula(this, list, this.formula);  //调用表头公式计算
+            }
+            console.log('进入了吗2-----------------------------------------')
+
             if (!rest) {
                 this.$refs.elxEditable1.reload(this.list);
                 this.$root.state = true;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
@@ -517,14 +534,6 @@ export default {
                     for (let i = hd.length -1; i >=0; i--) {
                         let listRows = list[index][hd[i]];
                         if (listRows && listRows.colNum) {
-                            // // delete listRows.edit;                                
-                            // listRows['trNum'] = index+1;      
-                            // // listRows.attribute = ''; //加入属性
-                            // // listRows.formula = ''; //加入公式                  
-                            // listRows['upload'] = 1; 
-                            // if (!listRows.attribute) listRows.attribute = ''; //加入属性
-                            // if (!listRows.formula) listRows.formula = ''; //加入公式
-                           
                             RowList.push(listRows);
                         }
                     }
@@ -953,13 +962,13 @@ export default {
 
                 //此处需要将去掉表头的剩余表格内容的行号更新为最新
                 let collect = this.form.collect;
-                console.log('collect')
-                console.log(collect)
-                if (collect==='0' || collect===0) {
-                    console.log('1111111111111111')
+                // console.log('collect')
+                // console.log(collect)
+                if (collect==='1' || collect===1) {
+                    // console.log('1111111111111111')
 
                     for (let a = data.length-1; a >= 0; a--) {
-                        console.log('1111111111111111')
+                        // console.log('1111111111111111')
 
                         for (let b = this.hd.length-1; b >= 0; b--) {
                             data[a][this.hd[b]].trNum = a+1;
@@ -1008,6 +1017,7 @@ export default {
                 let str = column.property,
                 colName = str.substr(0,str.indexOf(".td"));
                 this.editRow = row[colName];
+                if (this.editRow.attribute) return false; //单元格有属性和公式时不需要开启编辑
                 if (this.editRow.edit && this.editRow.edit==='Y') return false;
                 this.editRow.edit = "Y";  //Y为编辑模式N为只读状态
                 // document.addEventListener('click', this.foo) // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
@@ -1041,15 +1051,6 @@ export default {
                 // this.list = this.$refs.elxEditable1.getRecords();//获取表格的全部数据;
                 console.log('调用了合计');
                 
-            // console.log("++++++++++++++++++++")
-            // console.log("this.list")
-
-            // console.log(this.list[0]['D'].td+'  ,  ',this.list[1]['D'].td+'  ,  ',this.list[2]['D'].td)
-            // let AAA = this.$refs.elxEditable1.getRecords();
-            // console.log("AAA")
-
-            // console.log(AAA[0]['D'].td+'  ,  ',AAA[1]['D'].td+'  ,  ',AAA[2]['D'].td)
-
                 this.totalobj = this.$excel.Total(this.list, this.PackHeader); //调用合计计算
                 this.$root.state = false;//全局变量 用于是否开启调用清单合计尾行计算 为true开启相反为false
             }
