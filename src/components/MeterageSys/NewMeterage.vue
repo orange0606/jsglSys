@@ -733,13 +733,18 @@ export default {
                     // console.log('hdlenn');
                     // console.log(listlen+r+1);
                     rest[r][row.colNum]['tdColspan'] = rest[r][row.colNum]['tdRowspan'] = 1;
+                    let coltd = rest[r][row.colNum].attribute;
+                    if (coltd && (coltd ==='auto' || coltd ==='manual' )) { // 清空计算公式属性
+                        rest[r][row.colNum].attribute = rest[r][row.colNum].formula = '';
+                    }
                     delete rest[r][row.colNum]['id'];
+                    coltd = null;
                 }
             }
         }
         console.log('看一下生成的数据ya')
         console.log(rest)
-        console.log(this, rest, this.formula)
+        // console.log(this, rest, this.formula)
         this.$excel.Formula(this, rest, this.formula);  //调用公式计算
         try {  //把数据载入表格+
             let listlen = this.list.length;
@@ -943,7 +948,9 @@ export default {
                             // listRows['trNum'] = index+1;   
                             // console.log(listRows['trNum'])               
                             // listRows['attribute'] = '';                  
-                            listRows['upload'] = 1;    
+                            listRows['upload'] = 1;  
+                            if (!listRows.attribute) listRows.attribute = ''; //加入属性
+                            if (!listRows.formula) listRows.formula = ''; //加入公式  
                             if (!listRows['id']) {  //无id则视为新增，新增到meterageRowAddList
                                 meterageRowAddList.push(listRows);
                             }else if ( (list[index]['alter'] || listRows['alter']) && listRows['id'] ) {   //有id 与 alter 视为已修改过的数据 新增到meterageRowAltList+

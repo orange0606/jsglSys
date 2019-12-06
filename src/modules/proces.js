@@ -477,7 +477,7 @@ excelmodel = {
             let hdobj = Object.keys(data[index]).length;
             for (let r = 0; r < hdobj; r++) {
                 // console.log('Object.keys(data[index]).length   '+Object.keys(data[index]).length+'      r : '+r+'    Rnum  :'+Rnum)
-                if (data[index][ABC[r]].td === null && data[index][ABC[r]].tdRowspan === 1 && data[index][ABC[r]].tdColspan === 1) {
+                if ((data[index][ABC[r]].td === null || data[index][ABC[r]].td === '') && data[index][ABC[r]].tdRowspan === 1 && data[index][ABC[r]].tdColspan === 1) {
                     if (r== hdobj - 1) {
                         Rnum++;
                     }
@@ -497,7 +497,7 @@ excelmodel = {
             hdobj = Object.keys(data[index]);
             for (let r = hdobj.length-1; r >= 0; r--) {
                 // console.log('r   '+r+'   length-   '+(Object.keys(data[index]).length-1)+'      num  :'+num)
-                if (data[index][hdobj[r]].td === null && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
+                if ((data[index][hdobj[r]].td === null || data[index][hdobj[r]].td === '') && data[index][hdobj[r]].tdRowspan === 1 && data[index][hdobj[r]].tdColspan === 1) {
                     num++;
                 }else{
                     if (index === data.length-1) {
@@ -623,31 +623,57 @@ excelmodel = {
         sum = null,
         evalSum = null,
         fhdlen = formuHd.length;
+        let the = this;
         try {
+            
             for (let index = list.length - 1; index >= 0; index--) {  
                 row = list[index];
+                let sumobj = {}; // 用来存储对比收敛算法 例如A:0,B:2
                 for (let a = fhdlen -1; a >= 0; a--) {
-                    if (row[formuHd[a]].attribute)  continue; // 当单元格内容有属性与公式时，将不再使用表头公式
-                    let rowTd = row[formuHd[a]].td;
+                    let colnum = formuHd[a];
+                    if (row[colnum].attribute)  continue; // 当单元格内容有属性与公式时，将不再使用表头公式
+                    // let rowTd = row[colnum].td;
                     // if (rowTd !==null && rowTd !== '') continue;  //不为空，马上跳出这个循环不进行计算
-
-                    sum = formula[formuHd[a]];
-                    evalSum = eval(sum);
+                    sum = formula[colnum];
+                    evalSum = this.Count(eval(sum));//this.Count小数点精度计算 
                     if (that) {
-                        if (evalSum) {
-                            that.$set(row[formuHd[a]],'td',this.Count(evalSum));  //this.Count小数点精度计算 
-                        }else{
-                            that.$set(row[formuHd[a]],'td',0);
-                        }
+                        that.$set(row[colnum],'td',evalSum?evalSum:0);  
                     }else{
-                        if (evalSum) {
-                            row[formuHd[a]]['td'] = this.Count(evalSum);  //this.Count小数点精度计算 
-                        }else{
-                            row[formuHd[a]]['td'] = 0;
-                        }
+                        row[colnum]['td'] = evalSum?evalSum:0;   
                     }
+                    sumobj[colnum] = row[colnum]['td']; // 存储初次计算的值
                     
                 }
+                //此处也应采用收敛算法
+                function convergence (obj) { 
+                    let states = true; //默认为true
+                    for (let a = fhdlen -1; a >= 0; a--) {
+                        let colnum = formuHd[a];
+                        if (row[colnum].attribute)  continue; // 当单元格内容有属性与公式时，将不再使用表头公式
+                        // let rowTd = row[colnum].td;
+                        // if (rowTd !==null && rowTd !== '') continue;  //不为空，马上跳出这个循环不进行计算
+                        sum = formula[colnum];
+                        evalSum = the.Count(eval(sum));//this.Count小数点精度计算 
+                        if (that) {
+                            that.$set(row[colnum],'td',evalSum?evalSum:0);  
+                        }else{
+                            row[colnum]['td'] = evalSum?evalSum:0;   
+                        }
+                        if (row[colnum].td !== sumobj[colnum]) {    //不相等
+                            console.log('不相等,将会再次计算！')
+                            states = false;
+                        }
+                        console.log(colnum,'  列计算后的值新值 ： ',row[colnum].td,' --- ',colnum,'  列旧值 ： ',sumobj[colnum])
+
+                        obj[colnum] = row[colnum]['td']; // 存储新值
+                        if (!states) {  //再次调用
+                            console.log('正在再次调用计算')
+                            convergence(obj);
+                        }
+                        
+                    }
+                }
+                convergence(sumobj);
                 index === 0 ?Message({ message: `系统已为你计算完成`, type: 'success', duration: 3000, showClose: true }): index;
             }
         } catch (error) {
@@ -782,6 +808,7 @@ excelmodel = {
         let Eval = null,
         fkeyslen = fkeys.length;
         try {   // 调用公式计算该行
+            let sumobj = {}; // 用来存储对比收敛算法 例如A:0,B:2
             for (let index = 0; index < fkeyslen; index++) {    //先看公式解析函数
                 let item = fkeys[index];
                 Eval = eval(F[item]);
@@ -792,12 +819,42 @@ excelmodel = {
                 // console.log('fkeys')
                 // console.log(fkeys)
                 // console.log(F)
-                if (Eval) {
-                    row[item].td = this.Count(Eval);   //调用精度计算小数点处理
-                }else{
-                    row[item].td = 0;
+                let num = this.Count(Eval);//调用精度计算小数点处理
+                row[item].td = num?num:0; 
+                sumobj[item] = row[item].td;
+                
+                console.log(item,'  列计算后的值 ： ',row[item].td)
+            }
+            //此处也应采用收敛算法
+            function convergence (obj) { 
+                let states = true; //默认为true
+                for (let index = 0; index < fkeyslen; index++) {    //先看公式解析函数
+                    let item = fkeys[index];
+                    Eval = eval(F[item]);
+                    if (row[fkeys] && row[fkeys].attribute && row[fkeys].colNum === fkeys[index]) { //有内容属性或者公式不执行表头公式
+                        console.log('有内容公式不执行')
+                        continue; // 当单元格内容有属性与公式时，将不再使用表头公式
+                    }
+
+                    let num = that.Count(Eval);//调用精度计算小数点处理
+                    row[item].td = num?num:0; 
+                    if (row[item].td !== sumobj[item]) {    //不相等
+                        console.log('不相等,将会再次计算！')
+                        states = false;
+                    }
+                    console.log(item,'  列计算后的值新值 ： ',row[item].td,' --- ',item,'  列旧值 ： ',sumobj[item])
+
+                    sumobj[item] = row[item].td;
+
+                    if (!states) {  //再次调用
+                        console.log('正在再次调用计算')
+                        convergence(obj);
+                    }
+                    //此处也应采用收敛算法
+                    
                 }
             }
+            convergence(sumobj);
         } catch (error) {
             console.log(error);
             return Message({ message: '这边出现了点问题，貌似是公式错误，请先去检查一下表头。再进行录入吧！', type: 'warning', duration: 3000, showClose: true });
@@ -806,13 +863,13 @@ excelmodel = {
         // console.log(list)
         // console.log('打印一下collect : ')
         // console.log(collect)
-        if (collect==='1' || collect===1) {
-            console.log("没进来吗")
+        if (collect*1 === 1) {
+            // console.log("没进来吗")
             let listlen = list.length,
             hdlen = hd.length;
             let formula_obj = {}; //用来提取存储好的数据 A1:{colnum:A, trnum:1,td:0}
 
-            console.log('  list '+list.length+'   hd  '+hd.length)
+            // console.log('  list '+list.length+'   hd  '+hd.length)
             for (let a = 0; a < listlen; a++) {
                 for (let b = 0; b < hdlen; b++) {
                     let item = list[a][hd[b]];
@@ -839,7 +896,7 @@ excelmodel = {
                 }
             }
             function summary ( obj ) {
-                console.log('调用了此函数')
+                // console.log('调用了此函数')
                 let state = true; // 状态值
                 for(var i in obj) {
                     let num = eval(that.Summary_Formula_analysis(obj[i].formula));//此处调用公式解析
@@ -855,9 +912,9 @@ excelmodel = {
                 }
                 if (!state) {
                     // console.log(formula_obj)
-                    console.log('打印一下 formula_obj + obj')
-                    console.log(formula_obj)
-                    console.log(obj)
+                    // console.log('打印一下 formula_obj + obj')
+                    // console.log(formula_obj)
+                    // console.log(obj)
                     summary (obj) //再次调用
                 }
             }

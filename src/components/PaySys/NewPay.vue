@@ -699,10 +699,12 @@ export default {
 
                         if (listRows && listRows.colNum) {
                             // delete listRows.edit;
-                            listRows['formula'] = '';
+                            
                             listRows['trNum'] = index+1;                  
-                            listRows['attribute'] = '';                  
+                                     
                             listRows['upload'] = 1;    
+                            if (!listRows.attribute) listRows.attribute = ''; //加入属性
+                            if (!listRows.formula) listRows.formula = ''; //加入公式
                             if (!listRows.id) {  //无id则视为新增，新增到payRowAddList
   
                                 payRowAddList.push(listRows);

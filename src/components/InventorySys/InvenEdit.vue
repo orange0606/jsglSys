@@ -424,7 +424,7 @@ export default {
             }
         },
         /*
-            参数rest 是为了区分是当前是汇总清单还是其他，当前是则不需传，否的话就需要传值（未组装的清单数据）
+            参数rest,HeadRows, refCol, refRow 是为了区分是当前是汇总清单还是其他，当前是则不需传，否的话就需要传值（未组装的清单数据）
         */
         All_Formula (rest,HeadRows, refCol, refRow) {    //当汇总表属性重新取值后需要执行的全部公式计算
             let hd = [],
@@ -500,9 +500,9 @@ export default {
                 }
                 if (!state) {
                     // console.log(formula_obj)
-                    console.log('打印一下 formula_obj + obj')
-                    console.log(formula_obj)
-                    console.log(obj)
+                    // console.log('打印一下 formula_obj + obj')
+                    // console.log(formula_obj)
+                    // console.log(obj)
                     summary (obj) //再次调用
                 }
             }
@@ -510,21 +510,21 @@ export default {
             //表头公式计算 
             // console.log(HeadRows)
             if (rest) {
-                console.log('进入了吗1-----------------------------------------')
-                console.log("refCol,'---',refRow")
-                console.log(refCol,'---',refRow)
-                console.log("HeadRows")
-                console.log(HeadRows)
+                // console.log('进入了吗1-----------------------------------------')
+                // console.log("refCol,'---',refRow")
+                // console.log(refCol,'---',refRow)
+                // console.log("HeadRows")
+                // console.log(HeadRows)
                 let headsArr = this.$excel.Package(HeadRows,refCol,refRow),
                 col = this.$excel.Nesting(headsArr),  //调用多级表头嵌套组装函数
                 //调用表格公式解析 存储
                 formula = this.$excel.FormulaAnaly([col]);
                 this.$excel.Formula(null, list, formula);  //调用表头公式计算
             }else{
-                console.log('进入了吗-----------------------------------------')
+                // console.log('进入了吗-----------------------------------------')
                 this.$excel.Formula(this, list, this.formula);  //调用表头公式计算
             }
-            console.log('进入了吗2-----------------------------------------')
+            // console.log('进入了吗2-----------------------------------------')
 
             if (!rest) {
                 this.$refs.elxEditable1.reload(this.list);
@@ -979,6 +979,7 @@ export default {
                 }
 
                 try {  //把数据载入表格
+                    this.$excel.Formula(this, data, this.formula);  //调用公式计算
                     let listlen = this.list.length;
                     this.list = [...data];
                     for (let index = listlen -1; index >=0; index--) {
@@ -995,7 +996,6 @@ export default {
             })
         },
         cell_click(row, column, cell, event){ //单元格点击编辑事件
-            
             if(this.approval.state === 1)return false; //审批单已通过，并且不是新建清单的话不许做修改
             if (this.formula_state) {   //公式输入框开启后
                 if (column.property) {
@@ -1011,14 +1011,17 @@ export default {
                 })
                 return false; //当前正在输入公式，不能切换单元格
             }
+           
 
             this.editRow && this.editRow.edit && this.editRow.edit === "Y" ? this.editRow.edit = "N" :this.editRow; //清除上一个单元格编辑状态
+            
             if (column.property) {
                 // 每次点完单元格的时候需要清除上一个编辑状态（所以需要记住上一个）
                 let str = column.property,
                 colName = str.substr(0,str.indexOf(".td"));
                 this.editRow = row[colName];
-                if (this.editRow.attribute) return false; //单元格有属性和公式时不需要开启编辑
+                 console.log('进来了点击')
+                if (this.editRow.attribute && this.editRow.attribute !=='add') return false; //单元格有属性和公式时不需要开启编辑
                 if (this.editRow.edit && this.editRow.edit==='Y') return false;
                 this.editRow.edit = "Y";  //Y为编辑模式N为只读状态
                 // document.addEventListener('click', this.foo) // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
@@ -1099,8 +1102,8 @@ export default {
         RemoveSelecteds () {  //删除选中
             let selection = this.$refs.elxEditable1.getSelecteds(),
             seleLen = selection.length;
-            console.log('seleLen')
-            console.log(selection)
+            // console.log('seleLen')
+            // console.log(selection)
             if (seleLen && seleLen > 0) {
                 this.$refs.elxEditable1.removeSelecteds();
                 let number = selection[0]['seq'];; //表格列表的下标
@@ -1130,6 +1133,11 @@ export default {
                         if (item['id']) this.list[index]['alter'] = 'Y';   
                     }
                 }
+                if (this.form.collect*1 === 1) {
+                    console.log('汇总清单——————调用全部公式计算')
+                    this.All_Formula(); //调用全部公式计算
+                }
+                
                 this.$nextTick(() => {
                     this.$refs.elxEditable1.reload([]);
                     this.$refs.elxEditable1.reload(this.list);

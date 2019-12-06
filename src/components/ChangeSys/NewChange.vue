@@ -751,7 +751,13 @@ export default {
                     rest[r][row.colNum]['colNum'] = row['colNum'];
                     rest[r][row.colNum]['trNum'] = listlen+r+1;
                     rest[r][row.colNum]['tdColspan'] = rest[r][row.colNum]['tdRowspan'] = 1;
+                    let coltd = rest[r][row.colNum].attribute;
+                    if (coltd && (coltd ==='auto' || coltd ==='manual' )) { // 清空计算公式属性
+                        rest[r][row.colNum].attribute = rest[r][row.colNum].formula = '';
+                    }
+                    
                     delete rest[r][row.colNum]['id'];
+                    coltd = null;
                 }
             }
         }
@@ -964,6 +970,8 @@ export default {
                             // listRows['trNum'] = index+1;                  
                             // listRows['attribute'] = '';                  
                             listRows['upload'] = 1;    
+                            if (!listRows.attribute) listRows.attribute = ''; //加入属性
+                            if (!listRows.formula) listRows.formula = ''; //加入公式
                             if (!listRows['id']) {  //无id则视为新增，新增到changeRowAddList
                                 changeRowAddList.push(listRows);
                             }else if ( (list[index]['alter'] || listRows['alter']) && listRows['id'] ) {   //有id 与 alter 视为已修改过的数据 新增到changeRowAltList+
