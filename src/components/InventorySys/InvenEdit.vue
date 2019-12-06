@@ -330,7 +330,7 @@ export default {
             },300)
             
         },
-        All_Attrbute () { //重新对汇总清单全部内容取值
+        All_Attrbute () { //重新对汇总清单全部内容取值 // 非汇总清单时使用
             let patt2 =/[A-Z+]*/g; //所有的大写字母
             console.log('打印一下全部集合')
             console.log(this.originalList)
@@ -385,6 +385,7 @@ export default {
                     // console.log('+++++++++++++++++++fffff++++++++++++++++++++++')
                     // console.log(fffff)
                     if (pitem.id) {
+                        pitem['alter'] = 'Y'; // 作为修改过的
                         pitem.originalRowList = pitem.originalRowAltList = this.All_Formula(pitem.originalRowList,pitem.originalHead.tOriginalHeadRows, pitem.originalHead.refCol, pitem.originalHead.refRow) //调用全部公式重新计算
                     }else{
                         pitem.originalRowList = pitem.originalRowAddList = this.All_Formula(pitem.originalRowList,pitem.originalHead.tOriginalHeadRows, pitem.originalHead.refCol, pitem.originalHead.refRow) //调用全部公式重新计算

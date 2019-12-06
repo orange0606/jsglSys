@@ -678,7 +678,7 @@ excelmodel = {
         col['td'] = this.Count(col['td']);   //调用精度计算小数点处理
         let that = this,
         ColTd = col['td']*1; //点击修改过的单元格的值
-        if (!row[fkeys].attribute && lastHeader[fkeys].attribute && lastHeader[fkeys].attribute === 'formula') {    //有内容属性或者公式不执行表头公式
+        if (row[fkeys] && !row[fkeys].attribute && lastHeader[fkeys].attribute && lastHeader[fkeys].attribute === 'formula') {    //有内容属性或者公式不执行表头公式
             console.log('mei内容公式本次应该计算')
             Object.keys(lastHeader).forEach(function(key){  //遍历表头最后一层的属性和列号
                 let keyObj = lastHeader[key],   //列号
@@ -785,13 +785,13 @@ excelmodel = {
             for (let index = 0; index < fkeyslen; index++) {    //先看公式解析函数
                 let item = fkeys[index];
                 Eval = eval(F[item]);
-                if ( row[fkeys].attribute && row[fkeys].colNum === fkeys[index]) { //有内容属性或者公式不执行表头公式
-                    // console.log('有内容公式不执行')
+                if (row[fkeys] && row[fkeys].attribute && row[fkeys].colNum === fkeys[index]) { //有内容属性或者公式不执行表头公式
+                    console.log('有内容公式不执行')
                     continue; // 当单元格内容有属性与公式时，将不再使用表头公式
                 }
-                console.log('fkeys')
-                console.log(fkeys)
-                console.log(F)
+                // console.log('fkeys')
+                // console.log(fkeys)
+                // console.log(F)
                 if (Eval) {
                     row[item].td = this.Count(Eval);   //调用精度计算小数点处理
                 }else{

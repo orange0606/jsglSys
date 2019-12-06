@@ -169,6 +169,7 @@ import XEUtils from 'xe-utils'
         tenderList:null,  //全部标段
         dialogVisible:false,//显示隐藏
         isClearActiveFlag: true,
+        allstae: false,
         rules: {
             name: [
                 { required: true, message: '请输入活动名称', trigger: 'blur' },
@@ -183,13 +184,19 @@ import XEUtils from 'xe-utils'
     }
   },
   created () {
+
       //此处判断父组件传来的展示模式类型
       this.modeType ( this.mode );
   },
   watch: {
-    originalList: function(newVal,oldVal){
+    mode: function(newVal,oldVal){
         //此处判断父组件传来的展示模式类型
-        this.modeType ( this.mode );
+        console.log('allstae------------------------',this.allstae)
+    
+        
+        // console.log(this.allstae)
+        this.modeType ( newVal );
+        
     },
     visibleNew: function(newVal,oldVal){
         if (!newVal) {
@@ -321,8 +328,56 @@ import XEUtils from 'xe-utils'
             .then((response) => {
             console.log('response-------------打印一下请求到的数据')
             console.log(response)
-            this.list = response.data.originalList.list;
+         
+            // this.list = response.data.originalList.list;
             this.pageVO.totalResult = response.data.originalList.total;
+       
+            let Allid = response.data.originalList.list.map(function(item){
+                console.log('  item.id  : ',item.id)
+                return item.id;
+            })
+            this.originalList.length = 0;
+            //用递归代替for循环，可以保证正常执行顺序
+            let that = this;
+            function recurTest(j, length){
+                let id = Allid[j]
+                that.$post('/original/row/getone',{ id })
+                    .then((res) => {
+                    console.log('/此处请求一个审批单的一个原清单-----------------------')
+                    console.log(res)
+                    let data = res.data.original;
+                    let headsArr = that.$excel.Package(data['originalHead'].tOriginalHeadRows,data['originalHead'].refCol,data['originalHead'].refRow);
+                    //截取获取表格实际对应所有列最后一层的表头列 object(用来单元格点击判断)
+                    let list = that.$excel.ListAssemble(data.originalRowList); //组装清单表格数据
+                    data.totalobj = that.$excel.Total(list, headsArr); //调用合计计算
+                    that.originalList.push(data);
+                    that.list = that.originalList;
+
+                    if(++j < length){
+                        recurTest(j, length);
+                    }
+                   
+                }).catch(e => {
+                    that.loading = false;
+                    
+                    console.log(e)
+                    that.$message({
+                        type: 'info',
+                        message: '请求全部清单内容时发生错误！'+e
+                    });
+                })
+
+            }
+            if (Allid.length >0) {
+                recurTest(0, Allid.length);
+
+            }
+  
+            //此处设置不需要分页
+            this.list = this.originalList;
+            console.log('this.list--------------')
+            console.log(this.list)
+            
             this.loading = false;
         }).catch(e => {
             this.loading = false;
